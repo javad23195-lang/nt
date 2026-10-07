@@ -84,6 +84,60 @@ iframe{background:#EEF1F4}
   iframe.on{display:block!important;position:static!important;
     width:100%!important;height:auto!important;min-height:270mm;border:0!important}
 }
+/* ---------- اطلاعات مشترک (همگام‌سازی) ---------- */
+.tabrow{display:flex;align-items:flex-start;gap:6px}
+.tabrow .tabs{flex:1;min-width:0}
+.sybtn{flex:none;min-height:40px;display:flex;align-items:center;gap:6px;border:1px solid #D5DCE3;background:#fff;color:#17212B;
+  font:inherit;font-size:.78rem;font-weight:500;padding:0 11px;border-radius:20px;cursor:pointer;white-space:nowrap}
+.sybtn .d{width:9px;height:9px;border-radius:50%;background:#9AA8B5;flex:none}
+.sybtn.ok .d{background:#1E8E5A}
+.sybtn.busy .d{background:#C77A1A}
+.sybtn.err .d{background:#C0392B}
+.sybtn.err{border-color:#C0392B;color:#8E2219;font-weight:700}
+.sybtn svg{flex:none;color:#51606E}
+@media (max-width:560px){ .sybtn{padding:0 9px;gap:5px} .sybtn .tx{display:none} }
+.sybtn:focus-visible{outline:2px solid #0B5C7A;outline-offset:2px}
+.sybar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 -12px;padding:6px 12px;font-size:.8rem;line-height:1.6;
+  background:#E6F1F5;color:#0B4A63;border-top:1px solid #C5DCE5}
+.sybar[hidden]{display:none}
+.sybar.err{background:#FBE9E7;color:#8E2219;border-top-color:#E8B4AE}
+.sybar.new{background:#FFF1DB;color:#7A4300;border-top-color:#E0A75E}
+.sybar span{flex:1;min-width:0}
+.sybar button{flex:none;min-height:30px;border:1px solid currentColor;background:#fff;color:inherit;font:inherit;font-size:.78rem;font-weight:700;
+  padding:0 12px;border-radius:15px;cursor:pointer}
+.sybar button[hidden]{display:none}
+.sydlg{position:fixed;inset:0;z-index:80;background:rgba(23,33,43,.45);display:flex;align-items:flex-start;justify-content:center;
+  padding:calc(14px + env(safe-area-inset-top)) 10px 14px;overflow:auto}
+.sydlg[hidden]{display:none}
+.sybox{width:100%;max-width:480px;background:#fff;color:#17212B;border-radius:16px;padding:16px;box-shadow:0 14px 40px rgba(23,33,43,.35);
+  font-size:.92rem;line-height:1.8}
+.sybox h2{margin:0 0 8px;font-size:1.05rem;font-weight:800}
+.sybox h3{margin:0 0 4px;font-size:.95rem;font-weight:800;color:#0B5C7A}
+.sybox p{margin:0 0 10px}
+.sybox .sycard{border:1px solid #D5DCE3;border-radius:12px;padding:12px;margin:0 0 10px;background:#F7F9FA}
+.sybox label{display:block;font-size:.82rem;font-weight:700;margin:0 0 8px}
+.sybox input[type=password],.sybox input[type=text]{display:block;width:100%;min-height:44px;margin-top:3px;border:1px solid #9AA8B5;border-radius:10px;
+  padding:0 10px;font:inherit;font-size:.95rem;background:#fff;color:#17212B;direction:ltr;text-align:left}
+.sybox input:focus-visible{outline:2px solid #0B5C7A;outline-offset:1px}
+.sybox .chk{display:flex;align-items:center;gap:8px;font-weight:500}
+.sybox .chk input{width:18px;height:18px}
+.sybox button{display:block;width:100%;min-height:46px;border-radius:10px;font:inherit;font-size:.95rem;font-weight:700;cursor:pointer;margin:0 0 8px;
+  background:#fff;border:1px solid #9AA8B5;color:#17212B}
+.sybox button.go{background:#0B5C7A;border-color:#0B5C7A;color:#fff}
+.sybox button.warn{border-color:#C0392B;color:#8E2219}
+.sybox button:disabled{opacity:.55;cursor:default}
+.sybox button:focus-visible{outline:2px solid #17212B;outline-offset:2px}
+.sybox .symsg{font-size:.86rem;font-weight:700;margin:0 0 10px;padding:8px 10px;border-radius:10px;background:#E6F1F5;color:#0B4A63}
+.sybox .symsg:empty{display:none}
+.sybox .symsg.bad{background:#FBE9E7;color:#8E2219}
+.sybox .sykv{font-size:.84rem;background:#F7F9FA;border:1px solid #D5DCE3;border-radius:10px;padding:8px 10px;margin:0 0 10px}
+.sybox .sykv b{display:block}
+.sybox small{display:block;font-size:.78rem;color:#51606E;font-weight:500;line-height:1.7}
+.sytoast{position:fixed;z-index:90;bottom:calc(16px + env(safe-area-inset-bottom));inset-inline:12px;margin:0 auto;max-width:440px;
+  background:#17212B;color:#fff;border-radius:12px;padding:10px 14px;font-size:.88rem;line-height:1.7;text-align:center;box-shadow:0 8px 24px rgba(23,33,43,.35)}
+.sytoast[hidden]{display:none}
+.sytoast.bad{background:#8E2219}
+@media print{ .sybar,.sydlg,.sytoast,.sybtn{display:none!important} }
 </style>
 </head>
 <body>
@@ -93,7 +147,8 @@ iframe{background:#EEF1F4}
     <span class="lg">▮</span>
     <span class="tt">سامانه نگهداری و تعمیرات<span class="dt" id="today"></span></span>
   </div>
-  <div class="tabs" id="tabs"></div>
+  <div class="tabrow"><div class="tabs" id="tabs"></div><button type="button" class="sybtn" id="ntSyBtn"><span class="d"></span><span class="tx">اطلاعات مشترک</span></button></div>
+  <div class="sybar" id="ntSyBar" hidden><span id="ntSyBarT"></span><button type="button" id="ntSyBarB" hidden></button></div>
 </div>
 
 <div class="ntal" id="ntAl" role="alertdialog" aria-labelledby="ntAlH" aria-live="assertive" hidden>
@@ -101,6 +156,8 @@ iframe{background:#EEF1F4}
   <ul id="ntAlL"></ul>
   <div class="bt"><button type="button" class="a" id="ntAlGo">نمایش در «امروز»</button><button type="button" class="b" id="ntAlOk">دیدم</button></div>
 </div>
+<div class="sydlg" id="ntSyDlg" role="dialog" aria-modal="true" aria-labelledby="ntSyH" hidden><div class="sybox"><h2 id="ntSyH"></h2><div id="ntSyBody"></div></div></div>
+<div class="sytoast" id="ntSyToast" role="status" aria-live="polite" hidden></div>
 <div class="stage" id="stage"><div class="load" id="load">در حال آماده‌سازی…</div></div>
 
 <script>
@@ -194,10 +251,11 @@ function badges(){
 
 let start=0;   // پیش‌فرض: زبانه «امروز»
 try{ const s=localStorage.getItem('nt_lasttab'); if(s!==null && DOCS[+s]) start=+s; }catch(e){}
-show(start);
-badges();
-setTimeout(()=>{ try{ if(!frames[0].dataset.loaded){ frames[0].setAttribute('loading','eager'); frames[0].srcdoc=srcFor(0); frames[0].dataset.loaded='1'; } }catch(e){} },1500);
-setInterval(badges,3000);
+let ntBooted=false;
+function ntBoot(){ if(ntBooted) return; ntBooted=true; if(active<0) show(start); badges(); }
+setTimeout(ntBoot,6000);   // اگر بخش اطلاعات مشترک پاسخ نداد، سامانه باز هم باز شود
+setTimeout(function f(){ if(!ntBooted){ setTimeout(f,800); return; } try{ if(!frames[0].dataset.loaded){ frames[0].setAttribute('loading','eager'); frames[0].srcdoc=srcFor(0); frames[0].dataset.loaded='1'; } }catch(e){} },1500);
+setInterval(()=>{ if(ntBooted) badges(); },3000);
 window.addEventListener('focus',badges);
 /* ---------- پنجره یادآور ---------- */
 const AL_SEEN='nt_al_seen_v1', TITLE0=document.title;
@@ -219,6 +277,7 @@ function dueNotes(){
 }
 function alSeen(){ try{ const o=JSON.parse(localStorage.getItem(AL_SEEN)||'{}'); return (o && typeof o==='object')?o:{}; }catch(e){ return {}; } }
 function alCheck(){
+  if(window.ntViewer){ alHide(); return; }
   const due=dueNotes(), seen=alSeen(), keep={};
   due.forEach(x=>{ if(seen[x.k]) keep[x.k]=1; });
   try{ if(JSON.stringify(keep)!==JSON.stringify(seen)) localStorage.setItem(AL_SEEN,JSON.stringify(keep)); }catch(e){}
@@ -258,6 +317,589 @@ window.addEventListener('message',ev=>{
   if(ev.data.nt==='printed') document.body.classList.remove('printing');
 });
 
+</script>
+<script>
+/* ============ اطلاعات مشترک: همگام‌سازی با GitHub ============
+   - سیستم «ثبت‌کننده» اطلاعات را قفل‌شده (رمزگذاری‌شده) به مخزن می‌فرستد.
+   - سیستم «مشاهده» همان اطلاعات را می‌گیرد و نشان می‌دهد.
+   اطلاعات در برچسب nt-data مخزن، در پرونده nt-data.json نگه داشته می‌شود. */
+(function(){
+'use strict';
+const CFG='ntsync_cfg_v1', STK='ntsync_state_v1', PREV='ntsync_prev_v1';
+const TEST=window.NTSYNC_TEST||{};
+const API=TEST.api||'https://api.github.com', RAW=TEST.raw||'https://raw.githubusercontent.com';
+const TAG='nt-data', FILE='nt-data.json';
+let OWNER='javad23195-lang', REPO='nt';
+try{
+  const m=/^([a-z0-9-]+)\.github\.io$/i.exec(location.hostname);
+  if(m){ OWNER=m[1]; const p=decodeURIComponent(location.pathname).split('/').filter(Boolean)[0]; if(p && !/\.html?$/i.test(p)) REPO=p; }
+}catch(e){}
+/* کلیدهایی که مخصوص همین سیستم است و فرستاده نمی‌شود */
+const SKIP={nt_lasttab:1,nt_al_seen_v1:1,nt_backup_at:1,nt_alerts_v1:1,nt_bridge_sh_v1:1};
+/* زمان‌ها (میلی‌ثانیه) */
+const T={deb:8000,gap:60000,maxWait:90000,tick:4000,poll:180000,auto:45000,refocus:60000};   // gap: فاصله کم‌ترین بین دو ارسال (محدودیت GitHub)
+if(TEST.T) Object.assign(T,TEST.T);
+
+const $=id=>document.getElementById(id);
+const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function lsGet(k){ try{ const o=JSON.parse(localStorage.getItem(k)||'null'); return (o && typeof o==='object')?o:{}; }catch(e){ return {}; } }
+function lsSet(k,o){ try{ localStorage.setItem(k,JSON.stringify(o)); return true; }catch(e){ return false; } }
+
+let cfg=lsGet(CFG);
+const st=()=>lsGet(STK);
+function stSet(p){ lsSet(STK,Object.assign(st(),p)); }
+const mode=()=>cfg.mode||'';
+window.ntViewer = mode()==='v';
+
+/* ---------- داده ---------- */
+const isSync=k=>k && k.indexOf('nt_')===0 && !SKIP[k];
+function collect(){
+  const keys={};
+  try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(isSync(k)) keys[k]=localStorage.getItem(k); } }catch(e){}
+  return keys;
+}
+function hashOf(keys){
+  let a=5381, b=52711, n=0;
+  Object.keys(keys).sort().forEach(k=>{
+    const s=k+'\u0001'+keys[k]+'\u0002'; n+=s.length;
+    for(let i=0;i<s.length;i++){ const c=s.charCodeAt(i); a=((a<<5)+a+c)|0; b=((b<<5)+b^c)|0; }
+  });
+  return (a>>>0).toString(16)+'-'+(b>>>0).toString(16)+'-'+n;
+}
+function counts(keys){
+  const P=k=>{ try{ return JSON.parse(keys[k]||'null'); }catch(e){ return null; } };
+  const n=k=>{ const o=P(k); return o && Array.isArray(o.rows) ? o.rows.length : (Array.isArray(o)?o.length:0); };
+  const pr=P('nt_prog_v1');
+  return [['خروج انبار',n('nt_anbar_out_v1')],['ورود انبار',n('nt_anbar_in_v1')],['درخواست خرید',n('nt_kharid9_v1')],
+          ['مشکلات',n('nt_moshkel_v1')],['شناسنامه',n('nt_sh8_v1')],['خدمات',n('nt_khadamat_v1')],
+          ['قرائت',n('nt_daftar_v1')],['روز برنامه',pr&&typeof pr==='object'&&!Array.isArray(pr)?Object.keys(pr).length:0],['یادداشت',n('nt_today_todo_v1')]];
+}
+const total=keys=>counts(keys).reduce((s,x)=>s+x[1],0);
+const countText=keys=>counts(keys).filter(x=>x[1]>0).map(x=>`${x[0]} ${fa(x[1])}`).join(' · ') || 'بدون ردیف';
+function fmtAt(iso){
+  if(!iso) return '—';
+  try{
+    const d=new Date(iso), n=new Date();
+    const hm=new Intl.DateTimeFormat('fa-IR',{hour:'2-digit',minute:'2-digit',hour12:false}).format(d);
+    if(d.toDateString()===n.toDateString()) return 'امروز '+hm;
+    return new Intl.DateTimeFormat('fa-IR',{day:'numeric',month:'long'}).format(d)+' '+hm;
+  }catch(e){ return String(iso).slice(0,16).replace('T',' '); }
+}
+
+/* ---------- رمزگذاری ---------- */
+const enc=new TextEncoder(), dec=new TextDecoder();
+const hasCrypto=()=>!!(window.crypto && crypto.subtle);
+function b64e(u8){ let s=''; for(let i=0;i<u8.length;i+=0x8000) s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000)); return btoa(s); }
+function b64d(s){ const b=atob(s), u=new Uint8Array(b.length); for(let i=0;i<b.length;i++) u[i]=b.charCodeAt(i); return u; }
+async function pipe(u8,ts){ return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(ts)).arrayBuffer()); }
+function normPass(p){ return String(p||'').trim().replace(/[۰-۹]/g,d=>String(d.charCodeAt(0)-0x06F0)).replace(/[٠-٩]/g,d=>String(d.charCodeAt(0)-0x0660)); }
+async function derive(pass,saltB64){
+  const km=await crypto.subtle.importKey('raw',enc.encode(normPass(pass)),'PBKDF2',false,['deriveBits']);
+  const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:b64d(saltB64),iterations:150000,hash:'SHA-256'},km,256);
+  return b64e(new Uint8Array(bits));
+}
+const aesKey=raw=>crypto.subtle.importKey('raw',b64d(raw),'AES-GCM',false,['encrypt','decrypt']);
+async function seal(keys){
+  const at=new Date().toISOString();
+  let body=enc.encode(JSON.stringify({keys,at})), g=0;
+  try{ if(window.CompressionStream){ body=await pipe(body,new CompressionStream('gzip')); g=1; } }catch(e){ g=0; body=enc.encode(JSON.stringify({keys,at})); }
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},await aesKey(cfg.key),body));
+  const ivs=b64e(iv);
+  return {text:JSON.stringify({app:'nt-sync',v:1,at,salt:cfg.salt,iv:ivs,gz:g,data:b64e(ct)}), iv:ivs, at};
+}
+async function unseal(w,rawKey){
+  let pt;
+  try{ pt=new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(w.iv)},await aesKey(rawKey),b64d(w.data))); }
+  catch(e){ throw new Error('PASS'); }
+  if(w.gz) pt=await pipe(pt,new DecompressionStream('gzip'));
+  const o=JSON.parse(dec.decode(pt));
+  if(!o || !o.keys || typeof o.keys!=='object') throw new Error('BAD');
+  return o;
+}
+
+/* ---------- ارتباط با GitHub ---------- */
+async function gh(path,opt){
+  opt=opt||{};
+  const h=Object.assign({'Accept':'application/vnd.github+json'},opt.headers||{});
+  if(opt.auth && cfg.token) h['Authorization']='Bearer '+cfg.token;
+  if(opt.body) h['Content-Type']='application/json';
+  try{ return await fetch(API+path,{method:opt.method||'GET',headers:h,body:opt.body?JSON.stringify(opt.body):undefined,cache:'no-store'}); }
+  catch(e){ throw new Error('NET'); }
+}
+async function bad(res){
+  let msg=''; try{ msg=(await res.json()).message||''; }catch(e){}
+  const rate = res.status===429 || (res.status===403 && (res.headers.get('x-ratelimit-remaining')==='0' || /rate limit/i.test(msg)));
+  const e=new Error(res.status===401?'AUTH':rate?'RATE':(res.status===403||res.status===404)?'PERM':'HTTP');
+  e.status=res.status; e.detail=msg; return e;
+}
+const repoPath=()=>`/repos/${OWNER}/${REPO}`;
+async function getRef(){
+  const r=await gh(`${repoPath()}/git/ref/tags/${TAG}`,{auth:true});
+  if(r.status===404) return null;
+  if(!r.ok) throw await bad(r);
+  const j=await r.json();
+  return (j && j.object && j.object.sha) || null;
+}
+function parseFile(t){ let w=null; try{ w=JSON.parse(t); }catch(e){} if(!w || w.app!=='nt-sync' || !w.data || !w.iv || !w.salt) throw new Error('BAD'); return w; }
+async function getFile(auth,etag){
+  const h={'Accept':'application/vnd.github.raw+json'}; if(etag) h['If-None-Match']=etag;
+  const r=await gh(`${repoPath()}/contents/${FILE}?ref=${TAG}`,{auth,headers:h});
+  if(r.status===304) return {same:true};
+  if(r.status===404) return {none:true};
+  if(!r.ok) throw await bad(r);
+  return {w:parseFile(await r.text()), etag:r.headers.get('ETag')||''};
+}
+async function getRaw(){
+  let r; try{ r=await fetch(`${RAW}/${OWNER}/${REPO}/${TAG}/${FILE}?t=${Date.now()}`,{cache:'no-store'}); }catch(e){ throw new Error('NET'); }
+  if(r.status===404) return {none:true};
+  if(!r.ok) throw new Error('HTTP');
+  return {w:parseFile(await r.text()), etag:''};
+}
+/** پرونده را بدون نگه داشتن تاریخچه در مخزن می‌گذارد (هر بار یک ثبت تنها) */
+async function putFile(text){
+  const P=repoPath()+'/git';
+  let r=await gh(P+'/blobs',{method:'POST',auth:true,body:{content:text,encoding:'utf-8'}}); if(!r.ok) throw await bad(r);
+  const blob=(await r.json()).sha;
+  r=await gh(P+'/trees',{method:'POST',auth:true,body:{tree:[{path:FILE,mode:'100644',type:'blob',sha:blob}]}}); if(!r.ok) throw await bad(r);
+  const tree=(await r.json()).sha;
+  r=await gh(P+'/commits',{method:'POST',auth:true,body:{message:'nt-data',tree,parents:[]}}); if(!r.ok) throw await bad(r);
+  const commit=(await r.json()).sha;
+  r=await gh(P+'/refs/tags/'+TAG,{method:'PATCH',auth:true,body:{sha:commit,force:true}});
+  if(r.status===422 || r.status===404) r=await gh(P+'/refs',{method:'POST',auth:true,body:{ref:'refs/tags/'+TAG,sha:commit}});
+  if(!r.ok) throw await bad(r);
+  return commit;
+}
+function errText(e){
+  const c=e && e.message;
+  if(c==='NET')  return 'اینترنت قطع است یا GitHub باز نمی‌شود';
+  if(c==='AUTH') return 'کلید دسترسی اشتباه است یا تاریخ آن تمام شده است';
+  if(c==='PERM') return 'کلید دسترسی اجازه نوشتن در مخزن ندارد';
+  if(c==='RATE') return 'GitHub موقتاً اجازه نمی‌دهد — چند دقیقه بعد دوباره امتحان می‌شود';
+  if(c==='PASS') return 'رمز اطلاعات درست نیست';
+  if(c==='BAD')  return 'پرونده اطلاعات مشترک خراب است';
+  if(c==='FULL') return 'حافظه مرورگر پر است';
+  return 'خطا در ارتباط با GitHub'+(e && e.status?' ('+e.status+')':'');
+}
+
+/* ---------- جایگزینی اطلاعات این سیستم ---------- */
+function reloadFrames(){
+  try{
+    frames.forEach((old,i)=>{
+      if(!old.dataset.loaded) return;
+      const on=old.classList.contains('on');
+      let y=0; try{ y=old.contentWindow.scrollY||0; }catch(e){}
+      const fr=document.createElement('iframe');
+      fr.setAttribute('title',DOCS[i].name); fr.setAttribute('allow','microphone; clipboard-write');
+      if(on) fr.classList.add('on');
+      old.replaceWith(fr); frames[i]=fr;          // قاب تازه: بدون پرسش «خارج می‌شوید؟»
+      if(on || i===0){
+        fr.srcdoc=srcFor(i); fr.dataset.loaded='1';
+        if(on && y) fr.addEventListener('load',()=>setTimeout(()=>{ try{ fr.contentWindow.scrollTo(0,y); }catch(e){} },120),{once:true});
+      }
+    });
+    badges();
+  }catch(e){}
+}
+function applyKeys(keys,keepPrev){
+  const cur=collect();
+  if(keepPrev && total(cur)>0) lsSet(PREV,{at:Date.now(),keys:cur});
+  const write=()=>{
+    Object.keys(cur).forEach(k=>{ if(!(k in keys)) localStorage.removeItem(k); });
+    Object.keys(keys).forEach(k=>{ if(isSync(k) && typeof keys[k]==='string' && localStorage.getItem(k)!==keys[k]) localStorage.setItem(k,keys[k]); });
+  };
+  try{ localStorage.setItem('ntbak_lock',String(Date.now())); }catch(e){}
+  let ok=true;
+  try{ write(); }
+  catch(e){
+    try{ localStorage.removeItem(PREV); write(); }
+    catch(e2){
+      ok=false;
+      try{ Object.keys(collect()).forEach(k=>localStorage.removeItem(k)); Object.keys(cur).forEach(k=>localStorage.setItem(k,cur[k])); }catch(e3){}
+    }
+  }
+  try{ localStorage.removeItem('ntbak_lock'); }catch(e){}
+  if(!ok) throw new Error('FULL');
+  reloadFrames();
+}
+
+/* ---------- وضعیت روی صفحه ---------- */
+let phase='', note='', busy=false, conflict=null, pending=null, lastPush=0, lastChk=0, changedAt=0, dirtyAt=0, mayDirty=true, autoT=null;
+function toast(t,isBad){
+  const el=$('ntSyToast'); if(!el) return;
+  el.textContent=t; el.className='sytoast'+(isBad?' bad':''); el.hidden=false;
+  clearTimeout(toast._t); toast._t=setTimeout(()=>{ el.hidden=true; },isBad?6000:3500);
+}
+const CLOUD='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 10.5a3.75 3.75 0 0 1-.25 7.5H7z"></path></svg>';
+function paint(){
+  const b=$('ntSyBtn'), bar=$('ntSyBar'), s=st(), m=mode();
+  if(!b) return;
+  let cls='', txt='اطلاعات مشترک';
+  if(m==='w'){
+    if(conflict){ cls='err'; txt='نیاز به انتخاب'; }
+    else if(phase==='busy'){ cls='busy'; txt='در حال ارسال…'; }
+    else if(phase==='err'){ cls='err'; txt='ارسال نشد'; }
+    else { cls='ok'; txt=s.at?'ارسال شد '+fmtAt(s.at).replace('امروز ',''):'ثبت‌کننده'; }
+  }else if(m==='v'){
+    if(phase==='busy'){ cls='busy'; txt='در حال دریافت…'; }
+    else if(phase==='err'){ cls='err'; txt='دریافت نشد'; }
+    else { cls='ok'; txt='مشاهده'; }
+  }
+  b.className='sybtn '+cls;
+  b.innerHTML='<span class="d"></span>'+CLOUD+'<span class="tx">'+esc(txt)+'</span>';
+  b.setAttribute('aria-label','اطلاعات مشترک: '+txt);
+  b.title = m==='w'?'این سیستم ثبت‌کننده است':m==='v'?'این سیستم فقط مشاهده می‌کند':'تنظیم اطلاعات مشترک';
+  /* نوار زیر زبانه‌ها */
+  let show=false, bc='', bt='', bb='', act=null;
+  if(m==='v'){
+    show=true;
+    if(pending){ bc='new'; bt='اطلاعات جدید رسید.'; bb='نمایش'; act=()=>applyPending(true); }
+    else if(phase==='err'){ bc='err'; bt='دریافت نشد — '+note+'. اطلاعات نشان داده شده: '+fmtAt(s.at); bb='تلاش دوباره'; act=()=>pull(true); }
+    else { bt='حالت مشاهده — آخرین اطلاعات: '+fmtAt(s.at)+(s.at?'':' (هنوز دریافت نشده)'); bb='تازه‌سازی'; act=()=>pull(true); }
+  }else if(m==='w'){
+    if(conflict){ show=true; bc='err'; bt='اطلاعات مشترک با اطلاعات این سیستم فرق دارد. ارسال متوقف است.'; bb='انتخاب'; act=()=>viewConflict(); }
+    else if(phase==='err'){ show=true; bc='err'; bt='ارسال نشد — '+note; bb='تلاش دوباره'; act=()=>reconcile(); }
+  }
+  bar.hidden=!show; bar.className='sybar'+(bc?' '+bc:'');
+  $('ntSyBarT').textContent=bt;
+  const bbEl=$('ntSyBarB'); bbEl.hidden=!bb; bbEl.textContent=bb; bbEl.onclick=act;
+}
+function setPhase(p,n){ phase=p; note=n||''; paint(); }
+
+/* ---------- ثبت‌کننده ---------- */
+async function push(force){
+  if(busy) return; busy=true; setPhase('busy');
+  try{
+    const ref=await getRef();
+    if(ref && ref!==st().sha && !force){ busy=false; return await reconcile(ref); }
+    const keys=collect(), h=hashOf(keys), s=await seal(keys);
+    const sha=await putFile(s.text);
+    stSet({sha,hash:h,iv:s.iv,at:s.at}); lastPush=Date.now(); dirtyAt=0;
+    conflict=null; setPhase('ok');
+  }catch(e){ setPhase('err',errText(e)); }
+  finally{ busy=false; }
+}
+/** وضعیت این سیستم را با اطلاعات مشترک مقایسه می‌کند و کار درست را انجام می‌دهد */
+async function reconcile(knownRef){
+  if(busy) return; busy=true; setPhase('busy');
+  let again=false;
+  try{
+    const ref=knownRef || await getRef(), s=st(), lh=hashOf(collect());
+    lastChk=Date.now();
+    if(!ref){ again='push'; }
+    else if(ref===s.sha){ if(lh!==s.hash) again='push'; setPhase('ok'); }
+    else{
+      const f=await getFile(true);
+      if(f.none){ again='push'; }
+      else{
+        const o=await unseal(f.w,cfg.key), ch=hashOf(pick(o.keys));
+        if(ch===lh){ stSet({sha:ref,hash:lh,iv:f.w.iv,at:f.w.at}); conflict=null; setPhase('ok'); }
+        else if(lh===s.hash || total(collect())===0){
+          applyKeys(pick(o.keys),true);
+          stSet({sha:ref,hash:hashOf(collect()),iv:f.w.iv,at:f.w.at}); conflict=null; setPhase('ok');
+          toast('اطلاعات جدیدتر از سیستم دیگر دریافت شد');
+        }else{
+          conflict={keys:pick(o.keys),ref,at:f.w.at,iv:f.w.iv}; setPhase('ok'); viewConflict();
+        }
+      }
+    }
+  }catch(e){
+    if(e && e.message==='PASS'){ setPhase('err','رمز اطلاعات مشترک عوض شده است'); viewPass('w'); }
+    else setPhase('err',errText(e));
+  }finally{ busy=false; }
+  if(again==='push') await push(true);
+}
+function pick(keys){ const o={}; Object.keys(keys||{}).forEach(k=>{ if(isSync(k) && typeof keys[k]==='string') o[k]=keys[k]; }); return o; }
+function tickW(){
+  if(mode()!=='w' || busy || conflict) return;
+  const now=Date.now();
+  if(phase==='err'){ if(now-lastChk>60000){ lastChk=now; reconcile(); } return; }
+  if(!mayDirty) return;
+  const lh=hashOf(collect());
+  if(lh===st().hash){ mayDirty=false; dirtyAt=0; return; }
+  if(!dirtyAt) dirtyAt=now;
+  const quiet = now-changedAt>=T.deb, late = now-dirtyAt>=T.maxWait;
+  if((quiet || late) && now-lastPush>=T.gap) push(false);
+}
+
+/* ---------- مشاهده ---------- */
+async function pull(manual){
+  if(busy) return; busy=true; setPhase('busy');
+  let done=false;
+  try{
+    lastChk=Date.now();
+    let f;
+    try{ f=await getFile(false, manual?'':st().etag); }
+    catch(e){ if(e && e.message==='RATE') f=await getRaw(); else throw e; }
+    if(f.same){ setPhase('ok'); }
+    else if(f.none){ setPhase('err','اطلاعات مشترک هنوز ارسال نشده است'); }
+    else if(f.w.iv===st().iv){ stSet({etag:f.etag}); setPhase('ok'); }
+    else{
+      if(f.w.salt!==cfg.salt){ setPhase('err','رمز اطلاعات عوض شده است'); viewPass('v',f.w); }
+      else{
+        const o=await unseal(f.w,cfg.key), keys=pick(o.keys);
+        if(hashOf(keys)===hashOf(collect())){ stSet({iv:f.w.iv,at:f.w.at,etag:f.etag,hash:hashOf(keys)}); setPhase('ok'); }
+        else{
+          pending={keys,iv:f.w.iv,at:f.w.at,etag:f.etag};
+          setPhase('ok');
+          if(!booted() || document.hidden || !st().iv || manual) applyPending(false);
+          else{ clearTimeout(autoT); autoT=setTimeout(()=>applyPending(false),T.auto); }
+        }
+      }
+    }
+    done=true;
+  }catch(e){
+    if(e && e.message==='PASS'){ setPhase('err','رمز اطلاعات عوض شده است'); viewPass('v'); }
+    else setPhase('err',errText(e));
+  }finally{ busy=false; }
+  if(manual && done && phase==='ok' && !pending) toast('اطلاعات به‌روز است — '+fmtAt(st().at));
+}
+const booted=()=>{ try{ return !!ntBooted; }catch(e){ return true; } };
+function typing(){
+  try{ const fr=frames[active], a=fr && fr.contentDocument && fr.contentDocument.activeElement;
+       return !!(a && /^(INPUT|TEXTAREA)$/.test(a.tagName) && a.value); }catch(e){ return false; }
+}
+function applyPending(byUser){
+  if(!pending) return;
+  clearTimeout(autoT);
+  if(!byUser && booted() && !document.hidden && typing()){ autoT=setTimeout(()=>applyPending(false),15000); return; }
+  const p=pending;
+  try{ applyKeys(p.keys,!st().iv); }
+  catch(e){ pending=null; setPhase('err',errText(e)); return; }
+  pending=null;
+  stSet({iv:p.iv,at:p.at,etag:p.etag,hash:hashOf(collect())});
+  setPhase('ok');
+  if(booted()) toast('اطلاعات جدید نشان داده شد — '+fmtAt(p.at));
+}
+
+/* ---------- پنجره تنظیم ---------- */
+function dlg(title,html){ $('ntSyH').textContent=title; $('ntSyBody').innerHTML=html; $('ntSyDlg').hidden=false; }
+function dlgClose(){ $('ntSyDlg').hidden=true; $('ntSyBody').innerHTML=''; }
+function msg(t,isBad){ const el=$('syMsg'); if(el){ el.textContent=t||''; el.className='symsg'+(isBad?' bad':''); } }
+function on(id,fn){ const el=$(id); if(el) el.addEventListener('click',fn); }
+/** دکمه‌ای که برای کارهای برگشت‌ناپذیر باید دو بار زده شود */
+function arm(id,again,fn){
+  const el=$(id); if(!el) return; const t0=el.textContent; let t=null;
+  el.addEventListener('click',()=>{
+    if(t){ clearTimeout(t); t=null; el.textContent=t0; fn(); return; }
+    el.textContent=again; t=setTimeout(()=>{ t=null; el.textContent=t0; },5000);
+  });
+}
+function lock(v){ document.querySelectorAll('#ntSyBody button').forEach(b=>{ if(b.id!=='syClose') b.disabled=v; }); }
+const showBox='<label class="chk"><input type="checkbox" id="syShow">نمایش رمزها</label>';
+function bindShow(){ const c=$('syShow'); if(c) c.addEventListener('change',()=>document.querySelectorAll('#ntSyBody input[data-p]').forEach(i=>i.type=c.checked?'text':'password')); }
+const NOCRYPTO='<div class="symsg bad">این مرورگر رمزگذاری را پشتیبانی نمی‌کند. سامانه را با مرورگر Edge یا Chrome و از آدرس اینترنتی باز کنید.</div>';
+
+function viewMain(){
+  const m=mode(), s=st();
+  if(m==='w'){
+    dlg('اطلاعات مشترک',`
+      <div class="sykv"><b>این سیستم ثبت‌کننده است.</b>آخرین ارسال: ${esc(fmtAt(s.at))}<br>این سیستم: ${esc(countText(collect()))}</div>
+      <div class="symsg" id="syMsg"></div>
+      <button type="button" class="go" id="syNow">ارسال الان</button>
+      <label>کلید دسترسی جدید (فقط اگر کلید قبلی باطل شده است)<input id="syTok" data-p type="password" autocomplete="off" placeholder="github_pat_..."></label>
+      <button type="button" id="syTokSave">ذخیره کلید جدید</button>
+      <button type="button" class="warn" id="syOff">قطع اتصال این سیستم</button>
+      <small>با قطع اتصال، اطلاعات این سیستم پاک نمی‌شود. فقط ارسال متوقف می‌شود.</small>
+      <button type="button" id="syClose">بستن</button>`);
+    on('syNow',async()=>{ lock(true); msg('در حال ارسال…'); await push(false); lock(false); if(conflict) return; msg(phase==='ok'?'ارسال شد — '+fmtAt(st().at):'ارسال نشد — '+note,phase!=='ok'); });
+    on('syTokSave',async()=>{
+      const t=$('syTok').value.trim(); if(!t){ msg('کلید را وارد کنید',true); return; }
+      const old=cfg.token; cfg.token=t; lock(true); msg('در حال بررسی کلید…');
+      try{ const r=await gh(repoPath(),{auth:true}); if(!r.ok) throw await bad(r); lsSet(CFG,cfg); msg('کلید ذخیره شد'); reconcile(); }
+      catch(e){ cfg.token=old; msg(errText(e),true); }
+      lock(false);
+    });
+    arm('syOff','مطمئن هستید؟ دوباره بزنید',()=>{ disconnect(); dlgClose(); toast('اتصال این سیستم قطع شد'); });
+  }else if(m==='v'){
+    dlg('اطلاعات مشترک',`
+      <div class="sykv"><b>این سیستم فقط مشاهده می‌کند.</b>آخرین اطلاعات: ${esc(fmtAt(s.at))}<br>${esc(countText(collect()))}</div>
+      <small>هر تغییری که در این سیستم بدهید، با اطلاعات جدید جایگزین می‌شود.</small>
+      <div class="symsg" id="syMsg"></div>
+      <button type="button" class="go" id="syNow">تازه‌سازی</button>
+      <div class="sycard"><h3>تبدیل به ثبت‌کننده</h3>
+        <label>کلید دسترسی GitHub<input id="syTok" data-p type="password" autocomplete="off" placeholder="github_pat_..."></label>
+        <button type="button" id="syUp">این سیستم ثبت‌کننده شود</button></div>
+      <button type="button" class="warn" id="syOff">قطع اتصال این سیستم</button>
+      <button type="button" id="syClose">بستن</button>`);
+    on('syNow',async()=>{ lock(true); await pull(true); lock(false); msg(phase==='ok'?'اطلاعات به‌روز است — '+fmtAt(st().at):note,phase!=='ok'); });
+    on('syUp',async()=>{
+      const t=$('syTok').value.trim(); if(!t){ msg('کلید را وارد کنید',true); return; }
+      cfg.token=t; lock(true); msg('در حال بررسی کلید…');
+      try{
+        const r=await gh(repoPath(),{auth:true}); if(!r.ok) throw await bad(r);
+        cfg.mode='w'; lsSet(CFG,cfg); window.ntViewer=false; pending=null; clearTimeout(autoT);
+        dlgClose(); toast('این سیستم ثبت‌کننده شد'); startTimers(); reconcile();
+      }catch(e){ delete cfg.token; msg(errText(e),true); lock(false); }
+    });
+    arm('syOff','مطمئن هستید؟ دوباره بزنید',()=>{ disconnect(); dlgClose(); toast('اتصال این سیستم قطع شد'); });
+  }else{
+    const n=total(collect());
+    dlg('اطلاعات مشترک',`
+      <p>الان اطلاعات فقط در همین سیستم ذخیره است. با این بخش، اطلاعات روی GitHub ذخیره می‌شود و سیستم‌های دیگر هم آن را می‌بینند.</p>
+      ${hasCrypto()?'':NOCRYPTO}
+      <div class="symsg" id="syMsg"></div>
+      <div class="sycard"><h3>این سیستم ثبت می‌کند</h3>
+        <small>اطلاعات این سیستم (${esc(n?countText(collect()):'بدون ردیف')}) برای بقیه ارسال می‌شود.</small>
+        <label>کلید دسترسی GitHub<input id="syTok" data-p type="password" autocomplete="off" placeholder="github_pat_..."></label>
+        <label>رمز اطلاعات (حداقل ۶ حرف)<input id="syP1" data-p type="password" autocomplete="new-password"></label>
+        <label>تکرار رمز اطلاعات<input id="syP2" data-p type="password" autocomplete="new-password"></label>
+        <button type="button" class="go" id="syStartW">شروع ارسال</button></div>
+      <div class="sycard"><h3>این سیستم فقط مشاهده می‌کند</h3>
+        <small>${n?'توجه: اطلاعات فعلی این سیستم با اطلاعات مشترک جایگزین می‌شود.':'اطلاعات مشترک در این سیستم نشان داده می‌شود.'}</small>
+        <label>رمز اطلاعات<input id="syPv" data-p type="password" autocomplete="off"></label>
+        <button type="button" class="go" id="syStartV">دریافت اطلاعات</button></div>
+      ${showBox}
+      <button type="button" id="syClose">بستن</button>`);
+    on('syStartW',()=>startWriter(false));
+    on('syStartV',()=>startViewer($('syPv').value));
+  }
+  bindShow();
+  on('syClose',dlgClose);
+}
+async function startWriter(replace){
+  if(!hasCrypto()) return;
+  const tok=$('syTok').value.trim(), p1=normPass($('syP1').value), p2=normPass($('syP2').value);
+  if(!tok){ msg('کلید دسترسی را وارد کنید',true); return; }
+  if(p1.length<6){ msg('رمز اطلاعات باید حداقل ۶ حرف باشد',true); return; }
+  if(p1!==p2){ msg('رمز و تکرار آن یکی نیست',true); return; }
+  lock(true); msg('در حال بررسی کلید…');
+  const keep=cfg; cfg={token:tok};
+  try{
+    const r=await gh(repoPath(),{auth:true});
+    if(r.status===404) throw Object.assign(new Error('X'),{text:'مخزن '+OWNER+'/'+REPO+' با این کلید پیدا نشد'});
+    if(!r.ok) throw await bad(r);
+    const f=await getFile(true);
+    if(f.none || replace){
+      const salt=b64e(crypto.getRandomValues(new Uint8Array(16)));
+      cfg={mode:'w',token:tok,salt,key:await derive(p1,salt)};
+      lsSet(CFG,cfg); lsSet(STK,{}); window.ntViewer=false;
+      msg('در حال ارسال اطلاعات…'); await push(true);
+      if(phase!=='ok'){ const n=note; disconnect(); throw Object.assign(new Error('X'),{text:n}); }
+      dlgClose(); toast('ارسال شد. این سیستم ثبت‌کننده است.'); startTimers();
+    }else{
+      const key=await derive(p1,f.w.salt);
+      try{ await unseal(f.w,key); }
+      catch(e){
+        cfg=keep; lock(false);
+        msg('اطلاعات مشترک از قبل با رمز دیگری وجود دارد. همان رمز را وارد کنید.',true);
+        if(!$('syRep')){
+          const b=document.createElement('button'); b.type='button'; b.className='warn'; b.id='syRep'; b.textContent='رمز قبلی را ندارم — اطلاعات مشترک با اطلاعات این سیستم و رمز جدید جایگزین شود';
+          $('syStartW').after(b); arm('syRep','اطلاعات مشترک قبلی پاک می‌شود. دوباره بزنید',()=>startWriter(true));
+        }
+        return;
+      }
+      cfg={mode:'w',token:tok,salt:f.w.salt,key}; lsSet(CFG,cfg); lsSet(STK,{}); window.ntViewer=false;
+      dlgClose(); startTimers(); await reconcile();
+      if(!conflict && phase==='ok') toast('این سیستم ثبت‌کننده است.');
+    }
+  }catch(e){ if(mode()!=='w'){ cfg=keep; lsSet(CFG,cfg); } lock(false); msg(e.text||errText(e),true); }
+}
+async function startViewer(pass,w){
+  if(!hasCrypto()) return;
+  pass=normPass(pass);
+  if(!pass){ msg('رمز اطلاعات را وارد کنید',true); return; }
+  lock(true); msg('در حال دریافت…');
+  try{
+    if(!w){ let f; try{ f=await getFile(false); }catch(e){ if(e && e.message==='RATE') f=await getRaw(); else throw e; }
+            if(f.none) throw Object.assign(new Error('X'),{text:'اطلاعات مشترک هنوز ارسال نشده است. اول سیستم ثبت‌کننده را تنظیم کنید.'}); w=f.w; }
+    const key=await derive(pass,w.salt), o=await unseal(w,key), keys=pick(o.keys);
+    const tok=mode()==='w'?cfg.token:undefined;
+    cfg={mode:tok?'w':'v',salt:w.salt,key}; if(tok) cfg.token=tok;
+    lsSet(CFG,cfg); window.ntViewer=cfg.mode==='v';
+    if(cfg.mode==='v'){
+      if(hashOf(keys)!==hashOf(collect())) applyKeys(keys,true);
+      lsSet(STK,{iv:w.iv,at:w.at,hash:hashOf(collect())});
+      dlgClose(); setPhase('ok'); toast('اطلاعات دریافت شد — '+fmtAt(w.at)); startTimers();
+      try{ alHide(); }catch(e){}
+    }else{ dlgClose(); reconcile(); }
+  }catch(e){ lock(false); msg(e.text||errText(e),true); }
+}
+/** رمز عوض شده یا سیستم تازه است: فقط رمز پرسیده می‌شود */
+function viewPass(kind,w){
+  const n=total(collect());
+  dlg('اطلاعات مشترک',`
+    <p>${kind==='new'?'این سامانه اطلاعات مشترک دارد. برای دیدن آن، رمز اطلاعات را وارد کنید.':'رمز اطلاعات مشترک عوض شده است. رمز جدید را وارد کنید.'}</p>
+    ${hasCrypto()?'':NOCRYPTO}
+    ${kind==='new'&&n?`<small>توجه: اطلاعات فعلی این سیستم (${esc(countText(collect()))}) با اطلاعات مشترک جایگزین می‌شود.</small>`:''}
+    <div class="symsg" id="syMsg"></div>
+    <label>رمز اطلاعات<input id="syPv" data-p type="password" autocomplete="off"></label>
+    ${showBox}
+    <button type="button" class="go" id="syStartV">${kind==='new'?'دریافت اطلاعات':'تأیید'}</button>
+    ${kind==='new'?'<button type="button" id="syLater">بعداً</button><button type="button" id="syNever">این سیستم اطلاعات مشترک نمی‌خواهد</button><button type="button" id="syMore">این سیستم ثبت‌کننده است…</button>':'<button type="button" id="syClose">بستن</button>'}`);
+  bindShow();
+  on('syStartV',()=>startViewer($('syPv').value,w));
+  const inp=$('syPv'); if(inp) inp.addEventListener('keydown',e=>{ if(e.key==='Enter') startViewer(inp.value,w); });
+  on('syLater',dlgClose); on('syClose',dlgClose);
+  on('syNever',()=>{ cfg={mode:'off'}; lsSet(CFG,cfg); dlgClose(); paint(); });
+  on('syMore',()=>{ viewMain(); });
+}
+function viewConflict(){
+  if(!conflict) return;
+  dlg('کدام اطلاعات درست است؟',`
+    <p>اطلاعات مشترک با اطلاعات این سیستم فرق دارد. یکی را انتخاب کنید.</p>
+    <div class="sykv"><b>اطلاعات مشترک — ارسال: ${esc(fmtAt(conflict.at))}</b>${esc(countText(conflict.keys))}</div>
+    <div class="sykv"><b>این سیستم</b>${esc(countText(collect()))}</div>
+    <div class="symsg" id="syMsg"></div>
+    <button type="button" id="syTake">دریافت اطلاعات مشترک (اطلاعات این سیستم جایگزین می‌شود)</button>
+    <button type="button" id="syGive">ارسال اطلاعات این سیستم (اطلاعات مشترک جایگزین می‌شود)</button>
+    <button type="button" id="syClose">بعداً</button>`);
+  arm('syTake','مطمئن هستید؟ دوباره بزنید',()=>{
+    const c=conflict; if(!c) return;
+    try{ applyKeys(c.keys,true); }catch(e){ msg(errText(e),true); return; }
+    stSet({sha:c.ref,hash:hashOf(collect()),iv:c.iv,at:c.at}); conflict=null; mayDirty=true; setPhase('ok'); dlgClose(); toast('اطلاعات مشترک دریافت شد');
+  });
+  arm('syGive','مطمئن هستید؟ دوباره بزنید',async()=>{
+    lock(true); msg('در حال ارسال…'); conflict=null; await push(true); lock(false);
+    if(phase==='ok'){ dlgClose(); toast('اطلاعات این سیستم ارسال شد'); } else msg('ارسال نشد — '+note,true);
+  });
+  on('syClose',dlgClose);
+}
+function disconnect(){
+  cfg={mode:'off'}; lsSet(CFG,cfg);
+  try{ localStorage.removeItem(STK); }catch(e){}
+  conflict=null; pending=null; clearTimeout(autoT); window.ntViewer=false; setPhase('');
+}
+
+/* ---------- شروع ---------- */
+let timers=false;
+function startTimers(){
+  if(timers) return; timers=true;
+  window.addEventListener('storage',e=>{ if(!e || !e.key || isSync(e.key)){ mayDirty=true; changedAt=Date.now(); } });
+  setInterval(()=>{ if(mode()==='w') tickW(); },T.tick);
+  setInterval(()=>{ mayDirty=true; },15000);
+  setInterval(()=>{ if(mode()==='v' && !document.hidden && Date.now()-lastChk>=T.poll-1000) pull(false); },Math.min(T.poll,20000));
+  const wake=()=>{
+    if(document.hidden){ if(mode()==='v' && pending) applyPending(false); return; }
+    if(Date.now()-lastChk<T.refocus) return;
+    if(mode()==='v') pull(false);
+    else if(mode()==='w' && !conflict && !busy){ lastChk=Date.now(); getRef().then(r=>{ if(r && r!==st().sha) reconcile(r); }).catch(()=>{}); }
+  };
+  document.addEventListener('visibilitychange',wake);
+  window.addEventListener('focus',wake);
+  /* اطلاعات تازه هنگام رفتن به زبانه دیگر نشان داده می‌شود */
+  $('tabs').addEventListener('click',()=>{ if(mode()==='v' && pending) applyPending(true); },true);
+}
+async function probe(){
+  try{
+    const f=await getFile(false);
+    if(f.w && mode()==='' && $('ntSyDlg').hidden) viewPass('new',f.w);
+  }catch(e){}
+}
+function start(){
+  $('ntSyBtn').addEventListener('click',viewMain);
+  paint();
+  const m=mode();
+  const go=()=>{ try{ ntBoot(); }catch(e){} };
+  if((m==='w' || m==='v') && !hasCrypto()){ setPhase('err','این مرورگر رمزگذاری را پشتیبانی نمی‌کند'); go(); return; }
+  if(m==='w'){ go(); startTimers(); reconcile(); }
+  else if(m==='v'){ startTimers(); pull(false).then(go,go); }
+  else{ go(); if(m==='' && hasCrypto()) setTimeout(probe,1500); }
+}
+window.ntSync={T,get cfg(){ return cfg; },st,push,pull,reconcile,collect,hashOf};
+start();
+})();
 </script>
 </body>
 </html>
