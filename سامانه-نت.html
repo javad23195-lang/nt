@@ -145,6 +145,20 @@ iframe{background:#EEF1F4}
 .sybox #syAclList{margin-top:8px}
 .sybox #syAclList[hidden]{display:none}
 .sybox .chk input[type=radio]{width:18px;height:18px}
+.sybox textarea{display:block;width:100%;margin-top:3px;border:1px solid #9AA8B5;border-radius:10px;padding:8px 10px;font:inherit;font-size:.8rem;line-height:1.5;
+  background:#fff;color:#17212B;direction:ltr;text-align:left;resize:vertical;word-break:break-all;font-family:ui-monospace,Menlo,Consolas,monospace}
+.sybox textarea:focus-visible{outline:2px solid #0B5C7A;outline-offset:1px}
+.sybox label[hidden]{display:none}
+.sybox .syuser{border:1px solid #D5DCE3;border-radius:12px;padding:10px 12px;margin:0 0 10px;background:#F7F9FA}
+.sybox .syuser.off{background:#FBF1F0;border-color:#E8B4AE}
+.sybox .syuser b{display:flex;align-items:center;gap:8px;font-size:.95rem;font-weight:800}
+.sybox .sychip{font-size:.72rem;font-weight:700;background:#A32018;color:#fff;border-radius:10px;padding:1px 8px}
+.sybox .syub{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.sybox .syub button{margin:0;min-height:40px;font-size:.84rem}
+.sybox .sypin{margin:4px 0 10px;padding:10px;border:2px solid #0B5C7A;border-radius:12px;background:#E6F0F4;text-align:center;font-size:.85rem;font-weight:700}
+.sybox .sypin b{display:block;font-size:1.7rem;font-weight:800;letter-spacing:.12em;font-variant-numeric:tabular-nums;color:#0B5C7A}
+.sybox details.sycard>summary{cursor:pointer;font-size:.92rem;font-weight:800;color:#8E2219;min-height:32px}
+.sybox details.sycard[open]>summary{margin-bottom:6px}
 @media print{ .sybar,.sydlg,.sytoast,.sybtn{display:none!important} }
 </style>
 </head>
@@ -337,6 +351,7 @@ window.addEventListener('message',ev=>{
 (function(){
 'use strict';
 const CFG='ntsync_cfg_v1', STK='ntsync_state_v1', BASE='ntsync_base_v1', PREV='ntsync_prev_v1';
+const UKEY='nt_users_v1', SKEY='nt_seen_v1';      // لیست کاربران (فقط مدیر می‌نویسد) و آخرین اتصال هر کاربر
 const TEST=window.NTSYNC_TEST||{};
 const API=TEST.api||'https://api.github.com', RAW=TEST.raw||'https://raw.githubusercontent.com';
 const TAG='nt-data', FILE='nt-data.json';
@@ -349,6 +364,8 @@ try{
 const SKIP={nt_lasttab:1,nt_al_seen_v1:1,nt_backup_at:1,nt_alerts_v1:1,nt_bridge_sh_v1:1,nt_tavaqof_name:1,nt_tavaqof_dev:1};
 /* کلیدهای محاسبه‌ای: ادغام نمی‌شوند؛ هر سیستم خودش دوباره می‌سازد */
 const CALC={nt_anbar_sum_v1:1,nt_fixed_done_v1:1};
+/* کلیدهایی که اختلافشان به کاربر گزارش نمی‌شود */
+const QUIET={nt_users_v1:1,nt_seen_v1:1};
 /* هر زبانه کدام اطلاعات را می‌نویسد (برای دسترسی محدود) */
 const TABKEYS={
   'امروز':['nt_today_todo_v1','nt_fixed_done_v1'],
@@ -369,7 +386,7 @@ const LABEL={nt_anbar_out_v1:'خروج انبار',nt_anbar_in_v1:'ورود ان
 /* شناسه ردیف در لیست‌هایی که هر ردیف باید یکتا باشد */
 const IDF={nt_daftar_v1:e=>(e && typeof e==='object' && e.dev && e.date)?e.dev+'|'+e.date:null};
 /* زمان‌ها (میلی‌ثانیه) — gap: کم‌ترین فاصله دو ارسال (محدودیت GitHub) */
-const T={deb:8000,gap:60000,maxWait:90000,tick:4000,poll:180000,pollW:60000,busy:20000,maxDefer:180000,refocus:30000,retry:60000,squash:30};
+const T={deb:8000,gap:60000,maxWait:90000,tick:4000,poll:180000,pollW:60000,busy:20000,maxDefer:180000,refocus:30000,retry:60000,squash:30,seen:900000,seenMin:60000};
 if(TEST.T) Object.assign(T,TEST.T);
 
 const $=id=>document.getElementById(id);
@@ -387,11 +404,15 @@ const tabAcc=name=>{ const a=acl(); return a?(a[name]||'h'):'w'; };
 /** این سیستم اجازه دارد این کلید را بنویسد؟ */
 function canWrite(k){
   if(mode()!=='w') return false;
+  if(k===UKEY) return isAdmin();
+  if(k===SKEY) return true;
   const a=acl(); if(!a) return true;
   return Object.keys(TABKEYS).some(t=>a[t]==='w' && TABKEYS[t].indexOf(k)>-1);
 }
 const fullWriter=()=>mode()==='w' && !acl();
-window.ntViewer = mode()==='v' || !!acl();      // یادآورهای شخصی فقط در سیستم اصلی باز می‌شود
+/** سیستم مدیر: با کلید GitHub تنظیم شده، نه با کد اتصال */
+const isAdmin=()=>mode()==='w' && !cfg.uid && !acl();
+window.ntViewer = mode()==='v' || !!acl() || !!cfg.uid;      // یادآورهای شخصی فقط در سیستم اصلی باز می‌شود
 
 /* ---------- داده ---------- */
 const isSync=k=>k && k.indexOf('nt_')===0 && !SKIP[k];
@@ -413,7 +434,7 @@ function baseGet(){ try{ const o=JSON.parse(localStorage.getItem(BASE)||'null');
 function baseSet(keys){ try{ localStorage.setItem(BASE,JSON.stringify(keys)); return true; }catch(e){ try{ localStorage.removeItem(BASE); }catch(e2){} return false; } }
 /** آنچه این سیستم باید بفرستد: کلیدهای مجاز از همین سیستم، بقیه همان که در اطلاعات مشترک است */
 function outgoing(local,base){
-  if(fullWriter()) return local;
+  if(isAdmin()) return local;
   const o={};
   Object.keys(base||{}).forEach(k=>{ if(!canWrite(k)) o[k]=base[k]; });
   Object.keys(local).forEach(k=>{ if(canWrite(k)) o[k]=local[k]; });
@@ -447,7 +468,7 @@ let mergeNote={};          // کلید → تعداد ردیف‌هایی که �
 let mKey='';
 const J=x=>JSON.stringify(x);
 const isArr=Array.isArray, isObj=x=>x && typeof x==='object' && !isArr(x);
-const clash=()=>{ mergeNote[mKey]=(mergeNote[mKey]||0)+1; };
+const clash=()=>{ if(!QUIET[mKey]) mergeNote[mKey]=(mergeNote[mKey]||0)+1; };
 function merge3(b,l,r){
   const sl=J(l), sr=J(r);
   if(sl===sr) return l;
@@ -721,6 +742,7 @@ function applyKeys(keys,opt){
 }
 
 /* ---------- وضعیت روی صفحه ---------- */
+let needCode=false;   // کلید یا رمز عوض شده: این کاربر کد اتصال جدید لازم دارد
 let phase='', note='', busy=false, conflict=null, incoming=null, waiting=false, lastPush=0, lastChk=0, changedAt=0, dirtyAt=0, mayDirty=true, tip='';
 function toast(t,isBad){
   const el=$('ntSyToast'); if(!el) return;
@@ -747,11 +769,11 @@ function paint(){
   if(!tx || !b.querySelector('svg')){ b.innerHTML='<span class="d"></span>'+CLOUD+'<span class="tx"></span>'; tx=b.querySelector('.tx'); }
   if(b.className!=='sybtn '+cls) b.className='sybtn '+cls;
   if(tx.textContent!==txt){ tx.textContent=txt; b.setAttribute('aria-label','اطلاعات مشترک: '+txt); }
-  b.title = m==='w'?(acl()?'این سیستم ثبت‌کننده است (دسترسی محدود)':'این سیستم ثبت‌کننده است'):m==='v'?'این سیستم فقط مشاهده می‌کند':'تنظیم اطلاعات مشترک';
+  b.title = m==='w'?(cfg.uid?'کاربر: '+(cfg.uname||''):isAdmin()?'سیستم مدیر':'این سیستم ثبت‌کننده است'):m==='v'?'این سیستم فقط مشاهده می‌کند':'اتصال به اطلاعات مشترک';
   /* نوار زیر زبانه‌ها */
   let show=false, bc='', bt='', bb='', act=null;
   if(m==='w' && conflict){ show=true; bc='err'; bt='اطلاعات مشترک با اطلاعات این سیستم فرق دارد. همگام‌سازی متوقف است.'; bb='انتخاب'; act=()=>viewConflict(); }
-  else if((m==='w' || m==='v') && phase==='err'){ show=true; bc='err'; bt=(m==='w'?'همگام نشد — ':'دریافت نشد — ')+note+(m==='v'?'. اطلاعات نشان داده شده: '+fmtAt(s.at):''); bb='تلاش دوباره'; act=()=>sync({manual:true}); }
+  else if((m==='w' || m==='v') && phase==='err'){ show=true; bc='err'; bt=(m==='w'?'همگام نشد — ':'دریافت نشد — ')+note+(m==='v'?'. اطلاعات نشان داده شده: '+fmtAt(s.at):''); bb='تلاش دوباره'; act=()=>sync({manual:true}); if(needCode){ bb='وارد کردن کد'; act=()=>viewJoin(''); } }
   else if((m==='w' || m==='v') && waiting){ show=true; bc='new'; bt='اطلاعات جدید رسید.'; bb='نمایش'; act=()=>sync({now:true}); }
   else if(m==='w' && tip){ show=true; bc='new'; bt=tip; bb='دیدم'; act=()=>{ tip=''; paint(); }; }
   else if(m==='v'){ show=true; bt='حالت مشاهده — آخرین اطلاعات: '+fmtAt(s.at)+(s.at?'':' (هنوز دریافت نشده)'); bb='تازه‌سازی'; act=()=>sync({manual:true}); }
@@ -811,17 +833,24 @@ async function sync(opt){
         waiting=true; busy=false; setPhase('ok'); return;                  // کاربر مشغول است: کمی بعد
       }
       waiting=false; conflict=null;
+      /* فقط «آخرین اتصال» یا لیست کاربران عوض شده؟ پس پیامی لازم نیست */
+      const real=Object.keys(Object.assign({},local,merged)).some(k=>!QUIET[k] && local[k]!==merged[k]);
       baseSet(incoming.keys);
       stSet({sha:incoming.ref||s.sha||'',iv:incoming.iv,at:incoming.at,n:incoming.n,hash:hashOf(incoming.keys),etag:incoming.etag||s.etag||''});
       const dup=Object.keys(mergeNote);
       if(dup.length) tip='در «'+dup.map(k=>LABEL[k]||k).join('»، «')+'» دو سیستم هم‌زمان یک ردیف را تغییر داده بودند. آن بخش را بررسی کنید؛ اگر ردیفی دو بار آمده، نسخه اضافه را پاک کنید.';
-      else if(!first && !opt.resolve && m==='w') toast('اطلاعات جدید از سیستم دیگر رسید');
-      else if(m==='v' && !first) toast('اطلاعات جدید نشان داده شد — '+fmtAt(incoming.at));
+      else if(!first && !opt.resolve && m==='w'){ if(real) toast('اطلاعات جدید از سیستم دیگر رسید'); }
+      else if(m==='v' && !first && real) toast('اطلاعات جدید نشان داده شد — '+fmtAt(incoming.at));
       incoming=null; local=collect(); base=baseGet(); s=st();
     }
     /* ۳) ارسال نوشته‌های این سیستم */
     if(m==='w'){
-      const out=outgoing(local,base||{}), h=hashOf(out);
+      if(!isAdmin() && base && local[UKEY]!==base[UKEY]){    // لیست کاربران فقط از مدیر می‌آید
+        try{ if(base[UKEY]===undefined) localStorage.removeItem(UKEY); else localStorage.setItem(UKEY,base[UKEY]); }catch(e){}
+        local=collect();
+      }
+      let out=outgoing(local,base||{}), h=hashOf(out);
+      if(touchSeen(h!==s.hash)){ local=collect(); out=outgoing(local,base||{}); h=hashOf(out); }
       const must = !ref || h!==s.hash || opt.replace;
       if(must){
         const now=Date.now();
@@ -839,11 +868,14 @@ async function sync(opt){
         }
       }else{ dirtyAt=0; if(!base) baseSet(out); }
     }
-    if(!again) setPhase('ok');
+    if(!again){ needCode=false; setPhase('ok'); }
   }catch(e){
-    if(e && e.message==='PASS'){ setPhase('err','رمز اطلاعات مشترک عوض شده است'); viewPass(m); }
+    const c=e && e.message;
+    if(cfg.uid && (c==='PASS' || c==='AUTH')){ needCode=true; setPhase('err','کلید یا رمز اطلاعات عوض شده است. از مدیر کد اتصال جدید بگیرید'); }
+    else if(c==='PASS'){ setPhase('err','رمز اطلاعات مشترک عوض شده است'); viewPass(m); }
     else setPhase('err',errText(e));
   }finally{ busy=false; }
+  if(!again && phase==='ok' && !checkMe()) return;
   if(again && (opt._n||0)<4) return sync(Object.assign({},opt,{_n:(opt._n||0)+1,replace:false}));
   if(opt.manual && phase==='ok' && !waiting) toast(m==='v'?'اطلاعات به‌روز است — '+fmtAt(st().at):'همگام شد — '+fmtAt(st().at));
 }
@@ -864,130 +896,323 @@ function tick(){
 }
 
 /* ---------- پنجره تنظیم ---------- */
-function dlg(title,html){ $('ntSyH').textContent=title; $('ntSyBody').innerHTML=html; $('ntSyDlg').hidden=false; }
+function dlg(title,html){ $('ntSyH').textContent=title; $('ntSyBody').innerHTML=html; $('ntSyDlg').hidden=false; try{ $('ntSyDlg').scrollTop=0; }catch(e){} }
 function dlgClose(){ $('ntSyDlg').hidden=true; $('ntSyBody').innerHTML=''; }
-function msg(t,isBad){ const el=$('syMsg'); if(el){ el.textContent=t||''; el.className='symsg'+(isBad?' bad':''); } }
+function msg(t,isBad){ const el=$('syMsg'); if(el){ el.textContent=t||''; el.className='symsg'+(isBad?' bad':''); if(t){ try{ el.scrollIntoView({block:'nearest'}); }catch(e){} } } }
 function on(id,fn){ const el=$(id); if(el) el.addEventListener('click',fn); }
 /** دکمه‌ای که برای کارهای برگشت‌ناپذیر باید دو بار زده شود */
-function arm(id,again,fn){
-  const el=$(id); if(!el) return; const t0=el.textContent; let t=null;
+function armEl(el,again,fn){
+  if(!el) return; const t0=el.textContent; let t=null;
   el.addEventListener('click',()=>{
     if(t){ clearTimeout(t); t=null; el.textContent=t0; fn(); return; }
     el.textContent=again; t=setTimeout(()=>{ t=null; el.textContent=t0; },5000);
   });
 }
+const arm=(id,again,fn)=>armEl($(id),again,fn);
 function lock(v){ document.querySelectorAll('#ntSyBody button').forEach(b=>{ if(b.id!=='syClose') b.disabled=v; }); }
 const showBox='<label class="chk"><input type="checkbox" id="syShow">نمایش رمزها</label>';
 function bindShow(){ const c=$('syShow'); if(c) c.addEventListener('change',()=>document.querySelectorAll('#ntSyBody input[data-p]').forEach(i=>i.type=c.checked?'text':'password')); }
 const NOCRYPTO='<div class="symsg bad">این مرورگر رمزگذاری را پشتیبانی نمی‌کند. سامانه را با مرورگر Edge یا Chrome و از آدرس اینترنتی باز کنید.</div>';
+async function copyText(t){
+  try{ if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(t); return true; } }catch(e){}
+  try{ const ta=document.createElement('textarea'); ta.value=t; ta.setAttribute('readonly',''); ta.style.cssText='position:fixed;top:0;left:0;opacity:0';
+       document.body.appendChild(ta); ta.focus(); ta.select(); ta.setSelectionRange(0,t.length); const ok=document.execCommand('copy'); ta.remove(); return ok; }catch(e){ return false; }
+}
 
-/* --- دسترسی این سیستم --- */
-function aclBox(cur){
-  const lim=!!cur, a=cur||PRESET;
-  return `<div class="sycard"><h3>دسترسی این سیستم</h3>
-    <label class="chk"><input type="radio" name="syAcc" value="full" ${lim?'':'checked'}>کامل — همه زبانه‌ها</label>
-    <label class="chk"><input type="radio" name="syAcc" value="lim" ${lim?'checked':''}>محدود — فقط زبانه‌های انتخاب‌شده</label>
-    <div id="syAclList" ${lim?'':'hidden'}>
-      ${DOCS.map((d,i)=>`<div class="syrow"><span>${esc(d.name)}</span><select data-tab="${i}" aria-label="دسترسی ${esc(d.name)}">
-        ${[['w','ثبت'],['r','فقط مشاهده'],['h','پنهان']].map(o=>`<option value="${o[0]}" ${(a[d.name]||'h')===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></div>`).join('')}
-      <label>رمز مدیر (برای تغییر تنظیم این سیستم، حداقل ۴ حرف)<input id="syAdm" data-p type="password" autocomplete="new-password" ${cfg.adm?'placeholder="بدون تغییر"':''}></label>
-      <small>با دسترسی محدود، کاربر این سیستم بدون رمز مدیر نمی‌تواند تنظیم را عوض کند.</small>
-    </div></div>`;
+/* ---------- کاربران ---------- */
+function usersGet(src){
+  try{ const o=JSON.parse((src===undefined?localStorage.getItem(UKEY):src)||'null'); return (o && isObj(o.users))?o.users:null; }catch(e){ return null; }
 }
-function aclBind(){
-  document.querySelectorAll('input[name="syAcc"]').forEach(r=>r.addEventListener('change',()=>{ $('syAclList').hidden=document.querySelector('input[name="syAcc"]:checked').value!=='lim'; }));
+function usersSet(users){
+  try{ localStorage.setItem(UKEY,JSON.stringify({users})); }catch(e){ toast('ذخیره نشد — حافظه مرورگر پر است',true); return; }
+  mayDirty=true; changedAt=0; sync({force:true});
 }
-/** دسترسی انتخاب‌شده در پنجره را می‌خواند؛ اگر ناقص باشد پیام می‌دهد و undefined برمی‌گرداند */
-async function aclRead(){
-  const r=document.querySelector('input[name="syAcc"]:checked');
-  if(!r || r.value!=='lim') return {acl:null,adm:null};
-  const a={}; let vis=0;
-  document.querySelectorAll('#syAclList select').forEach(s=>{ a[DOCS[+s.dataset.tab].name]=s.value; if(s.value!=='h') vis++; });
-  if(!vis){ msg('حداقل یک زبانه باید «ثبت» یا «فقط مشاهده» باشد',true); return undefined; }
-  const p=normPass($('syAdm').value);
-  if(!p && cfg.adm) return {acl:a,adm:cfg.adm};
-  if(p.length<4){ msg('رمز مدیر باید حداقل ۴ حرف باشد',true); return undefined; }
-  const salt=newSalt();
-  return {acl:a,adm:{salt,hash:await derive(p,salt)}};
+function seenGet(){ try{ const o=JSON.parse(localStorage.getItem(SKEY)||'null'); return isObj(o)?o:{}; }catch(e){ return {}; } }
+function devLabel(){
+  const u=navigator.userAgent||'';
+  return /Android/i.test(u)?'اندروید':/iPhone|iPad/i.test(u)?'آیفون':/Windows/i.test(u)?'ویندوز':/Mac/i.test(u)?'مک':'دستگاه دیگر';
 }
-/** اگر این سیستم رمز مدیر دارد، اول آن را می‌پرسد */
-function gate(next){
-  if(!cfg.adm){ next(); return; }
-  dlg('اطلاعات مشترک',`
-    <div class="sykv"><b>${mode()==='w'?'این سیستم ثبت‌کننده است (دسترسی محدود).':'این سیستم فقط مشاهده می‌کند (دسترسی محدود).'}</b>آخرین همگام‌سازی: ${esc(fmtAt(st().at))}</div>
+/** این سیستم «آخرین اتصال» خودش را ثبت می‌کند (هر ۱۵ دقیقه، یا همراه ارسال بعدی) */
+function touchSeen(dirty){
+  if(!cfg.uid) return false;
+  const seen=seenGet(), mine=seen[cfg.uid], age=mine&&mine.at?Date.now()-Date.parse(mine.at):Infinity;
+  if(!(age>=T.seen || (dirty && age>=T.seenMin))) return false;
+  seen[cfg.uid]={at:new Date().toISOString(),dev:devLabel()};
+  try{ localStorage.setItem(SKEY,JSON.stringify(seen)); }catch(e){ return false; }
+  return true;
+}
+function accText(a){
+  if(!a) return 'کامل (همه زبانه‌ها)';
+  const w=[], r=[]; DOCS.forEach(d=>{ if(a[d.name]==='w') w.push(d.name); else if(a[d.name]==='r') r.push(d.name); });
+  return ((w.length?'ثبت: '+w.join('، '):'')+(w.length&&r.length?' · ':'')+(r.length?'مشاهده: '+r.join('، '):'')) || 'بدون دسترسی';
+}
+/** بعد از هر همگام‌سازی: دسترسی این سیستم همان است که مدیر تعیین کرده؟ */
+function checkMe(){
+  if(!cfg.uid || mode()!=='w') return true;
+  const b=baseGet(), U=b?usersGet(b[UKEY]||''):null;      // از آخرین نسخه اطلاعات مشترک، نه از نسخه این سیستم
+  if(!U) return true;                                     // لیست کاربران در دسترس نیست: چیزی عوض نمی‌شود
+  const me=U[cfg.uid];
+  if(!me || me.off){ revoke(); return false; }
+  const a=isObj(me.acl)?me.acl:null;
+  if(J(a)!==J(acl()) || (me.name||'')!==(cfg.uname||'')){
+    if(a) cfg.acl=a; else delete cfg.acl;
+    cfg.uname=me.name||''; lsSet(CFG,cfg);
+    toast('دسترسی این سیستم تغییر کرد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),900);
+    return false;
+  }
+  return true;
+}
+/** مدیر دسترسی را قطع کرده است: اطلاعات از این سیستم برداشته می‌شود */
+function revoke(){
+  try{ Object.keys(collect()).forEach(k=>localStorage.removeItem(k)); [STK,BASE,PREV].forEach(k=>localStorage.removeItem(k)); }catch(e){}
+  cfg={mode:'off',revoked:1}; lsSet(CFG,cfg);
+  location.reload();
+}
+
+/* --- کد اتصال: کلید و رمز اطلاعات، قفل‌شده با رمز ۶ رقمی --- */
+const u64e=u8=>b64e(u8).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const u64d=s=>b64d(s.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((s.length+3)%4));
+const pinNorm=p=>normPass(p).replace(/\D/g,'');
+async function pinKey(pin,salt){
+  const km=await crypto.subtle.importKey('raw',enc.encode(pinNorm(pin)),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:400000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function codeMake(uid,pin){
+  const salt=crypto.getRandomValues(new Uint8Array(16)), iv=crypto.getRandomValues(new Uint8Array(12));
+  const body=enc.encode(JSON.stringify({v:1,o:OWNER,r:REPO,t:cfg.token,k:cfg.key,s:cfg.salt,u:uid}));
+  const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},await pinKey(pin,salt),body));
+  return 'NT1.'+u64e(salt)+'.'+u64e(iv)+'.'+u64e(ct);
+}
+const CODE_RE=/NT1\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{20,}/;
+function codeFind(t){ const m=CODE_RE.exec(String(t||'').replace(/[\s​-‏‪-‮⁦-⁩]+/g,'')); return m?m[0]:''; }
+async function codeOpen(code,pin){
+  const p=code.split('.');
+  let pt;
+  try{ pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:u64d(p[2])},await pinKey(pin,u64d(p[1])),u64d(p[3])); }catch(e){ throw new Error('PIN'); }
+  const o=JSON.parse(dec.decode(pt));
+  if(!o || !o.t || !o.k || !o.s || !o.u) throw new Error('PIN');
+  return o;
+}
+/** لینک اتصال همیشه به آدرس اینترنتی سامانه اشاره می‌کند (نه به پرونده روی همین سیستم) */
+const joinLink=code=>(/^https?:$/.test(location.protocol)?location.href.split('#')[0].split('?')[0]:'https://'+OWNER+'.github.io/'+REPO+'/'+encodeURIComponent('سامانه-نت.html'))+'#join='+code;
+function hashCode(){
+  const m=/[#&]join=([^&]+)/.exec(location.hash||''); if(!m) return '';
+  try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){}
+  try{ return codeFind(decodeURIComponent(m[1])); }catch(e){ return ''; }
+}
+function viewJoin(code){
+  const fresh=mode()==='';
+  dlg('اتصال به اطلاعات مشترک',`
+    ${cfg.revoked?'<div class="symsg bad">دسترسی این سیستم قطع شده است. برای اتصال دوباره، از مدیر کد اتصال جدید بگیرید.</div>':''}
+    ${needCode?'<div class="symsg bad">کلید یا رمز اطلاعات عوض شده است. از مدیر کد اتصال جدید بگیرید.</div>':''}
+    <p>${code?'کد اتصال از لینک خوانده شد. رمز ۶ رقمی را که از مدیر گرفته‌اید وارد کنید.':'کد اتصال و رمز ۶ رقمی را که از مدیر گرفته‌اید وارد کنید.'}</p>
+    ${hasCrypto()?'':NOCRYPTO}
     <div class="symsg" id="syMsg"></div>
-    <button type="button" class="go" id="syNow">همگام‌سازی الان</button>
-    <label>رمز مدیر (برای تغییر تنظیم)<input id="syAdmIn" data-p type="password" autocomplete="off"></label>
-    <button type="button" id="syAdmGo">ورود به تنظیم</button>
-    <button type="button" id="syClose">بستن</button>`);
-  on('syNow',async()=>{ lock(true); await sync({manual:true}); lock(false); msg(phase==='ok'?'همگام شد — '+fmtAt(st().at):note,phase!=='ok'); });
-  const go=async()=>{
-    const p=normPass($('syAdmIn').value); if(!p){ msg('رمز مدیر را وارد کنید',true); return; }
-    lock(true); let ok=false; try{ ok=(await derive(p,cfg.adm.salt))===cfg.adm.hash; }catch(e){}
-    lock(false); if(ok) next(); else msg('رمز مدیر درست نیست',true);
-  };
-  on('syAdmGo',go); $('syAdmIn').addEventListener('keydown',e=>{ if(e.key==='Enter') go(); });
-  on('syClose',dlgClose);
+    <label ${code?'hidden':''}>کد اتصال (یا لینک اتصال)<textarea id="syCode" rows="3" dir="ltr" spellcheck="false" autocomplete="off">${esc(code||'')}</textarea></label>
+    <label>رمز ۶ رقمی<input id="syPin" type="text" inputmode="numeric" autocomplete="off" maxlength="12"></label>
+    <button type="button" class="go" id="syJoin">اتصال</button>
+    ${mode()==='w'||mode()==='v'?'<small>با اتصال، تنظیم قبلی این سیستم جایگزین می‌شود.</small>':''}
+    <button type="button" id="syOther">سیستم مدیر، یا مشاهده با رمز اطلاعات…</button>
+    ${fresh?'<button type="button" id="syLater">بعداً</button><button type="button" id="syNever">این سیستم اطلاعات مشترک نمی‌خواهد</button>':'<button type="button" id="syClose">بستن</button>'}`);
+  on('syJoin',join);
+  $('syPin').addEventListener('keydown',e=>{ if(e.key==='Enter') join(); });
+  on('syOther',viewSetup);
+  on('syLater',dlgClose); on('syClose',dlgClose);
+  on('syNever',()=>{ cfg={mode:'off'}; lsSet(CFG,cfg); dlgClose(); paint(); });
+  try{ (code?$('syPin'):$('syCode')).focus(); }catch(e){}
 }
+async function join(){
+  if(!hasCrypto()) return;
+  const code=codeFind($('syCode').value), pin=pinNorm($('syPin').value);
+  if(!code){ msg('کد اتصال درست نیست. کد را کامل کپی کنید.',true); return; }
+  if(pin.length<6){ msg('رمز ۶ رقمی را وارد کنید',true); return; }
+  lock(true); msg('در حال اتصال…');
+  const keep=cfg, ko=OWNER, kr=REPO;
+  const fail=t=>{ cfg=keep; OWNER=ko; REPO=kr; lsSet(CFG,cfg); lock(false); msg(t,true); };
+  try{
+    let c; try{ c=await codeOpen(code,pin); }catch(e){ return fail('رمز ۶ رقمی یا کد اتصال درست نیست'); }
+    if(c.o) OWNER=c.o; if(c.r) REPO=c.r;
+    cfg={token:c.t,key:c.k,salt:c.s};
+    const f=await getFile(true);
+    if(f.none) return fail('اطلاعات مشترک پیدا نشد');
+    let o; try{ if(f.w.salt!==c.s) throw new Error('PASS'); o=await unseal(f.w,c.k); }catch(e){ return fail('این کد قدیمی است. از مدیر کد اتصال جدید بگیرید.'); }
+    const U=usersGet(o.keys[UKEY]||''), me=U && U[c.u];
+    if(!me || me.off) return fail('این کد دیگر معتبر نیست. از مدیر کد اتصال جدید بگیرید.');
+    cfg={mode:'w',token:c.t,key:c.k,salt:c.s,uid:c.u,uname:me.name||'',o:OWNER,r:REPO}; if(isObj(me.acl)) cfg.acl=me.acl;
+    lsSet(CFG,cfg); lsSet(STK,{}); try{ localStorage.removeItem(BASE); }catch(e){}
+    incoming=null; conflict=null; waiting=false; needCode=false;
+    await sync({force:true});
+    if(phase==='err'){ const n=note; lsSet(STK,{}); return fail(n); }
+    if(conflict) return;
+    toast('وصل شد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),700);
+  }catch(e){ fail(e && e.message==='AUTH'?'این کد دیگر معتبر نیست (کلید باطل شده است). از مدیر کد جدید بگیرید.':errText(e)); }
+}
+
+/* --- لیست کاربران (فقط سیستم مدیر) --- */
+function viewUsers(){
+  const U=usersGet()||{}, S=seenGet();
+  const ids=Object.keys(U).sort((a,b)=>String(U[a].name||'').localeCompare(String(U[b].name||''),'fa'));
+  dlg('کاربران',`
+    <div class="symsg" id="syMsg"></div>
+    ${ids.length?ids.map(id=>{ const u=U[id], s=S[id];
+      return `<div class="syuser${u.off?' off':''}" data-id="${esc(id)}">
+        <b>${esc(u.name||'بدون نام')}${u.off?'<span class="sychip">قطع شده</span>':''}</b>
+        <small>${esc(accText(isObj(u.acl)?u.acl:null))}</small>
+        <small>آخرین اتصال: ${s&&s.at?esc(fmtAt(s.at))+(s.dev?' ('+esc(s.dev)+')':''):'هنوز وصل نشده'}</small>
+        <div class="syub"><button type="button" data-act="code">کد اتصال</button><button type="button" data-act="edit">دسترسی</button><button type="button" data-act="off">${u.off?'وصل دوباره':'قطع دسترسی'}</button><button type="button" class="warn" data-act="del">حذف</button></div>
+      </div>`; }).join(''):'<p>هنوز کاربری ساخته نشده است. برای هر همکار یا هر سیستم، یک کاربر بسازید.</p>'}
+    <button type="button" class="go" id="syUNew">کاربر جدید</button>
+    <button type="button" id="syURef">تازه‌سازی لیست</button>
+    <small>«آخرین اتصال» حدود ۱۵ دقیقه دقت دارد. سیستم‌هایی که فقط با رمز اطلاعات وصل شده‌اند در این لیست نیستند.</small>
+    <button type="button" id="syBack">بازگشت</button>`);
+  document.querySelectorAll('#ntSyBody .syuser').forEach(row=>{
+    const id=row.dataset.id;
+    row.querySelector('[data-act="code"]').addEventListener('click',()=>{ if(U[id].off){ msg('این کاربر قطع شده است. اول «وصل دوباره» را بزنید.',true); return; } viewCode(id); });
+    row.querySelector('[data-act="edit"]').addEventListener('click',()=>viewUserEdit(id));
+    row.querySelector('[data-act="off"]').addEventListener('click',()=>{ const X=usersGet()||{}; if(!X[id]) return; if(X[id].off) delete X[id].off; else X[id].off=true; usersSet(X); viewUsers(); toast(X[id].off?'دسترسی «'+X[id].name+'» قطع شد':'«'+X[id].name+'» دوباره وصل شد'); });
+    armEl(row.querySelector('[data-act="del"]'),'حذف شود؟',()=>{ const X=usersGet()||{}; delete X[id]; usersSet(X); viewUsers(); toast('کاربر حذف شد'); });
+  });
+  on('syUNew',()=>viewUserEdit(null));
+  on('syURef',async()=>{ lock(true); await sync({manual:true}); viewUsers(); });
+  on('syBack',viewMain);
+}
+function viewUserEdit(id){
+  const U=usersGet()||{}, u=id?U[id]:null, cur=u&&isObj(u.acl)?u.acl:null, lim=u?!!cur:true, a=cur||PRESET;
+  dlg(u?'دسترسی کاربر':'کاربر جدید',`
+    <div class="symsg" id="syMsg"></div>
+    <label>نام کاربر یا سیستم<input id="syUName" type="text" autocomplete="off" maxlength="40" value="${esc(u?u.name:'')}" placeholder="مثلاً: استخراج — شیفت صبح" style="direction:rtl;text-align:right"></label>
+    <div class="sycard"><h3>دسترسی</h3>
+      <label class="chk"><input type="radio" name="syAcc" value="lim" ${lim?'checked':''}>محدود — فقط زبانه‌های انتخاب‌شده</label>
+      <label class="chk"><input type="radio" name="syAcc" value="full" ${lim?'':'checked'}>کامل — همه زبانه‌ها (ثبت در همه)</label>
+      <div id="syAclList" ${lim?'':'hidden'}>
+        ${DOCS.map((d,i)=>`<div class="syrow"><span>${esc(d.name)}</span><select data-tab="${i}" aria-label="دسترسی ${esc(d.name)}">
+          ${[['w','ثبت'],['r','فقط مشاهده'],['h','پنهان']].map(o=>`<option value="${o[0]}" ${(a[d.name]||'h')===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></div>`).join('')}
+      </div></div>
+    <button type="button" class="go" id="syUSave">${u?'ذخیره':'ساخت کاربر و کد اتصال'}</button>
+    <button type="button" id="syBack">انصراف</button>`);
+  document.querySelectorAll('input[name="syAcc"]').forEach(r=>r.addEventListener('change',()=>{ $('syAclList').hidden=document.querySelector('input[name="syAcc"]:checked').value!=='lim'; }));
+  on('syUSave',()=>{
+    const name=$('syUName').value.trim().replace(/\s+/g,' ');
+    if(!name){ msg('نام کاربر را بنویسید',true); return; }
+    const X=usersGet()||{};
+    if(Object.keys(X).some(k=>k!==id && (X[k].name||'')===name)){ msg('کاربری با همین نام هست. نام دیگری بنویسید.',true); return; }
+    let ac=null;
+    if(document.querySelector('input[name="syAcc"]:checked').value==='lim'){
+      ac={}; let vis=0;
+      document.querySelectorAll('#syAclList select').forEach(s=>{ ac[DOCS[+s.dataset.tab].name]=s.value; if(s.value!=='h') vis++; });
+      if(!vis){ msg('حداقل یک زبانه باید «ثبت» یا «فقط مشاهده» باشد',true); return; }
+    }
+    const nid=id || ('u'+Date.now().toString(36)+Math.random().toString(36).slice(2,6));
+    X[nid]=Object.assign({},X[nid]||{id:nid,made:new Date().toISOString()},{name});
+    if(ac) X[nid].acl=ac; else delete X[nid].acl;
+    usersSet(X);
+    if(id){ viewUsers(); toast('ذخیره شد — تا ۲ دقیقه دیگر در سیستم کاربر اجرا می‌شود'); } else viewCode(nid);
+  });
+  on('syBack',viewUsers);
+}
+async function viewCode(id){
+  const U=usersGet()||{}, u=U[id]; if(!u) return viewUsers();
+  dlg('کد اتصال',`<p>در حال ساخت کد…</p>`);
+  const d=crypto.getRandomValues(new Uint32Array(1))[0]%1000000, pin=String(d).padStart(6,'0');
+  let code=''; try{ code=await codeMake(id,pin); }catch(e){ dlg('کد اتصال','<div class="symsg bad">کد ساخته نشد.</div><button type="button" id="syBack">بازگشت</button>'); on('syBack',viewUsers); return; }
+  const link=joinLink(code);
+  dlg('کد اتصال',`
+    <p>برای «${esc(u.name)}»: لینک را بفرستید و رمز ۶ رقمی را <b>تلفنی یا حضوری</b> بگویید.</p>
+    <div class="symsg" id="syMsg"></div>
+    <label>لینک اتصال<textarea id="syLink" rows="4" dir="ltr" readonly>${esc(link)}</textarea></label>
+    <button type="button" class="go" id="syCopyL">کپی لینک اتصال</button>
+    <button type="button" id="syCopyC">کپی فقط کد (بدون لینک)</button>
+    <div class="sypin">رمز ۶ رقمی<b id="syPinOut" dir="ltr">${pin.slice(0,3)} ${pin.slice(3)}</b></div>
+    <small>همکار لینک را باز می‌کند و رمز ۶ رقمی را وارد می‌کند. این رمز فقط همین‌جا دیده می‌شود. اگر گم شد، دوباره «کد اتصال» را بزنید تا لینک و رمز تازه ساخته شود.</small>
+    <small>هر کسی لینک و رمز را با هم داشته باشد، با دسترسی این کاربر وصل می‌شود.</small>
+    <button type="button" id="syBack">بازگشت به کاربران</button>`);
+  on('syCopyL',async()=>msg(await copyText(link)?'لینک کپی شد':'کپی نشد — متن لینک را خودتان انتخاب و کپی کنید',false));
+  on('syCopyC',async()=>msg(await copyText(code)?'کد کپی شد':'کپی نشد',false));
+  on('syBack',viewUsers);
+}
+
+/* --- پنجره اصلی --- */
 function viewMain(){
   const m=mode(), s=st();
-  if(m==='w' || m==='v'){
-    dlg('اطلاعات مشترک',`
-      <div class="sykv"><b>${m==='w'?'این سیستم ثبت‌کننده است.':'این سیستم فقط مشاهده می‌کند.'}</b>آخرین همگام‌سازی: ${esc(fmtAt(s.at))}<br>این سیستم: ${esc(countText(collect()))}</div>
-      ${m==='v'?'<small>هر تغییری که در این سیستم بدهید، با اطلاعات جدید جایگزین می‌شود.</small>':''}
-      <div class="symsg" id="syMsg"></div>
-      <button type="button" class="go" id="syNow">همگام‌سازی الان</button>
-      ${aclBox(acl())}
-      <button type="button" id="syAclSave">ذخیره دسترسی</button>
-      <div class="sycard"><h3>${m==='w'?'کلید دسترسی جدید':'تبدیل به ثبت‌کننده'}</h3>
-        <label>${m==='w'?'فقط اگر کلید قبلی باطل شده است':'کلید دسترسی GitHub'}<input id="syTok" data-p type="password" autocomplete="off" placeholder="github_pat_..."></label>
-        <button type="button" id="syTokSave">${m==='w'?'ذخیره کلید جدید':'این سیستم ثبت‌کننده شود'}</button></div>
-      ${showBox}
-      <button type="button" class="warn" id="syOff">قطع اتصال این سیستم</button>
-      <small>با قطع اتصال، اطلاعات این سیستم پاک نمی‌شود. فقط همگام‌سازی متوقف می‌شود.</small>
-      <button type="button" id="syClose">بستن</button>`);
-    on('syNow',async()=>{ lock(true); msg('در حال همگام‌سازی…'); await sync({manual:true}); lock(false); if(conflict) return; msg(phase==='ok'?'همگام شد — '+fmtAt(st().at):'همگام نشد — '+note,phase!=='ok'); });
-    on('syAclSave',async()=>{
-      const a=await aclRead(); if(!a) return;
-      cfg.acl=a.acl; if(a.adm) cfg.adm=a.adm; else delete cfg.adm;
-      lsSet(CFG,cfg); toast('دسترسی ذخیره شد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),600);
-    });
-    on('syTokSave',async()=>{
-      const t=$('syTok').value.trim(); if(!t){ msg('کلید را وارد کنید',true); return; }
-      const old=cfg.token; cfg.token=t; lock(true); msg('در حال بررسی کلید…');
-      try{
-        const r=await gh(repoPath(),{auth:true}); if(!r.ok) throw await bad(r);
-        const was=cfg.mode; cfg.mode='w'; lsSet(CFG,cfg);
-        if(was==='v'){ toast('این سیستم ثبت‌کننده شد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),600); return; }
-        msg('کلید ذخیره شد'); sync({manual:true});
-      }catch(e){ if(old) cfg.token=old; else delete cfg.token; msg(errText(e),true); }
-      lock(false);
-    });
-    arm('syOff','مطمئن هستید؟ دوباره بزنید',()=>{ disconnect(); toast('اتصال این سیستم قطع شد'); setTimeout(()=>location.reload(),600); });
-  }else{
-    const n=total(collect());
-    dlg('اطلاعات مشترک',`
-      <p>الان اطلاعات فقط در همین سیستم ذخیره است. با این بخش، اطلاعات روی GitHub ذخیره می‌شود و سیستم‌های دیگر هم آن را می‌بینند.</p>
-      ${hasCrypto()?'':NOCRYPTO}
-      <div class="symsg" id="syMsg"></div>
-      <div class="sycard"><h3>این سیستم ثبت می‌کند</h3>
-        <small>نوشته‌های این سیستم (${esc(n?countText(collect()):'بدون ردیف')}) با اطلاعات مشترک یکی می‌شود.</small>
-        <label>کلید دسترسی GitHub<input id="syTok" data-p type="password" autocomplete="off" placeholder="github_pat_..."></label>
-        <label>رمز اطلاعات (حداقل ۶ حرف)<input id="syP1" data-p type="password" autocomplete="new-password"></label>
-        <label>تکرار رمز اطلاعات<input id="syP2" data-p type="password" autocomplete="new-password"></label>
-        <button type="button" class="go" id="syStartW">شروع همگام‌سازی</button></div>
-      <div class="sycard"><h3>این سیستم فقط مشاهده می‌کند</h3>
-        <small>${n?'توجه: اطلاعات فعلی این سیستم با اطلاعات مشترک جایگزین می‌شود.':'اطلاعات مشترک در این سیستم نشان داده می‌شود.'}</small>
-        <label>رمز اطلاعات<input id="syPv" data-p type="password" autocomplete="off"></label>
-        <button type="button" class="go" id="syStartV">دریافت اطلاعات</button></div>
-      ${aclBox(null)}
-      ${showBox}
-      <button type="button" id="syClose">بستن</button>`);
-    on('syStartW',()=>startWriter(false));
-    on('syStartV',()=>startViewer($('syPv').value));
-  }
-  aclBind(); bindShow();
+  if(m!=='w' && m!=='v'){ viewJoin(''); return; }
+  const admin=isAdmin(), U=usersGet()||{}, nU=Object.keys(U).length;
+  const who = admin?'این سیستم، سیستم مدیر است.':cfg.uid?'کاربر: '+(cfg.uname||'—'):m==='v'?'این سیستم فقط مشاهده می‌کند.':'این سیستم ثبت‌کننده است.';
+  dlg('اطلاعات مشترک',`
+    <div class="sykv"><b>${esc(who)}</b>${cfg.uid?'دسترسی: '+esc(accText(acl()))+'<br>':''}آخرین همگام‌سازی: ${esc(fmtAt(s.at))}${admin?'<br>این سیستم: '+esc(countText(collect())):''}</div>
+    ${m==='v'?'<small>هر تغییری که در این سیستم بدهید، با اطلاعات جدید جایگزین می‌شود.</small>':''}
+    <div class="symsg" id="syMsg"></div>
+    <button type="button" class="go" id="syNow">همگام‌سازی الان</button>
+    ${admin?`<button type="button" class="go" id="syUsers">کاربران${nU?' ('+fa(nU)+')':''}</button>
+      <div class="sycard"><h3>کلید دسترسی جدید</h3>
+        <label>فقط اگر کلید قبلی باطل شده است<input id="syTok" data-p type="password" autocomplete="off" placeholder="github_pat_..."></label>
+        <button type="button" id="syTokSave">ذخیره کلید جدید</button></div>
+      <details class="sycard"><summary>قطع قطعی همه کاربران</summary>
+        <small>وقتی لازم است که یک کاربر قطع‌شده دیگر به هیچ روشی نتواند اطلاعات را بخواند. بعد از این کار، همه کاربران باید کد اتصال جدید بگیرند.</small>
+        <small>۱) در GitHub یک کلید جدید بسازید. ۲) کلید جدید و رمز جدید را اینجا وارد کنید. ۳) کلید قدیمی را در GitHub پاک کنید (Delete).</small>
+        <label>کلید دسترسی جدید GitHub<input id="syRTok" data-p type="password" autocomplete="off" placeholder="github_pat_..."></label>
+        <label>رمز اطلاعات جدید (حداقل ۶ حرف)<input id="syRP1" data-p type="password" autocomplete="new-password"></label>
+        <label>تکرار رمز اطلاعات جدید<input id="syRP2" data-p type="password" autocomplete="new-password"></label>
+        <button type="button" class="warn" id="syRot">تعویض کلید و رمز</button></details>
+      ${showBox}`:''}
+    ${m==='v'?'<button type="button" id="syToJoin">اتصال با کد اتصال…</button>':''}
+    <button type="button" class="warn" id="syOff">قطع اتصال این سیستم</button>
+    <small>${cfg.uid?'برای اتصال دوباره، کد اتصال لازم است.':'با قطع اتصال، اطلاعات این سیستم پاک نمی‌شود. فقط همگام‌سازی متوقف می‌شود.'}</small>
+    <button type="button" id="syClose">بستن</button>`);
+  on('syNow',async()=>{ lock(true); msg('در حال همگام‌سازی…'); await sync({manual:true}); lock(false); if(conflict) return; msg(phase==='ok'?'همگام شد — '+fmtAt(st().at):'همگام نشد — '+note,phase!=='ok'); });
+  on('syUsers',viewUsers);
+  on('syToJoin',()=>viewJoin(''));
+  on('syTokSave',async()=>{
+    const t=$('syTok').value.trim(); if(!t){ msg('کلید را وارد کنید',true); return; }
+    const old=cfg.token; cfg.token=t; lock(true); msg('در حال بررسی کلید…');
+    try{ const r=await gh(repoPath(),{auth:true}); if(!r.ok) throw await bad(r); lsSet(CFG,cfg); msg('کلید ذخیره شد. کاربران باید کد اتصال جدید بگیرند.'); sync({manual:true}); }
+    catch(e){ cfg.token=old; msg(errText(e),true); }
+    lock(false);
+  });
+  arm('syRot','همه کاربران قطع می‌شوند. دوباره بزنید',rotate);
+  arm('syOff','مطمئن هستید؟ دوباره بزنید',()=>{ disconnect(); toast('اتصال این سیستم قطع شد'); setTimeout(()=>location.reload(),600); });
+  bindShow();
   on('syClose',dlgClose);
+}
+/** کلید GitHub و/یا رمز اطلاعات عوض می‌شود و اطلاعات مشترک با قفل تازه نوشته می‌شود */
+async function rotate(){
+  const tok=$('syRTok').value.trim(), p1=normPass($('syRP1').value), p2=normPass($('syRP2').value);
+  if(!tok && !p1){ msg('کلید جدید یا رمز جدید را وارد کنید',true); return; }
+  if(p1 && p1.length<6){ msg('رمز اطلاعات باید حداقل ۶ حرف باشد',true); return; }
+  if(p1!==p2){ msg('رمز و تکرار آن یکی نیست',true); return; }
+  lock(true); msg('در حال انجام…');
+  const keep=Object.assign({},cfg);
+  try{
+    await sync({force:true});                              // اول آخرین نوشته‌های دیگران گرفته شود
+    if(tok){ cfg.token=tok; const r=await gh(repoPath(),{auth:true}); if(!r.ok) throw await bad(r); }
+    if(p1){ cfg.salt=newSalt(); cfg.key=await derive(p1,cfg.salt); }
+    lsSet(CFG,cfg);
+    await sync({replace:true,force:true});
+    if(phase==='err') throw Object.assign(new Error('X'),{text:note});
+    lock(false); msg('انجام شد. حالا کلید قدیمی را در GitHub پاک کنید و از بخش «کاربران» به هر کاربر کد اتصال جدید بدهید.');
+  }catch(e){ cfg=keep; lsSet(CFG,cfg); lock(false); msg(e.text||errText(e),true); }
+}
+/** تنظیم سیستم مدیر با کلید GitHub، یا مشاهده ساده با رمز اطلاعات */
+function viewSetup(){
+  const n=total(collect());
+  dlg('اطلاعات مشترک',`
+    ${hasCrypto()?'':NOCRYPTO}
+    <div class="symsg" id="syMsg"></div>
+    <div class="sycard"><h3>سیستم مدیر</h3>
+      <small>این سیستم همه زبانه‌ها را دارد و کاربران را مدیریت می‌کند. نوشته‌های این سیستم (${esc(n?countText(collect()):'بدون ردیف')}) با اطلاعات مشترک یکی می‌شود.</small>
+      <label>کلید دسترسی GitHub<input id="syTok" data-p type="password" autocomplete="off" placeholder="github_pat_..."></label>
+      <label>رمز اطلاعات (حداقل ۶ حرف)<input id="syP1" data-p type="password" autocomplete="new-password"></label>
+      <label>تکرار رمز اطلاعات<input id="syP2" data-p type="password" autocomplete="new-password"></label>
+      <button type="button" class="go" id="syStartW">شروع همگام‌سازی</button></div>
+    <div class="sycard"><h3>فقط مشاهده با رمز اطلاعات</h3>
+      <small>${n?'توجه: اطلاعات فعلی این سیستم با اطلاعات مشترک جایگزین می‌شود.':'همه زبانه‌ها دیده می‌شود، بدون ثبت. این سیستم در لیست کاربران نمی‌آید.'}</small>
+      <label>رمز اطلاعات<input id="syPv" data-p type="password" autocomplete="off"></label>
+      <button type="button" class="go" id="syStartV">دریافت اطلاعات</button></div>
+    ${showBox}
+    <button type="button" id="syBack">بازگشت</button>`);
+  on('syStartW',()=>startWriter(false));
+  on('syStartV',()=>startViewer($('syPv').value));
+  on('syBack',()=>viewJoin(''));
+  bindShow();
 }
 async function startWriter(replace){
   if(!hasCrypto()) return;
@@ -995,7 +1220,6 @@ async function startWriter(replace){
   if(!tok){ msg('کلید دسترسی را وارد کنید',true); return; }
   if(p1.length<6){ msg('رمز اطلاعات باید حداقل ۶ حرف باشد',true); return; }
   if(p1!==p2){ msg('رمز و تکرار آن یکی نیست',true); return; }
-  const a=await aclRead(); if(!a) return;
   lock(true); msg('در حال بررسی کلید…');
   const keep=cfg; cfg={token:tok};
   const fail=(t)=>{ cfg=keep; lsSet(CFG,cfg); lock(false); msg(t,true); };
@@ -1019,54 +1243,48 @@ async function startWriter(replace){
         return;
       }
     }
-    cfg={mode:'w',token:tok,salt,key}; if(a.acl){ cfg.acl=a.acl; cfg.adm=a.adm; }
+    cfg={mode:'w',token:tok,salt,key};
     lsSet(CFG,cfg); lsSet(STK,{}); try{ localStorage.removeItem(BASE); }catch(e){}
-    incoming=null; conflict=null; waiting=false;
+    incoming=null; conflict=null; waiting=false; needCode=false;
     msg('در حال همگام‌سازی…');
     if(replace) await sync({replace:true,resolve:'give',force:true}); else await sync({force:true});
     if(phase==='err'){ const n=note; lsSet(STK,{}); return fail(n); }
     if(conflict) return;                                   // پنجره انتخاب باز شده است
-    toast('این سیستم ثبت‌کننده شد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),700);
+    toast('این سیستم، سیستم مدیر شد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),700);
   }catch(e){ fail(e.text||errText(e)); }
 }
 async function startViewer(pass,w){
   if(!hasCrypto()) return;
   pass=normPass(pass);
   if(!pass){ msg('رمز اطلاعات را وارد کنید',true); return; }
-  const a=$('syAclList') ? await aclRead() : {acl:acl(),adm:cfg.adm||null}; if(!a) return;
   lock(true); msg('در حال دریافت…');
   try{
-    if(!w){ const f=await getAny(''); if(f.none){ lock(false); msg('اطلاعات مشترک هنوز ارسال نشده است. اول سیستم ثبت‌کننده را تنظیم کنید.',true); return; } w=f.w; }
+    if(!w){ const f=await getAny(''); if(f.none){ lock(false); msg('اطلاعات مشترک هنوز ارسال نشده است. اول سیستم مدیر را تنظیم کنید.',true); return; } w=f.w; }
     const key=await derive(pass,w.salt); await unseal(w,key);
-    const tok=mode()==='w'?cfg.token:undefined, was=mode();
+    const tok=(mode()==='w' && !cfg.uid)?cfg.token:undefined, was=mode();
     cfg={mode:tok?'w':'v',salt:w.salt,key}; if(tok) cfg.token=tok;
-    if(a.acl){ cfg.acl=a.acl; if(a.adm) cfg.adm=a.adm; }
     lsSet(CFG,cfg);
     if(was!=='w' && was!=='v'){ lsSet(STK,{}); try{ localStorage.removeItem(BASE); }catch(e){} }
-    incoming=null; waiting=false;
+    incoming=null; waiting=false; needCode=false;
     await sync({manual:true,now:true});
     if(phase==='err'){ lock(false); msg(note,true); return; }
     toast('اطلاعات دریافت شد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),700);
   }catch(e){ lock(false); msg(e.text||errText(e),true); }
 }
-/** رمز عوض شده یا سیستم تازه است: فقط رمز پرسیده می‌شود */
+/** رمز اطلاعات عوض شده است (سیستم مدیر دوم، یا سیستمی که با رمز اطلاعات می‌بیند) */
 function viewPass(kind,w){
-  const n=total(collect());
   dlg('اطلاعات مشترک',`
-    <p>${kind==='new'?'این سامانه اطلاعات مشترک دارد. برای دیدن آن، رمز اطلاعات را وارد کنید.':'رمز اطلاعات مشترک عوض شده است. رمز جدید را وارد کنید.'}</p>
+    <p>رمز اطلاعات مشترک عوض شده است. رمز جدید را وارد کنید.</p>
     ${hasCrypto()?'':NOCRYPTO}
-    ${kind==='new'&&n?`<small>توجه: اطلاعات فعلی این سیستم (${esc(countText(collect()))}) با اطلاعات مشترک جایگزین می‌شود.</small>`:''}
     <div class="symsg" id="syMsg"></div>
     <label>رمز اطلاعات<input id="syPv" data-p type="password" autocomplete="off"></label>
     ${showBox}
-    <button type="button" class="go" id="syStartV">${kind==='new'?'دریافت اطلاعات (فقط مشاهده)':'تأیید'}</button>
-    ${kind==='new'?'<button type="button" id="syMore">این سیستم ثبت می‌کند، یا دسترسی محدود دارد…</button><button type="button" id="syLater">بعداً</button><button type="button" id="syNever">این سیستم اطلاعات مشترک نمی‌خواهد</button>':'<button type="button" id="syClose">بستن</button>'}`);
+    <button type="button" class="go" id="syStartV">تأیید</button>
+    <button type="button" id="syClose">بستن</button>`);
   bindShow();
   on('syStartV',()=>startViewer($('syPv').value,w));
   const inp=$('syPv'); if(inp) inp.addEventListener('keydown',e=>{ if(e.key==='Enter') startViewer(inp.value,w); });
-  on('syLater',dlgClose); on('syClose',dlgClose);
-  on('syNever',()=>{ cfg={mode:'off'}; lsSet(CFG,cfg); dlgClose(); paint(); });
-  on('syMore',()=>{ viewMain(); });
+  on('syClose',dlgClose);
 }
 function viewConflict(){
   if(!conflict) return;
@@ -1123,20 +1341,23 @@ function startTimers(){
 async function probe(){
   try{
     const f=await getFile(false);
-    if(f.w && mode()==='' && $('ntSyDlg').hidden) viewPass('new',f.w);
+    if(f.w && mode()==='' && $('ntSyDlg').hidden) viewJoin('');
   }catch(e){}
 }
 function init(){
-  $('ntSyBtn').addEventListener('click',()=>gate(viewMain));
+  if(cfg.o) OWNER=cfg.o; if(cfg.r) REPO=cfg.r;
+  $('ntSyBtn').addEventListener('click',viewMain);
   applyAcl(); paint();
-  const m=mode();
+  const m=mode(), jc=hashCode();
   const go=()=>{ try{ ntBoot(); }catch(e){} };
   if((m==='w' || m==='v') && !hasCrypto()){ setPhase('err','این مرورگر رمزگذاری را پشتیبانی نمی‌کند'); go(); return; }
   if(m==='w'){ go(); startTimers(); sync({force:true}); }
   else if(m==='v'){ startTimers(); sync({now:true}).then(go,go); }
-  else{ go(); if(m==='' && hasCrypto()) setTimeout(probe,1500); }
+  else{ go(); if(m==='' && !jc && hasCrypto()) setTimeout(probe,1500); }
+  if(jc){ if(isAdmin()) setTimeout(()=>toast('این سیستم، سیستم مدیر است. لینک اتصال برای سیستم‌های دیگر است.',true),400); else setTimeout(()=>viewJoin(jc),300); }
+  else if(cfg.revoked) setTimeout(()=>viewJoin(''),300);
 }
-window.ntSync={T,get cfg(){ return cfg; },st,sync,collect,hashOf,mergeAll,baseGet,outgoing};
+window.ntSync={T,get cfg(){ return cfg; },st,sync,collect,hashOf,mergeAll,baseGet,outgoing,usersGet,seenGet};
 init();
 })();
 </script>
