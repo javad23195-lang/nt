@@ -112,8 +112,10 @@ function probsOf(dev){ return rowsOf('nt_moshkel_v1').filter(r=>r && norm(r.dev)
 function outsOf(dev){ return rowsOf('nt_anbar_out_v1').filter(r=>r && norm(r.dev)===norm(dev.name)).sort((a,b)=>rDate(a).localeCompare(rDate(b))); }
 
 let cur=null;
+const myDevs=()=>{ try{ return S()&&S().myDevs?S().myDevs():null; }catch(e){ return null; } };
 function home(id){
   const dev=byId(id); if(!dev){ toast('این کد QR مال سامانه نیست یا دستگاه آن حذف شده است',true); return; }
+  const mine=myDevs(); if(mine && !mine.some(n=>norm(n)===norm(dev.name))){ toast('این برچسب مال «'+dev.name+'» است، نه دستگاه شما',true); return; }
   cur=dev;
   const R=readings(dev), last=R[R.length-1], os=openStop(dev);
   const svc=outsOf(dev).filter(r=>r.svc); const lastSvc=svc[svc.length-1];
@@ -316,6 +318,23 @@ function sheet(list){
 }
 const chunk=(a,n)=>{ const r=[]; for(let i=0;i<a.length;i+=n) r.push(a.slice(i,i+n)); return r; };
 
+/* ---------- صفحه اصلی راننده (کاربر یک دستگاه) ---------- */
+function driverHome(){
+  const mine=myDevs(); if(!mine) return false;
+  let box=$('ntDrv'); if(!box){ box=document.createElement('div'); box.id='ntDrv'; const st=$('stage')||document.body; st.parentNode.insertBefore(box,st); }
+  const name=(()=>{ try{ return S().myName()||''; }catch(e){ return ''; } })();
+  const ds=mine.map(n=>DEVS.find(d=>norm(d.name)===norm(n))).filter(Boolean);
+  box.style.cssText='max-width:480px;margin:16px auto;padding:0 12px';
+  box.innerHTML=`<div class="sybox" style="box-shadow:none;border:1px solid #D5DCE3"><h2>${name?esc(name):'راننده'}</h2>
+    <p>${ds.length?'دستگاه شما:':'دستگاه شما در سامانه پیدا نشد. به مدیر خبر دهید.'}</p>
+    ${ds.map(d=>`<button type="button" class="go" data-drv="${d.id}" style="min-height:64px;font-size:1.1rem">${esc(d.name)}</button>`).join('')}
+    <button type="button" id="ntDrvScan">اسکن کد QR</button>
+    <small>برای ثبت توقف، قرائت یا مشکل، دستگاه را بزنید یا برچسب روی دستگاه را اسکن کنید. بدون اینترنت هم ثبت می‌شود و بعداً فرستاده می‌شود.</small></div>`;
+  box.querySelectorAll('[data-drv]').forEach(b=>b.addEventListener('click',()=>home(b.dataset.drv)));
+  $('ntDrvScan').addEventListener('click',scan);
+  return ds;
+}
+
 /* ---------- شروع ---------- */
 function booted(){ try{ return typeof ntBooted!=='undefined' && ntBooted && !window.ntLocked; }catch(e){ return false; } }
 function fromHash(){
@@ -333,8 +352,10 @@ function addBtn(){
   const sy=$('ntSyBtn'); if(sy) row.insertBefore(b,sy); else row.appendChild(b);
 }
 dlg(); addBtn(); fromHash();
+/* راننده: بعد از بالا آمدن سامانه، صفحه اصلی راننده؛ اگر از برچسب نیامده و یک دستگاه دارد، صفحه همان دستگاه */
+(function drv(){ if(!booted()){ setTimeout(drv,400); return; } const ds=driverHome(); if(ds && ds.length===1 && !idFrom(location.hash) && $('ntQrDlg').hidden) home(ds[0].id); })();
 window.addEventListener('hashchange',fromHash);
 window.addEventListener('message',e=>{ const d=e&&e.data; if(!d) return; if(d.nt==='qrlabels') labels(); else if(d.nt==='qrscan') scan(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape' && $('ntQrDlg') && !$('ntQrDlg').hidden) close(); });
-window.ntQr={DEVS,home,scan,labels,qrUrl,sheet};
+window.ntQr={DEVS,home,scan,labels,qrUrl,sheet,driverHome};
 })();

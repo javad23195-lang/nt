@@ -77,3 +77,6 @@ body.ntlocked .tabs{visibility:hidden}
 body.ntlocked iframe{display:none!important}
 body.ntlocked .load{padding:0 20px;text-align:center;font-size:1rem;font-weight:700}
 @media print{ .sybar,.sydlg,.sytoast,.sybtn{display:none!important} }
+body.ntdriver .tabs{visibility:hidden}
+body.ntdriver .load{display:none!important}
+body.ntdriver iframe{display:none!important}

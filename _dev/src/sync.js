@@ -35,6 +35,9 @@ const TABKEYS={
 };
 /* پیش‌فرض دسترسی محدود: واحد استخراج */
 const PRESET={'توقف شیفت':'w','دفترچه قرائت':'w'};
+/* راننده (کاربر یک دستگاه): هیچ زبانه‌ای نمی‌بیند؛ فقط صفحه دستگاه خودش (qr.js) — قرائت، توقف، مشکل */
+const DRIVER={'توقف شیفت':'w','دفترچه قرائت':'w','ثبت مشکلات':'w'};
+const devList=()=>{ try{ return (window.ntQr && ntQr.DEVS || []).map(d=>d.name); }catch(e){ return []; } };
 /* نام بخش‌ها برای پیام‌ها */
 const LABEL={nt_anbar_out_v1:'خروج انبار',nt_anbar_in_v1:'ورود انبار',nt_kharid9_v1:'درخواست خرید',nt_moshkel_v1:'مشکلات',nt_sh8_v1:'شناسنامه',
   nt_khadamat_v1:'خدمات',nt_daftar_v1:'قرائت',nt_prog_v1:'برنامه روزانه',nt_today_todo_v1:'یادداشت',nt_tavaqof_v1:'توقف شیفت'};
@@ -621,9 +624,10 @@ function checkMe(){
   if(!U) return true;                                     // لیست کاربران در دسترس نیست: چیزی عوض نمی‌شود
   const me=U[cfg.uid];
   if(!me || me.off){ revoke(); return false; }
-  const a=isObj(me.acl)?me.acl:null;
-  if(J(a)!==J(acl()) || (me.name||'')!==(cfg.uname||'')){
+  const a=isObj(me.acl)?me.acl:null, dv=Array.isArray(me.dev)&&me.dev.length?me.dev:null;
+  if(J(a)!==J(acl()) || (me.name||'')!==(cfg.uname||'') || J(dv)!==J(cfg.devs||null)){
     if(a) cfg.acl=a; else delete cfg.acl;
+    if(dv) cfg.devs=dv; else delete cfg.devs;
     cfg.uname=me.name||''; lsSet(CFG,cfg);
     toast('دسترسی این سیستم تغییر کرد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),900);
     return false;
@@ -725,7 +729,7 @@ function viewUsers(){
     ${ids.length?ids.map(id=>{ const u=U[id], s=S[id];
       return `<div class="syuser${u.off?' off':''}" data-id="${esc(id)}">
         <b>${esc(u.name||'بدون نام')}${u.off?'<span class="sychip">قطع شده</span>':''}</b>
-        <small>${esc(accText(isObj(u.acl)?u.acl:null))}</small>
+        <small>${Array.isArray(u.dev)&&u.dev.length?'راننده — فقط '+esc(u.dev.join('، ')):esc(accText(isObj(u.acl)?u.acl:null))}</small>
         <small>آخرین اتصال: ${s&&s.at?esc(fmtAt(s.at))+(s.dev?' ('+esc(s.dev)+')':''):'هنوز وصل نشده'}</small>
         <div class="syub"><button type="button" data-act="code">کد اتصال</button><button type="button" data-act="edit">دسترسی</button><button type="button" data-act="off">${u.off?'وصل دوباره':'قطع دسترسی'}</button><button type="button" class="warn" data-act="del">حذف</button></div>
       </div>`; }).join(''):'<p>هنوز کاربری ساخته نشده است. برای هر همکار یا هر سیستم، یک کاربر بسازید.</p>'}
@@ -749,7 +753,10 @@ function viewUserEdit(id){
   dlg(u?'دسترسی کاربر':'کاربر جدید',`
     <div class="symsg" id="syMsg"></div>
     <label>نام کاربر یا سیستم<input id="syUName" type="text" autocomplete="off" maxlength="40" value="${esc(u?u.name:'')}" placeholder="مثلاً: استخراج — شیفت صبح" style="direction:rtl;text-align:right"></label>
-    <div class="sycard"><h3>دسترسی</h3>
+    <div class="sycard"><h3>راننده (فقط یک دستگاه)</h3>
+      <label>دستگاه<select id="syUDev" style="display:block;width:100%;margin-top:3px"><option value="">— کاربر عادی (همه دستگاه‌ها) —</option>${devList().map(n=>`<option ${u&&Array.isArray(u.dev)&&u.dev[0]===n?'selected':''}>${esc(n)}</option>`).join('')}</select></label>
+      <small>راننده هیچ زبانه‌ای نمی‌بیند؛ فقط صفحه دستگاه خودش: ثبت قرائت، شروع و پایان توقف، ثبت مشکل.</small></div>
+    <div class="sycard" id="syAccCard"><h3>دسترسی</h3>
       <label class="chk"><input type="radio" name="syAcc" value="lim" ${lim?'checked':''}>محدود — فقط زبانه‌های انتخاب‌شده</label>
       <label class="chk"><input type="radio" name="syAcc" value="full" ${lim?'':'checked'}>کامل — همه زبانه‌ها (ثبت در همه)</label>
       <div id="syAclList" ${lim?'':'hidden'}>
@@ -759,13 +766,15 @@ function viewUserEdit(id){
     <button type="button" class="go" id="syUSave">${u?'ذخیره':'ساخت کاربر و کد اتصال'}</button>
     <button type="button" id="syBack">انصراف</button>`);
   document.querySelectorAll('input[name="syAcc"]').forEach(r=>r.addEventListener('change',()=>{ $('syAclList').hidden=document.querySelector('input[name="syAcc"]:checked').value!=='lim'; }));
+  const dvSync=()=>{ $('syAccCard').hidden=!!$('syUDev').value; }; $('syUDev').addEventListener('change',dvSync); dvSync();
   on('syUSave',()=>{
     const name=$('syUName').value.trim().replace(/\s+/g,' ');
     if(!name){ msg('نام کاربر را بنویسید',true); return; }
     const X=usersGet()||{};
     if(Object.keys(X).some(k=>k!==id && (X[k].name||'')===name)){ msg('کاربری با همین نام هست. نام دیگری بنویسید.',true); return; }
-    let ac=null;
-    if(document.querySelector('input[name="syAcc"]:checked').value==='lim'){
+    let ac=null; const dev=$('syUDev').value;
+    if(dev) ac=Object.assign({},DRIVER);
+    else if(document.querySelector('input[name="syAcc"]:checked').value==='lim'){
       ac={}; let vis=0;
       document.querySelectorAll('#syAclList select').forEach(s=>{ ac[DOCS[+s.dataset.tab].name]=s.value; if(s.value!=='h') vis++; });
       if(!vis){ msg('حداقل یک زبانه باید «ثبت» یا «فقط مشاهده» باشد',true); return; }
@@ -773,6 +782,7 @@ function viewUserEdit(id){
     const nid=id || ('u'+Date.now().toString(36)+Math.random().toString(36).slice(2,6));
     X[nid]=Object.assign({},X[nid]||{id:nid,made:new Date().toISOString()},{name});
     if(ac) X[nid].acl=ac; else delete X[nid].acl;
+    if(dev) X[nid].dev=[dev]; else delete X[nid].dev;
     usersSet(X);
     if(id){ viewUsers(); toast('ذخیره شد — تا ۲ دقیقه دیگر در سیستم کاربر اجرا می‌شود'); } else viewCode(nid);
   });
@@ -979,6 +989,8 @@ function viewConflict(){
   arm('syGive','مطمئن هستید؟ دوباره بزنید',()=>run('give','اطلاعات این سیستم ارسال شد'));
   on('syClose',dlgClose);
 }
+/** راننده: دستگاه‌هایی که این سیستم فقط برای آن‌ها ثبت می‌کند (از لیست کاربران مدیر) */
+function myDevs(){ return cfg.uid && mode()==='w' && Array.isArray(cfg.devs) && cfg.devs.length ? cfg.devs.slice() : null; }
 function disconnect(){
   cfg={mode:'off'}; lsSet(CFG,cfg);
   try{ localStorage.removeItem(STK); localStorage.removeItem(BASE); }catch(e){}
@@ -988,6 +1000,7 @@ function disconnect(){
 /* ---------- زبانه‌های مجاز ---------- */
 function applyAcl(){
   const a=acl(); if(!a) return;
+  if(myDevs()){ DOCS.forEach((d,i)=>{ try{ tabs[i].hidden=true; }catch(e){} }); document.body.classList.add('ntdriver'); window.show=function(){}; return; }
   let first=-1;
   DOCS.forEach((d,i)=>{ const h=tabAcc(d.name)==='h'; try{ tabs[i].hidden=h; }catch(e){} if(!h && first<0) first=i; });
   try{ if(first>-1 && tabAcc(DOCS[start].name)==='h') start=first; }catch(e){}
@@ -1053,6 +1066,6 @@ function touch(keys){
 }
 function myName(){ try{ const u=cfg.uid && usersGet(); return (u && u[cfg.uid] && u[cfg.uid].name)||''; }catch(e){ return ''; } }
 window.ntSync={T,get cfg(){ return cfg; },st,sync,collect,hashOf,mergeAll,baseGet,outgoing,usersGet,seenGet,canSee:n=>tabAcc(n)!=='h',
-  canWriteTab:n=>mode()!=='v' && tabAcc(n)==='w',touch,myName};
+  canWriteTab:n=>mode()!=='v' && tabAcc(n)==='w',touch,myName,myDevs};
 init();
 })();
