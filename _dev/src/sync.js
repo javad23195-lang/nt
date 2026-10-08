@@ -1038,6 +1038,6 @@ function init(){
   else{ lockOn(); probeLock(jc); return; }
   if(jc){ if(isAdmin()) setTimeout(()=>toast('این سیستم، سیستم مدیر است. لینک اتصال برای سیستم‌های دیگر است.',true),400); else setTimeout(()=>viewJoin(jc),300); }
 }
-window.ntSync={T,get cfg(){ return cfg; },st,sync,collect,hashOf,mergeAll,baseGet,outgoing,usersGet,seenGet};
+window.ntSync={T,get cfg(){ return cfg; },st,sync,collect,hashOf,mergeAll,baseGet,outgoing,usersGet,seenGet,canSee:n=>tabAcc(n)!=='h'};
 init();
 })();

@@ -4,6 +4,8 @@ const {make}=require('./fakegh.js');
 const OLD=fs.readFileSync(process.env.NT_OLD||require('path').join(__dirname,'..','..','سامانه-نت.html')), NEW=fs.readFileSync(require('path').join(__dirname,'..','out.html'));
 let cur=OLD, fails=0; const ok=(c,m)=>{ console.log((c?'  ok  ':'  FAIL ')+m); if(!c) fails++; };
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+/* تاریخ امروز (شمسی) — فرم انبار ردیف‌های همان روز را نشان می‌دهد */
+const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()); const g=t=>p.find(x=>x.type===t).value; return {s:`${g('year')}/${g('month')}/${g('day')}`,y:+g('year'),m:+g('month'),d:+g('day')}; })();
 (async()=>{
   const {S,srv}=make(); await new Promise(r=>srv.listen(0,r));
   const web=http.createServer((q,r)=>{ r.writeHead(200,{'Content-Type':'text/html; charset=utf-8'}); r.end(cur); }); await new Promise(r=>web.listen(0,r));
@@ -16,7 +18,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   const waitFor=async(fn,ms=9000)=>{ const t=Date.now(); while(Date.now()-t<ms){ try{ if(await fn()) return true; }catch(e){} await sleep(100); } return false; };
   const seed={nt_anbar_out_v1:JSON.stringify({row:720,rows:[{date:'1405/07/15',dev:'WA470',item:'روغن',qty:20}]}),nt_daftar_v1:JSON.stringify([{dev:'لودر ZL50',unit:'ساعت',val:15094,date:'1405/07/13'}])};
   // نسخه قبلی: سیستم اصلی و یک مشاهده‌کننده
-  const A=await mk(seed); await A.click('#ntSyBtn'); await A.click('#syOther'); await A.fill('#syTok',S.goodToken); await A.fill('#syP1','mine1405'); await A.fill('#syP2','mine1405'); await A.click('#syStartW');
+  const A=await mk(seed); await sleep(2500); await A.click('#ntSyBtn'); await sleep(300); if(await A.locator('#syOther').count()) await A.click('#syOther'); await A.fill('#syTok',S.goodToken); await A.fill('#syP1','mine1405'); await A.fill('#syP2','mine1405'); await A.click('#syStartW');
   ok(await waitFor(()=>!!S.tags['nt-data']),'نسخه قبلی: ارسال شد');
   const B=await mk(null); await waitFor(async()=>!(await B.evaluate(()=>document.getElementById('ntSyDlg').hidden)));
   await B.click('#syOther'); await B.fill('#syPv','mine1405'); await B.click('#syStartV');
