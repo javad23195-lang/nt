@@ -1038,6 +1038,13 @@ function init(){
   else{ lockOn(); probeLock(jc); return; }
   if(jc){ if(isAdmin()) setTimeout(()=>toast('این سیستم، سیستم مدیر است. لینک اتصال برای سیستم‌های دیگر است.',true),400); else setTimeout(()=>viewJoin(jc),300); }
 }
-window.ntSync={T,get cfg(){ return cfg; },st,sync,collect,hashOf,mergeAll,baseGet,outgoing,usersGet,seenGet,canSee:n=>tabAcc(n)!=='h'};
+/** نوشتن از خود پوسته (صفحه دستگاه): زبانه‌هایی که این کلیدها را دارند تازه شوند و ارسال شود */
+function touch(keys){
+  mayDirty=true; changedAt=Date.now();
+  try{ frames.forEach((f,i)=>{ if(!f || !f.dataset.loaded) return; const m=keysOfFrame(i); if((keys||[]).some(k=>m[k])) reloadFrame(i,true); }); }catch(e){}
+}
+function myName(){ try{ const u=cfg.uid && usersGet(); return (u && u[cfg.uid] && u[cfg.uid].name)||''; }catch(e){ return ''; } }
+window.ntSync={T,get cfg(){ return cfg; },st,sync,collect,hashOf,mergeAll,baseGet,outgoing,usersGet,seenGet,canSee:n=>tabAcc(n)!=='h',
+  canWriteTab:n=>mode()!=='v' && tabAcc(n)==='w',touch,myName};
 init();
 })();
