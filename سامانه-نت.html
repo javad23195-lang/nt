@@ -159,6 +159,9 @@ iframe{background:#EEF1F4}
 .sybox .sypin b{display:block;font-size:1.7rem;font-weight:800;letter-spacing:.12em;font-variant-numeric:tabular-nums;color:#0B5C7A}
 .sybox details.sycard>summary{cursor:pointer;font-size:.92rem;font-weight:800;color:#8E2219;min-height:32px}
 .sybox details.sycard[open]>summary{margin-bottom:6px}
+body.ntlocked .tabs{visibility:hidden}
+body.ntlocked iframe{display:none!important}
+body.ntlocked .load{padding:0 20px;text-align:center;font-size:1rem;font-weight:700}
 @media print{ .sybar,.sydlg,.sytoast,.sybtn{display:none!important} }
 </style>
 </head>
@@ -276,7 +279,7 @@ function badges(){
 let start=0;   // پیش‌فرض: زبانه «امروز»
 try{ const s=localStorage.getItem('nt_lasttab'); if(s!==null && DOCS[+s]) start=+s; }catch(e){}
 let ntBooted=false;
-function ntBoot(){ if(ntBooted) return; ntBooted=true; if(active<0) show(start); badges(); }
+function ntBoot(){ if(ntBooted || window.ntLocked) return; ntBooted=true; if(active<0) show(start); badges(); }
 setTimeout(ntBoot,6000);   // اگر بخش اطلاعات مشترک پاسخ نداد، سامانه باز هم باز شود
 setTimeout(function f(){ if(!ntBooted){ setTimeout(f,800); return; } try{ if(!frames[0].dataset.loaded && !tabs[0].hidden){ frames[0].setAttribute('loading','eager'); frames[0].srcdoc=srcFor(0); frames[0].dataset.loaded='1'; } }catch(e){} },1500);
 setInterval(()=>{ if(ntBooted) badges(); },3000);
@@ -301,7 +304,7 @@ function dueNotes(){
 }
 function alSeen(){ try{ const o=JSON.parse(localStorage.getItem(AL_SEEN)||'{}'); return (o && typeof o==='object')?o:{}; }catch(e){ return {}; } }
 function alCheck(){
-  if(window.ntViewer){ alHide(); return; }
+  if(window.ntViewer || window.ntLocked){ alHide(); return; }
   const due=dueNotes(), seen=alSeen(), keep={};
   due.forEach(x=>{ if(seen[x.k]) keep[x.k]=1; });
   try{ if(JSON.stringify(keep)!==JSON.stringify(seen)) localStorage.setItem(AL_SEEN,JSON.stringify(keep)); }catch(e){}
@@ -1008,8 +1011,8 @@ function hashCode(){
   try{ return codeFind(decodeURIComponent(m[1])); }catch(e){ return ''; }
 }
 function viewJoin(code){
-  const fresh=mode()==='';
-  dlg('اتصال به اطلاعات مشترک',`
+  const locked=!!window.ntLocked;
+  dlg(locked?'ورود به سامانه':'اتصال به اطلاعات مشترک',`
     ${cfg.revoked?'<div class="symsg bad">دسترسی این سیستم قطع شده است. برای اتصال دوباره، از مدیر کد اتصال جدید بگیرید.</div>':''}
     ${needCode?'<div class="symsg bad">کلید یا رمز اطلاعات عوض شده است. از مدیر کد اتصال جدید بگیرید.</div>':''}
     <p>${code?'کد اتصال از لینک خوانده شد. رمز ۶ رقمی را که از مدیر گرفته‌اید وارد کنید.':'کد اتصال و رمز ۶ رقمی را که از مدیر گرفته‌اید وارد کنید.'}</p>
@@ -1020,12 +1023,11 @@ function viewJoin(code){
     <button type="button" class="go" id="syJoin">اتصال</button>
     ${mode()==='w'||mode()==='v'?'<small>با اتصال، تنظیم قبلی این سیستم جایگزین می‌شود.</small>':''}
     <button type="button" id="syOther">سیستم مدیر، یا مشاهده با رمز اطلاعات…</button>
-    ${fresh?'<button type="button" id="syLater">بعداً</button><button type="button" id="syNever">این سیستم اطلاعات مشترک نمی‌خواهد</button>':'<button type="button" id="syClose">بستن</button>'}`);
+    ${locked?'':'<button type="button" id="syClose">بستن</button>'}`);
   on('syJoin',join);
   $('syPin').addEventListener('keydown',e=>{ if(e.key==='Enter') join(); });
   on('syOther',viewSetup);
-  on('syLater',dlgClose); on('syClose',dlgClose);
-  on('syNever',()=>{ cfg={mode:'off'}; lsSet(CFG,cfg); dlgClose(); paint(); });
+  on('syClose',dlgClose);
   try{ (code?$('syPin'):$('syCode')).focus(); }catch(e){}
 }
 async function join(){
@@ -1142,7 +1144,7 @@ async function viewCode(id){
 /* --- پنجره اصلی --- */
 function viewMain(){
   const m=mode(), s=st();
-  if(m!=='w' && m!=='v'){ viewJoin(''); return; }
+  if(m!=='w' && m!=='v'){ if(window.ntLocked) viewJoin(''); else viewSetup(); return; }
   const admin=isAdmin(), U=usersGet()||{}, nU=Object.keys(U).length;
   const who = admin?'این سیستم، سیستم مدیر است.':cfg.uid?'کاربر: '+(cfg.uname||'—'):m==='v'?'این سیستم فقط مشاهده می‌کند.':'این سیستم ثبت‌کننده است.';
   dlg('اطلاعات مشترک',`
@@ -1220,7 +1222,7 @@ function viewSetup(){
     <button type="button" id="syBack">بازگشت</button>`);
   on('syStartW',()=>startWriter(false));
   on('syStartV',()=>startViewer($('syPv').value));
-  on('syBack',()=>viewJoin(''));
+  on('syBack',()=>{ if(window.ntLocked) viewJoin(''); else dlgClose(); });
   bindShow();
 }
 async function startWriter(replace){
@@ -1353,11 +1355,24 @@ function startTimers(){
   /* اطلاعات تازه هنگام رفتن به زبانه دیگر نشان داده می‌شود */
   $('tabs').addEventListener('click',()=>{ if(waiting) sync({now:true}); },true);
 }
-async function probe(){
-  try{
-    const f=await getFile(false);
-    if(f.w && mode()==='' && $('ntSyDlg').hidden) viewJoin('');
-  }catch(e){}
+/* ---------- قفل ورود ----------
+   سیستمی که وصل نشده است، هیچ زبانه‌ای را نمی‌بیند؛ فقط پنجره ورود با کد اتصال.
+   تنها استثنا: وقتی هنوز هیچ اطلاعات مشترکی ساخته نشده است (تنظیم اول سیستم مدیر). */
+function lockOn(){
+  window.ntLocked=true; document.body.classList.add('ntlocked');
+  try{ const l=$('load'); if(l) l.textContent='برای ورود به سامانه، کد اتصال لازم است.'; }catch(e){}
+  if(!lockOn.done){ lockOn.done=1; const _s=window.show; window.show=function(i){ if(window.ntLocked) return; _s(i); }; }
+}
+function lockOff(){
+  window.ntLocked=false; document.body.classList.remove('ntlocked');
+  try{ const l=$('load'); if(l) l.textContent='در حال آماده‌سازی…'; }catch(e){}
+  try{ ntBoot(); }catch(e){}
+}
+async function probeLock(jc){
+  let exists=true;                                        // اگر GitHub جواب نداد، قفل می‌ماند
+  try{ const f=await getFile(false); if(f.none) exists=false; }catch(e){}
+  if(!exists && !jc && !cfg.revoked){ lockOff(); return; }
+  viewJoin(jc||'');
 }
 function init(){
   if(cfg.o) OWNER=cfg.o; if(cfg.r) REPO=cfg.r;
@@ -1368,9 +1383,8 @@ function init(){
   if((m==='w' || m==='v') && !hasCrypto()){ setPhase('err','این مرورگر رمزگذاری را پشتیبانی نمی‌کند'); go(); return; }
   if(m==='w'){ go(); startTimers(); sync({force:true,verify:true}); }
   else if(m==='v'){ startTimers(); sync({now:true}).then(go,go); }
-  else{ go(); if(m==='' && !jc && hasCrypto()) setTimeout(probe,1500); }
+  else{ lockOn(); probeLock(jc); return; }
   if(jc){ if(isAdmin()) setTimeout(()=>toast('این سیستم، سیستم مدیر است. لینک اتصال برای سیستم‌های دیگر است.',true),400); else setTimeout(()=>viewJoin(jc),300); }
-  else if(cfg.revoked) setTimeout(()=>viewJoin(''),300);
 }
 window.ntSync={T,get cfg(){ return cfg; },st,sync,collect,hashOf,mergeAll,baseGet,outgoing,usersGet,seenGet};
 init();
