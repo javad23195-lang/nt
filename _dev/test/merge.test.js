@@ -75,4 +75,7 @@ for(let t=0;t<300;t++){
   if(res.length!==want.size || res.some(s=>!want.has(s))) bad++;
 }
 eq(bad,0,'۳۰۰ ترکیب تصادفی افزودن/حذف: نتیجه دقیق');
+// انبار: دو سیستم همان اصلاح خودکار (کد جدید / دلیل نیاز) را جدا انجام دادند → تکراری نشود
+{ const o=R(5), n=Object.assign(R(5),{item:'NEW'}), n2=Object.assign(R(6),{why:'W6'});
+  eq(m({out:{rows:[R(1),o,R(6)]}},{out:{rows:[R(1),n,n2]}},{out:{rows:[R(1),n,n2,R(7)]}}),{out:{rows:[R(1),n,n2,R(7)]}},'اصلاح یکسان در دو سیستم: ردیف تکراری نمی‌شود'); }
 console.log(fails?`\n${fails} مورد ناموفق`:'\nهمه موارد موفق'); process.exit(fails?1:0);

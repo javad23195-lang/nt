@@ -55,8 +55,10 @@ function catalog(){
   try{ (LS('nt_kharid_cat_v1')||[]).forEach(o=>{ const k=o&&norm(o.d); if(k && o.c!=null && o.c!=='' && !CAT.has(k)) CAT.set(k,String(o.c)); }); }catch(e){}
   return CAT;
 }
+/* کد قدیمی → کد جدید (همان فهرست زبانه انبار) */
+const MOVED={'40240034':'966651','40370067':'967281'};
 function codeOf(r){
-  const c=catalog().get(norm(r.item)); if(c) return c;
+  const c=catalog().get(norm(r.item)); if(c) return MOVED[c]||c;
   const own=String(r.code||'').trim(); if(own) return own;
   const mem=(LS('nt_anbar_codes_v1')||{})[norm(r.item)];
   return mem && mem.c ? String(mem.c) : '';
