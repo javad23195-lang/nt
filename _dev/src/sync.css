@@ -1,0 +1,79 @@
+/* ---------- اطلاعات مشترک (همگام‌سازی) ---------- */
+.tabrow{display:flex;align-items:flex-start;gap:6px}
+.tabrow .tabs{flex:1;min-width:0}
+.sybtn{flex:none;min-height:40px;display:flex;align-items:center;gap:6px;border:1px solid #D5DCE3;background:#fff;color:#17212B;
+  font:inherit;font-size:.78rem;font-weight:500;padding:0 11px;border-radius:20px;cursor:pointer;white-space:nowrap}
+.sybtn .d{width:9px;height:9px;border-radius:50%;background:#9AA8B5;flex:none}
+.sybtn.ok .d{background:#1E8E5A}
+.sybtn.busy .d{background:#C77A1A}
+.sybtn.err .d{background:#C0392B}
+.sybtn.err{border-color:#C0392B;color:#8E2219;font-weight:700}
+.sybtn svg{flex:none;color:#51606E}
+@media (max-width:560px){ .sybtn{padding:0 9px;gap:5px} .sybtn .tx{display:none} }
+.sybtn:focus-visible{outline:2px solid #0B5C7A;outline-offset:2px}
+.sybar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 -12px;padding:6px 12px;font-size:.8rem;line-height:1.6;
+  background:#E6F1F5;color:#0B4A63;border-top:1px solid #C5DCE5}
+.sybar[hidden]{display:none}
+.sybar.err{background:#FBE9E7;color:#8E2219;border-top-color:#E8B4AE}
+.sybar.new{background:#FFF1DB;color:#7A4300;border-top-color:#E0A75E}
+.sybar span{flex:1;min-width:0}
+.sybar button{flex:none;min-height:30px;border:1px solid currentColor;background:#fff;color:inherit;font:inherit;font-size:.78rem;font-weight:700;
+  padding:0 12px;border-radius:15px;cursor:pointer}
+.sybar button[hidden]{display:none}
+.sydlg{position:fixed;inset:0;z-index:80;background:rgba(23,33,43,.45);display:flex;align-items:flex-start;justify-content:center;
+  padding:calc(14px + env(safe-area-inset-top)) 10px 14px;overflow:auto}
+.sydlg[hidden]{display:none}
+.sybox{width:100%;max-width:480px;background:#fff;color:#17212B;border-radius:16px;padding:16px;box-shadow:0 14px 40px rgba(23,33,43,.35);
+  font-size:.92rem;line-height:1.8}
+.sybox h2{margin:0 0 8px;font-size:1.05rem;font-weight:800}
+.sybox h3{margin:0 0 4px;font-size:.95rem;font-weight:800;color:#0B5C7A}
+.sybox p{margin:0 0 10px}
+.sybox .sycard{border:1px solid #D5DCE3;border-radius:12px;padding:12px;margin:0 0 10px;background:#F7F9FA}
+.sybox label{display:block;font-size:.82rem;font-weight:700;margin:0 0 8px}
+.sybox input[type=password],.sybox input[type=text]{display:block;width:100%;min-height:44px;margin-top:3px;border:1px solid #9AA8B5;border-radius:10px;
+  padding:0 10px;font:inherit;font-size:.95rem;background:#fff;color:#17212B;direction:ltr;text-align:left}
+.sybox input:focus-visible{outline:2px solid #0B5C7A;outline-offset:1px}
+.sybox .chk{display:flex;align-items:center;gap:8px;font-weight:500}
+.sybox .chk input{width:18px;height:18px}
+.sybox button{display:block;width:100%;min-height:46px;border-radius:10px;font:inherit;font-size:.95rem;font-weight:700;cursor:pointer;margin:0 0 8px;
+  background:#fff;border:1px solid #9AA8B5;color:#17212B}
+.sybox button.go{background:#0B5C7A;border-color:#0B5C7A;color:#fff}
+.sybox button.warn{border-color:#C0392B;color:#8E2219}
+.sybox button:disabled{opacity:.55;cursor:default}
+.sybox button:focus-visible{outline:2px solid #17212B;outline-offset:2px}
+.sybox .symsg{font-size:.86rem;font-weight:700;margin:0 0 10px;padding:8px 10px;border-radius:10px;background:#E6F1F5;color:#0B4A63}
+.sybox .symsg:empty{display:none}
+.sybox .symsg.bad{background:#FBE9E7;color:#8E2219}
+.sybox .sykv{font-size:.84rem;background:#F7F9FA;border:1px solid #D5DCE3;border-radius:10px;padding:8px 10px;margin:0 0 10px}
+.sybox .sykv b{display:block}
+.sybox small{display:block;font-size:.78rem;color:#51606E;font-weight:500;line-height:1.7}
+.sytoast{position:fixed;z-index:90;bottom:calc(16px + env(safe-area-inset-bottom));inset-inline:12px;margin:0 auto;max-width:440px;
+  background:#17212B;color:#fff;border-radius:12px;padding:10px 14px;font-size:.88rem;line-height:1.7;text-align:center;box-shadow:0 8px 24px rgba(23,33,43,.35)}
+.sytoast[hidden]{display:none}
+.sytoast.bad{background:#8E2219}
+.tab[hidden]{display:none}
+.sybox .syrow{display:flex;align-items:center;gap:8px;padding:4px 0;border-top:1px solid #E3E8ED;font-size:.86rem}
+.sybox .syrow:first-child{border-top:0}
+.sybox .syrow span{flex:1;min-width:0;font-weight:700}
+.sybox select{flex:none;min-height:38px;border:1px solid #9AA8B5;border-radius:8px;background:#fff;color:#17212B;font:inherit;font-size:.86rem;padding:0 8px}
+.sybox #syAclList{margin-top:8px}
+.sybox #syAclList[hidden]{display:none}
+.sybox .chk input[type=radio]{width:18px;height:18px}
+.sybox textarea{display:block;width:100%;margin-top:3px;border:1px solid #9AA8B5;border-radius:10px;padding:8px 10px;font:inherit;font-size:.8rem;line-height:1.5;
+  background:#fff;color:#17212B;direction:ltr;text-align:left;resize:vertical;word-break:break-all;font-family:ui-monospace,Menlo,Consolas,monospace}
+.sybox textarea:focus-visible{outline:2px solid #0B5C7A;outline-offset:1px}
+.sybox label[hidden]{display:none}
+.sybox .syuser{border:1px solid #D5DCE3;border-radius:12px;padding:10px 12px;margin:0 0 10px;background:#F7F9FA}
+.sybox .syuser.off{background:#FBF1F0;border-color:#E8B4AE}
+.sybox .syuser b{display:flex;align-items:center;gap:8px;font-size:.95rem;font-weight:800}
+.sybox .sychip{font-size:.72rem;font-weight:700;background:#A32018;color:#fff;border-radius:10px;padding:1px 8px}
+.sybox .syub{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.sybox .syub button{margin:0;min-height:40px;font-size:.84rem}
+.sybox .sypin{margin:4px 0 10px;padding:10px;border:2px solid #0B5C7A;border-radius:12px;background:#E6F0F4;text-align:center;font-size:.85rem;font-weight:700}
+.sybox .sypin b{display:block;font-size:1.7rem;font-weight:800;letter-spacing:.12em;font-variant-numeric:tabular-nums;color:#0B5C7A}
+.sybox details.sycard>summary{cursor:pointer;font-size:.92rem;font-weight:800;color:#8E2219;min-height:32px}
+.sybox details.sycard[open]>summary{margin-bottom:6px}
+body.ntlocked .tabs{visibility:hidden}
+body.ntlocked iframe{display:none!important}
+body.ntlocked .load{padding:0 20px;text-align:center;font-size:1rem;font-weight:700}
+@media print{ .sybar,.sydlg,.sytoast,.sybtn{display:none!important} }
