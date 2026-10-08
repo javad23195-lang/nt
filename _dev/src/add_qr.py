@@ -15,8 +15,9 @@ rep('    <div class="bkrow"><button type="button" class="bkb pri" id="rpOpen">س
     '    <h2 style="color:#0B5C7A">کد QR دستگاه‌ها</h2>\n'
     '    <p class="sub">برچسب هر دستگاه را چاپ کنید و داخل کابین بچسبانید. با اسکن برچسب، صفحه همان دستگاه باز می‌شود: ثبت قرائت، شروع و پایان توقف، ثبت مشکل و سوابق.</p>\n'
     '    <div class="bkrow"><button type="button" class="bkb pri" id="qrLabels">چاپ برچسب‌ها</button><button type="button" class="bkb" id="qrScanT">اسکن</button></div>\n'
+    '    <div class="bkrow" style="margin-top:8px"><button type="button" class="bkb" id="qrCardsT">کارت کاغذی توقف (راننده بدون گوشی)</button></div>\n'
     '  </div>\n')
-rep("\n</script></body></html>","\n$('qrLabels').addEventListener('click',()=>{ try{ parent.postMessage({nt:'qrlabels'},'*'); }catch(e){} });\n$('qrScanT').addEventListener('click',()=>{ try{ parent.postMessage({nt:'qrscan'},'*'); }catch(e){} });\n</script></body></html>")
+rep("\n</script></body></html>","\n$('qrLabels').addEventListener('click',()=>{ try{ parent.postMessage({nt:'qrlabels'},'*'); }catch(e){} });\n$('qrCardsT').addEventListener('click',()=>{ try{ parent.postMessage({nt:'qrcards'},'*'); }catch(e){} });\n$('qrScanT').addEventListener('click',()=>{ try{ parent.postMessage({nt:'qrscan'},'*'); }catch(e){} });\n</script></body></html>")
 d['b64']=base64.b64encode(h.encode('utf-8')).decode('ascii')
 s=s[:i]+json.dumps(docs,ensure_ascii=False)+s[j:]
 open(out,'w',encoding='utf-8').write(s); print('qr card added')

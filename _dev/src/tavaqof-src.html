@@ -347,8 +347,9 @@ function devSet(d){
 $('fQ').addEventListener('input',pickDraw);
 $('fChange').addEventListener('click',()=>{ devSet(''); const b=$('fQ').hidden?$('fPick').querySelector('button'):$('fQ'); if(b) b.focus(); });
 function whyDraw(){
+  const ALL=CAUSES.flatMap(c=>c.L);   // شماره علت = همان شماره روی کارت کاغذی توقف
   $('fWhy').innerHTML=CAUSES.map(c=>`<div class="grp">${esc(c.g)}</div><div class="why">${c.L.map(x=>
-    `<button type="button" data-c="${esc(x)}" aria-pressed="${x===fCause?'true':'false'}">${esc(x)}</button>`).join('')}</div>`).join('');
+    `<button type="button" data-c="${esc(x)}" aria-pressed="${x===fCause?'true':'false'}"><b class="num">${fa(ALL.indexOf(x)+1)}</b> ${esc(x)}</button>`).join('')}</div>`).join('');
   $('fWhy').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ fCause=b.dataset.c; $('eWhy').classList.remove('show'); whyDraw(); }));
 }
 function durDraw(){

@@ -177,7 +177,7 @@ function stopForm(dev){
   view('شروع توقف — '+dev.name,`
     <label>ساعت توقف<input type="text" id="qrFrom" inputmode="numeric" dir="ltr" value="${nowHM()}"></label>
     <div class="grp">علت توقف</div>
-    ${CAUSES.map(c=>`<div class="grp">${esc(c.g)}</div><div class="chips">${c.L.map(x=>`<button type="button" data-c="${esc(x)}" aria-pressed="false">${esc(x)}</button>`).join('')}</div>`).join('')}
+    ${CAUSES.map(c=>`<div class="grp">${esc(c.g)}</div><div class="chips">${c.L.map(x=>`<button type="button" data-c="${esc(x)}" aria-pressed="false"><b>${fa(CAUSES.flatMap(z=>z.L).indexOf(x)+1)}</b> ${esc(x)}</button>`).join('')}</div>`).join('')}
     <label>توضیح (اختیاری)<input type="text" id="qrNote" autocomplete="off" style="direction:rtl;text-align:right"></label>
     <label>نام ثبت‌کننده<input type="text" id="qrWho" autocomplete="off" style="direction:rtl;text-align:right" value="${esc(who())}"></label>
     <div class="symsg" id="qrMsg"></div>
@@ -293,15 +293,62 @@ function labels(){
     if(!ids.length){ msg.className='symsg bad'; msg.textContent='هیچ دستگاهی انتخاب نشده'; return; }
     msg.className='symsg'; msg.textContent='در حال ساخت برچسب‌ها…';
     loadLib(LIB_QR,()=>typeof window.qrcode==='function').then(()=>{
-      const html=sheet(ids.map(byId));
-      let fr=$('ntQrPrint'); if(fr) fr.remove();
-      fr=document.createElement('iframe'); fr.id='ntQrPrint'; fr.setAttribute('aria-hidden','true');
-      fr.style.cssText='position:fixed;width:0;height:0;border:0;left:-10px;top:-10px';
-      document.body.appendChild(fr); window.__ntQrLast=html;
-      const d=fr.contentWindow.document; d.open(); d.write(html); d.close();
-      setTimeout(()=>{ try{ fr.contentWindow.focus(); fr.contentWindow.print(); }catch(e){} msg.textContent='پنجره چاپ باز شد. برای فایل PDF، «Save as PDF» را انتخاب کنید.'; },350);
+      printHtml(sheet(ids.map(byId)),msg);
     }).catch(()=>{ msg.className='symsg bad'; msg.textContent='کتابخانه کد QR بارگذاری نشد. اتصال اینترنت را بررسی کنید.'; });
   });
+}
+/** صفحه چاپی در یک قاب پنهان */
+function printHtml(html,msg){
+  let fr=$('ntQrPrint'); if(fr) fr.remove();
+  fr=document.createElement('iframe'); fr.id='ntQrPrint'; fr.setAttribute('aria-hidden','true');
+  fr.style.cssText='position:fixed;width:0;height:0;border:0;left:-10px;top:-10px';
+  document.body.appendChild(fr); window.__ntQrLast=html;
+  const d=fr.contentWindow.document; d.open(); d.write(html); d.close();
+  setTimeout(()=>{ try{ fr.contentWindow.focus(); fr.contentWindow.print(); }catch(e){} if(msg){ msg.className='symsg'; msg.textContent='پنجره چاپ باز شد. برای فایل PDF، «Save as PDF» را انتخاب کنید.'; } },350);
+}
+
+/* ---------- کارت کاغذی توقف (برای راننده بدون گوشی) ----------
+   نصف A4؛ راننده ساعت توقف، ساعت راه افتادن و شماره علت را می‌نویسد. شماره علت = شماره کنار علت در فرم توقف. */
+function cardsDlg(){
+  const T=(window.ntStops&&ntStops.TRACKED)||DEVS.map(d=>d.name);
+  const L=DEVS.filter(d=>T.some(n=>norm(n)===norm(d.name)));
+  view('کارت کاغذی توقف',`
+    <p>برای راننده‌ای که گوشی ندارد. هر برگه A4 دو کارت دارد (برای دو شیفت یا دو روز). کارت در کابین می‌ماند و آخر شیفت به سرپرست داده می‌شود.</p>
+    <div class="qrlist">${L.map(d=>`<label class="chk"><input type="checkbox" data-id="${d.id}" checked> ${esc(d.name)}</label>`).join('')}</div>
+    <label>تعداد برگه A4 برای هر دستگاه<input type="text" id="qrPages" inputmode="numeric" dir="ltr" value="1"></label>
+    <div class="symsg" id="qrMsg"></div>
+    <button type="button" class="go" id="qrCards">چاپ کارت‌ها</button><button type="button" id="qrClose">بستن</button>`);
+  on('qrClose',close);
+  on('qrCards',()=>{
+    const ids=[...$('ntQrBody').querySelectorAll('input[data-id]')].filter(b=>b.checked).map(b=>b.dataset.id), msg=$('qrMsg');
+    const n=Math.min(20,Math.max(1,parseInt(latin($('qrPages').value),10)||1));
+    if(!ids.length){ msg.className='symsg bad'; msg.textContent='هیچ دستگاهی انتخاب نشده'; return; }
+    const list=[]; ids.forEach(id=>{ for(let i=0;i<n*2;i++) list.push(byId(id)); });
+    printHtml(cardSheet(list),msg);
+  });
+}
+function cardSheet(list){
+  const ALL=CAUSES.flatMap(c=>c.L);
+  const legend=CAUSES.map(c=>`<div class="lg"><b>${esc(c.g)}:</b> ${c.L.map(x=>`<span><i>${fa(ALL.indexOf(x)+1)}</i> ${esc(x)}</span>`).join(' ')}</div>`).join('');
+  const rows=Array.from({length:8},(_,i)=>`<tr><td class="c">${fa(i+1)}</td><td class="t">: </td><td class="t">: </td><td></td><td></td></tr>`).join('');
+  const one=d=>`<div class="cd"><div class="hd"><b>کارت توقف — ${esc(d.name)}</b><span>تاریخ: ۱۴۰&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;/</span></div>
+    <div class="hd2"><span>شیفت: ☐ صبح&nbsp; ☐ عصر&nbsp; ☐ شب</span><span>نام راننده: ............................</span></div>
+    <table><thead><tr><th style="width:7%">ردیف</th><th style="width:17%">ساعت توقف</th><th style="width:17%">ساعت راه افتادن</th><th style="width:13%">شماره علت</th><th>توضیح</th></tr></thead><tbody>${rows}</tbody></table>
+    ${legend}
+    <div class="ft"><span>اگر دستگاه تا آخر شیفت راه نیفتاد، «ساعت راه افتادن» را خالی بگذارید. آخر شیفت کارت را به سرپرست بدهید.</span><span>ثبت در سامانه ☐ امضا: ..........</span></div></div>`;
+  return `<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>کارت کاغذی توقف</title><style>
+@page{size:A4;margin:8mm}
+*{box-sizing:border-box}body{margin:0;font-family:Tahoma,'Vazirmatn',sans-serif;color:#000;font-size:10pt}
+.cd{height:136mm;border:1.5px solid #000;border-radius:3mm;padding:4mm 5mm;margin:0 0 6mm;display:flex;flex-direction:column;break-inside:avoid;page-break-inside:avoid}
+.cd:nth-child(2n){page-break-after:always;margin:0}
+.hd{display:flex;justify-content:space-between;align-items:baseline;font-size:12pt}.hd b{font-size:14pt}
+.hd2{display:flex;justify-content:space-between;margin:2mm 0 2mm}
+table{width:100%;border-collapse:collapse}th,td{border:1px solid #000;height:8.2mm;text-align:center;padding:0 1mm}th{font-size:9pt;background:#eee;height:7mm}
+td.t{direction:ltr;letter-spacing:6mm;color:#999}td.c{font-size:9pt}
+.lg{font-size:9.5pt;margin-top:2.5mm;line-height:1.75}.lg span{white-space:nowrap;margin-inline-start:2.5mm}.lg i{font-style:normal;font-weight:bold;border:1px solid #000;border-radius:50%;padding:0 1.3mm}
+.ft{margin-top:auto;display:flex;justify-content:space-between;gap:4mm;font-size:8.3pt;color:#222}
+@media screen{body{background:#ccc}.cd{background:#fff;width:194mm;margin:4mm auto}}
+</style></head><body>${list.map(one).join('')}</body></html>`;
 }
 function svgFor(text){ const q=window.qrcode(0,'M'); q.addData(text); q.make(); return q.createSvgTag({cellSize:4,margin:16,scalable:true}); }
 function sheet(list){
@@ -355,7 +402,7 @@ dlg(); addBtn(); fromHash();
 /* راننده: بعد از بالا آمدن سامانه، صفحه اصلی راننده؛ اگر از برچسب نیامده و یک دستگاه دارد، صفحه همان دستگاه */
 (function drv(){ if(!booted()){ setTimeout(drv,400); return; } const ds=driverHome(); if(ds && ds.length===1 && !idFrom(location.hash) && $('ntQrDlg').hidden) home(ds[0].id); })();
 window.addEventListener('hashchange',fromHash);
-window.addEventListener('message',e=>{ const d=e&&e.data; if(!d) return; if(d.nt==='qrlabels') labels(); else if(d.nt==='qrscan') scan(); });
+window.addEventListener('message',e=>{ const d=e&&e.data; if(!d) return; if(d.nt==='qrlabels') labels(); else if(d.nt==='qrscan') scan(); else if(d.nt==='qrcards') cardsDlg(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape' && $('ntQrDlg') && !$('ntQrDlg').hidden) close(); });
-window.ntQr={DEVS,home,scan,labels,qrUrl,sheet,driverHome};
+window.ntQr={DEVS,home,scan,labels,qrUrl,sheet,driverHome,cardsDlg,cardSheet};
 })();

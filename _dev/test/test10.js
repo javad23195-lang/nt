@@ -58,6 +58,17 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   fs.writeFileSync(path.join(os.tmpdir(),'qr-sheet.html'),sheetHtml);
   await P.screenshot({path:path.join(os.tmpdir(),'qr-sheet.png')});
   await A.click('#qrClose');
+  // کارت کاغذی توقف
+  await A.evaluate(()=>{ window.__ntQrLast=''; }); await A.frameLocator('iframe.on').locator('#qrCardsT').click();
+  await waitFor(async()=>(await qrText(A)).includes('کارت کاغذی توقف'));
+  ok(await A.locator('#ntQrBody input[data-id]').count()===8,'کارت توقف: فقط ۸ دستگاه تولید');
+  await A.evaluate(()=>{ document.querySelectorAll('#ntQrBody input[data-id]').forEach(b=>b.checked=b.dataset.id==='TRS01'); });
+  await A.click('#qrCards'); await waitFor(()=>A.evaluate(()=>!!window.__ntQrLast));
+  const cardHtml=await A.evaluate(()=>window.__ntQrLast);
+  ok((cardHtml.match(/class="cd"/g)||[]).length===2 && cardHtml.includes('کارت توقف — کامیون TRS01') && cardHtml.includes('<i>۵</i> خرابی لاستیک') && cardHtml.includes('<i>۱۳</i> انتظار بارگیری'),'برگه A4 با ۲ کارت TRS01 و علت‌های شماره‌دار');
+  { const P2=await (await br.newContext({viewport:{width:800,height:1130}})).newPage(); await P2.setContent(cardHtml); await P2.pdf({path:path.join(os.tmpdir(),'stop-card.pdf'),format:'A4'});
+    ok((await P2.pdf({format:'A4'})).toString('latin1').match(/\/Type\s*\/Page[^s]/g).length===1,'دو کارت دقیقاً در یک صفحه A4 جا می‌شود'); await P2.screenshot({path:path.join(os.tmpdir(),'stop-card.png'),fullPage:true}); }
+  await A.click('#qrClose');
 
   console.log('2) باز شدن با لینک برچسب');
   const B=A; await B.goto(BASE+'#m=ZL50'); await settle(B);
