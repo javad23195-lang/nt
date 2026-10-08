@@ -16,10 +16,8 @@ const DEVS=[
 ].map(([id,name,unit])=>({id,name,unit}));
 const byId=id=>DEVS.find(d=>d.id===String(id||'').toUpperCase())||null;
 /* علت‌های توقف — همان فهرست فرم «توقف شیفت» */
-const CAUSES=[
-  {g:'خرابی یا تعمیر',L:['خرابی موتور','خرابی هیدرولیک','خرابی برق','زنجیر و زیربندی','پاکت و ناخن','سرویس دوره‌ای','خرابی دیگر']},
-  {g:'سالم بود ولی کار نکرد',L:['نبود راننده','نبود سوخت','انتظار کامیون','جابه‌جایی بیل','هوا (باران شدید، مه غلیظ، برف)','سایر']}
-];
+const CAUSES=(()=>{ const N=window.ntStops; return N?[{g:'خرابی یا تعمیر',L:N.BROKEN},{g:'دستگاه سالم بود ولی کار نکرد',L:N.IDLE}]:
+  [{g:'خرابی یا تعمیر',L:['خرابی موتور','خرابی هیدرولیک','خرابی برق','خرابی دیگر']},{g:'دستگاه سالم بود ولی کار نکرد',L:['نبود راننده','نبود سوخت','سایر']}]; })();
 /* سیستم‌ها — همان فهرست «ثبت مشکلات» */
 const SYS=['موتور و قطعات','سیستم هیدرولیک','سیستم برقی','گیربکس و دیفرانسیل','سیستم ترمز','سیستم خنک کاری','سیستم سوخت رسانی','چرخ و لاستیک',
   'سیستم حرکتی','سیستم تعلیق','سیستم بادی','سیستم اگزوز','سیستم کولر و گرمایشی','بدنه و کابین','پاکت واتصالات','سیستم آب','سیستم پمپ','سرویس و نگهداری'];
@@ -127,7 +125,8 @@ function home(id){
   if(canSee('ثبت مشکلات')) kv+=`<span>مشکل باز</span><b class="${open.length?'stop':''}">${open.length?fa(open.length)+' — '+esc(String(open[open.length-1].desc||'').slice(0,40)):'ندارد'}</b>`;
   let acts='';
   if(canW('دفترچه قرائت')) acts+='<button type="button" class="go" id="qrRead">ثبت قرائت</button>';
-  if(canW('توقف شیفت')) acts+=os?'<button type="button" class="rn" id="qrRun">پایان توقف (راه افتاد)</button>':'<button type="button" class="stp" id="qrStop">شروع توقف</button>';
+  const trk=!window.ntStops || ntStops.tracked(dev.name);   // توقف دقیق فقط برای بیل، لودر و کامیون
+  if(canW('توقف شیفت') && (trk||os)) acts+=os?'<button type="button" class="rn" id="qrRun">پایان توقف (راه افتاد)</button>':'<button type="button" class="stp" id="qrStop">شروع توقف</button>';
   if(canW('ثبت مشکلات')) acts+='<button type="button" id="qrProb">ثبت مشکل</button>';
   acts+='<button type="button" id="qrHist">دیدن سوابق</button>';
   view(dev.name,`${kv?'<div class="kv">'+kv+'</div>':''}<div class="acts">${acts}</div><button type="button" id="qrClose">بستن</button>`);

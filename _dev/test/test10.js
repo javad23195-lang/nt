@@ -100,6 +100,7 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   ok(t.includes('۱۵,۱۳۰') && t.includes('خرابی هیدرولیک') && t.includes('نشتی جک بازو'),'سوابق: قرائت، توقف، مشکل');
   ok(await waitFor(()=>synced(B)),'همه ثبت‌ها فرستاده شد');
 
+  await B.evaluate(()=>ntQr.home('KIPOR')); ok(await B.locator('#qrStop').count()===0 && await B.locator('#qrRead').count()===1,'ژنراتور (دستگاه غیر تولید): بدون دکمه توقف');
   console.log('6) کاربر محدود (استخراج: فقط توقف و قرائت)');
   await B.evaluate(()=>{ document.getElementById('ntQrDlg').hidden=true; }); await B.click('#ntSyBtn'); await B.click('#syUsers');
   await B.click('#syUNew'); await B.fill('#syUName','استخراج'); await B.click('#syUSave'); await B.waitForSelector('#syLink');

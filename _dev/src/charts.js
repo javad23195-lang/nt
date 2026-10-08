@@ -5,7 +5,6 @@
 (function(){
 'use strict';
 const LIB=['lib/chart.umd.js','https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js'];
-const BROKEN=['خرابی موتور','خرابی هیدرولیک','خرابی برق','زنجیر و زیربندی','پاکت و ناخن','سرویس دوره‌ای','خرابی دیگر'];
 const MONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 const C={red:'#B3261E',gray:'#8A97A3',blue:'#0B5C7A',green:'#1E8E5A'};
 const OILC=['#0B5C7A','#C77A1A','#1E8E5A','#7B3FA0','#B3261E','#8A97A3'];
@@ -49,41 +48,16 @@ function setup(){
 }
 
 /* ---------- داده ---------- */
-function stopsIn(from,to){
-  const tv=LS('nt_tavaqof_v1')||{}, out=[];
-  Object.keys(tv).forEach(k=>{ const day=nd(k.split('|')[0]); if(!day || day<from || day>to) return;
-    ((tv[k]&&tv[k].stops)||[]).forEach(s=>{ if(s && s.dev) out.push(s); }); });
-  return out;
-}
-/** مدت به دقیقه: «2:30»، «2» (ساعت)، «۲ ساعت و ۳۰ دقیقه» */
-function toMin(v){
-  const t=latin(v).replace(/[٫,]/g,'.').trim(); if(!t) return null;
-  let m=/^(\d{1,3}):(\d{1,2})$/.exec(t); if(m) return (+m[1])*60+(+m[2]);
-  if(/^\d+(\.\d+)?$/.test(t)) return Math.round(parseFloat(t)*60);
-  const h=/(\d+(?:\.\d+)?)\s*ساعت/.exec(t), mi=/(\d+)\s*دقیقه/.exec(t);
-  if(h||mi) return Math.round((h?parseFloat(h[1])*60:0)+(mi?+mi[1]:0));
-  return null;
-}
-/** توقف‌ها: تعمیر و سرویس از «برنامه روزانه» (مدت توقف هر کار)؛ «سالم ولی کار نکرد» از «توقف شیفت» */
+/** توقف‌ها با قاعده مشترک (stops.js): دستگاه‌های تولید از فرم توقف، بقیه از «مدت توقف» برنامه روزانه */
 function stopData(from,to,opt){
-  opt=opt||{}; const usePrg=opt.prog!==false, useIdle=opt.idle!==false;
-  const per={}, cause={}; let open=0;
-  const add=(dev,lab,k,d)=>{ const P=per[dev]||(per[dev]={em:0,pm:0,idle:0}); P[k]+=d; const X=cause[lab]||(cause[lab]={em:0,pm:0,idle:0}); X[k]+=d; };
-  if(usePrg){
-    const db=LS('nt_prog_v1')||{};
-    Object.keys(db).forEach(k=>{ const day=nd(k); if(!day || day<from || day>to) return;
-      ((db[k]&&db[k].tasks)||[]).forEach(t=>{ if(!t || !t.dev) return;
-        let d=toMin(t.sdur); if(d===null) d=toMin(t.stop); if(!d || d<=0) return;
-        const em=t.kind==='EM' || (!t.kind && !!t.fault);
-        add(t.dev, String(t.act||'').trim()||'سایر', em?'em':'pm', d); }); });
-  }
-  if(useIdle){
-    stopsIn(from,to).forEach(s=>{ if(BROKEN.indexOf(s.cause)>-1) return;
-      const d=s.to?dur(s.from,s.to):null; if(d===null){ open++; return; }
-      add(s.dev, s.cause||'نامشخص', 'idle', d); });
-  }
+  opt=opt||{}; const per={}, cause={}; let open=0;
+  window.ntStops.list(from,to,{shift:opt.idle!==false,prog:opt.prog!==false}).forEach(x=>{
+    if(x.min===null){ open++; return; }
+    const P=per[x.dev]||(per[x.dev]={em:0,pm:0,idle:0}); P[x.cls]+=x.min;
+    const C=cause[x.cause]||(cause[x.cause]={em:0,pm:0,idle:0}); C[x.cls]+=x.min; });
   return {per,cause,open};
 }
+const toMin=v=>window.ntStops.toMin(v);
 function readingsByDev(){
   const by={};
   (LS('nt_daftar_v1')||[]).forEach(x=>{ if(!x||!x.dev) return; const d=nd(x.date), v=+latin(x.val); if(!d||isNaN(v)) return;
@@ -160,17 +134,17 @@ function draw(){
   if(seeP || seeI){
     const S=stopData(R.from,R.to,{prog:seeP,idle:seeI}), tot=o=>o.em+o.pm+o.idle;
     const devs=Object.keys(S.per).sort((a,b)=>tot(S.per[b])-tot(S.per[a]));
-    const src=(seeP?'از «مدت توقف» برنامه روزانه':'')+(seeP&&seeI?' + ':'')+(seeI?'«سالم ولی کار نکرد» از توقف شیفت':'');
+    const src=(seeI?'بیل، لودر و کامیون از فرم توقف':'')+(seeP&&seeI?'، ':'')+(seeP?'بقیه از «مدت توقف» برنامه روزانه':'');
     const note=S.open?`، ${fa(S.open)} توقف هنوز باز است و حساب نشده`:'';
-    const DS=(src,keys)=>[seeP&&{k:'em',label:'تعمیر (EM)',backgroundColor:C.red},seeP&&{k:'pm',label:'سرویس و نگهداری (PM)',backgroundColor:C.blue},
-      seeI&&{k:'idle',label:'سالم ولی کار نکرد',backgroundColor:C.gray}].filter(Boolean)
+    const DS=(src,keys)=>[{k:'em',label:'خرابی و تعمیر',backgroundColor:C.red},{k:'pm',label:'سرویس و نگهداری',backgroundColor:C.blue},
+      {k:'idle',label:'سالم ولی کار نکرد',backgroundColor:C.gray}]
       .map(x=>({label:x.label,backgroundColor:x.backgroundColor,data:keys.map(d=>r1(src[d][x.k]/60))}))
       .filter(x=>x.data.some(v=>v>0));
     if(devs.length){
       html+=card('ch1','ساعت توقف هر دستگاه',R.label+'، '+src+note,Math.max(150,70+devs.length*40));
       jobs.push(()=>bar('ch1',{labels:devs,datasets:DS(S.per,devs)},{horizontal:true,stacked:true,unit:'ساعت'}));
       const cs=Object.keys(S.cause).sort((a,b)=>tot(S.cause[b])-tot(S.cause[a]));
-      html+=card('ch2','علت‌های توقف',R.label+'، برنامه روزانه: بر اساس «دسته فعالیت»',Math.max(150,70+cs.length*34));
+      html+=card('ch2','علت‌های توقف',R.label+'، فرم توقف: علت ثبت‌شده؛ برنامه روزانه: «دسته فعالیت»',Math.max(150,70+cs.length*34));
       jobs.push(()=>bar('ch2',{labels:cs,datasets:DS(S.cause,cs)},{horizontal:true,stacked:true,unit:'ساعت'}));
     } else html+=emptyCard('ch1','ساعت توقف هر دستگاه','در '+R.label+' مدت توقفی ثبت نشده است ('+src+')'+note);
   }

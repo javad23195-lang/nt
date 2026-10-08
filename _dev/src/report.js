@@ -5,8 +5,6 @@
 const LIB_LOCAL='lib/xlsx.mini.min.js', LIB_CDN='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.mini.min.js';
 const MONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 /* گروه علت‌های توقف — همان فهرست فرم «توقف شیفت» */
-const BROKEN=['خرابی موتور','خرابی هیدرولیک','خرابی برق','زنجیر و زیربندی','پاکت و ناخن','سرویس دوره‌ای','خرابی دیگر'];
-const SHIFT_ORDER={'صبح':0,'عصر':1,'شب':2};
 const $=id=>document.getElementById(id);
 const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
 const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -69,14 +67,8 @@ function collect(from,to){
   CAT=null;   // کدهای «درخواست خرید» شاید تازه شده باشند
   const In=d=>d && d>=from && d<=to;
   const R={};
-  /* توقف‌ها */
-  const tv=LS('nt_tavaqof_v1')||{}, stops=[];
-  Object.keys(tv).forEach(k=>{
-    const [d,sh]=k.split('|'); const day=nd(d); if(!In(day)) return;
-    ((tv[k]&&tv[k].stops)||[]).forEach(s=>stops.push({day,sh:sh||'',s}));
-  });
-  stops.sort((a,b)=>a.day.localeCompare(b.day)||(SHIFT_ORDER[a.sh]??9)-(SHIFT_ORDER[b.sh]??9)||(mins(a.s.from)??0)-(mins(b.s.from)??0));
-  R.stops=stops;
+  /* توقف‌ها: قاعده مشترک stops.js (دستگاه‌های تولید از فرم توقف، بقیه از برنامه روزانه) */
+  R.stops=window.ntStops.list(from,to,{shift:canSee('توقف شیفت'),prog:canSee('برنامه روزانه')});
   /* قرائت */
   const daf=(LS('nt_daftar_v1')||[]).filter(x=>x && x.dev).map(x=>Object.assign({},x,{date:nd(x.date)})).filter(x=>x.date);
   R.read=daf.filter(x=>In(x.date)).sort((a,b)=>a.date.localeCompare(b.date)||String(a.dev).localeCompare(String(b.dev),'fa'));
@@ -89,7 +81,7 @@ function collect(from,to){
 }
 /* هر بخش: کدام زبانه، چه نامی */
 const PARTS=[
-  {k:'stops',tab:'توقف شیفت',label:'توقف‌ها (خلاصه و لیست)'},
+  {k:'stops',tab:['توقف شیفت','برنامه روزانه'],label:'توقف‌ها (خلاصه و لیست)'},
   {k:'read',tab:'دفترچه قرائت',label:'قرائت و کارکرد دستگاه‌ها'},
   {k:'out',tab:'انبار',label:'خروج انبار'},
   {k:'inn',tab:'انبار',label:'ورود انبار'},
@@ -103,26 +95,24 @@ function sheets(R,from,to,sel){
   const S=[];
   const made='ساخته شده: '+today()+' — بازه: '+from+' تا '+to;
   if(sel.stops){
-    const per={}, cause={};
-    R.stops.forEach(({s})=>{
-      const d=s.to?dur(s.from,s.to):null, g=BROKEN.indexOf(s.cause)>-1?'خرابی':'سالم ولی کار نکرد';
-      const P=per[s.dev]||(per[s.dev]={n:0,t:0,b:0,i:0,open:0});
-      P.n++; if(d===null) P.open++; else { P.t+=d; if(g==='خرابی') P.b+=d; else P.i+=d; }
-      const C=cause[s.cause]||(cause[s.cause]={g,n:0,t:0}); C.n++; if(d!==null) C.t+=d;
+    const per={}, cause={}, G=window.ntStops.CLS;
+    R.stops.forEach(x=>{
+      const P=per[x.dev]||(per[x.dev]={n:0,t:0,em:0,pm:0,idle:0,open:0,src:{}}); P.n++; P.src[x.src]=1;
+      if(x.min===null) P.open++; else { P.t+=x.min; P[x.cls]+=x.min; }
+      const C=cause[x.cause]||(cause[x.cause]={g:{},n:0,t:0}); C.n++; C.g[G[x.cls]]=1; if(x.min!==null) C.t+=x.min;
     });
-    const aoa=[[ 'خلاصه توقف — '+made ],[],
-      ['دستگاه','تعداد توقف','جمع مدت (ساعت)','جمع مدت (س:د)','خرابی (ساعت)','سالم ولی کار نکرد (ساعت)','هنوز متوقف']];
+    const aoa=[[ 'خلاصه توقف — '+made ],['بیل، لودر و کامیون: از فرم توقف (ساعت دقیق). بقیه دستگاه‌ها: «مدت توقف» برنامه روزانه.'],
+      ['دستگاه','منبع','تعداد توقف','جمع مدت (ساعت)','جمع مدت (س:د)','خرابی (ساعت)','سرویس و نگهداری (ساعت)','سالم ولی کار نکرد (ساعت)','هنوز متوقف']];
     const devs=Object.keys(per).sort((a,b)=>per[b].t-per[a].t);
-    devs.forEach(d=>{ const P=per[d]; aoa.push([d,P.n,hrs(P.t),hm(P.t),hrs(P.b),hrs(P.i),P.open]); });
-    if(devs.length>1){ const T=devs.reduce((a,d)=>{ const P=per[d]; a.n+=P.n; a.t+=P.t; a.b+=P.b; a.i+=P.i; a.o+=P.open; return a; },{n:0,t:0,b:0,i:0,o:0});
-      aoa.push(['جمع',T.n,hrs(T.t),hm(T.t),hrs(T.b),hrs(T.i),T.o]); }
+    devs.forEach(d=>{ const P=per[d]; aoa.push([d,Object.keys(P.src).join('، '),P.n,hrs(P.t),hm(P.t),hrs(P.em),hrs(P.pm),hrs(P.idle),P.open]); });
+    if(devs.length>1){ const T=devs.reduce((a,d)=>{ const P=per[d]; a.n+=P.n; a.t+=P.t; a.em+=P.em; a.pm+=P.pm; a.idle+=P.idle; a.o+=P.open; return a; },{n:0,t:0,em:0,pm:0,idle:0,o:0});
+      aoa.push(['جمع','',T.n,hrs(T.t),hm(T.t),hrs(T.em),hrs(T.pm),hrs(T.idle),T.o]); }
     if(!devs.length) aoa.push(['در این بازه توقفی ثبت نشده است']);
     aoa.push([],['علت','گروه','تعداد','جمع مدت (ساعت)','جمع مدت (س:د)']);
-    Object.keys(cause).sort((a,b)=>cause[b].t-cause[a].t).forEach(c=>{ const C=cause[c]; aoa.push([c,C.g,C.n,hrs(C.t),hm(C.t)]); });
+    Object.keys(cause).sort((a,b)=>cause[b].t-cause[a].t).forEach(c=>{ const C=cause[c]; aoa.push([c,Object.keys(C.g).join('، '),C.n,hrs(C.t),hm(C.t)]); });
     S.push({name:'خلاصه توقف',aoa,head:2});
-    const L=[['تاریخ','شیفت','دستگاه','از ساعت','تا ساعت','مدت (دقیقه)','مدت (س:د)','علت','گروه علت','توضیح','ثبت‌کننده']];
-    R.stops.forEach(({day,sh,s})=>{ const d=s.to?dur(s.from,s.to):null;
-      L.push([day,sh,s.dev,s.from||'',s.to||'هنوز متوقف',d===null?'':d,d===null?'':hm(d),s.cause||'',BROKEN.indexOf(s.cause)>-1?'خرابی':'سالم ولی کار نکرد',s.note||'',s.by||'']); });
+    const L=[['تاریخ','شیفت','دستگاه','از ساعت','تا ساعت','مدت (دقیقه)','مدت (س:د)','علت','گروه علت','منبع','توضیح','ثبت‌کننده']];
+    R.stops.forEach(x=>{ L.push([x.day,x.sh,x.dev,x.from,x.src==='توقف شیفت'?(x.to||'هنوز متوقف'):'',x.min===null?'':x.min,x.min===null?'':hm(x.min),x.cause,G[x.cls],x.src,x.note,x.by]); });
     S.push({name:'توقف‌ها',aoa:L,head:0});
   }
   if(sel.read){
@@ -190,7 +180,7 @@ function ensureDlg(){
 function mask(el){ let g=latin(el.value).replace(/\D/g,'').slice(0,8), o=g.slice(0,4); if(g.length>4) o+='/'+g.slice(4,6); if(g.length>6) o+='/'+g.slice(6,8); if(o!==el.value) el.value=o; }
 function open(){
   ensureDlg();
-  const cur=monthRange(0), prev=monthRange(-1), parts=PARTS.filter(p=>canSee(p.tab));
+  const cur=monthRange(0), prev=monthRange(-1), parts=PARTS.filter(p=>[].concat(p.tab).some(canSee));
   $('ntRpBody').innerHTML=`
     <p>یک فایل اکسل با چند برگه ساخته و دانلود می‌شود. ستون‌ها راست‌به‌چپ و عددها قابل جمع هستند.</p>
     <div class="sycard"><h3>بازه</h3>

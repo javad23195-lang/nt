@@ -28,6 +28,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
       {date:'1405/07/02',y:1405,m:7,d:2,dev:'WA470',item:'روغن دیزل اتوماتیک 50-20',qty:20,why:'تعویض روغن WA470',cond:'',svc:1,svcName:'تعویض روغن موتور',doc:'2345'},
       {date:'1405/07/03',y:1405,m:7,d:3,dev:'ZL50',item:'واسکازين ۱۴۰',qty:1,why:'مورد نیاز ZL50',cond:''}]}),
     nt_anbar_in_v1:JSON.stringify({row:1394,rows:[{date:'1405/07/08',y:1405,m:7,d:8,item:'فیلتر هوا',qty:'۴',type:'نو',cond:'خرید',src:''}]}),
+    nt_prog_v1:JSON.stringify({'1405/07/09':{sup:'',tasks:[{id:'p1',dev:'لیفتراک کوماتسو 6تنی',prog:'تعمیر جک',kind:'EM',act:'سیستم هیدرولیک',sdur:'1:30'},{id:'p2',dev:'بیل مکانیکی کوماتسو PC290',prog:'تعمیر',kind:'EM',act:'موتور و قطعات',sdur:'4:00'}]}}),
     nt_anbar_codes_v1:JSON.stringify({'فیلتر هوا':{c:'555',d:'فیلتر هوا'}}),
     nt_kharid9_v1:JSON.stringify({row:5,rows:[{date:'1405/07/09',unit:'PC290',item:'شیلنگ هیدرولیک',u:'عدد',qty:2,bought:'',desc:'سایز 1/2',d1:'2400',d2:'',pri:'ضروری',buy:'',req:'',apr:'تایید شده',over:'',note:''}]}),
     nt_khadamat_v1:JSON.stringify({row:54,rows:[{dev:'PC290',act:'تعمیر پمپ',part:'پمپ',kind:'خارجی',meter:'22610',munit:'ساعت',open:'1405/07/06',done:'',y:1405,m:7,d:6,cdate:'',reason:''}]}),
@@ -44,7 +45,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   await p.check('input[name="rpR"][value="own"]'); await p.fill('#rpFrom','14050701'); await p.fill('#rpTo','۱۴۰۵/۰۷/۳۱');
   await sleep(200);
   ok(await p.inputValue('#rpFrom')==='1405/07/01','تاریخ خودکار خط‌دار شد');
-  ok((await p.locator('#rpN_stops').innerText()).includes('۴') && (await p.locator('#rpN_read').innerText()).includes('۳') && (await p.locator('#rpN_out').innerText()).includes('۲'),'تعداد ردیف هر بخش در بازه نشان داده می‌شود');
+  ok((await p.locator('#rpN_stops').innerText()).includes('۵') && (await p.locator('#rpN_read').innerText()).includes('۳') && (await p.locator('#rpN_out').innerText()).includes('۲'),'تعداد ردیف هر بخش در بازه نشان داده می‌شود');
   await p.screenshot({path:path.join(os.tmpdir(),'rp-dlg.png')});
   const [dl]=await Promise.all([p.waitForEvent('download'),p.click('#rpGo')]);
   ok(dl.suggestedFilename()==='NT-report-1405-07-01_1405-07-31.xlsx','نام فایل: '+dl.suggestedFilename());
@@ -55,12 +56,14 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   const A=n=>XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:''});
   const sum=A('خلاصه توقف');
   const r290=sum.find(r=>r[0]==='بیل مکانیکی کوماتسو PC290'), r400=sum.find(r=>r[0]==='بیل مکانیکی کوماتسو PC400'), tot=sum.find(r=>r[0]==='جمع');
-  ok(r290 && r290[1]===2 && r290[2]===5 && r290[3]==='5:00' && r290[4]===5 && r290[5]===0,'PC290: ۲ توقف، ۵ ساعت (با توقف شب که از نیمه‌شب گذشت)، همه خرابی — '+JSON.stringify(r290));
-  ok(r400 && r400[1]===2 && r400[2]===0.75 && r400[5]===0.75 && r400[6]===1,'PC400: ۲ توقف، ۰٫۷۵ ساعت سالم ولی کار نکرد، ۱ هنوز متوقف — '+JSON.stringify(r400));
-  ok(tot && tot[1]===4 && tot[2]===5.75,'ردیف جمع درست است');
+  const rL=sum.find(r=>r[0]==='لیفتراک کوماتسو 6تنی');
+  ok(r290 && r290[1]==='توقف شیفت' && r290[2]===2 && r290[3]===5 && r290[4]==='5:00' && r290[5]===5 && r290[7]===0,'PC290: ۲ توقف، ۵ ساعت خرابی (شب از نیمه‌شب گذشت؛ ۴ ساعت برنامه روزانه دوباره شمرده نشد) — '+JSON.stringify(r290));
+  ok(r400 && r400[2]===2 && r400[3]===0.75 && r400[7]===0.75 && r400[8]===1,'PC400: ۲ توقف، ۰٫۷۵ ساعت سالم ولی کار نکرد، ۱ هنوز متوقف — '+JSON.stringify(r400));
+  ok(rL && rL[1]==='برنامه روزانه' && rL[3]===1.5 && rL[5]===1.5,'لیفتراک از «مدت توقف» برنامه روزانه — '+JSON.stringify(rL));
+  ok(tot && tot[2]===5 && tot[3]===7.25,'ردیف جمع درست است '+JSON.stringify(tot));
   ok(sum.some(r=>r[0]==='خرابی موتور' && r[1]==='خرابی' && r[2]===1 && r[3]===2.5) && sum.some(r=>r[0]==='نبود راننده' && r[1]==='سالم ولی کار نکرد'),'جدول علت‌ها درست است');
   const L=A('توقف‌ها');
-  ok(L.length===5 && L[1][0]==='1405/07/05' && L[3][1]==='شب' && L[3][5]===150 && L[4][4]==='هنوز متوقف' && L[1][10]==='رضا','لیست توقف‌ها: فقط مهر، مرتب، مدت و ثبت‌کننده');
+  ok(L.length===6 && L[1][0]==='1405/07/05' && L[3][1]==='شب' && L[3][5]===150 && L[5][4]==='هنوز متوقف' && L[1][11]==='رضا' && L[4][9]==='برنامه روزانه' && L[4][8]==='خرابی','لیست توقف‌ها: فقط مهر، مرتب، مدت و ثبت‌کننده');
   const K=A('کارکرد دستگاه‌ها');
   const wa=K.find(r=>r[0]==='لودر کوماتسو WA470'), pc=K.find(r=>r[0]==='بیل مکانیکی کوماتسو PC290');
   ok(wa && wa[2]==='1405/06/28' && wa[3]===26900 && wa[5]===27150 && wa[6]===250,'کارکرد WA470 = ۲۵۰ ساعت (از آخرین قرائت قبل از بازه) — '+JSON.stringify(wa));
