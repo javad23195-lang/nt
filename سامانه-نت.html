@@ -164,6 +164,10 @@ body.ntlocked iframe{display:none!important}
 body.ntlocked .load{padding:0 20px;text-align:center;font-size:1rem;font-weight:700}
 @media print{ .sybar,.sydlg,.sytoast,.sybtn{display:none!important} }
 </style>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0B5C7A">
+<link rel="apple-touch-icon" href="lib/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
 </head>
 <body>
 
@@ -764,10 +768,12 @@ function paint(){
     if(conflict){ cls='err'; txt='نیاز به انتخاب'; }
     else if(phase==='busy'){ cls='busy'; txt='در حال همگام‌سازی…'; }
     else if(phase==='err'){ cls='err'; txt='همگام نشد'; }
+    else if(phase==='off'){ cls='busy'; txt='بدون اینترنت'; }
     else { cls='ok'; txt=s.at?'همگام '+fmtAt(s.at).replace('امروز ',''):'ثبت‌کننده'; }
   }else if(m==='v'){
     if(phase==='busy'){ cls='busy'; txt='در حال دریافت…'; }
     else if(phase==='err'){ cls='err'; txt='دریافت نشد'; }
+    else if(phase==='off'){ cls='busy'; txt='بدون اینترنت'; }
     else { cls='ok'; txt='مشاهده'; }
   }
   /* فرزندان دکمه یک بار ساخته می‌شوند؛ اگر وسط کلیک عوض شوند، کلیک گم می‌شود */
@@ -779,6 +785,9 @@ function paint(){
   /* نوار زیر زبانه‌ها */
   let show=false, bc='', bt='', bb='', act=null;
   if(m==='w' && conflict){ show=true; bc='err'; bt='اطلاعات مشترک با اطلاعات این سیستم فرق دارد. همگام‌سازی متوقف است.'; bb='انتخاب'; act=()=>viewConflict(); }
+  else if((m==='w' || m==='v') && phase==='off'){ show=true; bc='new'; bb='تلاش دوباره'; act=()=>sync({manual:true});
+    bt=m==='w'?'اینترنت نیست. ثبت‌ها روی همین گوشی ذخیره می‌شود و وقتی اینترنت آمد، خودکار فرستاده می‌شود.'+(unsent()?' (ثبت ارسال‌نشده دارد)':'')
+             :'اینترنت نیست. اطلاعات آخرین دریافت نشان داده می‌شود: '+fmtAt(s.at); }
   else if((m==='w' || m==='v') && phase==='err'){ show=true; bc='err'; bt=(m==='w'?'همگام نشد — ':'دریافت نشد — ')+note+(m==='v'?'. اطلاعات نشان داده شده: '+fmtAt(s.at):''); bb='تلاش دوباره'; act=()=>sync({manual:true}); if(needCode){ bb='وارد کردن کد'; act=()=>viewJoin(''); } }
   else if((m==='w' || m==='v') && waiting){ show=true; bc='new'; bt='اطلاعات جدید رسید.'; bb='نمایش'; act=()=>sync({now:true}); }
   else if(m==='w' && tip){ show=true; bc='new'; bt=tip; bb='دیدم'; act=()=>{ tip=''; paint(); }; }
@@ -880,6 +889,7 @@ async function sync(opt){
     const c=e && e.message;
     if(cfg.uid && (c==='PASS' || c==='AUTH')){ needCode=true; setPhase('err','کلید یا رمز اطلاعات عوض شده است. از مدیر کد اتصال جدید بگیرید'); }
     else if(c==='PASS'){ setPhase('err','رمز اطلاعات مشترک عوض شده است'); viewPass(m); }
+    else if(c==='NET') setPhase('off',errText(e));     // بدون اینترنت: ثبت‌ها روی همین سیستم می‌ماند و بعداً فرستاده می‌شود
     else setPhase('err',errText(e));
     lastErr={t:note,at:Date.now()};
   }finally{ busy=false; }
@@ -894,7 +904,7 @@ function tick(){
   const m=mode(); if((m!=='w' && m!=='v') || busy || conflict) return;
   const now=Date.now();
   if(waiting){ sync({}); return; }
-  if(phase==='err'){ if(now-lastChk>T.retry) sync({}); return; }
+  if(phase==='err' || phase==='off'){ if(now-lastChk>(phase==='off'?Math.min(T.retry,30000):T.retry)) sync({}); return; }
   if(document.hidden) { if(m==='v') return; }
   if(now-lastChk >= (m==='w'?T.pollW:T.poll)){ sync({}); return; }
   if(m!=='w' || !mayDirty) return;
@@ -1052,7 +1062,7 @@ async function join(){
     lsSet(CFG,cfg); lsSet(STK,{}); try{ localStorage.removeItem(BASE); }catch(e){}
     incoming=null; conflict=null; waiting=false; needCode=false;
     await sync({force:true});
-    if(phase==='err'){ const n=note; lsSet(STK,{}); return fail(n); }
+    if((phase==='err'||phase==='off')){ const n=note; lsSet(STK,{}); return fail(n); }
     if(conflict) return;
     toast('وصل شد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),700);
   }catch(e){ fail(e && e.message==='AUTH'?'این کد دیگر معتبر نیست (کلید باطل شده است). از مدیر کد جدید بگیرید.':errText(e)); }
@@ -1198,7 +1208,7 @@ async function rotate(){
     if(p1){ cfg.salt=newSalt(); cfg.key=await derive(p1,cfg.salt); }
     lsSet(CFG,cfg);
     await sync({replace:true,force:true});
-    if(phase==='err') throw Object.assign(new Error('X'),{text:note});
+    if((phase==='err'||phase==='off')) throw Object.assign(new Error('X'),{text:note});
     lock(false); msg('انجام شد. حالا کلید قدیمی را در GitHub پاک کنید و از بخش «کاربران» به هر کاربر کد اتصال جدید بدهید.');
   }catch(e){ cfg=keep; lsSet(CFG,cfg); lock(false); msg(e.text||errText(e),true); }
 }
@@ -1260,7 +1270,7 @@ async function startWriter(replace){
     incoming=null; conflict=null; waiting=false; needCode=false;
     msg('در حال همگام‌سازی…');
     if(replace) await sync({replace:true,resolve:'give',force:true}); else await sync({force:true});
-    if(phase==='err'){ const n=note; lsSet(STK,{}); return fail(n); }
+    if((phase==='err'||phase==='off')){ const n=note; lsSet(STK,{}); return fail(n); }
     if(conflict) return;                                   // پنجره انتخاب باز شده است
     toast('این سیستم، سیستم مدیر شد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),700);
   }catch(e){ fail(e.text||errText(e)); }
@@ -1279,7 +1289,7 @@ async function startViewer(pass,w){
     if(was!=='w' && was!=='v'){ lsSet(STK,{}); try{ localStorage.removeItem(BASE); }catch(e){} }
     incoming=null; waiting=false; needCode=false;
     await sync({manual:true,now:true});
-    if(phase==='err'){ lock(false); msg(note,true); return; }
+    if((phase==='err'||phase==='off')){ lock(false); msg(note,true); return; }
     toast('اطلاعات دریافت شد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),700);
   }catch(e){ lock(false); msg(e.text||errText(e),true); }
 }
@@ -1352,6 +1362,8 @@ function startTimers(){
   document.addEventListener('visibilitychange',wake);
   window.addEventListener('pagehide',()=>{ if(!busy && !conflict && mode()==='w' && unsent()) sync({force:true}); });
   window.addEventListener('focus',wake);
+  /* اینترنت برگشت: هر چه روی این سیستم مانده فرستاده شود */
+  window.addEventListener('online',()=>{ if(!busy && !conflict) sync({force:true}); });
   /* اطلاعات تازه هنگام رفتن به زبانه دیگر نشان داده می‌شود */
   $('tabs').addEventListener('click',()=>{ if(waiting) sync({now:true}); },true);
 }
@@ -2250,6 +2262,47 @@ function devMini(devName){
 window.addEventListener('message',e=>{ if(e && e.data && e.data.nt==='charts') open(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape' && $('ntChDlg') && !$('ntChDlg').hidden) close(); });
 window.ntCharts={open,close,devMini,stopData,toMin,workMonths,oilData,readingsByDev};
+})();
+</script>
+<script>
+/* ============ نصب روی گوشی و کار بدون اینترنت ============
+   sw.js (ریشه مخزن) صفحه و کتابخانه‌ها را نگه می‌دارد تا سامانه بدون اینترنت هم باز شود.
+   ثبت‌ها مثل همیشه در حافظه همین گوشی است و با برگشتن اینترنت فرستاده می‌شود (sync.js). */
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const DKEY='ntpwa_hide';          // «بعداً» — نام با nt_ شروع نمی‌شود، پس ارسال نمی‌شود
+const standalone=()=>{ try{ return matchMedia('(display-mode: standalone)').matches || navigator.standalone===true; }catch(e){ return false; } };
+const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent||'');
+const ios=/iPhone|iPad|iPod/i.test(navigator.userAgent||'');
+let prompt=null;
+
+/* ۱) ثبت Service Worker */
+if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost' || location.hostname==='127.0.0.1')){
+  window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
+/* ۲) حافظه ماندگار: مرورگر اطلاعات را هنگام کمبود جا پاک نکند */
+try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persisted().then(p=>{ if(!p) navigator.storage.persist().catch(()=>{}); }).catch(()=>{}); }catch(e){}
+
+/* ۳) نوار «نصب روی گوشی» */
+function hidden(){ try{ return Date.now()-(+localStorage.getItem(DKEY)||0) < 7*86400000; }catch(e){ return false; } }
+function bar(){
+  const old=$('ntPwaBar'); if(old) old.remove();
+  if(standalone() || hidden() || window.ntLocked || !mobile) return;
+  if(!prompt && !(ios && mobile)) return;
+  const b=document.createElement('div'); b.className='sybar new'; b.id='ntPwaBar';
+  b.innerHTML='<span>'+(prompt?'سامانه را روی گوشی نصب کنید تا بدون اینترنت هم باز شود.'
+    :'برای کار بدون اینترنت: در Safari دکمه اشتراک‌گذاری ← «Add to Home Screen» را بزنید.')+'</span>'
+    +(prompt?'<button type="button" id="ntPwaGo">نصب</button>':'')+'<button type="button" id="ntPwaNo">بعداً</button>';
+  const at=$('ntSyBar'); if(at && at.parentNode) at.parentNode.insertBefore(b,at.nextSibling); else document.body.prepend(b);
+  const go=$('ntPwaGo'); if(go) go.addEventListener('click',async()=>{ const p=prompt; prompt=null; b.remove(); try{ p.prompt(); await p.userChoice; }catch(e){} });
+  $('ntPwaNo').addEventListener('click',()=>{ try{ localStorage.setItem(DKEY,String(Date.now())); }catch(e){} b.remove(); });
+}
+function later(){ if(window.ntLocked){ setTimeout(later,3000); return; } bar(); }   // بعد از اتصال هم نشان داده شود
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); prompt=e; later(); });
+window.addEventListener('appinstalled',()=>{ prompt=null; const b=$('ntPwaBar'); if(b) b.remove(); });
+if(ios && mobile) setTimeout(later,4000);
+window.ntPwa={standalone,get canInstall(){ return !!prompt; },install:()=>{ if(prompt){ const p=prompt; prompt=null; try{ p.prompt(); }catch(e){} } }};
 })();
 </script>
 </body>

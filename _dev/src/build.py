@@ -9,6 +9,7 @@ def rep(a,b,n=1):
     s=s.replace(a,b)
 # 1) css
 rep("</style>\n</head>", css+"</style>\n</head>")
+rep("</head>", '<link rel="manifest" href="manifest.webmanifest">\n<meta name="theme-color" content="#0B5C7A">\n<link rel="apple-touch-icon" href="lib/icon-192.png">\n<meta name="apple-mobile-web-app-capable" content="yes">\n</head>')
 # 2) دکمه و نوار وضعیت
 rep('  <div class="tabs" id="tabs"></div>\n',
     '  <div class="tabrow"><div class="tabs" id="tabs"></div><button type="button" class="sybtn" id="ntSyBtn"><span class="d"></span><span class="tx">اطلاعات مشترک</span></button></div>\n'
@@ -41,6 +42,7 @@ stp=open('stops.js',encoding='utf-8').read()
 rpt=open('report.js',encoding='utf-8').read()
 qr=open('qr.js',encoding='utf-8').read()
 ch=open('charts.js',encoding='utf-8').read()
-rep("\n</script>\n</body>\n</html>", "\n</script>\n<script>\n"+js+"</script>\n<script>\n"+stp+"</script>\n<script>\n"+rpt+"</script>\n<script>\n"+qr+"</script>\n<script>\n"+ch+"</script>\n</body>\n</html>")
+pw=open('pwa.js',encoding='utf-8').read()
+rep("\n</script>\n</body>\n</html>", "\n</script>\n<script>\n"+js+"</script>\n<script>\n"+stp+"</script>\n<script>\n"+rpt+"</script>\n<script>\n"+qr+"</script>\n<script>\n"+ch+"</script>\n<script>\n"+pw+"</script>\n</body>\n</html>")
 open(out,'w',encoding='utf-8').write(s)
 print('built',len(s))

@@ -416,10 +416,12 @@ function paint(){
     if(conflict){ cls='err'; txt='نیاز به انتخاب'; }
     else if(phase==='busy'){ cls='busy'; txt='در حال همگام‌سازی…'; }
     else if(phase==='err'){ cls='err'; txt='همگام نشد'; }
+    else if(phase==='off'){ cls='busy'; txt='بدون اینترنت'; }
     else { cls='ok'; txt=s.at?'همگام '+fmtAt(s.at).replace('امروز ',''):'ثبت‌کننده'; }
   }else if(m==='v'){
     if(phase==='busy'){ cls='busy'; txt='در حال دریافت…'; }
     else if(phase==='err'){ cls='err'; txt='دریافت نشد'; }
+    else if(phase==='off'){ cls='busy'; txt='بدون اینترنت'; }
     else { cls='ok'; txt='مشاهده'; }
   }
   /* فرزندان دکمه یک بار ساخته می‌شوند؛ اگر وسط کلیک عوض شوند، کلیک گم می‌شود */
@@ -431,6 +433,9 @@ function paint(){
   /* نوار زیر زبانه‌ها */
   let show=false, bc='', bt='', bb='', act=null;
   if(m==='w' && conflict){ show=true; bc='err'; bt='اطلاعات مشترک با اطلاعات این سیستم فرق دارد. همگام‌سازی متوقف است.'; bb='انتخاب'; act=()=>viewConflict(); }
+  else if((m==='w' || m==='v') && phase==='off'){ show=true; bc='new'; bb='تلاش دوباره'; act=()=>sync({manual:true});
+    bt=m==='w'?'اینترنت نیست. ثبت‌ها روی همین گوشی ذخیره می‌شود و وقتی اینترنت آمد، خودکار فرستاده می‌شود.'+(unsent()?' (ثبت ارسال‌نشده دارد)':'')
+             :'اینترنت نیست. اطلاعات آخرین دریافت نشان داده می‌شود: '+fmtAt(s.at); }
   else if((m==='w' || m==='v') && phase==='err'){ show=true; bc='err'; bt=(m==='w'?'همگام نشد — ':'دریافت نشد — ')+note+(m==='v'?'. اطلاعات نشان داده شده: '+fmtAt(s.at):''); bb='تلاش دوباره'; act=()=>sync({manual:true}); if(needCode){ bb='وارد کردن کد'; act=()=>viewJoin(''); } }
   else if((m==='w' || m==='v') && waiting){ show=true; bc='new'; bt='اطلاعات جدید رسید.'; bb='نمایش'; act=()=>sync({now:true}); }
   else if(m==='w' && tip){ show=true; bc='new'; bt=tip; bb='دیدم'; act=()=>{ tip=''; paint(); }; }
@@ -532,6 +537,7 @@ async function sync(opt){
     const c=e && e.message;
     if(cfg.uid && (c==='PASS' || c==='AUTH')){ needCode=true; setPhase('err','کلید یا رمز اطلاعات عوض شده است. از مدیر کد اتصال جدید بگیرید'); }
     else if(c==='PASS'){ setPhase('err','رمز اطلاعات مشترک عوض شده است'); viewPass(m); }
+    else if(c==='NET') setPhase('off',errText(e));     // بدون اینترنت: ثبت‌ها روی همین سیستم می‌ماند و بعداً فرستاده می‌شود
     else setPhase('err',errText(e));
     lastErr={t:note,at:Date.now()};
   }finally{ busy=false; }
@@ -546,7 +552,7 @@ function tick(){
   const m=mode(); if((m!=='w' && m!=='v') || busy || conflict) return;
   const now=Date.now();
   if(waiting){ sync({}); return; }
-  if(phase==='err'){ if(now-lastChk>T.retry) sync({}); return; }
+  if(phase==='err' || phase==='off'){ if(now-lastChk>(phase==='off'?Math.min(T.retry,30000):T.retry)) sync({}); return; }
   if(document.hidden) { if(m==='v') return; }
   if(now-lastChk >= (m==='w'?T.pollW:T.poll)){ sync({}); return; }
   if(m!=='w' || !mayDirty) return;
@@ -704,7 +710,7 @@ async function join(){
     lsSet(CFG,cfg); lsSet(STK,{}); try{ localStorage.removeItem(BASE); }catch(e){}
     incoming=null; conflict=null; waiting=false; needCode=false;
     await sync({force:true});
-    if(phase==='err'){ const n=note; lsSet(STK,{}); return fail(n); }
+    if((phase==='err'||phase==='off')){ const n=note; lsSet(STK,{}); return fail(n); }
     if(conflict) return;
     toast('وصل شد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),700);
   }catch(e){ fail(e && e.message==='AUTH'?'این کد دیگر معتبر نیست (کلید باطل شده است). از مدیر کد جدید بگیرید.':errText(e)); }
@@ -850,7 +856,7 @@ async function rotate(){
     if(p1){ cfg.salt=newSalt(); cfg.key=await derive(p1,cfg.salt); }
     lsSet(CFG,cfg);
     await sync({replace:true,force:true});
-    if(phase==='err') throw Object.assign(new Error('X'),{text:note});
+    if((phase==='err'||phase==='off')) throw Object.assign(new Error('X'),{text:note});
     lock(false); msg('انجام شد. حالا کلید قدیمی را در GitHub پاک کنید و از بخش «کاربران» به هر کاربر کد اتصال جدید بدهید.');
   }catch(e){ cfg=keep; lsSet(CFG,cfg); lock(false); msg(e.text||errText(e),true); }
 }
@@ -912,7 +918,7 @@ async function startWriter(replace){
     incoming=null; conflict=null; waiting=false; needCode=false;
     msg('در حال همگام‌سازی…');
     if(replace) await sync({replace:true,resolve:'give',force:true}); else await sync({force:true});
-    if(phase==='err'){ const n=note; lsSet(STK,{}); return fail(n); }
+    if((phase==='err'||phase==='off')){ const n=note; lsSet(STK,{}); return fail(n); }
     if(conflict) return;                                   // پنجره انتخاب باز شده است
     toast('این سیستم، سیستم مدیر شد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),700);
   }catch(e){ fail(e.text||errText(e)); }
@@ -931,7 +937,7 @@ async function startViewer(pass,w){
     if(was!=='w' && was!=='v'){ lsSet(STK,{}); try{ localStorage.removeItem(BASE); }catch(e){} }
     incoming=null; waiting=false; needCode=false;
     await sync({manual:true,now:true});
-    if(phase==='err'){ lock(false); msg(note,true); return; }
+    if((phase==='err'||phase==='off')){ lock(false); msg(note,true); return; }
     toast('اطلاعات دریافت شد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),700);
   }catch(e){ lock(false); msg(e.text||errText(e),true); }
 }
@@ -1004,6 +1010,8 @@ function startTimers(){
   document.addEventListener('visibilitychange',wake);
   window.addEventListener('pagehide',()=>{ if(!busy && !conflict && mode()==='w' && unsent()) sync({force:true}); });
   window.addEventListener('focus',wake);
+  /* اینترنت برگشت: هر چه روی این سیستم مانده فرستاده شود */
+  window.addEventListener('online',()=>{ if(!busy && !conflict) sync({force:true}); });
   /* اطلاعات تازه هنگام رفتن به زبانه دیگر نشان داده می‌شود */
   $('tabs').addEventListener('click',()=>{ if(waiting) sync({now:true}); },true);
 }
