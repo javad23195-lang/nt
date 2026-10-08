@@ -9,7 +9,7 @@ const MONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرد�
 const C={red:'#B3261E',gray:'#8A97A3',blue:'#0B5C7A',green:'#1E8E5A'};
 const OILC=['#0B5C7A','#C77A1A','#1E8E5A','#7B3FA0','#B3261E','#8A97A3'];
 const $=id=>document.getElementById(id);
-const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+const fa=n=>String(n==null?'':n).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);   // رقم فارسی + امن برای HTML
 const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const p2=n=>String(n).padStart(2,'0');
 const latin=s=>String(s==null?'':s).replace(/[۰-۹]/g,d=>'0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]).replace(/[٠-٩]/g,d=>'0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);

@@ -79,7 +79,21 @@ function collect(){
   try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(isSync(k)) keys[k]=localStorage.getItem(k); } }catch(e){}
   return keys;
 }
-function pick(keys){ const o={}; Object.keys(keys||{}).forEach(k=>{ if(isSync(k) && typeof keys[k]==='string') o[k]=keys[k]; }); return o; }
+/* امنیت: اطلاعاتی که از سیستم‌های دیگر می‌رسد نباید بتواند در صفحه کد اجرا کند (XSS).
+   در همه متن‌ها «<» «>» «"» با نشانه‌های بی‌خطر هم‌شکل (‹ › ″) عوض می‌شود؛ برای اطلاعات نت این سه نشانه لازم نیست. */
+const SAFE_RE=/[<>"]/g, SAFE_MAP={'<':'‹','>':'›','"':'″'};
+const safeStr=t=>String(t).replace(SAFE_RE,c=>SAFE_MAP[c]);
+function safeVal(v){
+  if(typeof v==='string') return safeStr(v);
+  if(Array.isArray(v)) return v.map(safeVal);
+  if(v && typeof v==='object'){ const o={}; Object.keys(v).forEach(k=>{ o[safeStr(k)]=safeVal(v[k]); }); return o; }
+  return v;
+}
+function safeJson(t){
+  if(!/[<>]|\\"/.test(t)) return t;                       // بیشتر وقت‌ها: بدون تغییر
+  try{ return JSON.stringify(safeVal(JSON.parse(t))); }catch(e){ return safeStr(t); }
+}
+function pick(keys){ const o={}; Object.keys(keys||{}).forEach(k=>{ if(isSync(k) && typeof keys[k]==='string') o[k]=safeJson(keys[k]); }); return o; }
 function hashOf(keys){
   let a=5381, b=52711, n=0;
   Object.keys(keys).sort().forEach(k=>{

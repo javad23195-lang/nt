@@ -167,6 +167,8 @@ body.ntdriver .tabs{visibility:hidden}
 body.ntdriver .load{display:none!important}
 body.ntdriver iframe{display:none!important}
 </style>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://api.github.com https://raw.githubusercontent.com https://cdn.jsdelivr.net http://localhost:* http://127.0.0.1:*; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self' blob: mediastream:; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<script>window.addEventListener("message",function(e){ if(e.origin!==location.origin && location.origin!=="null"){ e.stopImmediatePropagation(); } },true);</script>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0B5C7A">
 <link rel="apple-touch-icon" href="lib/icon-192.png">
@@ -434,7 +436,21 @@ function collect(){
   try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(isSync(k)) keys[k]=localStorage.getItem(k); } }catch(e){}
   return keys;
 }
-function pick(keys){ const o={}; Object.keys(keys||{}).forEach(k=>{ if(isSync(k) && typeof keys[k]==='string') o[k]=keys[k]; }); return o; }
+/* امنیت: اطلاعاتی که از سیستم‌های دیگر می‌رسد نباید بتواند در صفحه کد اجرا کند (XSS).
+   در همه متن‌ها «<» «>» «"» با نشانه‌های بی‌خطر هم‌شکل (‹ › ″) عوض می‌شود؛ برای اطلاعات نت این سه نشانه لازم نیست. */
+const SAFE_RE=/[<>"]/g, SAFE_MAP={'<':'‹','>':'›','"':'″'};
+const safeStr=t=>String(t).replace(SAFE_RE,c=>SAFE_MAP[c]);
+function safeVal(v){
+  if(typeof v==='string') return safeStr(v);
+  if(Array.isArray(v)) return v.map(safeVal);
+  if(v && typeof v==='object'){ const o={}; Object.keys(v).forEach(k=>{ o[safeStr(k)]=safeVal(v[k]); }); return o; }
+  return v;
+}
+function safeJson(t){
+  if(!/[<>]|\\"/.test(t)) return t;                       // بیشتر وقت‌ها: بدون تغییر
+  try{ return JSON.stringify(safeVal(JSON.parse(t))); }catch(e){ return safeStr(t); }
+}
+function pick(keys){ const o={}; Object.keys(keys||{}).forEach(k=>{ if(isSync(k) && typeof keys[k]==='string') o[k]=safeJson(keys[k]); }); return o; }
 function hashOf(keys){
   let a=5381, b=52711, n=0;
   Object.keys(keys).sort().forEach(k=>{
@@ -1494,7 +1510,7 @@ const LIB_LOCAL='lib/xlsx.mini.min.js', LIB_CDN='https://cdn.jsdelivr.net/npm/xl
 const MONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 /* گروه علت‌های توقف — همان فهرست فرم «توقف شیفت» */
 const $=id=>document.getElementById(id);
-const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+const fa=n=>String(n==null?'':n).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);   // رقم فارسی + امن برای HTML
 const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const p2=n=>String(n).padStart(2,'0');
 const latin=s=>String(s==null?'':s).replace(/[۰-۹]/g,d=>'0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]).replace(/[٠-٩]/g,d=>'0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
@@ -1754,7 +1770,7 @@ const LIB_QR=['lib/qrcode.js','https://cdn.jsdelivr.net/npm/qrcode-generator@1.4
 const LIB_SCAN=['lib/html5-qrcode.min.js','https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js'];
 
 const $=id=>document.getElementById(id);
-const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+const fa=n=>String(n==null?'':n).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);   // رقم فارسی + امن برای HTML
 const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const p2=n=>String(n).padStart(2,'0');
 const latin=s=>String(s==null?'':s).replace(/[۰-۹]/g,d=>'0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]).replace(/[٠-٩]/g,d=>'0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
@@ -2146,7 +2162,7 @@ const MONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرد�
 const C={red:'#B3261E',gray:'#8A97A3',blue:'#0B5C7A',green:'#1E8E5A'};
 const OILC=['#0B5C7A','#C77A1A','#1E8E5A','#7B3FA0','#B3261E','#8A97A3'];
 const $=id=>document.getElementById(id);
-const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+const fa=n=>String(n==null?'':n).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);   // رقم فارسی + امن برای HTML
 const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const p2=n=>String(n).padStart(2,'0');
 const latin=s=>String(s==null?'':s).replace(/[۰-۹]/g,d=>'0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]).replace(/[٠-٩]/g,d=>'0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);

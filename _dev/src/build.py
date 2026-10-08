@@ -9,6 +9,9 @@ def rep(a,b,n=1):
     s=s.replace(a,b)
 # 1) css
 rep("</style>\n</head>", css+"</style>\n</head>")
+# امنیت: سیاست محتوا (اطلاعات فقط به GitHub فرستاده می‌شود) و نپذیرفتن پیام از سایت‌های دیگر
+CSP="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://api.github.com https://raw.githubusercontent.com https://cdn.jsdelivr.net http://localhost:* http://127.0.0.1:*; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self' blob: mediastream:; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'"
+rep("</head>", '<meta http-equiv="Content-Security-Policy" content="'+CSP+'">\n<script>window.addEventListener("message",function(e){ if(e.origin!==location.origin && location.origin!=="null"){ e.stopImmediatePropagation(); } },true);</script>\n</head>')
 rep("</head>", '<link rel="manifest" href="manifest.webmanifest">\n<meta name="theme-color" content="#0B5C7A">\n<link rel="apple-touch-icon" href="lib/icon-192.png">\n<meta name="apple-mobile-web-app-capable" content="yes">\n</head>')
 # 2) دکمه و نوار وضعیت
 rep('  <div class="tabs" id="tabs"></div>\n',
