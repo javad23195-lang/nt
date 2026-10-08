@@ -26,8 +26,9 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
       {dev:'بیل مکانیکی کوماتسو PC290',unit:'ساعت',val:22600,date:'1405/07/04'}]),
     nt_anbar_out_v1:JSON.stringify({row:720,rows:[
       {date:'1405/07/02',y:1405,m:7,d:2,dev:'WA470',item:'روغن دیزل اتوماتیک 50-20',qty:20,why:'تعویض روغن WA470',cond:'',svc:1,svcName:'تعویض روغن موتور',doc:'2345'},
-      {date:'1405/06/25',y:1405,m:6,d:25,dev:'ZL50',item:'فیلتر روغن',qty:1,why:'مورد نیاز ZL50',cond:''}]}),
+      {date:'1405/07/03',y:1405,m:7,d:3,dev:'ZL50',item:'واسکازين ۱۴۰',qty:1,why:'مورد نیاز ZL50',cond:''}]}),
     nt_anbar_in_v1:JSON.stringify({row:1394,rows:[{date:'1405/07/08',y:1405,m:7,d:8,item:'فیلتر هوا',qty:'۴',type:'نو',cond:'خرید',src:''}]}),
+    nt_anbar_codes_v1:JSON.stringify({'فیلتر هوا':{c:'555',d:'فیلتر هوا'}}),
     nt_kharid9_v1:JSON.stringify({row:5,rows:[{date:'1405/07/09',unit:'PC290',item:'شیلنگ هیدرولیک',u:'عدد',qty:2,bought:'',desc:'سایز 1/2',d1:'2400',d2:'',pri:'ضروری',buy:'',req:'',apr:'تایید شده',over:'',note:''}]}),
     nt_khadamat_v1:JSON.stringify({row:54,rows:[{dev:'PC290',act:'تعمیر پمپ',part:'پمپ',kind:'خارجی',meter:'22610',munit:'ساعت',open:'1405/07/06',done:'',y:1405,m:7,d:6,cdate:'',reason:''}]}),
     nt_moshkel_v1:JSON.stringify({row:5,rows:[{y:1405,m:7,d:7,dev:'WA470',sys:'هیدرولیک',desc:'نشتی',sev:'بالا',cur:'در حال کار',part:'بله',state:'باز',fix:'',src:'دفترچه'}]})};
@@ -43,7 +44,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   await p.check('input[name="rpR"][value="own"]'); await p.fill('#rpFrom','14050701'); await p.fill('#rpTo','۱۴۰۵/۰۷/۳۱');
   await sleep(200);
   ok(await p.inputValue('#rpFrom')==='1405/07/01','تاریخ خودکار خط‌دار شد');
-  ok((await p.locator('#rpN_stops').innerText()).includes('۴') && (await p.locator('#rpN_read').innerText()).includes('۳') && (await p.locator('#rpN_out').innerText()).includes('۱'),'تعداد ردیف هر بخش در بازه نشان داده می‌شود');
+  ok((await p.locator('#rpN_stops').innerText()).includes('۴') && (await p.locator('#rpN_read').innerText()).includes('۳') && (await p.locator('#rpN_out').innerText()).includes('۲'),'تعداد ردیف هر بخش در بازه نشان داده می‌شود');
   await p.screenshot({path:path.join(os.tmpdir(),'rp-dlg.png')});
   const [dl]=await Promise.all([p.waitForEvent('download'),p.click('#rpGo')]);
   ok(dl.suggestedFilename()==='NT-report-1405-07-01_1405-07-31.xlsx','نام فایل: '+dl.suggestedFilename());
@@ -65,7 +66,10 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   ok(wa && wa[2]==='1405/06/28' && wa[3]===26900 && wa[5]===27150 && wa[6]===250,'کارکرد WA470 = ۲۵۰ ساعت (از آخرین قرائت قبل از بازه) — '+JSON.stringify(wa));
   ok(pc && pc[6]===0 && !K.some(r=>r[0]==='لودر ZL50'),'دستگاه بدون قرائت در بازه نمی‌آید');
   ok(A('قرائت').length===4,'برگه قرائت: ۳ قرائت مهر');
-  const O=A('خروج انبار'); ok(O.length===2 && O[1][4]===20 && typeof O[1][4]==='number' && O[1][7]==='تعویض روغن موتور' && O[1][8]==='2345','خروج انبار: فقط مهر، مقدار عددی، نوع و شماره درخواست');
+  const O=A('خروج انبار'); ok(O.length===3 && O[1][4]===20 && typeof O[1][4]==='number' && O[1][7]==='تعویض روغن موتور' && O[1][8]==='2345','خروج انبار: فقط مهر، مقدار عددی، نوع و شماره درخواست');
+  ok(O[1][2]===921013,'کد کالا از کاتالوگ انبار آمد (ردیف بدون کد) — '+O[1][2]);
+  ok(O[2][2]===963171,'کد کالا با رقم فارسی و «ي» عربی هم پیدا شد — '+O[2][2]);
+  ok(A('ورود انبار')[1][1]===555,'کد دستی کالای بیرون از کاتالوگ آمد — '+A('ورود انبار')[1][1]);
   ok(A('ورود انبار')[1][3]===4,'مقدار با رقم فارسی به عدد تبدیل شد');
   ok(A('درخواست خرید')[1][7]==='2400' && A('خدمات')[1][3]==='تعمیر پمپ' && A('مشکلات')[1][3]==='نشتی','خرید، خدمات و مشکلات درست آمد');
   const z=require('child_process').execSync(`python3 -c "import zipfile,sys;z=zipfile.ZipFile(sys.argv[1]);print(sum(1 for n in z.namelist() if n.startswith('xl/worksheets/') and b'rightToLeft=\\"1\\"' in z.read(n)))" ${file}`).toString().trim();

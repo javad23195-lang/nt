@@ -35,8 +35,36 @@ const hrs=m=>Math.round(m/60*100)/100;
 const num=v=>{ const s=latin(v).replace(/,/g,'').trim(); return s!=='' && !isNaN(+s) ? +s : (v==null?'':v); };
 const canSee=name=>{ try{ return window.ntSync && ntSync.canSee ? ntSync.canSee(name) : true; }catch(e){ return true; } };
 
+/* ---------- کد کالا: همان ترتیب زبانه «انبار» ----------
+   کاتالوگ انبار داخل خود فرم انبار است (const DATA)، نه در localStorage؛ پس از DOCS خوانده می‌شود. */
+const norm=s=>latin(s||'').replace(/[ىي]/g,'ی').replace(/ك/g,'ک').replace(/‌/g,' ').replace(/\s+/g,' ').trim().toLowerCase();
+let CAT=null;
+function catalog(){
+  if(CAT) return CAT;
+  CAT=new Map();
+  try{
+    const doc=(typeof DOCS!=='undefined'?DOCS:[]).find(x=>x && x.name==='انبار');
+    if(doc){
+      const bin=atob(doc.b64), u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i);
+      const html=new TextDecoder('utf-8').decode(u);
+      const m=/const DATA\s*=\s*(\{.*?\});\s*\n/.exec(html);
+      if(m) (JSON.parse(m[1]).items||[]).forEach(o=>{ const k=norm(o.d); if(k && o.c!=null && o.c!=='' && !CAT.has(k)) CAT.set(k,String(o.c)); });
+    }
+  }catch(e){}
+  /* کدهای تازه «درخواست خرید» */
+  try{ (LS('nt_kharid_cat_v1')||[]).forEach(o=>{ const k=o&&norm(o.d); if(k && o.c!=null && o.c!=='' && !CAT.has(k)) CAT.set(k,String(o.c)); }); }catch(e){}
+  return CAT;
+}
+function codeOf(r){
+  const c=catalog().get(norm(r.item)); if(c) return c;
+  const own=String(r.code||'').trim(); if(own) return own;
+  const mem=(LS('nt_anbar_codes_v1')||{})[norm(r.item)];
+  return mem && mem.c ? String(mem.c) : '';
+}
+
 /* ---------- جمع‌آوری ردیف‌ها در بازه ---------- */
 function collect(from,to){
+  CAT=null;   // کدهای «درخواست خرید» شاید تازه شده باشند
   const In=d=>d && d>=from && d<=to;
   const R={};
   /* توقف‌ها */
@@ -112,9 +140,9 @@ function sheets(R,from,to,sel){
   }
   const typ=r=>r.svc?(r.svcName||'تعویض روغن'):(r.rep?'نت تعمیرات':'مصرف');
   if(sel.out){ const A=[['تاریخ','دستگاه','کد کالا','شرح کالا','مقدار','مورد نیاز','وضعیت','نوع خروج','شماره درخواست مصرف']];
-    R.out.forEach(({d,r})=>A.push([d,r.dev||'',r.code||'',r.item||'',num(r.qty),r.why||'',r.cond||'',typ(r),r.doc||''])); S.push({name:'خروج انبار',aoa:A,head:0}); }
+    R.out.forEach(({d,r})=>A.push([d,r.dev||'',num(codeOf(r)),r.item||'',num(r.qty),r.why||'',r.cond||'',typ(r),r.doc||''])); S.push({name:'خروج انبار',aoa:A,head:0}); }
   if(sel.inn){ const A=[['تاریخ','کد کالا','شرح کالا','مقدار','نوع','وضعیت','منبع']];
-    R.inn.forEach(({d,r})=>A.push([d,r.code||'',r.item||'',num(r.qty),r.type||'',r.cond||'',r.src||''])); S.push({name:'ورود انبار',aoa:A,head:0}); }
+    R.inn.forEach(({d,r})=>A.push([d,num(codeOf(r)),r.item||'',num(r.qty),r.type||'',r.cond||'',r.src||''])); S.push({name:'ورود انبار',aoa:A,head:0}); }
   if(sel.buy){ const A=[['تاریخ','دستگاه / واحد','کالا','شرح اقلام','تعداد','خریداری‌شده','اولویت','سند مصرف','سند خرید','درخواست‌کننده','تأیید','وضعیت','یادداشت']];
     R.buy.forEach(({d,r})=>A.push([d,r.unit||'',r.item||'',r.desc||'',num(r.qty),num(r.bought),r.pri||'',r.d1||'',r.d2||'',r.req||'',r.apr||'',r.over||'',r.note||''])); S.push({name:'درخواست خرید',aoa:A,head:0}); }
   if(sel.svc){ const A=[['تاریخ','دستگاه','نوع','شرح فعالیت','قطعه','شروع','انجام','کارکرد','واحد کارکرد','بسته شده','علت']];
