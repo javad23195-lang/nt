@@ -134,6 +134,7 @@ function home(id){
   on('qrRead',()=>readForm(dev)); on('qrStop',()=>stopForm(dev)); on('qrRun',()=>runForm(dev));
   on('qrProb',()=>probForm(dev)); on('qrHist',()=>hist(dev)); on('qrClose',close);
   setTimeout(()=>{ try{ const b=$('ntQrBody').querySelector('.acts button'); if(b) b.focus(); }catch(e){} },50);
+  try{ if(window.ntCharts && ntCharts.devMini) ntCharts.devMini(dev.name); }catch(e){}   // نمودار کوچک کارکرد
 }
 const back=dev=>`<button type="button" id="qrBack">بازگشت</button>`;
 
@@ -303,7 +304,7 @@ function labels(){
 }
 function svgFor(text){ const q=window.qrcode(0,'M'); q.addData(text); q.make(); return q.createSvgTag({cellSize:4,margin:16,scalable:true}); }
 function sheet(list){
-  const one=d=>`<div class="lb"><div class="q">${svgFor(qrUrl(d.id))}</div><div class="n">${esc(d.name)}</div><div class="s">سامانه نت — با دوربین گوشی اسکن کنید · ${d.id}</div></div>`;
+  const one=d=>`<div class="lb"><div class="q">${svgFor(qrUrl(d.id))}</div><div class="n">${esc(d.name)}</div><div class="s">سامانه نت — با دوربین گوشی اسکن کنید — ${d.id}</div></div>`;
   return `<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>برچسب QR دستگاه‌ها</title><style>
 @page{size:A4;margin:10mm}
 *{box-sizing:border-box}body{margin:0;font-family:Tahoma,'Vazirmatn',sans-serif;color:#000}

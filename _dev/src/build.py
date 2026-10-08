@@ -39,6 +39,7 @@ rep("setTimeout(function f(){ if(!ntBooted){ setTimeout(f,800); return; } try{ i
 # 5) بخش همگام‌سازی
 rpt=open('report.js',encoding='utf-8').read()
 qr=open('qr.js',encoding='utf-8').read()
-rep("\n</script>\n</body>\n</html>", "\n</script>\n<script>\n"+js+"</script>\n<script>\n"+rpt+"</script>\n<script>\n"+qr+"</script>\n</body>\n</html>")
+ch=open('charts.js',encoding='utf-8').read()
+rep("\n</script>\n</body>\n</html>", "\n</script>\n<script>\n"+js+"</script>\n<script>\n"+rpt+"</script>\n<script>\n"+qr+"</script>\n<script>\n"+ch+"</script>\n</body>\n</html>")
 open(out,'w',encoding='utf-8').write(s)
 print('built',len(s))
