@@ -9,5 +9,6 @@ python3 add_report.py "$T/b3.html" "$T/b4.html"
 python3 add_anbar_fix.py "$T/b4.html" "$T/b5.html"
 python3 add_qr.py "$T/b5.html" "$T/b6.html"
 python3 add_charts.py "$T/b6.html" "$T/b7.html"
-python3 build.py "$T/b7.html" ../out.html
+python3 add_fleet.py "$T/b7.html" "$T/b8.html"
+python3 build.py "$T/b8.html" ../out.html
 echo "ساخته شد: _dev/out.html — بعد از آزمایش، به جای ../سامانه-نت.html بگذارید"

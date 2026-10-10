@@ -58,7 +58,7 @@ body.ntnav:not(.ntlocked):not(.ntdriver) #ntFab.has{display:grid}
 .ntnb svg{width:26px;height:26px}
 .ntnb.on{color:#1B2430}
 .ntnb.on::before{content:"";position:absolute;top:-8px;width:36px;height:4px;border-radius:0 0 4px 4px;background:#E6A52E}
-.ntnb .b{position:absolute;top:-2px;inset-inline-end:10px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#C0392B;color:#fff;font-size:.62rem;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid #fff;box-sizing:content-box}
+.ntnb .b{position:absolute;top:-4px;inset-inline-end:4px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#C0392B;color:#fff;font-size:.62rem;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid #fff;box-sizing:content-box}
 .ntnb .b.show{display:flex}
 .ntnb:focus-visible,.ntfab:focus-visible,.ntac:focus-visible,.ntmr:focus-visible{outline:3px solid #1B2430;outline-offset:2px}
 .ntsp{width:64px;flex:none}
@@ -105,8 +105,8 @@ function paint(){
   first.forEach(n=>h+=mk(n,lab[n],TABICON[n],act===n,badgeOf(n)));
   h+='<span class="ntsp" aria-hidden="true"></span>';
   last.forEach(n=>h+=mk(n,lab[n],TABICON[n],act===n,badgeOf(n)));
-  if(more.length){ const mb=more.reduce((s,n)=>s+(+badgeOf(n).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d))||0),0);
-    h+=`<button type="button" class="ntnb${more.indexOf(act)>-1?' on':''}" data-more="1">${svg('more')}بیشتر<span class="b${mb?' show':''}">${mb||''}</span></button>`; }
+  if(more.length){ const faN=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]); const mb=more.reduce((s,n)=>s+(+badgeOf(n).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d))||0),0);
+    h+=`<button type="button" class="ntnb${more.indexOf(act)>-1?' on':''}" data-more="1">${svg('more')}بیشتر<span class="b${mb?' show':''}">${mb?faN(mb):''}</span></button>`; }
   nav.innerHTML=h;
   const canAdd=ACTS.some(a=>vis(a[0]) && canW(a[0]));
   fab.classList.toggle('has',canAdd);

@@ -402,7 +402,7 @@ dlg(); addBtn(); fromHash();
 /* راننده: بعد از بالا آمدن سامانه، صفحه اصلی راننده؛ اگر از برچسب نیامده و یک دستگاه دارد، صفحه همان دستگاه */
 (function drv(){ if(!booted()){ setTimeout(drv,400); return; } const ds=driverHome(); if(ds && ds.length===1 && !idFrom(location.hash) && $('ntQrDlg').hidden) home(ds[0].id); })();
 window.addEventListener('hashchange',fromHash);
-window.addEventListener('message',e=>{ const d=e&&e.data; if(!d) return; if(d.nt==='qrlabels') labels(); else if(d.nt==='qrscan') scan(); else if(d.nt==='qrcards') cardsDlg(); });
+window.addEventListener('message',e=>{ const d=e&&e.data; if(!d) return; if(d.nt==='qrlabels') labels(); else if(d.nt==='qrscan') scan(); else if(d.nt==='qrcards') cardsDlg(); else if(d.nt==='qrdev' && typeof d.id==='string' && DEVS.some(x=>x.id===d.id)) home(d.id); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape' && $('ntQrDlg') && !$('ntQrDlg').hidden) close(); });
 window.ntQr={DEVS,home,scan,labels,qrUrl,sheet,driverHome,cardsDlg,cardSheet};
 })();
