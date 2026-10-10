@@ -52,9 +52,13 @@ const hm=m=>{ m=((m%1440)+1440)%1440; return pad(Math.floor(m/60))+':'+pad(m%60)
   const yk0=await yk(Q);
   await Q.evaluate(([y,nm])=>{ localStorage.setItem('nt_tavaqof_v1',JSON.stringify({[y+'|شب']:{stops:[{id:'a',dev:'کامیون TRS03',from:'23:00',to:'',cause:'خرابی موتور'}]}})); frames[0].contentWindow.postMessage({nt:'show'},'*'); },[yk0,0]); await sleep(600);
   r=await F(Q); ok(by(r,'TRS03').cls.includes('fl-bad'),'توقف باز دیشب هنوز خراب حساب می‌شود');
-  await Q.evaluate(()=>{ localStorage.setItem('nt_tavaqof_v1',JSON.stringify({'1300/01/01|شب':{stops:[{id:'a',dev:'کامیون TRS03',from:'23:00',to:'',cause:'خرابی موتور'}]}})); frames[0].contentWindow.postMessage({nt:'show'},'*'); }); await sleep(600);
-  r=await F(Q); ok(by(r,'TRS03').cls.includes('fl-ok'),'توقف باز مال روزهای قدیمی نادیده گرفته می‌شود');
-
+  // توقف باز چند روز پیش (مثل TRS02 که از ۱۶ مهر بسته نشده بود) باید خراب بماند
+  const old3=await Q.evaluate(()=>{ const d=new Date(Date.now()-3*864e5); const q=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d); const g=t=>q.find(x=>x.type===t).value; return `${g('year')}/${g('month')}/${g('day')}`; });
+  await Q.evaluate(d=>{ localStorage.setItem('nt_tavaqof_v1',JSON.stringify({[d+'|صبح']:{stops:[{id:'a',dev:'کامیون TRS02',from:'11:45',to:'',cause:'خرابی موتور'}]}})); frames[0].contentWindow.postMessage({nt:'show'},'*'); },old3); await sleep(600);
+  r=await F(Q); ok(by(r,'TRS02').cls.includes('fl-bad'),'توقف باز ۳ روز پیش هنوز خراب است (تا بسته نشود)');
+  ok(/۲ روز|۳ روز/.test(by(r,'TRS02').t) && /پایان را ثبت کنید/.test(by(r,'TRS02').t),'مدت به روز نوشته می‌شود و یادآوری ثبت پایان می‌آید — '+by(r,'TRS02').t);
+  ok(await Q.evaluate(()=>{ const f=frames[0].contentWindow; const g=f.flJ2G(f.todayKey()); const n=new Date(); return g[0]===n.getFullYear() && g[1]===n.getMonth()+1 && g[2]===n.getDate(); }),'تبدیل تاریخ شمسی به میلادی درست است');
+  ok(await Q.evaluate(()=>{ const f=frames[0].contentWindow; const g=f.flJ2G('1405/07/16'); return g[0]===2026 && g[1]===10 && g[2]===8; }),'۱۶ مهر ۱۴۰۵ = ۸ اکتبر ۲۰۲۶');
   console.log('4) دسترسی و امنیت');
   await Q.evaluate(()=>{ const i=DOCS.findIndex(d=>d.name==='توقف شیفت'); tabs[i].hidden=true; window.ntSync.canSee=n=>n!=='توقف شیفت'; frames[0].contentWindow.postMessage({nt:'show'},'*'); }); await sleep(700);
   r=await F(Q); ok(r.hidden,'بدون دسترسی به «توقف شیفت»، ناوگان نشان داده نمی‌شود (وضعیت اشتباه «در کار» نمی‌دهد)');

@@ -58,16 +58,29 @@ const flMin=t=>{ const m=/^(\d{1,2}):(\d{2})$/.exec(String(t||'')); return m?(+m
 const flJ=dt=>{ try{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(dt); const g=t=>p.find(x=>x.type===t).value; return `${g('year')}/${g('month')}/${g('day')}`; }catch(e){ return ''; } };
 const flLS=k=>{ try{ return JSON.parse(localStorage.getItem(k)||'null')||{}; }catch(e){ return {}; } };
 const flHM=m=>{ m=Math.max(0,Math.round(m)); return fa(Math.floor(m/60))+':'+fa(String(m%60).padStart(2,'0')); };
+
+/** تاریخ شمسی «۱۴۰۵/۰۷/۱۶» → [سال، ماه، روز] میلادی */
+function flJ2G(dy){ const m=/^(\d{4})\/(\d{2})\/(\d{2})$/.exec(dy); if(!m) return null;
+  let jy=+m[1]-979, jm=+m[2]-1, jd=+m[3]-1;
+  let n=365*jy+Math.floor(jy/33)*8+Math.floor(((jy%33)+3)/4); for(let i=0;i<jm;i++) n+=i<6?31:30; n+=jd;
+  let g=n+79, gy=1600+400*Math.floor(g/146097); g%=146097; let leap=true;
+  if(g>=36525){ g--; gy+=100*Math.floor(g/36524); g%=36524; if(g>=365) g++; else leap=false; }
+  gy+=4*Math.floor(g/1461); g%=1461; if(g>=366){ leap=false; g--; gy+=Math.floor(g/365); g%=365; }
+  const ml=[31,leap?29:28,31,30,31,30,31,31,30,31,30,31]; let gm=0; while(gm<12 && g>=ml[gm]){ g-=ml[gm]; gm++; }
+  return [gy,gm+1,g+1]; }
+/** چند دقیقه از شروع توقف گذشته (null = ساعت شروع معلوم نیست) */
+function flSince(dy,from,now){ const f=flMin(from), g=flJ2G(dy); if(f===null||!g) return null;
+  const ms=now.getTime()-new Date(g[0],g[1]-1,g[2],Math.floor(f/60),f%60).getTime(); return ms<0?0:Math.floor(ms/60000); }
+const flDur=m=>{ if(m<1440) return flHM(m)+' ساعت'; const d=Math.floor(m/1440), h=Math.floor((m%1440)/60); return fa(d)+' روز'+(h?' و '+fa(h)+' ساعت':''); };
 function flParts(n){ const w=String(n).split(' '); let i=w.findIndex(x=>/[A-Za-z0-9]/.test(x)); if(i<1) return {cp:'',md:String(n)}; return {cp:w.slice(0,i).join(' '),md:w.slice(i).join(' ')}; }
 function flCan(){ try{ return !parent.ntSync || parent.ntSync.canSee('توقف شیفت'); }catch(e){ return true; } }
 function flBuild(){
   const S=parent.ntStops; if(!S || !S.TRACKED) return null;
-  const now=new Date(), nowM=now.getHours()*60+now.getMinutes(), yest=flJ(new Date(now.getTime()-864e5));
+  const now=new Date();
   const tv=flLS('nt_tavaqof_v1'), pg=flLS('nt_prog_v1');
-  const open={};                                         // توقف بازِ امروز یا دیشب
-  Object.keys(tv).forEach(k=>{ const dy=flDay(k.split('|')[0]); if(dy!==K && dy!==yest) return;
-    ((tv[k]&&tv[k].stops)||[]).forEach(x=>{ if(!x||!x.dev||x.to) return; const dk=flKey(x.dev), f=flMin(x.from);
-      let el=null; if(f!==null){ el=dy===K?nowM-f:(1440-f+nowM); if(el<0) el+=1440; }
+  const open={};                                         // هر توقف باز (تا وقتی بسته نشده، باز می‌ماند)
+  Object.keys(tv).forEach(k=>{ const dy=flDay(k.split('|')[0]); if(!dy) return;
+    ((tv[k]&&tv[k].stops)||[]).forEach(x=>{ if(!x||!x.dev||x.to) return; const dk=flKey(x.dev), el=flSince(dy,x.from,now);
       const o=open[dk]; if(!o || (el!==null && (o.el===null || el<o.el))) open[dk]={cause:x.cause||'نامشخص',el}; }); });
   const closed={}; try{ S.list(K,K,{prog:false}).forEach(r=>{ if(r.min!==null && r.min>0){ const dk=flKey(r.dev); closed[dk]=(closed[dk]||0)+r.min; } }); }catch(e){}
   const pk=Object.keys(pg).find(k=>flDay(k)===K), tasks=((pk&&pg[pk]&&pg[pk].tasks)||[]).filter(t=>t&&t.dev&&!t.done);
@@ -88,11 +101,11 @@ function flRender(){
   $('flSum').innerHTML=`<div class="k bad"><b>${fa(nb)}</b><span>خراب</span></div><div class="k wa"><b>${fa(nw)}</b><span>منتظر یا سرویس</span></div><div class="k ok"><b>${fa(no)}</b><span>در کار</span></div>`;
   const W={bad:'خراب',wa:'منتظر',svc:'در سرویس',ok:'در کار'};
   $('flGrid').innerHTML=D.list.map(x=>{ const p=flParts(x.n);
-    const sb=x.o?`${esc(x.o.cause)}${x.o.el!==null?' · '+flHM(x.o.el)+' ساعت':''}`:(x.cm>0?'توقف امروز: '+flHM(x.cm)+' ساعت':'امروز بدون توقف');
+    const sb=x.o?`${esc(x.o.cause)}${x.o.el!==null?' · '+flDur(x.o.el):''}`:(x.cm>0?'توقف امروز: '+flHM(x.cm)+' ساعت':'امروز بدون توقف');
     return `<button type="button" class="fld fl-${x.st}" data-dev="${esc(x.n)}" aria-label="${esc(x.n)}: ${W[x.st]}">
       <span class="cp">${esc(p.cp)}</span><span class="md">${esc(p.md)}</span>
       <span class="ch"><svg viewBox="0 0 24 24" aria-hidden="true">${FL_I[x.st]}</svg>${W[x.st]}</span>
-      <span class="sb">${sb}</span>${x.pt?`<span class="tk">${fa(x.pt)} کار مانده</span>`:''}</button>`; }).join('');
+      <span class="sb">${sb}</span>${x.o&&x.o.el!==null&&x.o.el>=2880?'<span class="tk">اگر تمام شده، پایان را ثبت کنید</span>':''}${x.pt?`<span class="tk">${fa(x.pt)} کار مانده</span>`:''}</button>`; }).join('');
   box.querySelectorAll('.fld').forEach(b=>b.addEventListener('click',()=>{
     try{ const dv=(parent.ntQr&&parent.ntQr.DEVS||[]).find(d=>flKey(d.name)===flKey(b.dataset.dev));
       if(dv) parent.postMessage({nt:'qrdev',id:dv.id},'*'); else parent.postMessage({nt:'go',tab:'توقف شیفت'},'*'); }catch(e){} }));
