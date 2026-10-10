@@ -1,0 +1,23 @@
+name: daily-report
+# هر روز ساعت ۰۶:۳۰ به وقت تهران (۰۳:۰۰ UTC). ممکن است GitHub تا ۳۰ دقیقه دیر اجرا کند.
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node bot/report.mjs
+        env:
+          NT_PASS: ${{ secrets.NT_PASS }}
+          GITHUB_TOKEN: ${{ github.token }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT: ${{ secrets.TELEGRAM_CHAT }}
+          BALE_TOKEN: ${{ secrets.BALE_TOKEN }}
+          BALE_CHAT: ${{ secrets.BALE_CHAT }}
