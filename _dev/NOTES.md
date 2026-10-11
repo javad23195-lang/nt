@@ -239,6 +239,7 @@ NT_READINGS=لیست.txt node test/test2.js   # ورود لیست قرائت
 - «ارسال برگه (عکس)»: در صفحه برگه چاپ (خدمات) دکمه‌ای هست که هر برگه را با SVG/canvas به PNG می‌کند و با `navigator.share` می‌فرستد (نبود → دانلود). تابع `ntShare` در `add_print_flag.py`؛ آزمایش `test24.js`. نکته: داخل قالب JS باید `<\/script>` نوشت.
 
 ## زبانه «عکس‌ها» (b13)
-- `src/photos-src.html` + `add_photos.py`. اطلاعات هر عکس (`nt_photos_v1`: id, dev, sec, part, note, date, by, ts) در localStorage و همگام؛ خود عکس (۱۲۸۰px JPEG و تصویر کوچک ۲۵۶px) فقط در IndexedDB `ntphotos` همان گوشی (store `full`/`thumb`). مخزن عمومی عکس نمی‌گیرد.
+- `src/photos-src.html` + `add_photos.py`. اطلاعات هر عکس (`nt_photos_v1`: id, dev, sec, part, note, date, by, ts) در localStorage، **همگام نمی‌شود** (در `TABKEYS` نیست؛ پس در «حالت مشاهده» هم کار می‌کند)؛ خود عکس (۱۲۸۰px JPEG و تصویر کوچک ۲۵۶px) فقط در IndexedDB `ntphotos` همان گوشی (store `full`/`thumb`). مخزن عمومی عکس نمی‌گیرد.
 - ارسال با `navigator.share` همراه توضیح و برچسب (#دستگاه #بخش #قطعه) برای بله/تلگرام؛ نبود اشتراک = دانلود. ربات خودکار عمداً نیست (رمز ربات نباید در سامانه باشد).
 - دکمه «عکس تازه» در صفحه QR دستگاه (`ntPhotoDraft`). آزمایش: `test25.js`. زبانه‌ها حالا ۱۱ است.
+- دکمه برگشت گوشی از صفحه دستگاه به فهرست برمی‌گردد (`history.pushState` در `enterDev`).

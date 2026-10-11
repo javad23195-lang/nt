@@ -32,7 +32,7 @@ h1{margin:0;font-size:1.3rem;font-weight:800;line-height:1.4}
 .dv{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:60px;padding:8px 14px;margin-top:8px;border:1px solid var(--rule);border-radius:14px;background:var(--card);text-align:start}
 .dv b{display:block}.dv span{color:var(--dim);font-size:.82rem}
 .dv .n{flex:none;min-width:34px;height:28px;border-radius:14px;background:#F3F5F7;border:1px solid var(--rule);display:grid;place-items:center;font-weight:800;font-size:.85rem;padding:0 8px}
-.back{margin-top:8px;min-height:44px;background:transparent;border:0;color:var(--acc);font-weight:700;padding:0}
+.back{margin-top:8px;min-height:48px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;color:var(--acc);font-weight:800;padding:0 14px;text-align:start}
 .pt{margin:16px 0 4px;font-size:1rem;font-weight:800;display:flex;gap:8px;align-items:center}
 .pt small{color:var(--dim);font-weight:400}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
@@ -68,7 +68,7 @@ h1{margin:0;font-size:1.3rem;font-weight:800;line-height:1.4}
 <body>
 <header><div class="wrap">
   <h1>عکس‌ها</h1>
-  <p class="sub">عکس هر دستگاه، به تفکیک بخش و قطعه. خود عکس‌ها فقط روی همین گوشی می‌مانند.</p>
+  <p class="sub">عکس هر دستگاه، به تفکیک بخش و قطعه. همه چیز فقط روی همین گوشی می‌ماند.</p>
   <div class="bar"><button type="button" class="btn p" id="pNew">+ عکس تازه</button></div>
   <input type="file" id="fIn" accept="image/*" multiple hidden>
 </div></header>
@@ -107,10 +107,10 @@ let _t=null; function say(t,bad){ const el=$('toast'); el.textContent=t; el.clas
 function jNow(){ try{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()); const g=t=>p.find(x=>x.type===t).value; return `${g('year')}/${g('month')}/${g('day')}`; }catch(e){ return ''; } }
 const P=()=>{ try{ return parent; }catch(e){ return null; } };
 const who=()=>{ try{ return (P().ntSync && P().ntSync.myName && P().ntSync.myName())||''; }catch(e){ return ''; } };
-const canW=()=>{ try{ return !P().ntSync || P().ntSync.canWriteTab(TAB); }catch(e){ return true; } };
+const canW=()=>true;   // عکس‌ها فقط روی همین گوشی است و همگام نمی‌شود؛ پس در حالت مشاهده هم کار می‌کند
 function devNames(){ try{ const d=(P().ntQr&&P().ntQr.DEVS||[]).map(x=>x.name); if(d.length) return d; }catch(e){} try{ return P().ntStops.TRACKED.slice(); }catch(e){ return []; } }
 
-/* ---------- ذخیره: اطلاعات در localStorage (همگام می‌شود)، خود عکس در IndexedDB همین گوشی ---------- */
+/* ---------- ذخیره: اطلاعات در localStorage (همگام نمی‌شود)، خود عکس در IndexedDB همین گوشی ---------- */
 let photos=LS(KEY,[]); if(!Array.isArray(photos)) photos=[];
 function save(){ LSset(KEY,photos); }
 function reload(){ const d=LS(KEY,[]); if(Array.isArray(d)){ photos=d; render(); } }
@@ -149,7 +149,7 @@ function render(){
   const secs=[...new Set(mine.map(secOf))]; if(curSec && !secs.includes(curSec)) curSec='';
   const shown=curSec?mine.filter(p=>secOf(p)===curSec):mine;
   const parts=[...new Set(shown.map(p=>p.part||'بدون نام قطعه'))].sort((a,b)=>a.localeCompare(b,'fa'));
-  M.innerHTML=`<button type="button" class="back" id="back">‹ همه دستگاه‌ها</button><h2 style="margin:0;font-size:1.1rem">${esc(curDev)} <small style="color:var(--dim);font-weight:400">${fa(mine.length)} عکس</small></h2>`+
+  M.innerHTML=`<button type="button" class="back" id="back">→ برگشت به فهرست دستگاه‌ها</button><h2 style="margin:0;font-size:1.1rem">${esc(curDev)} <small style="color:var(--dim);font-weight:400">${fa(mine.length)} عکس</small></h2>`+
     `<div class="chips"><button type="button" class="cp" data-sec="" aria-pressed="${!curSec}">همه</button>${secs.map(s=>`<button type="button" class="cp" data-sec="${esc(s)}" aria-pressed="${curSec===s}">${esc(s)}<small>${fa(mine.filter(p=>secOf(p)===s).length)}</small></button>`).join('')}</div>`+
     (mine.length?'':'<div class="empty">برای این دستگاه عکسی نیست.</div>')+
     parts.map(pn=>{ const ps=shown.filter(p=>(p.part||'بدون نام قطعه')===pn).sort((a,b)=>(b.ts||0)-(a.ts||0));
@@ -158,12 +158,16 @@ function render(){
   M.querySelectorAll('[data-ph]').forEach(el=>{ const id=el.dataset.ph; thumbURL(id).then(u=>{ if(u) el.outerHTML=`<img alt="" src="${u}">`; else el.textContent='روی گوشی دیگری است'; }); });
 }
 $('main').addEventListener('click',e=>{
-  const d=e.target.closest('[data-dev]'); if(d){ curDev=d.dataset.dev; curSec=''; render(); window.scrollTo(0,0); return; }
-  if(e.target.closest('#back')){ curDev=''; render(); return; }
+  const d=e.target.closest('[data-dev]'); if(d){ enterDev(d.dataset.dev); return; }
+  if(e.target.closest('#back')){ curDev=''; curSec=''; render(); window.scrollTo(0,0); try{ if(history.state&&history.state.ntph) history.back(); }catch(x){} return; }
   const c=e.target.closest('[data-sec]'); if(c){ curSec=c.dataset.sec; render(); return; }
   const t=e.target.closest('[data-id]'); if(t){ openViewer(t.dataset.id); return; }
   if(e.target.closest('#sendAll')) sendMany();
 });
+
+function enterDev(n){ const was=!!curDev; curDev=n; curSec=''; render(); window.scrollTo(0,0); if(!was){ try{ history.pushState({ntph:1},''); }catch(x){} } }
+/* دکمه «برگشت» گوشی هم از صفحه دستگاه به فهرست برمی‌گردد */
+window.addEventListener('popstate',()=>{ if(curDev){ curDev=''; curSec=''; render(); window.scrollTo(0,0); } });
 
 /* ---------- ارسال (منوی اشتراک گوشی؛ برچسب‌دار تا در بله/تلگرام جدا جدا پیدا شود) ---------- */
 const tag=s=>'#'+String(s||'').trim().replace(/[\s\-‌]+/g,'_').replace(/[^\w؀-ۿ]/g,'');
@@ -228,7 +232,7 @@ $('dlg').addEventListener('click',e=>{ if(e.target===$('dlg')) closeForm(); });
 $('fSave').addEventListener('click',async()=>{
   const dev=$('fDev').value.trim(), sec=($('fSecN').value.trim()||secSel||'سایر'), part=$('fPart').value.trim(), note=$('fNote').value.trim();
   $('fDev').classList.remove('bad'); if(!dev){ $('fDev').classList.add('bad'); $('fErr').textContent='دستگاه را بنویسید'; try{ $('fDev').focus(); }catch(e){} return; }
-  if(editP){ Object.assign(editP,{dev,sec,part,note}); save(); closeForm(); curDev=dev; render(); say('ذخیره شد'); return; }
+  if(editP){ Object.assign(editP,{dev,sec,part,note}); save(); closeForm(); enterDev(dev); say('ذخیره شد'); return; }
   $('fSave').disabled=true; $('fSave').textContent='در حال ذخیره…';
   let ok=0, bad=0; const date=jNow(), by=who();
   for(const f of pend){ try{
@@ -237,14 +241,14 @@ $('fSave').addEventListener('click',async()=>{
     await putB('full',id,a.blob); await putB('thumb',id,t.blob);
     photos.push({id,dev,sec,part,note,date,by,ts:Date.now(),w:a.w,h:a.h}); ok++;
   }catch(e){ bad++; } }
-  save(); $('fSave').disabled=false; $('fSave').textContent='ثبت'; closeForm(); curDev=dev; curSec=''; render();
+  save(); $('fSave').disabled=false; $('fSave').textContent='ثبت'; closeForm(); enterDev(dev);
   say(bad?`${fa(ok)} عکس ثبت شد، ${fa(bad)} عکس ثبت نشد`:`${fa(ok)} عکس ثبت شد`, !!bad);
   try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist(); }catch(e){}
 });
 document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; if($('vw').classList.contains('on')) closeViewer(); else if($('dlg').classList.contains('on')) closeForm(); });
 
 /* «عکس تازه» از صفحه دستگاه */
-function consumeDraft(){ try{ const d=parent.ntPhotoDraft; if(!d||!d.dev) return; parent.ntPhotoDraft=null; curDev=String(d.dev); curSec=''; render(); }catch(e){} }
+function consumeDraft(){ try{ const d=parent.ntPhotoDraft; if(!d||!d.dev) return; parent.ntPhotoDraft=null; enterDev(String(d.dev)); }catch(e){} }
 window.addEventListener('message',e=>{ if(!e||!e.data||e.data.nt!=='show') return; if($('dlg').classList.contains('on')||$('vw').classList.contains('on')) return; reload(); consumeDraft(); });
 if(!canW()) $('pNew').hidden=true;
 render(); setTimeout(consumeDraft,300);

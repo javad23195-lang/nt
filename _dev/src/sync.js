@@ -32,8 +32,7 @@ const TABKEYS={
   'انبار':['nt_anbar_out_v1','nt_anbar_in_v1','nt_anbar_sent_v1','nt_anbar_codes_v1','nt_anbar_sum_v1'],
   'درخواست خرید':['nt_kharid9_v1','nt_kharid9_hist_v1','nt_kharid_cat_v1','nt_kr_unit_v1','nt_anbar_in_v1'],
   'توقف شیفت':['nt_tavaqof_v1'],
-  'برون‌سپاری':['nt_outsrc_v1'],
-  'عکس‌ها':['nt_photos_v1']
+  'برون‌سپاری':['nt_outsrc_v1']
 };
 /* پیش‌فرض دسترسی محدود: واحد استخراج */
 const PRESET={'توقف شیفت':'w','دفترچه قرائت':'w'};
@@ -42,7 +41,7 @@ const DRIVER={'توقف شیفت':'w','دفترچه قرائت':'w','ثبت مش
 const devList=()=>{ try{ return (window.ntQr && ntQr.DEVS || []).map(d=>d.name); }catch(e){ return []; } };
 /* نام بخش‌ها برای پیام‌ها */
 const LABEL={nt_anbar_out_v1:'خروج انبار',nt_anbar_in_v1:'ورود انبار',nt_kharid9_v1:'درخواست خرید',nt_moshkel_v1:'مشکلات',nt_sh8_v1:'شناسنامه',
-  nt_khadamat_v1:'خدمات',nt_daftar_v1:'قرائت',nt_prog_v1:'برنامه روزانه',nt_today_todo_v1:'یادداشت',nt_tavaqof_v1:'توقف شیفت',nt_outsrc_v1:'برون‌سپاری',nt_photos_v1:'عکس‌ها'};
+  nt_khadamat_v1:'خدمات',nt_daftar_v1:'قرائت',nt_prog_v1:'برنامه روزانه',nt_today_todo_v1:'یادداشت',nt_tavaqof_v1:'توقف شیفت',nt_outsrc_v1:'برون‌سپاری'};
 /* شناسه ردیف در لیست‌هایی که هر ردیف باید یکتا باشد */
 const IDF={nt_daftar_v1:e=>(e && typeof e==='object' && e.dev && e.date)?e.dev+'|'+e.date:null};
 /* زمان‌ها (میلی‌ثانیه) — gap: کم‌ترین فاصله دو ارسال (محدودیت GitHub) */
@@ -122,7 +121,7 @@ function counts(keys){
   return [['خروج انبار',n('nt_anbar_out_v1')],['ورود انبار',n('nt_anbar_in_v1')],['درخواست خرید',n('nt_kharid9_v1')],
           ['مشکلات',n('nt_moshkel_v1')],['شناسنامه',n('nt_sh8_v1')],['خدمات',n('nt_khadamat_v1')],
           ['قرائت',n('nt_daftar_v1')],['روز برنامه',pr&&typeof pr==='object'&&!Array.isArray(pr)?Object.keys(pr).length:0],
-          ['یادداشت',n('nt_today_todo_v1')],['توقف',stops],['برون‌سپاری',n('nt_outsrc_v1')],['عکس',n('nt_photos_v1')]];
+          ['یادداشت',n('nt_today_todo_v1')],['توقف',stops],['برون‌سپاری',n('nt_outsrc_v1')]];
 }
 const total=keys=>counts(keys).reduce((s,x)=>s+x[1],0);
 const countText=keys=>counts(keys).filter(x=>x[1]>0).map(x=>`${x[0]} ${fa(x[1])}`).join(' · ') || 'بدون ردیف';
