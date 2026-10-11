@@ -16,5 +16,6 @@ python3 add_today_v2.py "$T/b10.html" "$T/b11.html"
 python3 add_print_flag.py "$T/b11.html" "$T/b12.html"
 python3 add_photos.py "$T/b12.html" "$T/b13.html"
 python3 add_mk_photo.py "$T/b13.html" "$T/b14.html"
-python3 build.py "$T/b14.html" ../out.html
+python3 add_sh_remind.py "$T/b14.html" "$T/b15.html"
+python3 build.py "$T/b15.html" ../out.html
 echo "ساخته شد: _dev/out.html — بعد از آزمایش، به جای ../سامانه-نت.html بگذارید"
