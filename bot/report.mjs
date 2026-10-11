@@ -74,6 +74,17 @@ export function buildReport(keys,now){
   if(left.length){ L.push(`• ${FA(left.length)} کار دیروز انجام نشده:`); left.slice(0,5).forEach(t=>L.push(`  - ${t.dev}: ${String(t.prog).slice(0,60)}`)); }
   const faults=[...(dT.faults||[]),...(dY.faults||[])].filter(f=>f&&f.dev&&f.fdesc);
   if(faults.length){ L.push('','خرابی‌های ثبت‌شده:'); faults.slice(0,6).forEach(f=>L.push(`• ${f.dev}: ${String(f.fdesc).slice(0,60)}${f.pri?' (اولویت '+FA(f.pri)+')':''}`)); }
+  // فاکتور برون‌سپاری: کارهای باز و دیرکرد (بیش از ۳ روز بعد از پایان یا شروع کار)
+  try{
+    const jobs=JSON.parse(store.nt_outsrc_v1||'[]'); const open=(Array.isArray(jobs)?jobs:[]).filter(j=>j&&j.id&&!(j.steps&&j.steps.fin));
+    if(open.length){
+      const j2g=dy=>{ const m=/^(\d{4})\/(\d{2})\/(\d{2})$/.exec(dy||''); if(!m) return null; let jy=+m[1]-979, jm=+m[2]-1, jd=+m[3]-1; let n=365*jy+Math.floor(jy/33)*8+Math.floor(((jy%33)+3)/4); for(let i=0;i<jm;i++) n+=i<6?31:30; n+=jd; return n; };
+      const t0=j2g(today), NX={ann:'اعلام خرابی',chk:'بررسی خرابی',ord:'دستور تعمیر',snd:'ارسال کالا',rep:'گزارش',fin:'فاکتور'};
+      const late=open.map(j=>{ const b=normDay(j.we||j.ws||''), g=b?j2g(b):null; return {j,d:(g===null||t0===null)?0:t0-g-3}; }).filter(x=>x.d>0).sort((a,b)=>b.d-a.d);
+      L.push('',`فاکتور برون‌سپاری: ${FA(open.length)} کار باز${late.length?` — ${FA(late.length)} دیرکرد`:''}`);
+      late.slice(0,3).forEach(x=>{ const nx=Object.keys(NX).find(k=>!(x.j.steps&&x.j.steps[k])); L.push(`  - ${String(x.j.dev).slice(0,40)}: ${FA(x.d)} روز دیرکرد، قدم بعد: ${NX[nx]||''}`); });
+    }
+  }catch(e){}
   return L.join('\n').slice(0,3800);
 }
 

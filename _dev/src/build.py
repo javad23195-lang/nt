@@ -35,6 +35,7 @@ rep("function alCheck(){\n", "function alCheck(){\n  if(window.ntViewer || windo
 rep("    const key=KEYMAP[name]; if(!key) return 0;",
     "    if(name==='توقف شیفت'){ const o=JSON.parse(localStorage.getItem('nt_tavaqof_v1')||'{}'), K=todayKey(); let n=0;\n"
     "      Object.keys(o||{}).forEach(k=>{ if(k.indexOf(K+'|')===0) ((o[k]&&o[k].stops)||[]).forEach(x=>{ if(!x.to) n++; }); }); return n; }\n"
+    "    if(name==='برون‌سپاری'){ try{ const a=JSON.parse(localStorage.getItem('nt_outsrc_v1')||'[]'); return (Array.isArray(a)?a:[]).filter(j=>j&&j.id&&!(j.steps&&j.steps.fin)).length; }catch(e){ return 0; } }\n"
     "    const key=KEYMAP[name]; if(!key) return 0;")
 # 4c) زبانه «امروز» اگر پنهان است، پشت صحنه باز نشود
 rep("setTimeout(function f(){ if(!ntBooted){ setTimeout(f,800); return; } try{ if(!frames[0].dataset.loaded){",
