@@ -106,6 +106,16 @@ function stopsOf(dev){
   return out.sort((a,b)=>a.day.localeCompare(b.day)||String(a.s.from).localeCompare(String(b.s.from)));
 }
 const openStop=dev=>{ const L=stopsOf(dev).filter(x=>!x.s.to); return L.length?L[L.length-1]:null; };
+/* اضافه‌کار: کلید «روز|اضافه» در nt_tavaqof_v1 → {stops:[],work:[{id,dev,from,to,by}]} */
+const WK='اضافه';
+function workOf(dev){
+  const db=LS('nt_tavaqof_v1',{})||{}, out=[];
+  Object.keys(db).forEach(k=>{ const [d,sh]=k.split('|'); if(sh!==WK) return; ((db[k]&&db[k].work)||[]).forEach(w=>{ if(w && norm(w.dev)===norm(dev.name)) out.push({k,day:d,w}); }); });
+  return out.sort((a,b)=>a.day.localeCompare(b.day)||String(a.w.from).localeCompare(String(b.w.from)));
+}
+const openWork=dev=>{ const L=workOf(dev).filter(x=>!x.w.to); return L.length?L[L.length-1]:null; };
+const trk0=dev=>!window.ntStops || ntStops.tracked(dev.name);
+const dayOk=s=>{ const m=/^(1[34]\d{2})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/.exec(latin(s).trim()); return m && +m[2]>=1 && +m[2]<=12 && +m[3]>=1 && +m[3]<=31 ? m[1]+'/'+p2(+m[2])+'/'+p2(+m[3]) : ''; };
 const rowsOf=k=>{ const o=LS(k,null); return o && Array.isArray(o.rows)?o.rows:(Array.isArray(o)?o:[]); };
 const rDate=r=>r.y&&r.m&&r.d?`${r.y}/${p2(r.m)}/${p2(r.d)}`:latin(r.date||'');
 function probsOf(dev){ return rowsOf('nt_moshkel_v1').filter(r=>r && norm(r.dev)===norm(dev.name)); }
@@ -123,17 +133,20 @@ function home(id){
   let kv='';
   if(canSee('دفترچه قرائت')) kv+=`<span>آخرین قرائت</span><b>${last?sep(last.val)+' '+esc(last.unit||dev.unit)+' <small style="display:inline;color:#51606E">('+fa(last.date)+')</small>':'ثبت نشده'}</b>`;
   if(canSee('توقف شیفت')) kv+=`<span>وضعیت</span><b class="${os?'stop':'run'}">${os?'● متوقف از '+fa(os.s.from)+(os.day!==jStr(jNow())?' ('+fa(os.day)+')':'')+' — '+esc(os.s.cause):'● کار می‌کند'}</b>`;
+  const ow=openWork(dev);
+  if(canSee('توقف شیفت') && (trk0(dev)||ow)) kv+=`<span>اضافه‌کار</span><b class="${ow?'run':''}">${ow?'● در جریان از '+fa(ow.w.from)+(ow.day!==jStr(jNow())?' ('+fa(ow.day)+')':''):'در جریان نیست'}</b>`;
   if(canSee('انبار') && lastSvc) kv+=`<span>آخرین سرویس</span><b>${fa(rDate(lastSvc))} — ${esc(lastSvc.svcName||'تعویض روغن')}</b>`;
   if(canSee('ثبت مشکلات')) kv+=`<span>مشکل باز</span><b class="${open.length?'stop':''}">${open.length?fa(open.length)+' — '+esc(String(open[open.length-1].desc||'').slice(0,40)):'ندارد'}</b>`;
   let acts='';
   if(canW('دفترچه قرائت')) acts+='<button type="button" class="go" id="qrRead">ثبت قرائت</button>';
   const trk=!window.ntStops || ntStops.tracked(dev.name);   // توقف دقیق فقط برای بیل، لودر و کامیون
   if(canW('توقف شیفت') && (trk||os)) acts+=os?'<button type="button" class="rn" id="qrRun">پایان توقف (راه افتاد)</button>':'<button type="button" class="stp" id="qrStop">شروع توقف</button>';
+  if(canW('توقف شیفت') && (trk||ow)) acts+=ow?'<button type="button" class="rn" id="qrWEnd">پایان اضافه‌کار</button>':'<button type="button" id="qrWStart">شروع اضافه‌کار</button>';
   if(canW('ثبت مشکلات')) acts+='<button type="button" id="qrProb">ثبت مشکل</button>';
   acts+='<button type="button" id="qrHist">دیدن سوابق</button>';
   view(dev.name,`${kv?'<div class="kv">'+kv+'</div>':''}<div class="acts">${acts}</div><button type="button" id="qrClose">بستن</button>`);
   on('qrRead',()=>readForm(dev)); on('qrStop',()=>stopForm(dev)); on('qrRun',()=>runForm(dev));
-  on('qrProb',()=>probForm(dev)); on('qrHist',()=>hist(dev)); on('qrClose',close);
+  on('qrWStart',()=>workStart(dev)); on('qrWEnd',()=>workEnd(dev)); on('qrProb',()=>probForm(dev)); on('qrHist',()=>hist(dev)); on('qrClose',close);
   setTimeout(()=>{ try{ const b=$('ntQrBody').querySelector('.acts button'); if(b) b.focus(); }catch(e){} },50);
   try{ if(window.ntCharts && ntCharts.devMini) ntCharts.devMini(dev.name); }catch(e){}   // نمودار کوچک کارکرد
 }
@@ -215,6 +228,53 @@ function runForm(dev){
     s.to=to; db[os.k].sent=false;
     if(!LSset('nt_tavaqof_v1',db)){ msg.textContent='ذخیره نشد'; return; }
     touch(['nt_tavaqof_v1']); toast('راه افتاد — ساعت '+fa(to)); home(dev.id);
+  });
+  on('qrBack',()=>home(dev.id));
+}
+
+/* ---------- اضافه‌کار ---------- */
+function workStart(dev){
+  view('شروع اضافه‌کار — '+dev.name,`
+    <p>برای کار خارج از ساعت کاری (بعد از ۱۵ یا پیش از ۷). اگر کار تمام شده است، ساعت پایان را هم بنویسید.</p>
+    <label>تاریخ<input type="text" id="qrDay" inputmode="numeric" dir="ltr" value="${jStr(jNow())}"></label>
+    <label>ساعت شروع<input type="text" class="big" id="qrFrom" inputmode="numeric" dir="ltr" value="${nowHM()}"></label>
+    <label>ساعت پایان (اگر تمام شده)<input type="text" id="qrTo" inputmode="numeric" dir="ltr" placeholder="خالی = هنوز کار می‌کند"></label>
+    <label>نام ثبت‌کننده<input type="text" id="qrWho" autocomplete="off" style="direction:rtl;text-align:right" value="${esc(who())}"></label>
+    <div class="symsg" id="qrMsg"></div>
+    <button type="button" class="go" id="qrSave">ثبت</button>${back(dev)}`);
+  on('qrSave',()=>{
+    const day=dayOk($('qrDay').value), from=hmOk($('qrFrom').value), toRaw=$('qrTo').value.trim(), to=toRaw?hmOk(toRaw):'', msg=$('qrMsg'); msg.className='symsg bad';
+    if(!day){ msg.textContent='تاریخ را مثل 1405/07/19 بنویسید'; return; }
+    if(!from){ msg.textContent='ساعت شروع را مثل 15:30 بنویسید'; return; }
+    if(toRaw && !to){ msg.textContent='ساعت پایان را مثل 18:00 بنویسید'; return; }
+    if(to && to===from){ msg.textContent='ساعت پایان با ساعت شروع یکی است'; return; }
+    if(!to && openWork(dev)){ msg.textContent='این دستگاه همین حالا یک اضافه‌کار باز دارد'; return; }
+    const by=$('qrWho').value.trim(); if(by) LSset('nt_tavaqof_name',by);
+    const db=LS('nt_tavaqof_v1',{})||{}, k=day+'|'+WK;
+    if(!db[k]) db[k]={stops:[],work:[],sent:true};
+    if(!Array.isArray(db[k].work)) db[k].work=[];
+    db[k].work.push({id:'w'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),dev:dev.name,from,to,by});
+    if(!LSset('nt_tavaqof_v1',db)){ msg.textContent='ذخیره نشد'; return; }
+    touch(['nt_tavaqof_v1']); toast(to?'اضافه‌کار ثبت شد':'اضافه‌کار شروع شد — ساعت '+fa(from)); home(dev.id);
+  });
+  on('qrBack',()=>home(dev.id));
+}
+function workEnd(dev){
+  const ow=openWork(dev); if(!ow){ home(dev.id); return; }
+  view('پایان اضافه‌کار — '+dev.name,`
+    <p>شروع اضافه‌کار: <b>${fa(ow.w.from)}</b>${ow.day!==jStr(jNow())?' ('+fa(ow.day)+')':''}</p>
+    <label>ساعت پایان<input type="text" class="big" id="qrTo" inputmode="numeric" dir="ltr" value="${nowHM()}"></label>
+    <div class="symsg" id="qrMsg"></div>
+    <button type="button" class="go" id="qrSave">ثبت پایان</button>${back(dev)}`);
+  on('qrSave',()=>{
+    const to=hmOk($('qrTo').value), msg=$('qrMsg'); msg.className='symsg bad';
+    if(!to){ msg.textContent='ساعت را مثل 18:00 بنویسید'; return; }
+    if(to===ow.w.from){ msg.textContent='ساعت پایان با ساعت شروع یکی است'; return; }
+    const db=LS('nt_tavaqof_v1',{})||{}, w=((db[ow.k]&&db[ow.k].work)||[]).find(x=>x.id===ow.w.id);
+    if(!w){ msg.textContent='این اضافه‌کار پیدا نشد — شاید از سیستم دیگری حذف شده است'; return; }
+    w.to=to;
+    if(!LSset('nt_tavaqof_v1',db)){ msg.textContent='ذخیره نشد'; return; }
+    touch(['nt_tavaqof_v1']); toast('اضافه‌کار تمام شد — ساعت '+fa(to)); home(dev.id);
   });
   on('qrBack',()=>home(dev.id));
 }

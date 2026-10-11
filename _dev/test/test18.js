@@ -17,54 +17,79 @@ const hm=m=>{ m=((m%1440)+1440)%1440; return pad(Math.floor(m/60))+':'+pad(m%60)
     await sleep(700); return p; }
 
   const TL=p=>p.evaluate(()=>{ const d=frames[0].contentDocument; const c=d.getElementById('tlCard'); return {hidden:c.hidden,sub:d.getElementById('tlSub').textContent,sum:d.getElementById('tlSum').textContent,
-    rows:[...d.querySelectorAll('.tlr')].map(b=>({n:b.dataset.dev,t:b.innerText.replace(/\s+/g,' '),seg:[...b.querySelectorAll('.sg')].map(s=>({c:s.className.replace('sg ',''),r:parseFloat(s.style.right),w:parseFloat(s.style.width)}))}))}; });
+    rows:[...d.querySelectorAll('.tlr')].map(b=>({n:b.dataset.dev,t:b.innerText.replace(/\s+/g,' '),br:b.querySelectorAll('.br').length,ok:b.querySelectorAll('.tlok').length,wk:b.querySelectorAll('.wk').length,seg:[...b.querySelectorAll('.sg')].map(s=>s.className.replace('sg ',''))}))}; });
   const rw=(r,n)=>r.rows.find(x=>x.n.indexOf(n)>-1);
   console.log('1) نمایش پایه');
   const P=await boot((jk,nm)=>({nt_tavaqof_v1:{}}));
   let r=await TL(P);
   ok(!r.hidden && r.rows.length===8,'کارت با ۸ ردیف دیده می‌شود');
-  ok(/شیفت (صبح|عصر|شب)/.test(r.sub),'عنوان شیفت: '+r.sub);
-  ok(/توقفی ثبت نشده/.test(r.sum),'بدون توقف: پیام درست');
-  ok(await P.evaluate(()=>frames[0].contentDocument.querySelectorAll('#tlSh button').length===3 && frames[0].contentDocument.querySelectorAll('#tlSh button[aria-pressed="true"]').length===1),'۳ دکمه شیفت، یکی انتخاب‌شده');
+  ok(/(روز کاری|اضافه‌کار) · /.test(r.sub),'عنوان بازه: '+r.sub);
+  ok(await P.evaluate(()=>frames[0].contentDocument.querySelectorAll('#tlSh button').length===2 && frames[0].contentDocument.querySelectorAll('#tlSh button[aria-pressed="true"]').length===1),'۲ دکمه (روز کاری، اضافه‌کار)، یکی انتخاب‌شده');
 
-  console.log('2) منطق با زمان ثابت (شیفت شب دیشب)');
-  // «اکنون» = ۱۹ مهر ۱۴۰۵ (۱۱ اکتبر ۲۰۲۶) ساعت ۱۰:۰۰ → شیفت شب = ۱۸ مهر ۲۲:۰۰ تا ۱۹ مهر ۰۶:۰۰
-  const res=await P.evaluate(()=>{ const f=frames[0].contentWindow;
-    localStorage.setItem('nt_tavaqof_v1',JSON.stringify({
-      '1405/07/18|شب':{stops:[{id:'a',dev:'لودر کوماتسو WA470',from:'23:00',to:'01:00',cause:'خرابی هیدرولیک'},{id:'b',dev:'کامیون TRS02',from:'22:00',to:'22:30',cause:'نبود راننده'}]},
-      '1405/07/19|شب':{stops:[{id:'c',dev:'لودر کوماتسو WA470',from:'02:00',to:'03:00',cause:'خرابی هیدرولیک'},{id:'d',dev:'بیل مکانیکی کوماتسو PC400',from:'04:00',to:'',cause:'سرویس دوره‌ای'}]},
-      '1405/07/10|صبح':{stops:[{id:'e',dev:'کامیون TRS03',from:'08:00',to:'',cause:'خرابی موتور'}]}}));
-    const D=f.tlBuild('شب',new Date(2026,9,11,10,0)); const g=n=>D.rows.find(x=>x.n.indexOf(n)>-1);
-    return {wa:g('WA470').min,waSeg:g('WA470').seg.length,t2:g('TRS02').min,pc:g('PC400').min,t3:g('TRS03').min,start:new Date(D.W.a).toString().slice(0,24)}; });
-  ok(res.wa===180,'WA470: ۲ ساعت (از ۲۳ تا ۰۱ بعد از نیمه‌شب) + ۱ ساعت = ۱۸۰ دقیقه — '+res.wa);
-  ok(res.waSeg===2,'WA470: دو بخش');
-  ok(res.t2===30,'TRS02: ۳۰ دقیقه');
-  ok(res.pc===120,'PC400: باز از ۰۴:۰۰ تا پایان شیفت ۰۶:۰۰ = ۱۲۰ دقیقه — '+res.pc);
-  ok(res.t3===480,'TRS03: توقف باز از ۹ روز پیش کل شیفت را می‌گیرد — '+res.t3);
-  const res2=await P.evaluate(()=>{ const f=frames[0].contentWindow; const D=f.tlBuild('صبح',new Date(2026,9,11,10,0)); return D.rows.find(x=>x.n.indexOf('WA470')>-1).min; });
-  ok(res2===0,'شیفت صبح امروز: WA470 توقفی ندارد');
-  const res3=await P.evaluate(()=>{ const f=frames[0].contentWindow; const D=f.tlBuild('صبح',new Date(2026,9,11,8,0)); return D.rows.find(x=>x.n.indexOf('TRS03')>-1).min; });
-  ok(res3===120,'شیفت جاری: فقط تا «اکنون» شمرده می‌شود (۶ تا ۸ = ۱۲۰) — '+res3);
+  console.log('2) منطق با زمان ثابت');
+  await P.evaluate(()=>{ localStorage.setItem('nt_tavaqof_v1',JSON.stringify({
+    '1405/07/19|صبح':{stops:[
+      {id:'a',dev:'لودر کوماتسو WA470',from:'08:10',to:'',cause:'خرابی هیدرولیک'},
+      {id:'b',dev:'کامیون TRS02',from:'09:20',to:'10:05',cause:'نبود راننده'},
+      {id:'b2',dev:'کامیون TRS02',from:'06:00',to:'07:40',cause:'نبود راننده'},
+      {id:'c',dev:'بیل مکانیکی کوماتسو PC400',from:'08:50',to:'09:20',cause:'سرویس دوره‌ای'},
+      {id:'d',dev:'کامیون TRS01',from:'12:00',to:'12:45',cause:'نبود راننده'}]},
+    '1405/07/19|اضافه':{stops:[],work:[
+      {id:'w1',dev:'لودر کوماتسو WA470',from:'15:20',to:'17:00'},
+      {id:'w2',dev:'کامیون TRS01',from:'16:00',to:''},
+      {id:'w3',dev:'کامیون TRS02',from:'22:00',to:'00:30'}]},
+    '1405/07/10|صبح':{stops:[{id:'e',dev:'کامیون TRS03',from:'08:00',to:'',cause:'خرابی موتور'}]}})); });
+  const m=(k,h,mi)=>P.evaluate(([k,h,mi])=>{ const f=frames[0].contentWindow; const D=f.tlBuild(k,new Date(2026,9,11,h,mi)); const o={}; D.rows.forEach(x=>{ o[x.n.split(' ').pop()]=[x.min,x.wmin,x.seg.length,x.wk.length]; }); o.brs=D.brs.length; o.a=new Date(D.W.a).getHours(); o.d=new Date(D.W.a).getDate(); return o; },[k,h,mi]);
+  let D1=await m('day',11,30);
+  ok(D1.WA470[0]===185,'WA470: باز از ۰۸:۱۰ تا ۱۱:۳۰ = ۲۰۰ دقیقه، منهای ۱۵ دقیقه صبحانه = ۱۸۵ — '+D1.WA470[0]);
+  ok(D1.TRS02[0]===85,'TRS02: ۴۵ + ۴۰ (بخش پیش از ۰۷:۰۰ بریده شد) = ۸۵ — '+D1.TRS02[0]);
+  ok(D1.PC400[0]===15,'PC400: ۳۰ دقیقه منهای ۱۵ دقیقه صبحانه = ۱۵ — '+D1.PC400[0]);
+  ok(D1.TRS01[0]===0,'TRS01: توقف ۱۲:۰۰ هنوز نرسیده (بعد از «اکنون»)');
+  ok(D1.TRS03[0]===255,'TRS03: توقف باز از ۹ روز پیش کل روز را می‌گیرد (۷:۰۰ تا ۱۱:۳۰ = ۲۷۰، منهای ۱۵ دقیقه صبحانه = ۲۵۵) — '+D1.TRS03[0]);
+  ok(D1.brs===2 && D1.a===7,'روز کاری از ۰۷:۰۰، دو استراحت');
+  let D2=await m('day',14,0);
+  ok(D2.TRS01[0]===0,'TRS01: توقف ۱۲:۰۰ تا ۱۲:۴۵ همه‌اش نهار است، توقف حساب نمی‌شود — '+D2.TRS01[0]);
+  let D3=await m('ot',23,30);
+  ok(D3.WA470[1]===100,'اضافه‌کار WA470: ۱۵:۲۰ تا ۱۷:۰۰ = ۱۰۰ دقیقه — '+D3.WA470[1]);
+  ok(D3.TRS01[1]===420,'اضافه‌کار باز TRS01 از ۱۶:۰۰ تا پایان بازه ۲۳:۰۰ = ۴۲۰ — '+D3.TRS01[1]);
+  ok(D3.TRS02[1]===60,'اضافه‌کار TRS02 از ۲۲:۰۰ تا ۰۰:۳۰ (از نیمه‌شب رد می‌شود)، بازه تا ۲۳:۰۰ = ۶۰ — '+D3.TRS02[1]);
+  ok(D3.PC290[1]===0 && D3.brs===0 && D3.a===15,'بازه اضافه‌کار از ۱۵:۰۰ و بدون استراحت');
+  let D4=await m('day',5,0);
+  ok(D4.d===10,'پیش از ۰۷:۰۰ بازه روز قبل نشان داده می‌شود');
 
   console.log('3) نمایش روی صفحه');
-  await P.evaluate(()=>{ const f=frames[0].contentWindow; const n=new Date(); const cur=f.tlCur(n); f.tlSet(['صبح','عصر','شب'].find(x=>x!==cur)); });
-  r=await TL(P); ok(/توقف/.test(r.sum)||/توقفی ثبت نشده/.test(r.sum),'شیفت دیگر انتخاب شد: '+r.sub);
-  await P.evaluate(()=>{ frames[0].contentWindow.tlSet(null); });
-  r=await TL(P);
-  ok(rw(r,'TRS03').seg.length===1 && rw(r,'TRS03').seg[0].c==='em' && /توقف/.test(rw(r,'TRS03').t),'توقف باز قدیمی در شیفت جاری قرمز نشان داده می‌شود: '+rw(r,'TRS03').t);
-  ok(rw(r,'TRS03').seg[0].r<0.01,'بخش از ابتدای شیفت شروع می‌شود (راست)');
-  await P.evaluate(()=>{ frames[0].contentDocument.querySelector('#tlSh button:not([aria-pressed="true"])').click(); });
-  ok(await P.evaluate(()=>frames[0].contentDocument.querySelectorAll('#tlSh button[aria-pressed="true"]')[0].textContent.indexOf('اکنون')<0),'کلیک روی شیفت دیگر آن را انتخاب می‌کند');
+  await P.evaluate(()=>{ frames[0].contentWindow.tlSet('day'); }); r=await TL(P);
+  ok(r.rows.every(x=>x.br===2 && x.ok===1 && x.wk===0),'روز کاری: ۲ نوار استراحت و زمینه سبز در هر ردیف');
+  ok(/استراحت/.test(await P.evaluate(()=>frames[0].contentDocument.querySelector('.tlg').innerText)),'راهنما «استراحت» دارد');
+  ok(rw(r,'TRS03').seg.indexOf('em')>-1 && /توقف/.test(rw(r,'TRS03').t),'توقف باز قدیمی قرمز نشان داده می‌شود: '+rw(r,'TRS03').t);
+  await P.evaluate(()=>{ frames[0].contentWindow.tlSet('ot'); }); r=await TL(P);
+  ok(r.rows.every(x=>x.br===0 && x.ok===0),'اضافه‌کار: بدون استراحت و بدون زمینه سبز');
+  ok(/کار نکرده/.test(rw(r,'PC290').t),'دستگاه بدون ثبت: «کار نکرده» (خرابی نیست) — '+rw(r,'PC290').t);
+  await P.evaluate(()=>{ frames[0].contentWindow.tlSet(null); frames[0].contentDocument.querySelector('#tlSh button:not([aria-pressed="true"])').click(); });
+  ok(await P.evaluate(()=>frames[0].contentDocument.querySelectorAll('#tlSh button[aria-pressed="true"]')[0].textContent.indexOf('اکنون')<0),'کلیک روی بازه دیگر آن را انتخاب می‌کند');
   await P.evaluate(()=>{ frames[0].contentDocument.querySelector('.tlr[data-dev*="WA470"]').click(); }); await sleep(900);
   ok(await P.evaluate(()=>{ const d=document.getElementById('ntQrDlg'); return !!d && !d.hidden && /WA470/.test(d.innerText); }),'کلیک روی ردیف، صفحه دستگاه را باز می‌کند');
-  ok(await P.evaluate(()=>{ localStorage.setItem('nt_tavaqof_v1',JSON.stringify({[frames[0].contentWindow.todayKey()+'|'+frames[0].contentWindow.tlCur(new Date())]:{stops:[{id:'z',dev:'کامیون TRS01',from:'00:00',to:'23:59',cause:'نبود راننده'}]}})); const f=frames[0].contentWindow; f.tlSet(null); const s=frames[0].contentDocument.querySelector('.tlr[data-dev*="TRS01"] .sg'); return !!s && s.className.indexOf('idle')>-1 && getComputedStyle(s).backgroundImage!=='none'; }),'بخش «سالم ولی کار نکرد» رنگ و الگو دارد (دیده می‌شود)');
+  ok(await P.evaluate(()=>{ localStorage.setItem('nt_tavaqof_v1',JSON.stringify({[frames[0].contentWindow.todayKey()+'|صبح']:{stops:[{id:'z',dev:'کامیون TRS01',from:'00:00',to:'23:59',cause:'نبود راننده'}]}})); const f=frames[0].contentWindow; f.tlSet('day'); const s=frames[0].contentDocument.querySelector('.tlr[data-dev*="TRS01"] .sg'); return !!s && s.className.indexOf('idle')>-1 && getComputedStyle(s).backgroundImage!=='none'; }),'بخش «سالم ولی کار نکرد» رنگ و الگو دارد');
   ok(P.errs.length===0,'بدون خطا '+P.errs.slice(0,2).join('|'));
 
-  console.log('4) دسترسی و امنیت');
+  console.log('4) کارت ناوگان: خارج از ساعت کاری');
+  const Q=await boot((jk,nm)=>({nt_tavaqof_v1:{}}));
+  await Q.evaluate(()=>{ ntStops.HOURS={from:0,to:1}; const jk=frames[0].contentWindow.todayKey(); localStorage.setItem('nt_tavaqof_v1',JSON.stringify({
+    [jk+'|اضافه']:{stops:[],work:[{id:'w',dev:'کامیون TRS01',from:'16:00',to:''}]},
+    [jk+'|صبح']:{stops:[{id:'a',dev:'لودر ZL50',from:'05:00',to:'',cause:'خرابی برق'}]}})); frames[0].contentWindow.postMessage({nt:'show'},'*'); }); await sleep(700);
+  const FF=await Q.evaluate(()=>{ const d=frames[0].contentDocument; return {c:[...d.querySelectorAll('.fld')].map(b=>({n:b.dataset.dev,c:b.className,t:b.innerText.replace(/\s+/g,' ')})),sum:[...d.querySelectorAll('#flSum .k')].map(k=>k.innerText.replace(/\s+/g,' ')).join('|')}; });
+  const fb=n=>FF.c.find(x=>x.n.indexOf(n)>-1);
+  ok(fb('PC290').c.includes('fl-off') && /پایان کار/.test(fb('PC290').t) && /خارج از ساعت کاری/.test(fb('PC290').t),'خارج از ساعت کاری: «پایان کار» (نه «در کار»)');
+  ok(fb('TRS01').c.includes('fl-ok') && /اضافه‌کار از ۱۶:۰۰/.test(fb('TRS01').t),'اضافه‌کار باز: «در کار» با ساعت شروع — '+fb('TRS01').t);
+  ok(fb('ZL50').c.includes('fl-bad'),'توقف باز خارج از ساعت هم خراب می‌ماند');
+  ok(/پایان کار/.test(FF.sum),'شمارنده «پایان کار» دیده می‌شود: '+FF.sum);
+  ok(Q.errs.length===0,'بدون خطا');
+
+  console.log('5) دسترسی و امنیت');
   await P.evaluate(()=>{ const i=DOCS.findIndex(d=>d.name==='توقف شیفت'); tabs[i].hidden=true; window.ntSync.canSee=n=>n!=='توقف شیفت'; frames[0].contentWindow.postMessage({nt:'show'},'*'); }); await sleep(700);
   r=await TL(P); ok(r.hidden,'بدون دسترسی به «توقف شیفت»، خط زمان پنهان است');
-  const X=await boot((jk,nm)=>({nt_tavaqof_v1:{[jk+'|صبح']:{stops:[{id:'a',dev:'لودر ZL50',from:'06:30',to:'',cause:'<img src=x onerror=top.__xss=true>'}]}}}));
-  await X.evaluate(()=>{ const f=frames[0].contentWindow; f.tlSet('صبح'); }); await sleep(300);
+  const X=await boot((jk,nm)=>({nt_tavaqof_v1:{[jk+'|صبح']:{stops:[{id:'a',dev:'لودر ZL50',from:'07:30',to:'',cause:'<img src=x onerror=top.__xss=true>'}]}}}));
+  await X.evaluate(()=>{ frames[0].contentWindow.tlSet('day'); }); await sleep(300);
   ok(!(await X.evaluate(()=>!!window.__xss)) && !(await X.evaluate(()=>!!frames[0].contentDocument.querySelector('#tlCard img'))),'متن علت امن است (کد اجرا نشد)');
   ok(X.errs.length===0,'بدون خطا');
   await br.close(); web.close();

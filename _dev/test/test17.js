@@ -12,6 +12,7 @@ const hm=m=>{ m=((m%1440)+1440)%1440; return pad(Math.floor(m/60))+':'+pad(m%60)
     await p.goto(`http://localhost:${web.address().port}/nt/s.html`); await p.waitForFunction(()=>window.ntSync&&window.ntNav,null,{timeout:15000});
     await p.addStyleTag({content:'.sydlg,.sybd{display:none!important}'});
     const jk=await p.evaluate(()=>todayKey()); const n=new Date(), nm=n.getHours()*60+n.getMinutes();
+    await p.evaluate(()=>{ ntStops.HOURS={from:0,to:1440}; });
     await p.evaluate(([seed])=>{ Object.keys(seed).forEach(k=>localStorage.setItem(k,JSON.stringify(seed[k]))); window.ntLocked=false; document.body.classList.remove('ntlocked'); try{ ntBoot(); }catch(e){} },[seed(jk,nm)]);
     await p.waitForFunction(()=>{ try{ return !!frames[0].contentDocument.getElementById('flGrid'); }catch(e){ return false; } },null,{timeout:15000});
     await sleep(700); return p; }

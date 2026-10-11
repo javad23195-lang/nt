@@ -14,6 +14,12 @@ const SERVICE=['سرویس دوره‌ای'];
 const ALIAS={'جابه‌جایی بیل':'جابه‌جایی دستگاه'};
 const CLS={em:'خرابی',pm:'سرویس و نگهداری',idle:'سالم ولی کار نکرد'};
 const SHIFT_ORDER={'صبح':0,'عصر':1,'شب':2};
+/* روز کاری ۷ تا ۱۵. استراحت‌ها «توقف» حساب نمی‌شوند. (دقیقه از نیمه‌شب) */
+const HOURS={from:420,to:900};
+const BREAKS=[{from:540,to:555,n:'صبحانه'},{from:720,to:765,n:'نهار و استراحت'}];
+/** چند دقیقه از بازه [a,b) (دقیقه از نیمه‌شب؛ اگر b<a از نیمه‌شب رد می‌شود) در استراحت است */
+function brk(a,b){ if(a===null||b===null) return 0; const seg=b>a?[[a,b]]:[[a,1440],[0,b]]; let s=0;
+  seg.forEach(g=>BREAKS.forEach(x=>{ const o=Math.min(g[1],x.to)-Math.max(g[0],x.from); if(o>0) s+=o; })); return s; }
 const p2=n=>String(n).padStart(2,'0');
 const latin=s=>String(s==null?'':s).replace(/[۰-۹]/g,d=>'0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]).replace(/[٠-٩]/g,d=>'0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
 const key=s=>latin(s).replace(/[يى]/g,'ی').replace(/ك/g,'ک').replace(/[‌\s\-_]+/g,'').toLowerCase();
@@ -41,7 +47,7 @@ function list(from,to,opt){
     const tv=LS('nt_tavaqof_v1')||{};
     Object.keys(tv).forEach(k=>{ const [d,sh]=k.split('|'), day=nd(d); if(!In(day)) return;
       ((tv[k]&&tv[k].stops)||[]).forEach(s=>{ if(!s || !s.dev) return; const cause=ALIAS[s.cause]||s.cause||'نامشخص';
-        out.push({day,sh:sh||'',dev:s.dev,from:s.from||'',to:s.to||'',min:s.to?dur(s.from,s.to):null,cause,cls:clsOf(cause),src:'توقف شیفت',note:s.note||'',by:s.by||''}); }); });
+        out.push({day,sh:sh||'',dev:s.dev,from:s.from||'',to:s.to||'',min:s.to?Math.max(0,(dur(s.from,s.to)||0)-brk(mins(s.from),mins(s.to))):null,cause,cls:clsOf(cause),src:'توقف شیفت',note:s.note||'',by:s.by||''}); }); });
   }
   if(opt.prog!==false){
     const db=LS('nt_prog_v1')||{};
@@ -54,5 +60,10 @@ function list(from,to,opt){
   out.sort((a,b)=>a.day.localeCompare(b.day)||(SHIFT_ORDER[a.sh]??9)-(SHIFT_ORDER[b.sh]??9)||(mins(a.from)??0)-(mins(b.from)??0));
   return out;
 }
-window.ntStops={TRACKED,BROKEN,IDLE,SERVICE,CLS,tracked,list,toMin,dur,clsOf};
+/** اضافه‌کار (کار خارج از ساعت کاری): کلید «روز|اضافه» در همان nt_tavaqof_v1، فهرست work */
+function work(from,to){ const tv=LS('nt_tavaqof_v1')||{}, out=[];
+  Object.keys(tv).forEach(k=>{ const [d,sh]=k.split('|'), day=nd(d); if(sh!=='اضافه' || !day || day<from || day>to) return;
+    ((tv[k]&&tv[k].work)||[]).forEach(w=>{ if(!w||!w.dev) return; out.push({day,dev:w.dev,from:w.from||'',to:w.to||'',min:w.to?dur(w.from,w.to):null,by:w.by||''}); }); });
+  return out.sort((a,b)=>a.day.localeCompare(b.day)||(mins(a.from)??0)-(mins(b.from)??0)); }
+window.ntStops={TRACKED,BROKEN,IDLE,SERVICE,CLS,tracked,list,toMin,dur,clsOf,HOURS,BREAKS,brk,work};
 })();

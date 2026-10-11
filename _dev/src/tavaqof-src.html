@@ -274,7 +274,7 @@ function rec(){ const k=recKey(); if(!db[k]) db[k]={stops:[],sent:false}; return
 function save(touch){
   if(touch) rec().sent=false;
   // گزارش‌های خالی و قدیمی‌تر از ۳۰ گزارش آخر نگه داشته نمی‌شوند
-  Object.keys(db).forEach(k=>{ if(k!==recKey() && !(db[k].stops||[]).length) delete db[k]; });
+  Object.keys(db).forEach(k=>{ if(k!==recKey() && !(db[k].stops||[]).length && !(db[k].work||[]).length) delete db[k]; });
   const ks=Object.keys(db).sort(); while(ks.length>30) delete db[ks.shift()];
   LSset(KEY,db);
 }

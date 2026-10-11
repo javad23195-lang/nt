@@ -29,6 +29,7 @@ CSS=r"""
 .fld .ch svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .fld .sb{font-size:.7rem;color:#51606E;line-height:1.5;margin-top:2px}
 .fld .tk{font-size:.7rem;color:#9A5B00;font-weight:700}
+.fl-off{--c:#51606E;--cb:#E9EDF1}.flsum .off b{color:#51606E}
 .fl-bad{--c:#B3261E;--cb:#FBE5E2}.fl-wa{--c:#9A5B00;--cb:#FFF1D6}.fl-svc{--c:#1F5F99;--cb:#E2EEFA}.fl-ok{--c:#1E7F4F;--cb:#E3F4EA}
 .flnote{margin:8px 2px 0;font-size:.7rem;color:#51606E}
 """
@@ -50,6 +51,7 @@ const FL_I={
   bad:'<path d="M8 3h8l5 5v8l-5 5H8l-5-5V8z"/><path d="M9 12h6"/>',
   wa:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   svc:'<path d="M14 7a4 4 0 005 5l-9 9a2 2 0 01-3-3l9-9a4 4 0 00-2-2z"/>',
+  off:'<path d="M20 14a8 8 0 11-10-10 7 7 0 0010 10z"/>',
   ok:'<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>'};
 const flLat=s=>String(s==null?'':s).replace(/[۰-۹]/g,d=>'0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]).replace(/[٠-٩]/g,d=>'0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
 const flKey=s=>flLat(s).replace(/[يى]/g,'ی').replace(/ك/g,'ک').replace(/[‌\s\-_]+/g,'').toLowerCase();
@@ -78,16 +80,18 @@ function flBuild(){
   const S=parent.ntStops; if(!S || !S.TRACKED) return null;
   const now=new Date();
   const tv=flLS('nt_tavaqof_v1'), pg=flLS('nt_prog_v1');
-  const open={};                                         // هر توقف باز (تا وقتی بسته نشده، باز می‌ماند)
+  const open={}, ow={};                                  // هر توقف باز (تا وقتی بسته نشده، باز می‌ماند)؛ ow = اضافه‌کار در جریان
+  const H=S.HOURS||{from:0,to:1440}, nmin=now.getHours()*60+now.getMinutes(), inH=nmin>=H.from && nmin<H.to;
   Object.keys(tv).forEach(k=>{ const dy=flDay(k.split('|')[0]); if(!dy) return;
+    if(k.split('|')[1]==='اضافه'){ ((tv[k]&&tv[k].work)||[]).forEach(w=>{ if(w&&w.dev&&!w.to) ow[flKey(w.dev)]=w.from||''; }); return; }
     ((tv[k]&&tv[k].stops)||[]).forEach(x=>{ if(!x||!x.dev||x.to) return; const dk=flKey(x.dev), el=flSince(dy,x.from,now);
       const o=open[dk]; if(!o || (el!==null && (o.el===null || el<o.el))) open[dk]={cause:x.cause||'نامشخص',el}; }); });
   const closed={}; try{ S.list(K,K,{prog:false}).forEach(r=>{ if(r.min!==null && r.min>0){ const dk=flKey(r.dev); closed[dk]=(closed[dk]||0)+r.min; } }); }catch(e){}
   const pk=Object.keys(pg).find(k=>flDay(k)===K), tasks=((pk&&pg[pk]&&pg[pk].tasks)||[]).filter(t=>t&&t.dev&&!t.done);
-  const rank={bad:0,wa:1,svc:1,ok:2};
+  const rank={bad:0,wa:1,svc:1,ok:2,off:3};
   const list=S.TRACKED.map((n,idx)=>{ const dk=flKey(n), o=open[dk], pt=tasks.filter(t=>flKey(t.dev)===dk).length;
-    let st='ok'; if(o){ const c=S.clsOf(o.cause); st=c==='em'?'bad':c==='pm'?'svc':'wa'; }
-    return {n,dk,st,o,pt,cm:closed[dk]||0,idx}; });
+    let st=(inH||ow[dk]!==undefined)?'ok':'off'; if(o){ const c=S.clsOf(o.cause); st=c==='em'?'bad':c==='pm'?'svc':'wa'; }
+    return {n,dk,st,o,pt,cm:closed[dk]||0,idx,ow:ow[dk]}; });
   list.sort((a,b)=>rank[a.st]-rank[b.st]||a.idx-b.idx);
   return {list,pend:tasks.length};
 }
@@ -96,12 +100,12 @@ function flRender(){
   if(!flCan()){ box.hidden=true; return; }
   const D=flBuild(); if(!D){ box.hidden=true; return; }
   box.hidden=false;
-  const nb=D.list.filter(x=>x.st==='bad').length, nw=D.list.filter(x=>x.st==='wa'||x.st==='svc').length, no=D.list.length-nb-nw;
+  const nb=D.list.filter(x=>x.st==='bad').length, nw=D.list.filter(x=>x.st==='wa'||x.st==='svc').length, no=D.list.filter(x=>x.st==='ok').length, nf=D.list.filter(x=>x.st==='off').length;
   $('flSub').textContent=fa(D.list.length)+' دستگاه اصلی';
-  $('flSum').innerHTML=`<div class="k bad"><b>${fa(nb)}</b><span>خراب</span></div><div class="k wa"><b>${fa(nw)}</b><span>منتظر یا سرویس</span></div><div class="k ok"><b>${fa(no)}</b><span>در کار</span></div>`;
-  const W={bad:'خراب',wa:'منتظر',svc:'در سرویس',ok:'در کار'};
+  $('flSum').innerHTML=`<div class="k bad"><b>${fa(nb)}</b><span>خراب</span></div><div class="k wa"><b>${fa(nw)}</b><span>منتظر یا سرویس</span></div><div class="k ok"><b>${fa(no)}</b><span>در کار</span></div>${nf?`<div class="k off"><b>${fa(nf)}</b><span>پایان کار</span></div>`:''}`;
+  const W={bad:'خراب',wa:'منتظر',svc:'در سرویس',ok:'در کار',off:'پایان کار'};
   $('flGrid').innerHTML=D.list.map(x=>{ const p=flParts(x.n);
-    const sb=x.o?`${esc(x.o.cause)}${x.o.el!==null?' · '+flDur(x.o.el):''}`:(x.cm>0?'توقف امروز: '+flHM(x.cm)+' ساعت':'امروز بدون توقف');
+    const sb=x.o?`${esc(x.o.cause)}${x.o.el!==null?' · '+flDur(x.o.el):''}`:(x.st==='off'?'خارج از ساعت کاری':(x.ow!==undefined?'اضافه‌کار از '+fa(x.ow):(x.cm>0?'توقف امروز: '+flHM(x.cm)+' ساعت':'امروز بدون توقف')));
     return `<button type="button" class="fld fl-${x.st}" data-dev="${esc(x.n)}" aria-label="${esc(x.n)}: ${W[x.st]}">
       <span class="cp">${esc(p.cp)}</span><span class="md">${esc(p.md)}</span>
       <span class="ch"><svg viewBox="0 0 24 24" aria-hidden="true">${FL_I[x.st]}</svg>${W[x.st]}</span>
