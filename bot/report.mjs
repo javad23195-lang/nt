@@ -85,6 +85,13 @@ export function buildReport(keys,now){
       late.slice(0,3).forEach(x=>L.push(`  - ${String(x.j.dev).slice(0,40)}: ${x.rc?'فاکتور رسیده، در سندپرداز ثبت کنید':'فاکتور را از پیمانکار بگیرید'} (${FA(x.d)} روز دیرکرد)`));
     }
   }catch(e){}
+  // خدمت چاپ‌نشده: خدمت ۱۴ روز اخیر که برگه‌اش هنوز چاپ نشده (همان قاعده زبانه «خدمات»)
+  try{
+    const kd=JSON.parse(store.nt_khadamat_v1||'{}'), rows=Array.isArray(kd.rows)?kd.rows:[];
+    const t=today.split('/').map(Number), tj=t[0]*372+(t[1]-1)*31+t[2];
+    const np=rows.filter(r=>r&&!r.pr&&Math.abs(tj-((+r.y)*372+((+r.m)-1)*31+(+r.d)))<=14);
+    if(np.length){ L.push('',`خدمت چاپ‌نشده: ${FA(np.length)} مورد`); np.slice(0,4).forEach(r=>L.push(`  - ${String(r.dev||'').slice(0,40)}: ${String(r.act||'').slice(0,50)}`)); }
+  }catch(e){}
   return L.join('\n').slice(0,3800);
 }
 
