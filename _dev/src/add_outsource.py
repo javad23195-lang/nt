@@ -33,19 +33,19 @@ JS=r"""
 /* ============ فاکتور باز (فقط می‌خواند) ============ */
 function osDays(dy){ const m=/^(\d{4})\/(\d{2})\/(\d{2})$/.exec(String(dy||'')); if(!m) return null; const g=flJ2G(dy); if(!g) return null; const n=new Date(); return Math.round((Date.UTC(n.getFullYear(),n.getMonth(),n.getDate())-Date.UTC(g[0],g[1]-1,g[2]))/864e5); }
 function osCan(){ try{ return !parent.ntSync || parent.ntSync.canSee('برون‌سپاری'); }catch(e){ return true; } }
-const OS_STEPS=['ann','chk','ord','snd','rep','fin'], OS_N={ann:'اعلام خرابی',chk:'بررسی خرابی',ord:'دستور تعمیر',snd:'ارسال کالا',rep:'گزارش',fin:'فاکتور'};
+function osLate(j){ const rc=j.steps&&j.steps.rcv; const d=osDays(rc||j.ws||j.bd); return d===null?0:Math.max(0,d-(rc?1:3)); }
+function osNx(j){ return (j.steps&&j.steps.rcv)?'ثبت فاکتور در سندپرداز':'گرفتن فاکتور از '+(j.ven||'پیمانکار'); }
 function osRender(){
   const box=$('osCard'); if(!box) return;
   let jobs=[]; try{ jobs=JSON.parse(localStorage.getItem('nt_outsrc_v1')||'[]'); }catch(e){}
   if(!Array.isArray(jobs)) jobs=[];
   const open=jobs.filter(j=>j&&j.id&&!(j.steps&&j.steps.fin));
   if(!osCan() || !open.length){ box.hidden=true; return; }
-  const rows=open.map(j=>{ const d=osDays(j.we||j.ws||j.bd), late=(d!==null && (j.we||j.ws) && d>3)?d-3:0, nx=OS_STEPS.find(k=>!(j.steps&&j.steps[k]));
-    return {j,late,nx}; }).sort((a,b)=>b.late-a.late);
+  const rows=open.map(j=>({j,late:osLate(j)})).sort((a,b)=>b.late-a.late);
   box.hidden=false;
   const nl=rows.filter(r=>r.late).length;
   $('osSub').textContent=fa(open.length)+' کار باز'+(nl?' · '+fa(nl)+' دیرکرد':'');
-  $('osList').innerHTML=rows.slice(0,3).map(r=>`<button type="button" class="osr${r.late?' od':''}" data-os="1"><div><b>${esc(r.j.dev)}</b><br><span>${esc(r.j.ven||'')} · قدم بعد: ${esc(OS_N[r.nx]||'')}</span></div>${r.late?`<em>${fa(r.late)} روز دیرکرد</em>`:''}</button>`).join('')+(rows.length>3?`<div class="flnote">و ${fa(rows.length-3)} کار دیگر…</div>`:'');
+  $('osList').innerHTML=rows.slice(0,3).map(r=>`<button type="button" class="osr${r.late?' od':''}" data-os="1"><div><b>${esc(r.j.dev)}</b><br><span>${esc(r.j.ven||'')} · ${esc(osNx(r.j))}</span></div>${r.late?`<em>${fa(r.late)} روز دیرکرد</em>`:''}</button>`).join('')+(rows.length>3?`<div class="flnote">و ${fa(rows.length-3)} کار دیگر…</div>`:'');
   box.querySelectorAll('[data-os]').forEach(b=>b.addEventListener('click',()=>{ try{ parent.postMessage({nt:'go',tab:'برون‌سپاری'},'*'); }catch(e){} }));
 }
 setInterval(()=>{ try{ osRender(); }catch(e){} },20000);

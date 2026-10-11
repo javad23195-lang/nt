@@ -1,4 +1,4 @@
-// برون‌سپاری: دکمه از صفحه دستگاه، پیمانکار اختیاری، جلسه سندپرداز
+// برون‌سپاری: دکمه از صفحه دستگاه، پیمانکار اختیاری
 const {chromium}=require('playwright'); const http=require('http'), fs=require('fs'), path=require('path');
 const HTML=fs.readFileSync(path.join(__dirname,'..','out.html'));
 let fails=0; const ok=(c,m)=>{ console.log((c?'  ok  ':'  FAIL ')+m); if(!c) fails++; };
@@ -27,15 +27,6 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   let J=await p.evaluate(()=>JSON.parse(localStorage.getItem('nt_outsrc_v1')||'[]'));
   ok(J.length===1 && J[0].dev==='کامیون TRS02' && J[0].ven==='','ذخیره شد، بدون پیمانکار');
   ok(/پیمانکار نامعلوم/.test(await q('d=>d.getElementById("list").innerText')),'کارت: «پیمانکار نامعلوم»');
-  console.log('2) جلسه سندپرداز');
-  await p.evaluate(()=>{ const a=JSON.parse(localStorage.getItem('nt_outsrc_v1')); a.push({id:'x2',dev:'لودر ZL50',ven:'ف',desc:'ج',ws:'1405/07/19',cause:'C',act:'A',steps:{ann:'1405/07/19'}}); a.push({id:'x3',dev:'کامیون TRS01',ven:'',desc:'د',ws:'1405/07/19',steps:{}}); localStorage.setItem('nt_outsrc_v1',JSON.stringify(a)); frames[9].contentWindow.postMessage({nt:'show'},'*'); });
-  await sleep(400); await q('d=>d.getElementById("oSess").click()'); await sleep(300);
-  const t=await q('d=>d.getElementById("list").innerText.replace(/\\s+/g," ")');
-  ok(/اعلام خرابی/.test(t) && /بررسی خرابی/.test(t) && await q('d=>d.querySelectorAll(".sg").length')===2,'دو گروه مرحله: اعلام خرابی (۲ کار) و بررسی خرابی (۱ کار)');
-  ok(await q('d=>d.querySelectorAll(".sg")[0].querySelectorAll(".sc").length')===2,'گروه اول دو کار دارد');
-  await q('d=>d.querySelector(".sg:last-of-type .sc .go[data-st]").click()'); await sleep(250);
-  J=await p.evaluate(()=>JSON.parse(localStorage.getItem('nt_outsrc_v1')));
-  ok(!!J.find(j=>j.id==='x2').steps.chk,'«ثبت شد» در جلسه، مرحله بررسی را ثبت کرد');
   ok(errs.length===0,'بدون خطا'+errs.join('|').slice(0,160));
   await br.close(); web.close(); console.log(fails?'\n'+fails+' شکست':'\nهمه موفق'); process.exit(fails?1:0);
 })();

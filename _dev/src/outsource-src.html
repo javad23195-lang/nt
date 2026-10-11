@@ -112,7 +112,7 @@ details.more>summary{min-height:44px;display:flex;align-items:center;font-weight
   .rw .dv small{display:block;font-weight:400;color:var(--dim);font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .rw .vn,.rw .nx2{font-size:.9rem;overflow-wrap:anywhere}
   .rw .nx2{color:var(--dim)}
-  .rb{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;direction:rtl}
+  .rb{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;direction:rtl}
   .rb i{height:8px;border-radius:2px;background:#D5DCE3}
   .rb i.d{background:var(--ok)}
   .rb i.c{background:var(--acc)}
@@ -155,8 +155,8 @@ details.more>summary{min-height:44px;display:flex;align-items:center;font-weight
 <body>
 <header><div class="wrap">
   <div class="hd"><h1>لیست برون‌سپاری</h1>
-  <p class="sub">هر کار تعمیر بیرونی تا ثبت فاکتور در سندپرداز. این برگه خودش در سندپرداز چیزی نمی‌نویسد.</p></div>
-  <div class="bar"><button type="button" class="btn p" id="oNew">+ کار تازه</button><button type="button" class="btn" id="oSess" aria-pressed="false">جلسه سندپرداز</button></div>
+  <p class="sub">یادآور فاکتور تعمیر بیرونی: گرفتن فاکتور از پیمانکار و ثبت آن در سندپرداز.</p></div>
+  <div class="bar"><button type="button" class="btn p" id="oNew">+ کار تازه</button></div>
   <div class="seg" id="seg"><button type="button" data-f="open" aria-pressed="true">باز</button><button type="button" data-f="all" aria-pressed="false">همه</button></div>
 </div></header>
 <main class="wrap" id="list"></main>
@@ -211,12 +211,10 @@ function daysSince(dy){ const g=j2g(dy); if(!g) return null; const a=Date.UTC(g[
 
 /* مرحله‌ها به ترتیب فرایند سندپرداز. need = چیزهایی که پیش از آن مرحله باید نوشته شده باشد */
 const STEPS=[
-  {k:'ann',n:'اعلام خرابی',need:[['dev','دستگاه']]},
-  {k:'chk',n:'بررسی خرابی',need:[['cause','کد علت خرابی'],['act','کد فعالیت']]},
-  {k:'ord',n:'دستور تعمیر',need:[['svc','کد خدمات'],['ven','پیمانکار']]},
-  {k:'snd',n:'ارسال کالا',need:[['ws','تاریخ شروع کار']]},
-  {k:'rep',n:'گزارش',need:[['we','تاریخ پایان کار']]},
-  {k:'fin',n:'فاکتور',need:[['amt','مبلغ']]}];
+  {k:'rcv',n:'فاکتور رسید',need:[]},
+  {k:'fin',n:'ثبت در سندپرداز',need:[]}];
+/* یادآور: بدون فاکتور بیش از ۳ روز بعد از شروع کار؛ فاکتور رسیده ولی ثبت‌نشده بیش از ۱ روز */
+function nxText(j,st){ return st.k==='rcv'?'گرفتن فاکتور از '+(j.ven||'پیمانکار'):'ثبت فاکتور در سندپرداز'; }
 const LAST_LATE=3;   // بیشتر از این تعداد روز بعد از پایان کار، بدون فاکتور = دیرکرد
 
 let jobs=LS(KEY,[]); if(!Array.isArray(jobs)) jobs=[];
@@ -229,8 +227,8 @@ function missing(j,st){ return st.need.filter(x=>!String(j[x[0]]||'').trim()).ma
 function doneN(j){ let n=0; STEPS.forEach(s=>{ if(j.steps&&j.steps[s.k]) n++; }); return n; }
 const isDone=j=>!!(j.steps&&j.steps.fin);
 /** پایه شمارش دیرکرد: پایان کار، وگرنه شروع کار، وگرنه تاریخ خرابی */
-function lateDays(j){ if(isDone(j)) return 0; const b=j.we||j.ws||j.bd||''; const d=daysSince(b); return d===null?0:Math.max(0,d-LAST_LATE); }
-const isLate=j=>lateDays(j)>0 && !!(j.we||j.ws);
+function lateDays(j){ if(isDone(j)) return 0; const rc=j.steps&&j.steps.rcv; const d=daysSince(rc||j.ws||j.bd||''); return d===null?0:Math.max(0,d-(rc?1:LAST_LATE)); }
+const isLate=j=>lateDays(j)>0;
 
 function renderNarrow(){
   const L=$('list'), arr=jobs.filter(j=>j&&j.id).slice().sort((a,b)=>(isDone(a)-isDone(b))||(lateDays(b)-lateDays(a))||String(b.ws||'').localeCompare(String(a.ws||'')));
@@ -248,14 +246,13 @@ function renderNarrow(){
       const cls=dt?'done':(!dt&&prev?'next':''); const lock=!dt&&!prev; if(!dt) prev=false;
       return `<button type="button" class="sp ${cls}" data-st="${s.k}" data-id="${esc(j.id)}" ${lock?'disabled':''} aria-pressed="${dt?'true':'false'}">${dt?'✓ ':''}${esc(s.n)}<small>${dt?esc(fa(dt)):(lock?'':'ثبت شد؟')}</small></button>`; }).join('');
     let nx='';
-    if(nxt){ const m=missing(j,nxt); nx=m.length?`<div class="nx w">قدم بعد: ${esc(nxt.n)} — اول بنویسید: ${esc(m.join('، '))}</div>`:`<div class="nx">قدم بعد: ${esc(nxt.n)}</div>`; }
+    if(nxt){ nx=`<div class="nx${isLate(j)?' w':''}">${esc(nxText(j,nxt))}</div>`; }
     const sh=openSheet.has(j.id)?sheetHtml(j):'';
     return `<section class="jb${late?' od':''}${dn?' dn':''}" data-id="${esc(j.id)}">
       <h3>${esc(j.dev)} <span class="chip">${esc(j.ven||'پیمانکار نامعلوم')}</span></h3>
       <p>${esc(j.desc||'')}</p><div class="meta">${meta.join('')}</div>
       <div class="stp">${sp}</div>${nx}
-      <div class="acts"><button type="button" class="btn s" data-a="sheet" data-id="${esc(j.id)}">${openSheet.has(j.id)?'بستن برگه':'برگه سندپرداز'}</button>
-        <button type="button" class="btn s" data-a="edit" data-id="${esc(j.id)}">ویرایش</button>
+      <div class="acts"><button type="button" class="btn s" data-a="edit" data-id="${esc(j.id)}">ویرایش</button>
         <button type="button" class="btn s d" data-a="del" data-id="${esc(j.id)}">${armDel===j.id?'مطمئنید؟ دوباره بزنید':'حذف'}</button></div>${sh}</section>`; }).join('');
 }
 function rowH(l,v){ const t=String(v||'').trim(); return `<div class="row"><span class="l">${esc(l)}</span><span class="v${t?'':' no'}">${t?esc(lat(t)):'ننوشته‌اید'}</span><button type="button" class="cp" data-copy="${esc(lat(t))}" ${t?'':'disabled'}>کپی</button></div>`; }
@@ -264,7 +261,7 @@ function stepFields(j,k){
   return {ann:[['تجهیز',j.eq||j.dev],['تاریخ و ساعت خرابی',bdt],['شرح',j.desc]],
     chk:[['کد علت خرابی',j.cause],['کد فعالیت',j.act]],
     ord:[['کد خدمات',j.svc],['پیمانکار',j.ven],['شرح کار',j.desc]],
-    snd:[['تاریخ ارسال',j.ws]],rep:[['تاریخ پایان کار',j.we]],fin:[['مبلغ (ریال)',j.amt],['شماره فاکتور',j.inv]]}[k]||[]; }
+    rcv:[],fin:[['پیمانکار',j.ven],['مبلغ (ریال)',j.amt],['شماره فاکتور',j.inv],['شرح',j.desc]]}[k]||[]; }
 function sheetHtml(j){
   const bdt=[j.bd,j.bt].filter(Boolean).join(' ');
   return `<div class="sheet"><div class="hint">این مقدارها را در هر مرحله سندپرداز بگذارید (اعداد انگلیسی کپی می‌شود).</div>
@@ -300,7 +297,7 @@ function renderWide(){
   if(!arr.some(j=>j.id===sel)) sel=arr.length?arr[0].id:'';
   const cur=arr.find(j=>j.id===sel);
   const rows=arr.map(j=>{ const dn=isDone(j), late=isLate(j), nxt=STEPS.find(s=>!(j.steps&&j.steps[s.k])), segs=STEPS.map(s=>`<i class="${j.steps&&j.steps[s.k]?'d':(nxt&&nxt.k===s.k?'c':'')}"></i>`).join('');
-    return `<button type="button" class="rw${late?' od':''}${dn?' dn':''}" data-sel="${esc(j.id)}" aria-selected="${j.id===sel?'true':'false'}"><span class="dv">${esc(j.dev)}<small>${esc(j.desc||'')}</small></span><span class="vn">${esc(j.ven||'—')}</span><span class="rb" aria-label="${fa(doneN(j))} از ${fa(STEPS.length)} مرحله">${segs}</span><span class="nx2">${dn?'تمام شد':esc(nxt.n)}</span><span class="lt${dn?' g':''}">${late?fa(lateDays(j))+' روز دیرکرد':(dn?'✓':'')}</span></button>`; }).join('');
+    return `<button type="button" class="rw${late?' od':''}${dn?' dn':''}" data-sel="${esc(j.id)}" aria-selected="${j.id===sel?'true':'false'}"><span class="dv">${esc(j.dev)}<small>${esc(j.desc||'')}</small></span><span class="vn">${esc(j.ven||'—')}</span><span class="rb" aria-label="${fa(doneN(j))} از ${fa(STEPS.length)} مرحله">${segs}</span><span class="nx2">${dn?'تمام شد':esc(nxText(j,nxt))}</span><span class="lt${dn?' g':''}">${late?fa(lateDays(j))+' روز دیرکرد':(dn?'✓':'')}</span></button>`; }).join('');
   L.innerHTML=`<div class="app"><div class="lst"><div class="lh"><span>دستگاه</span><span>پیمانکار</span><span>پیشرفت</span><span>قدم بعد</span><span></span></div>${rows||`<div class="pe"><b>${filter==='open'?'کار باز نیست':'هنوز کاری ثبت نشده'}</b><br>با «+ کار تازه» شروع کنید.</div>`}</div><aside class="pane" aria-label="برگه سندپرداز">${paneHtml(cur)}</aside></div>`;
 }
 let sess=false;
@@ -378,9 +375,8 @@ function copy(t){ const done=()=>say('کپی شد'); try{ if(navigator.clipboard
   function fb(){ try{ const a=document.createElement('textarea'); a.value=t; a.style.position='fixed'; a.style.opacity='0'; document.body.appendChild(a); a.select(); document.execCommand('copy'); a.remove(); done(); }catch(e){ say('کپی نشد',true); } } }
 
 $('oNew').addEventListener('click',()=>openForm());
-$('oSess').addEventListener('click',()=>{ sess=!sess; $('oSess').setAttribute('aria-pressed',sess?'true':'false'); $('seg').hidden=sess; render(); });
 /** «نیاز به تعمیر بیرونی» از صفحه دستگاه: فرم تازه با دستگاه پر */
-function consumeDraft(){ try{ const d=parent.ntOutsrcDraft; if(!d||!d.dev) return; parent.ntOutsrcDraft=null; sess=false; $('oSess').setAttribute('aria-pressed','false'); $('seg').hidden=false; openForm(); $('fDev').value=String(d.dev); devHint(); try{ $('fVen').focus(); }catch(e){} }catch(e){} }
+function consumeDraft(){ try{ const d=parent.ntOutsrcDraft; if(!d||!d.dev) return; parent.ntOutsrcDraft=null; sess=false; openForm(); $('fDev').value=String(d.dev); devHint(); try{ $('fVen').focus(); }catch(e){} }catch(e){} }
 $('fCancel').addEventListener('click',closeForm);
 $('fSave').addEventListener('click',saveForm);
 $('fDev').addEventListener('input',devHint); $('fDev').addEventListener('change',devHint);
