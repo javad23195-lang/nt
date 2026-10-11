@@ -66,6 +66,7 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   await A.click('#qrCards'); await waitFor(()=>A.evaluate(()=>!!window.__ntQrLast));
   const cardHtml=await A.evaluate(()=>window.__ntQrLast);
   ok((cardHtml.match(/class="cd"/g)||[]).length===2 && cardHtml.includes('کارت توقف — کامیون TRS01') && cardHtml.includes('<i>۵</i> خرابی لاستیک') && cardHtml.includes('<i>۱۳</i> انتظار بارگیری'),'برگه A4 با ۲ کارت TRS01 و علت‌های شماره‌دار');
+  ok((cardHtml.match(/class="qq"/g)||[]).length===2 && cardHtml.includes('اضافه‌کار') && (cardHtml.match(/class="d"/g)||[]).length===6,'کارت: کد QR در هر کارت و بخش اضافه‌کار با ۳ ردیف');
   { const P2=await (await br.newContext({viewport:{width:800,height:1130}})).newPage(); await P2.setContent(cardHtml); await P2.pdf({path:path.join(os.tmpdir(),'stop-card.pdf'),format:'A4'});
     ok((await P2.pdf({format:'A4'})).toString('latin1').match(/\/Type\s*\/Page[^s]/g).length===1,'دو کارت دقیقاً در یک صفحه A4 جا می‌شود'); await P2.screenshot({path:path.join(os.tmpdir(),'stop-card.png'),fullPage:true}); }
   await A.click('#qrClose');

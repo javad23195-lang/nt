@@ -384,26 +384,33 @@ function cardsDlg(){
     const n=Math.min(20,Math.max(1,parseInt(latin($('qrPages').value),10)||1));
     if(!ids.length){ msg.className='symsg bad'; msg.textContent='هیچ دستگاهی انتخاب نشده'; return; }
     const list=[]; ids.forEach(id=>{ for(let i=0;i<n*2;i++) list.push(byId(id)); });
-    printHtml(cardSheet(list),msg);
+    msg.className='symsg'; msg.textContent='در حال ساخت کارت‌ها…';
+    loadLib(LIB_QR,()=>typeof window.qrcode==='function').then(()=>{ printHtml(cardSheet(list),msg); })
+      .catch(()=>{ printHtml(cardSheet(list),msg); });   // بدون کتابخانه QR هم کارت چاپ می‌شود (بدون کد)
   });
 }
 function cardSheet(list){
   const ALL=CAUSES.flatMap(c=>c.L);
   const legend=CAUSES.map(c=>`<div class="lg"><b>${esc(c.g)}:</b> ${c.L.map(x=>`<span><i>${fa(ALL.indexOf(x)+1)}</i> ${esc(x)}</span>`).join(' ')}</div>`).join('');
-  const rows=Array.from({length:8},(_,i)=>`<tr><td class="c">${fa(i+1)}</td><td class="t">: </td><td class="t">: </td><td></td><td></td></tr>`).join('');
-  const one=d=>`<div class="cd"><div class="hd"><b>کارت توقف — ${esc(d.name)}</b><span>تاریخ: ۱۴۰&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;/</span></div>
+  const rows=Array.from({length:5},(_,i)=>`<tr><td class="c">${fa(i+1)}</td><td class="t">: </td><td class="t">: </td><td></td><td></td></tr>`).join('');
+  const orows=Array.from({length:3},(_,i)=>`<tr><td class="c">${fa(i+1)}</td><td class="d">۱۴۰ &nbsp;&nbsp;/ &nbsp;&nbsp;/</td><td class="t">: </td><td class="t">: </td><td></td></tr>`).join('');
+  const qr=d=>{ try{ return window.qrcode?`<div class="qq">${svgFor(qrUrl(d.id))}</div>`:''; }catch(e){ return ''; } };
+  const one=d=>`<div class="cd"><div class="hd"><div class="hl">${qr(d)}<b>کارت توقف — ${esc(d.name)}</b></div><span>تاریخ: ۱۴۰&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;/</span></div>
     <div class="hd2"><span>شیفت: ☐ صبح&nbsp; ☐ عصر&nbsp; ☐ شب</span><span>نام راننده: ............................</span></div>
     <table><thead><tr><th style="width:7%">ردیف</th><th style="width:17%">ساعت توقف</th><th style="width:17%">ساعت راه افتادن</th><th style="width:13%">شماره علت</th><th>توضیح</th></tr></thead><tbody>${rows}</tbody></table>
     ${legend}
-    <div class="ft"><span>اگر دستگاه تا آخر شیفت راه نیفتاد، «ساعت راه افتادن» را خالی بگذارید. آخر شیفت کارت را به سرپرست بدهید.</span><span>ثبت در سامانه ☐ امضا: ..........</span></div></div>`;
+    <div class="ot"><b>اضافه‌کار</b> (کار بعد از ساعت ۱۵ یا پیش از ۷):</div>
+    <table class="ott"><thead><tr><th style="width:7%">ردیف</th><th style="width:26%">تاریخ</th><th style="width:17%">ساعت شروع</th><th style="width:17%">ساعت پایان</th><th>توضیح</th></tr></thead><tbody>${orows}</tbody></table>
+    <div class="ft"><span>راه نیفتاد = «ساعت راه افتادن» خالی. آخر شیفت کارت را به سرپرست بدهید. کد QR: ثبت با گوشی.</span><span>ثبت شد ☐ امضا: ........</span></div></div>`;
   return `<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>کارت کاغذی توقف</title><style>
 @page{size:A4;margin:8mm}
 *{box-sizing:border-box}body{margin:0;font-family:Tahoma,'Vazirmatn',sans-serif;color:#000;font-size:10pt}
 .cd{height:136mm;border:1.5px solid #000;border-radius:3mm;padding:4mm 5mm;margin:0 0 6mm;display:flex;flex-direction:column;break-inside:avoid;page-break-inside:avoid}
 .cd:nth-child(2n){page-break-after:always;margin:0}
-.hd{display:flex;justify-content:space-between;align-items:baseline;font-size:12pt}.hd b{font-size:14pt}
+.hd{display:flex;justify-content:space-between;align-items:center;font-size:12pt}.hd b{font-size:14pt}.hl{display:flex;align-items:center;gap:3mm}.qq{width:14mm;height:14mm}.qq svg{width:100%;height:100%;display:block}
+.ot{margin:2mm 0 1mm;font-size:9.5pt}.ott td,.ott th{height:6.4mm}td.d{direction:ltr;color:#999;font-size:9pt}
 .hd2{display:flex;justify-content:space-between;margin:2mm 0 2mm}
-table{width:100%;border-collapse:collapse}th,td{border:1px solid #000;height:8.2mm;text-align:center;padding:0 1mm}th{font-size:9pt;background:#eee;height:7mm}
+table{width:100%;border-collapse:collapse}th,td{border:1px solid #000;height:6.9mm;text-align:center;padding:0 1mm}th{font-size:9pt;background:#eee;height:7mm}
 td.t{direction:ltr;letter-spacing:6mm;color:#999}td.c{font-size:9pt}
 .lg{font-size:9.5pt;margin-top:2.5mm;line-height:1.75}.lg span{white-space:nowrap;margin-inline-start:2.5mm}.lg i{font-style:normal;font-weight:bold;border:1px solid #000;border-radius:50%;padding:0 1.3mm}
 .ft{margin-top:auto;display:flex;justify-content:space-between;gap:4mm;font-size:8.3pt;color:#222}
