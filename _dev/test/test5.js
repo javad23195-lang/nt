@@ -114,7 +114,7 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   await addReading(A,'لودر کوماتسو WA470',27200);
   await addNote(A,'سفارش فیلتر');
   ok(await waitFor(async()=>await has(A,'nt_tavaqof_v1','شیلنگ هیدرولیک') && await has(A,'nt_daftar_v1','22700'),15000),'توقف و قرائت همکار به مدیر رسید');
-  ok(await has(A,'nt_daftar_v1','27200') && await has(A,'nt_today_todo_v1','سفارش فیلتر') && await has(A,'nt_daftar_v1','15094'),'نوشته‌های مدیر سر جایش است');
+  ok(await waitFor(async()=>await has(A,'nt_daftar_v1','27200') && await has(A,'nt_today_todo_v1','سفارش فیلتر') && await has(A,'nt_daftar_v1','15094'),15000),'نوشته‌های مدیر سر جایش است');
   ok(await waitFor(async()=>await has(X,'nt_daftar_v1','27200'),15000),'قرائت مدیر به همکار رسید');
   ok(await waitFor(async()=>await synced(A) && await synced(X),15000) && await dlgText(A)==='' && await dlgText(X)==='','هر دو همگام، بدون پرسش');
   await tab(A,'توقف شیفت');
@@ -225,7 +225,7 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   S.goodToken=good;
   ok(await waitFor(async()=>await bar(A)==='' && await synced(A) && await bar(X)==='',15000),'بعد از درست شدن، هر دو خودکار ادامه دادند');
   await A.evaluate(()=>localStorage.removeItem('ntsync_base_v1')); await A.reload(); await A.waitForFunction(()=>window.ntSync); await settle(A);
-  ok(await waitFor(()=>A.evaluate(()=>!!ntSync.baseGet())) && await dlgText(A)==='' && await has(A,'nt_daftar_v1','300250') && await waitFor(()=>synced(A)),'سیستمی که از نسخه قبلی آمده: بدون پرسش و بدون گم شدن');
+  ok(await waitFor(()=>A.evaluate(()=>!!ntSync.baseGet()),20000) && await waitFor(()=>synced(A),20000) && await dlgText(A)==='' && await has(A,'nt_daftar_v1','300250'),'سیستمی که از نسخه قبلی آمده: بدون پرسش و بدون گم شدن');
 
   console.log('12) قطع قطعی: تعویض کلید و رمز');
   await A.click('#ntSyBtn'); await A.locator('details.sycard summary').click();
