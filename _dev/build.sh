@@ -13,5 +13,6 @@ python3 add_fleet.py "$T/b7.html" "$T/b8.html"
 python3 add_timeline.py "$T/b8.html" "$T/b9.html"
 python3 add_outsource.py "$T/b9.html" "$T/b10.html"
 python3 add_today_v2.py "$T/b10.html" "$T/b11.html"
-python3 build.py "$T/b11.html" ../out.html
+python3 add_print_flag.py "$T/b11.html" "$T/b12.html"
+python3 build.py "$T/b12.html" ../out.html
 echo "ساخته شد: _dev/out.html — بعد از آزمایش، به جای ../سامانه-نت.html بگذارید"
