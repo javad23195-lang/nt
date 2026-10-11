@@ -41,6 +41,10 @@ h1{margin:0;font-size:1.3rem;font-weight:800;line-height:1.4}
 .th img{width:100%;height:100%;object-fit:cover;display:block}
 .th .no{display:grid;place-items:center;height:100%;padding:6px;font-size:.72rem;color:var(--dim);text-align:center;line-height:1.4}
 .th .dt{position:absolute;inset-inline:0;bottom:0;background:rgba(23,33,43,.62);color:#fff;font-size:.68rem;text-align:center;padding:1px 0}
+.bk{margin-top:6px;padding:12px 14px;border:1px solid var(--rule);border-radius:14px;background:var(--card);display:flex;flex-direction:column;gap:8px}
+.bk.w{border-color:var(--wline);background:var(--wbg)}
+.bk b{display:block}.bk span{font-size:.85rem;color:var(--dim)}
+.bk .btn.p{flex:none}
 .empty{margin-top:16px;padding:22px 16px;border:1px dashed var(--line);border-radius:14px;text-align:center;color:var(--dim)}
 .dlg{position:fixed;inset:0;background:rgba(18,25,33,.55);z-index:50;display:none;align-items:flex-end;justify-content:center}
 .dlg.on{display:flex}
@@ -141,7 +145,9 @@ function render(){
     let names=devNames().filter(n=>!by.has(dkey(n))).map(n=>({n,c:0}));
     let list=[...by.values()].sort((a,b)=>b.c-a.c).concat(names);
     const qq=dkey(q); if(qq) list=list.filter(x=>dkey(x.n).includes(qq));
-    M.innerHTML=`<input class="sr" id="sr" placeholder="جستجوی دستگاه…" value="${esc(q)}" autocomplete="off">`+
+    const nb=all.filter(p=>!p.bk).length;
+    const bkc=all.length?`<div class="bk${nb?' w':''}">${nb?`<b>${fa(nb)} عکس پشتیبان ندارد</b><span>اگر گوشی گم شود، این عکس‌ها از بین می‌روند. به بله یا تلگرام بفرستید.</span><button type="button" class="btn p" id="bkGo">ارسال پشتیبان${nb>BK_MAX?` (${fa(BK_MAX)} عکس اول)`:''}</button>`:'<b>✓ همه عکس‌ها پشتیبان دارند</b>'}${lastBk.length?`<button type="button" class="btn s" id="bkAgain">ارسال دوباره همین ${fa(lastBk.length)} عکس (برای برنامه دیگر)</button>`:''}</div>`:'';
+    M.innerHTML=bkc+`<input class="sr" id="sr" placeholder="جستجوی دستگاه…" value="${esc(q)}" autocomplete="off">`+
       (all.length?'':'<div class="empty"><b>هنوز عکسی نیست.</b><br>با «دوربین» شروع کنید.</div>')+
       list.map(x=>`<button type="button" class="dv" data-dev="${esc(x.n)}"><span><b>${esc(x.n)}</b></span><span class="n">${x.c?fa(x.c):'—'}</span></button>`).join('');
     const s=$('sr'); s.addEventListener('input',()=>{ q=s.value; const pos=s.selectionStart; render(); const n=$('sr'); n.focus(); try{ n.setSelectionRange(pos,pos); }catch(e){} });
@@ -164,6 +170,8 @@ $('main').addEventListener('click',e=>{
   const c=e.target.closest('[data-sec]'); if(c){ curSec=c.dataset.sec; render(); return; }
   const t=e.target.closest('[data-id]'); if(t){ openViewer(t.dataset.id); return; }
   if(e.target.closest('#sendAll')) sendMany();
+  if(e.target.closest('#bkGo')) backup(false);
+  if(e.target.closest('#bkAgain')) backup(true);
 });
 
 function enterDev(n){ const was=!!curDev; curDev=n; curSec=''; render(); window.scrollTo(0,0); if(!was){ try{ history.pushState({ntph:1},''); }catch(x){} } }
@@ -177,6 +185,22 @@ function shareFiles(files,text,title){
   try{ if(navigator.canShare && navigator.canShare({files})) return navigator.share({files,text,title}).catch(e=>{ if(!(e&&e.name==='AbortError')) throw e; }); }catch(e){}
   files.forEach(f=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(f); a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); });
   say('گوشی منوی اشتراک ندارد؛ عکس دانلود شد'); return Promise.resolve();
+}
+/* ---------- پشتیبان: عکس‌هایی که هنوز فرستاده نشده‌اند، با یک ضربه به بله یا تلگرام ---------- */
+const BK_MAX=20; let lastBk=[];
+async function backup(again){
+  const list=again?lastBk.map(id=>photos.find(p=>p.id===id)).filter(Boolean):photos.filter(p=>p&&p.id&&!p.bk).sort((a,b)=>(a.ts||0)-(b.ts||0)).slice(0,BK_MAX);
+  const pairs=(await Promise.all(list.map(async p=>({p,f:await fileOf(p)})))).filter(x=>x.f);
+  if(!pairs.length){ say('عکسی روی این گوشی نیست',true); return; }
+  const files=pairs.map(x=>x.f), lines=[...new Set(pairs.map(x=>[x.p.dev,x.p.sec,x.p.part].filter(Boolean).join(' · ')))];
+  const text='پشتیبان عکس‌ها — '+jNow()+'\n'+lines.slice(0,15).join('\n')+'\n'+[...new Set(pairs.map(x=>tag(x.p.dev)))].join(' ');
+  window.__shared=files;
+  let sent=false;
+  try{ if(navigator.canShare && navigator.canShare({files})){ await navigator.share({files,text,title:'پشتیبان عکس‌ها'}); sent=true; } }
+  catch(e){ if(e&&e.name==='AbortError'){ say('ارسال لغو شد'); return; } }
+  if(!sent){ files.forEach(f=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(f); a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); }); }
+  const d=jNow(); pairs.forEach(x=>{ if(!x.p.bk) x.p.bk=d; }); save(); lastBk=pairs.map(x=>x.p.id); render();
+  say(sent?`${fa(files.length)} عکس فرستاده شد`:`${fa(files.length)} عکس دانلود شد`);
 }
 const fname=p=>(p.dev+'_'+(p.sec||'')+'_'+(p.part||'')+'_'+lat(p.date||'').replace(/\//g,'-')).replace(/[\\/:*?"<>|\s]+/g,'_')+'.jpg';
 async function fileOf(p){ const b=await getB('full',p.id); return b?new File([b],fname(p),{type:'image/jpeg'}):null; }

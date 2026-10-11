@@ -74,6 +74,8 @@ function atRows(){
   try{ autoItems().filter(x=>x.lv==='hot'||x.lv==='warn').forEach(x=>{
     if(x.lv==='warn' && x.go!=='برنامه روزانه'){ if(AT_CH.indexOf(x.go)<0) AT_CH.push(x.go); return; }
     R.push({c:'w',t:x.t,s:x.s,go:x.go}); }); }catch(e){}
+  try{ const P=JSON.parse(localStorage.getItem('nt_photos_v1')||'[]'), old=(Array.isArray(P)?P:[]).filter(x=>x&&!x.bk&&x.ts&&Date.now()-x.ts>7*864e5).length;
+    if(old) R.push({c:'i',t:fa(old)+' عکس پشتیبان ندارد',s:'در زبانه «عکس‌ها» به بله یا تلگرام بفرستید',go:'عکس‌ها'}); }catch(e){}
   try{ const b=bkAge(); if(b===null||b>7) R.push({c:'i',t:b===null?'پشتیبان ندارید':'آخرین پشتیبان '+fa(b)+' روز پیش',s:'یک نسخه پشتیبان بگیرید',bk:1}); }catch(e){}
   return R;
 }
