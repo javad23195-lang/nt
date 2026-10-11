@@ -71,6 +71,25 @@ details.more>summary{min-height:44px;display:flex;align-items:center;font-weight
 .toast{position:fixed;inset-inline:16px;bottom:calc(24px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;background:#1B2430;color:#fff;padding:12px 16px;border-radius:12px;font-weight:700;display:none;z-index:60}
 .toast.on{display:block}.toast.bad{background:var(--del)}
 
+/* ---------- جلسه سندپرداز: همه قدم‌های معوق، گروه‌بندی‌شده بر اساس مرحله ---------- */
+#oSess[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.sg{margin-top:16px}
+.sg h2{margin:0 0 6px;font-size:1.02rem;display:flex;align-items:center;gap:8px}
+.sg h2 .chip{font-weight:400}
+.sc{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:12px 14px;margin-top:8px}
+.sc h3{margin:0;font-size:1rem;line-height:1.5;overflow-wrap:anywhere}
+.sc h3 small{font-weight:400;color:var(--dim)}
+.sc .fl2{display:grid;gap:5px;margin-top:8px}
+.sc .fr{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;padding:2px 10px;text-align:start;background:#fff;border:1px solid var(--rule);border-radius:8px}
+.sc .fr:disabled{background:#FAFAFA}
+.sc .fr .l{flex:none;width:36%;font-size:.78rem;color:var(--dim)}
+.sc .fr .v{flex:1;min-width:0;font-weight:700;overflow-wrap:anywhere}
+.sc .fr .v.no{color:var(--del);font-weight:400}
+.sc .fr .k{flex:none;font-size:.74rem;color:var(--acc);font-weight:700}
+.sc .row2{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.sc .go{min-height:44px;padding:0 18px;border-radius:10px;border:0;background:var(--acc);color:#fff;font-weight:700}
+.sc .wn{font-size:.84rem;font-weight:700;color:var(--wink);flex:1}
+@media (min-width:960px){ .sg{max-width:760px;margin-inline:auto} .sc .fl2{grid-template-columns:1fr 1fr} }
 /* ---------- کامپیوتر: لیست + برگه کنار هم ---------- */
 .app{display:none}
 @media (min-width:960px){
@@ -137,7 +156,7 @@ details.more>summary{min-height:44px;display:flex;align-items:center;font-weight
 <header><div class="wrap">
   <div class="hd"><h1>لیست برون‌سپاری</h1>
   <p class="sub">هر کار تعمیر بیرونی تا ثبت فاکتور در سندپرداز. این برگه خودش در سندپرداز چیزی نمی‌نویسد.</p></div>
-  <div class="bar"><button type="button" class="btn p" id="oNew">+ کار تازه</button></div>
+  <div class="bar"><button type="button" class="btn p" id="oNew">+ کار تازه</button><button type="button" class="btn" id="oSess" aria-pressed="false">جلسه سندپرداز</button></div>
   <div class="seg" id="seg"><button type="button" data-f="open" aria-pressed="true">باز</button><button type="button" data-f="all" aria-pressed="false">همه</button></div>
 </div></header>
 <main class="wrap" id="list"></main>
@@ -145,7 +164,7 @@ details.more>summary{min-height:44px;display:flex;align-items:center;font-weight
 <div class="dlg" id="dlg" role="dialog" aria-modal="true" aria-labelledby="dH"><div class="box">
   <h2 id="dH">کار تازه</h2>
   <div class="fld"><label for="fDev">دستگاه</label><input class="in" id="fDev" list="dlDev" autocomplete="off"><datalist id="dlDev"></datalist><div class="hint" id="hStop"></div></div>
-  <div class="fld"><label for="fVen">پیمانکار (تعمیرکار)</label><input class="in" id="fVen" list="dlVen" autocomplete="off"><datalist id="dlVen"></datalist></div>
+  <div class="fld"><label for="fVen">پیمانکار (اگر می‌دانید؛ می‌توانید بعداً بنویسید)</label><input class="in" id="fVen" list="dlVen" autocomplete="off"><datalist id="dlVen"></datalist></div>
   <div class="fld"><label for="fDesc">شرح کار</label><textarea class="in" id="fDesc"></textarea></div>
   <div class="fld"><label for="fWs">تاریخ شروع کار (مثل 1405/07/19)</label><input class="in" id="fWs" inputmode="numeric" autocomplete="off" dir="ltr"></div>
   <details class="more" id="fMore"><summary>اطلاعات بیشتر (می‌توانید بعداً بنویسید)</summary>
@@ -232,7 +251,7 @@ function renderNarrow(){
     if(nxt){ const m=missing(j,nxt); nx=m.length?`<div class="nx w">قدم بعد: ${esc(nxt.n)} — اول بنویسید: ${esc(m.join('، '))}</div>`:`<div class="nx">قدم بعد: ${esc(nxt.n)}</div>`; }
     const sh=openSheet.has(j.id)?sheetHtml(j):'';
     return `<section class="jb${late?' od':''}${dn?' dn':''}" data-id="${esc(j.id)}">
-      <h3>${esc(j.dev)} <span class="chip">${esc(j.ven||'بدون پیمانکار')}</span></h3>
+      <h3>${esc(j.dev)} <span class="chip">${esc(j.ven||'پیمانکار نامعلوم')}</span></h3>
       <p>${esc(j.desc||'')}</p><div class="meta">${meta.join('')}</div>
       <div class="stp">${sp}</div>${nx}
       <div class="acts"><button type="button" class="btn s" data-a="sheet" data-id="${esc(j.id)}">${openSheet.has(j.id)?'بستن برگه':'برگه سندپرداز'}</button>
@@ -274,7 +293,7 @@ function paneHtml(j){
       (cur?(m.length?`<button type="button" class="go" data-a="edit" data-id="${esc(j.id)}">تکمیل اطلاعات</button>`:`<button type="button" class="go" data-st="${s.k}" data-id="${esc(j.id)}">ثبت شد</button>`):'');
     const rows=(dt&&!cur)?'':stepFields(j,s.k).map(r=>{ const t=String(r[1]||'').trim(); return `<button type="button" class="fr" data-copy="${esc(lat(t))}" ${t?'':'disabled'}><span class="l">${esc(r[0])}</span><span class="v${t?'':' no'}">${t?esc(lat(t)):'ننوشته‌اید'}</span><span class="k">${t?'کپی':''}</span></button>`; }).join('');
     return `<li class="ts${dt?' done':''}${cur?' cur':''}${lock?' lock':''}"><div class="tt"><span class="mk" aria-hidden="true">${dt?'✓':fa(i+1)}</span><b>${esc(s.n)}</b>${dt?`<span class="dt">${esc(fa(dt))}</span>`:''}${act}</div>${rows?`<div class="fl">${rows}</div>`:''}${cur&&m.length?`<p class="wn">اول بنویسید: ${esc(m.join('، '))}</p>`:''}</li>`; }).join('');
-  return `<div class="ph"><h2>${esc(j.dev)}</h2><p>${esc(j.ven||'بدون پیمانکار')} — ${esc(j.desc||'')}</p><div class="meta">${meta.join('')}</div>
+  return `<div class="ph"><h2>${esc(j.dev)}</h2><p>${esc(j.ven||'پیمانکار نامعلوم')} — ${esc(j.desc||'')}</p><div class="meta">${meta.join('')}</div>
     <div class="acts"><button type="button" class="btn s" data-a="edit" data-id="${esc(j.id)}">ویرایش</button><button type="button" class="btn s d" data-a="del" data-id="${esc(j.id)}">${armDel===j.id?'مطمئنید؟ دوباره بزنید':'حذف'}</button></div></div><ol class="trk">${trk}</ol>`; }
 function renderWide(){
   const L=$('list'), arr=shownJobs();
@@ -284,7 +303,19 @@ function renderWide(){
     return `<button type="button" class="rw${late?' od':''}${dn?' dn':''}" data-sel="${esc(j.id)}" aria-selected="${j.id===sel?'true':'false'}"><span class="dv">${esc(j.dev)}<small>${esc(j.desc||'')}</small></span><span class="vn">${esc(j.ven||'—')}</span><span class="rb" aria-label="${fa(doneN(j))} از ${fa(STEPS.length)} مرحله">${segs}</span><span class="nx2">${dn?'تمام شد':esc(nxt.n)}</span><span class="lt${dn?' g':''}">${late?fa(lateDays(j))+' روز دیرکرد':(dn?'✓':'')}</span></button>`; }).join('');
   L.innerHTML=`<div class="app"><div class="lst"><div class="lh"><span>دستگاه</span><span>پیمانکار</span><span>پیشرفت</span><span>قدم بعد</span><span></span></div>${rows||`<div class="pe"><b>${filter==='open'?'کار باز نیست':'هنوز کاری ثبت نشده'}</b><br>با «+ کار تازه» شروع کنید.</div>`}</div><aside class="pane" aria-label="برگه سندپرداز">${paneHtml(cur)}</aside></div>`;
 }
-function render(){ wide()?renderWide():renderNarrow(); }
+let sess=false;
+function renderSession(){
+  const L=$('list'), open=jobs.filter(j=>j&&j.id&&!isDone(j)); let out='', n=0;
+  STEPS.forEach((st,i)=>{ const js=open.filter(j=>{ const nx=STEPS.find(x=>!(j.steps&&j.steps[x.k])); return nx&&nx.k===st.k; });
+    if(!js.length) return; n+=js.length;
+    out+=`<section class="sg"><h2>${fa(i+1)} ${esc(st.n)} <span class="chip">${fa(js.length)} کار</span></h2>`+js.map(j=>{ const m=missing(j,st);
+      const fl=stepFields(j,st.k).map(r=>{ const t=String(r[1]||'').trim(); return `<button type="button" class="fr" data-copy="${esc(lat(t))}" ${t?'':'disabled'}><span class="l">${esc(r[0])}</span><span class="v${t?'':' no'}">${t?esc(lat(t)):'ننوشته‌اید'}</span><span class="k">${t?'کپی':''}</span></button>`; }).join('');
+      const late=isLate(j)?`<span class="chip r">${fa(lateDays(j))} روز دیرکرد</span>`:'';
+      return `<div class="sc"><h3>${esc(j.dev)} <small>— ${esc(j.ven||'پیمانکار نامعلوم')}</small> ${late}</h3><div class="fl2">${fl}</div>
+        <div class="row2">${m.length?`<span class="wn">اول بنویسید: ${esc(m.join('، '))}</span><button type="button" class="go" data-a="edit" data-id="${esc(j.id)}">تکمیل اطلاعات</button>`:`<button type="button" class="go" data-st="${st.k}" data-id="${esc(j.id)}">در سندپرداز زدم، ثبت شد</button>`}</div></div>`; }).join('')+'</section>'; });
+  L.innerHTML=n?`<div class="hint" style="margin-top:14px">همه قدم‌های بعدی، گروه‌بندی‌شده بر اساس صفحه سندپرداز. هر گروه را پشت سر هم بزنید.</div>${out}`:'<div class="empty"><b>قدم معوقی نیست</b>همه کارهای باز تمام شده‌اند.</div>';
+}
+function render(){ if(sess) return renderSession(); wide()?renderWide():renderNarrow(); }
 try{ matchMedia('(min-width:960px)').addEventListener('change',render); }catch(e){}
 document.addEventListener('keydown',e=>{ if(!wide()||$('dlg').classList.contains('on')) return; if(e.key!=='ArrowDown'&&e.key!=='ArrowUp') return;
   const t=e.target; if(t&&/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return; const a=shownJobs(); if(!a.length) return;
@@ -324,7 +355,7 @@ function saveForm(){
   ['cause','act','svc'].forEach(k=>{ v[k]=$({cause:'fCause',act:'fAct',svc:'fSvc'}[k]).value.trim(); });
   F.forEach(f=>$(f).classList.remove('bad'));
   const bad=[]; const need=(f,m)=>{ if(!$(f).value.trim()){ bad.push(f); return m; } return ''; };
-  let e=need('fDev','دستگاه را بنویسید')||need('fVen','پیمانکار را بنویسید')||need('fDesc','شرح کار را بنویسید');
+  let e=need('fDev','دستگاه را بنویسید')||need('fDesc','شرح کار را بنویسید');
   ['fWs','fBd','fWe'].forEach(f=>{ const t=$(f).value.trim(); if(!e && t){ const n=nd(t); if(!n){ bad.push(f); e='تاریخ را مثل 1405/07/19 بنویسید'; } else v[MAP[f]]=n; } else if(!t) v[MAP[f]]=''; });
   if(!e && v.bt && !/^\d{2}:\d{2}$/.test(v.bt)){ bad.push('fBt'); e='ساعت درست نیست'; }
   if(!e && v.amt && !/^[\d,٬]+$/.test(v.amt)){ bad.push('fAmt'); e='مبلغ را فقط با رقم بنویسید'; }
@@ -347,6 +378,9 @@ function copy(t){ const done=()=>say('کپی شد'); try{ if(navigator.clipboard
   function fb(){ try{ const a=document.createElement('textarea'); a.value=t; a.style.position='fixed'; a.style.opacity='0'; document.body.appendChild(a); a.select(); document.execCommand('copy'); a.remove(); done(); }catch(e){ say('کپی نشد',true); } } }
 
 $('oNew').addEventListener('click',()=>openForm());
+$('oSess').addEventListener('click',()=>{ sess=!sess; $('oSess').setAttribute('aria-pressed',sess?'true':'false'); $('seg').hidden=sess; render(); });
+/** «نیاز به تعمیر بیرونی» از صفحه دستگاه: فرم تازه با دستگاه پر */
+function consumeDraft(){ try{ const d=parent.ntOutsrcDraft; if(!d||!d.dev) return; parent.ntOutsrcDraft=null; sess=false; $('oSess').setAttribute('aria-pressed','false'); $('seg').hidden=false; openForm(); $('fDev').value=String(d.dev); devHint(); try{ $('fVen').focus(); }catch(e){} }catch(e){} }
 $('fCancel').addEventListener('click',closeForm);
 $('fSave').addEventListener('click',saveForm);
 $('fDev').addEventListener('input',devHint); $('fDev').addEventListener('change',devHint);
@@ -362,8 +396,8 @@ $('list').addEventListener('click',e=>{
   else if(a.dataset.a==='edit'){ openForm(id); }
   else if(a.dataset.a==='del'){ if(armDel===id){ jobs=jobs.filter(x=>x.id!==id); armDel=''; save(); render(); say('حذف شد'); } else{ armDel=id; render(); setTimeout(()=>{ if(armDel===id){ armDel=''; render(); } },4000); } }
 });
-window.addEventListener('message',e=>{ if(!e||!e.data||e.data.nt!=='show') return; if($('dlg').classList.contains('on')) return; reload(); });
-render();
+window.addEventListener('message',e=>{ if(!e||!e.data||e.data.nt!=='show') return; if($('dlg').classList.contains('on')) return; reload(); consumeDraft(); });
+render(); setTimeout(consumeDraft,300);
 </script>
 </body>
 </html>

@@ -136,6 +136,7 @@ function home(id){
   const ow=openWork(dev);
   if(canSee('توقف شیفت') && (trk0(dev)||ow)) kv+=`<span>اضافه‌کار</span><b class="${ow?'run':''}">${ow?'● در جریان از '+fa(ow.w.from)+(ow.day!==jStr(jNow())?' ('+fa(ow.day)+')':''):'در جریان نیست'}</b>`;
   if(canSee('انبار') && lastSvc) kv+=`<span>آخرین سرویس</span><b>${fa(rDate(lastSvc))} — ${esc(lastSvc.svcName||'تعویض روغن')}</b>`;
+  if(canSee('برون‌سپاری')){ try{ const oj=(JSON.parse(localStorage.getItem('nt_outsrc_v1')||'[]')||[]).filter(j=>j&&j.id&&!(j.steps&&j.steps.fin)&&norm(j.dev)===norm(dev.name)); if(oj.length) kv+=`<span>تعمیر بیرونی</span><b class="stop">${fa(oj.length)} کار باز</b>`; }catch(e){} }
   if(canSee('ثبت مشکلات')) kv+=`<span>مشکل باز</span><b class="${open.length?'stop':''}">${open.length?fa(open.length)+' — '+esc(String(open[open.length-1].desc||'').slice(0,40)):'ندارد'}</b>`;
   let acts='';
   if(canW('دفترچه قرائت')) acts+='<button type="button" class="go" id="qrRead">ثبت قرائت</button>';
@@ -143,10 +144,12 @@ function home(id){
   if(canW('توقف شیفت') && (trk||os)) acts+=os?'<button type="button" class="rn" id="qrRun">پایان توقف (راه افتاد)</button>':'<button type="button" class="stp" id="qrStop">شروع توقف</button>';
   if(canW('توقف شیفت') && (trk||ow)) acts+=ow?'<button type="button" class="rn" id="qrWEnd">پایان اضافه‌کار</button>':'<button type="button" id="qrWStart">شروع اضافه‌کار</button>';
   if(canW('ثبت مشکلات')) acts+='<button type="button" id="qrProb">ثبت مشکل</button>';
+  if(canW('برون‌سپاری')) acts+='<button type="button" id="qrOut">نیاز به تعمیر بیرونی</button>';
   acts+='<button type="button" id="qrHist">دیدن سوابق</button>';
   view(dev.name,`${kv?'<div class="kv">'+kv+'</div>':''}<div class="acts">${acts}</div><button type="button" id="qrClose">بستن</button>`);
   on('qrRead',()=>readForm(dev)); on('qrStop',()=>stopForm(dev)); on('qrRun',()=>runForm(dev));
   on('qrWStart',()=>workStart(dev)); on('qrWEnd',()=>workEnd(dev)); on('qrProb',()=>probForm(dev)); on('qrHist',()=>hist(dev)); on('qrClose',close);
+  on('qrOut',()=>{ window.ntOutsrcDraft={dev:dev.name}; close(); try{ window.postMessage({nt:'go',tab:'برون‌سپاری'},'*'); }catch(e){} });
   setTimeout(()=>{ try{ const b=$('ntQrBody').querySelector('.acts button'); if(b) b.focus(); }catch(e){} },50);
   try{ if(window.ntCharts && ntCharts.devMini) ntCharts.devMini(dev.name); }catch(e){}   // نمودار کوچک کارکرد
 }
