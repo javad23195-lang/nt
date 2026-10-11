@@ -69,8 +69,9 @@ h1{margin:0;font-size:1.3rem;font-weight:800;line-height:1.4}
 <header><div class="wrap">
   <h1>عکس‌ها</h1>
   <p class="sub">عکس هر دستگاه، به تفکیک بخش و قطعه. همه چیز فقط روی همین گوشی می‌ماند.</p>
-  <div class="bar"><button type="button" class="btn p" id="pNew">+ عکس تازه</button></div>
+  <div class="bar"><button type="button" class="btn p" id="pCam">📷 دوربین</button><button type="button" class="btn" id="pNew">از گالری</button></div>
   <input type="file" id="fIn" accept="image/*" multiple hidden>
+  <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
 </div></header>
 <main class="wrap" id="main"></main>
 
@@ -141,7 +142,7 @@ function render(){
     let list=[...by.values()].sort((a,b)=>b.c-a.c).concat(names);
     const qq=dkey(q); if(qq) list=list.filter(x=>dkey(x.n).includes(qq));
     M.innerHTML=`<input class="sr" id="sr" placeholder="جستجوی دستگاه…" value="${esc(q)}" autocomplete="off">`+
-      (all.length?'':'<div class="empty"><b>هنوز عکسی نیست.</b><br>با «+ عکس تازه» شروع کنید.</div>')+
+      (all.length?'':'<div class="empty"><b>هنوز عکسی نیست.</b><br>با «دوربین» شروع کنید.</div>')+
       list.map(x=>`<button type="button" class="dv" data-dev="${esc(x.n)}"><span><b>${esc(x.n)}</b></span><span class="n">${x.c?fa(x.c):'—'}</span></button>`).join('');
     const s=$('sr'); s.addEventListener('input',()=>{ q=s.value; const pos=s.selectionStart; render(); const n=$('sr'); n.focus(); try{ n.setSelectionRange(pos,pos); }catch(e){} });
     return; }
@@ -224,9 +225,12 @@ function openForm(files,p){
   if(pend.length>12){ const s=document.createElement('span'); s.textContent='+'+fa(pend.length-12); $('prev').appendChild(s); }
   $('dlg').classList.add('on'); try{ (curDev?$('fPart'):$('fDev')).focus(); }catch(e){}
 }
-function closeForm(){ $('dlg').classList.remove('on'); pend=[]; editP=null; $('fIn').value=''; }
-$('pNew').addEventListener('click',()=>{ if(!canW()){ say('اجازه ثبت ندارید',true); return; } $('fIn').click(); });
-$('fIn').addEventListener('change',()=>{ const fs=[...$('fIn').files].filter(f=>/^image\//.test(f.type)||/\.(jpe?g|png|webp|heic)$/i.test(f.name)); if(fs.length) openForm(fs); });
+function closeForm(){ $('dlg').classList.remove('on'); pend=[]; editP=null; $('fIn').value=''; $('fCam').value=''; }
+$('pNew').addEventListener('click',()=>$('fIn').click());
+$('pCam').addEventListener('click',()=>$('fCam').click());
+function picked(inp){ const fs=[...inp.files].filter(f=>/^image\//.test(f.type)||/\.(jpe?g|png|webp|heic)$/i.test(f.name)); if(fs.length) openForm(fs); }
+$('fIn').addEventListener('change',()=>picked($('fIn')));
+$('fCam').addEventListener('change',()=>picked($('fCam')));
 $('fCancel').addEventListener('click',closeForm);
 $('dlg').addEventListener('click',e=>{ if(e.target===$('dlg')) closeForm(); });
 $('fSave').addEventListener('click',async()=>{
@@ -250,7 +254,7 @@ document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; if($('vw')
 /* «عکس تازه» از صفحه دستگاه */
 function consumeDraft(){ try{ const d=parent.ntPhotoDraft; if(!d||!d.dev) return; parent.ntPhotoDraft=null; enterDev(String(d.dev)); }catch(e){} }
 window.addEventListener('message',e=>{ if(!e||!e.data||e.data.nt!=='show') return; if($('dlg').classList.contains('on')||$('vw').classList.contains('on')) return; reload(); consumeDraft(); });
-if(!canW()) $('pNew').hidden=true;
+
 render(); setTimeout(consumeDraft,300);
 </script>
 </body>
