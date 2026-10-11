@@ -83,3 +83,17 @@ body.ntdriver iframe{display:none!important}
 
 @media (min-width:900px){ .tabs{flex-wrap:wrap;overflow:visible;padding-top:6px} .tabs{gap:4px} .tab{padding:0 9px;gap:5px;font-size:.9rem} }
 @media (min-width:900px) and (max-width:1500px){ .tab .i{display:none} .tab{padding:0 11px} }
+
+/* نوار بالای کامپیوتر: همان تیره و زرد گوشی */
+@media (min-width:900px){
+  .topbar{background:#1B2430;border-bottom:3px solid #E6A52E}
+  .tab{background:rgba(255,255,255,.07);color:#E8EDF2;border-color:rgba(255,255,255,.2)}
+  .tab .i{color:#AEB9C5}
+  .tab.on{background:#E6A52E;border-color:#E6A52E;color:#1B2430}
+  .tab.on .i{color:#1B2430}
+  .tab .n{background:#C0392B;color:#fff}
+  .tab.on .n{background:#1B2430;color:#fff;border:0}
+  .tab:focus-visible{outline-color:#fff}
+  .topbar button:not(.tab){background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:14px}
+  .topbar button:not(.tab) svg{stroke:#fff;color:#fff}
+}

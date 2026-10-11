@@ -38,6 +38,7 @@ k=h.find("</style>"); assert k>0; h=h[:k]+CSS+h[k:]
 HTML="""  <div class="card fl" id="flCard" hidden>
     <h2 style="color:#1B2430">ناوگان <small id="flSub"></small></h2>
     <div class="flsum" id="flSum"></div>
+    <div class="flbar" id="flBar" aria-hidden="true"></div>
     <div class="flg" id="flGrid"></div>
     <p class="flnote">بر اساس توقف‌هایی که در «توقف شیفت» ثبت شده است.</p>
   </div>
@@ -101,13 +102,13 @@ function flRender(){
   const D=flBuild(); if(!D){ box.hidden=true; return; }
   box.hidden=false;
   const nb=D.list.filter(x=>x.st==='bad').length, nw=D.list.filter(x=>x.st==='wa'||x.st==='svc').length, no=D.list.filter(x=>x.st==='ok').length, nf=D.list.filter(x=>x.st==='off').length;
-  $('flSub').textContent=fa(D.list.length)+' دستگاه اصلی';
+  $('flSub').textContent=fa(D.list.length-nb-nw)+' از '+fa(D.list.length)+' دستگاه در کار'; $('flBar').innerHTML=D.list.map(x=>'<i class="b-'+x.st+'"></i>').join('');
   $('flSum').innerHTML=`<div class="k bad"><b>${fa(nb)}</b><span>خراب</span></div><div class="k wa"><b>${fa(nw)}</b><span>منتظر یا سرویس</span></div><div class="k ok"><b>${fa(no)}</b><span>در کار</span></div>${nf?`<div class="k off"><b>${fa(nf)}</b><span>پایان کار</span></div>`:''}`;
   const W={bad:'خراب',wa:'منتظر',svc:'در سرویس',ok:'در کار',off:'پایان کار'};
   $('flGrid').innerHTML=D.list.map(x=>{ const p=flParts(x.n);
     const sb=x.o?`${esc(x.o.cause)}${x.o.el!==null?' · '+flDur(x.o.el):''}`:(x.st==='off'?'خارج از ساعت کاری':(x.ow!==undefined?'اضافه‌کار از '+fa(x.ow):(x.cm>0?'توقف امروز: '+flHM(x.cm)+' ساعت':'امروز بدون توقف')));
     return `<button type="button" class="fld fl-${x.st}" data-dev="${esc(x.n)}" aria-label="${esc(x.n)}: ${W[x.st]}">
-      <span class="cp">${esc(p.cp)}</span><span class="md">${esc(p.md)}</span>
+      <span class="nmb"><span class="cp">${esc(p.cp)}</span><span class="md">${esc(p.md)}</span></span>
       <span class="ch"><svg viewBox="0 0 24 24" aria-hidden="true">${FL_I[x.st]}</svg>${W[x.st]}</span>
       <span class="sb">${sb}</span>${x.o&&x.o.el!==null&&x.o.el>=2880?'<span class="tk">اگر تمام شده، پایان را ثبت کنید</span>':''}${x.pt?`<span class="tk">${fa(x.pt)} کار مانده</span>`:''}</button>`; }).join('');
   box.querySelectorAll('.fld').forEach(b=>b.addEventListener('click',()=>{
