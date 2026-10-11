@@ -145,10 +145,12 @@ function home(id){
   if(canW('توقف شیفت') && (trk||ow)) acts+=ow?'<button type="button" class="rn" id="qrWEnd">پایان اضافه‌کار</button>':'<button type="button" id="qrWStart">شروع اضافه‌کار</button>';
   if(canW('ثبت مشکلات')) acts+='<button type="button" id="qrProb">ثبت مشکل</button>';
   if(canW('برون‌سپاری')) acts+='<button type="button" id="qrOut">نیاز به تعمیر بیرونی</button>';
+  if(canW('عکس‌ها')) acts+='<button type="button" id="qrPhoto">عکس تازه</button>';
   acts+='<button type="button" id="qrHist">دیدن سوابق</button>';
   view(dev.name,`${kv?'<div class="kv">'+kv+'</div>':''}<div class="acts">${acts}</div><button type="button" id="qrClose">بستن</button>`);
   on('qrRead',()=>readForm(dev)); on('qrStop',()=>stopForm(dev)); on('qrRun',()=>runForm(dev));
   on('qrWStart',()=>workStart(dev)); on('qrWEnd',()=>workEnd(dev)); on('qrProb',()=>probForm(dev)); on('qrHist',()=>hist(dev)); on('qrClose',close);
+  on('qrPhoto',()=>{ window.ntPhotoDraft={dev:dev.name}; close(); try{ window.postMessage({nt:'go',tab:'عکس‌ها'},'*'); }catch(e){} });
   on('qrOut',()=>{ window.ntOutsrcDraft={dev:dev.name}; close(); try{ window.postMessage({nt:'go',tab:'برون‌سپاری'},'*'); }catch(e){} });
   setTimeout(()=>{ try{ const b=$('ntQrBody').querySelector('.acts button'); if(b) b.focus(); }catch(e){} },50);
   try{ if(window.ntCharts && ntCharts.devMini) ntCharts.devMini(dev.name); }catch(e){}   // نمودار کوچک کارکرد
