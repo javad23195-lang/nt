@@ -62,6 +62,7 @@ rep('  <div class="card fl" id="flCard" hidden>','''  <div class="card at" id="a
 JS=r"""
 /* ============ نیاز به توجه: فقط استثناها (دستگاه خراب، دیرکرد فاکتور، کار معوق، پشتیبان) ============ */
 const AT_I={r:FL_I.bad,w:FL_I.wa,i:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>'};
+let AT_CH=[];
 function atRows(){
   const R=[]; let D=null; try{ if(flCan()) D=flBuild(); }catch(e){}
   if(D){
@@ -69,14 +70,18 @@ function atRows(){
     D.list.filter(x=>x.st==='wa'||x.st==='svc').forEach(x=>R.push({c:'w',t:x.n+(x.st==='svc'?' در سرویس':' منتظر است'),s:(x.o&&x.o.cause)||'',tag:(x.o&&x.o.el!==null)?flDur(x.o.el):'',dev:x.n}));
   }
   try{ osRows().forEach(r=>R.push(r)); }catch(e){}
-  try{ autoItems().filter(x=>x.lv==='hot'||x.lv==='warn').forEach(x=>R.push({c:'w',t:x.t,s:x.s,go:x.go})); }catch(e){}
+  AT_CH=[];
+  try{ autoItems().filter(x=>x.lv==='hot'||x.lv==='warn').forEach(x=>{
+    if(x.lv==='warn' && x.go!=='برنامه روزانه'){ if(AT_CH.indexOf(x.go)<0) AT_CH.push(x.go); return; }
+    R.push({c:'w',t:x.t,s:x.s,go:x.go}); }); }catch(e){}
   try{ const b=bkAge(); if(b===null||b>7) R.push({c:'i',t:b===null?'پشتیبان ندارید':'آخرین پشتیبان '+fa(b)+' روز پیش',s:'یک نسخه پشتیبان بگیرید',bk:1}); }catch(e){}
   return R;
 }
 function atRender(){
   const box=$('atCard'); if(!box) return; const R=atRows(), MAX=7; box.hidden=false;
   const n=$('atN'); n.textContent=R.length?fa(R.length):'✓'; n.classList.toggle('z',!R.length);
-  $('atList').innerHTML=R.length?R.slice(0,MAX).map((r,i)=>`<button type="button" class="ar ${r.c}" data-i="${i}"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">${AT_I[r.c]}</svg></span><span class="tx"><b>${esc(r.t)}</b>${r.s?`<span>${esc(r.s)}</span>`:''}</span>${r.tag?`<span class="tag">${esc(r.tag)}</span>`:'<span class="go" aria-hidden="true">‹</span>'}</button>`).join('')+(R.length>MAX?`<div class="atm">و ${fa(R.length-MAX)} مورد دیگر در بخش‌های پایین</div>`:''):'<div class="atz">✓ چیزی نیاز به توجه ندارد</div>';
+  $('atList').innerHTML=R.length?R.slice(0,MAX).map((r,i)=>`<button type="button" class="ar ${r.c}" data-i="${i}"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">${AT_I[r.c]}</svg></span><span class="tx"><b>${esc(r.t)}</b>${r.s?`<span>${esc(r.s)}</span>`:''}</span>${r.tag?`<span class="tag">${esc(r.tag)}</span>`:'<span class="go" aria-hidden="true">‹</span>'}</button>`).join('')+(R.length>MAX?`<div class="atm">و ${fa(R.length-MAX)} مورد دیگر در بخش‌های پایین</div>`:''):'<div class="atz">✓ چیزی نیاز به توجه ندارد</div>'
+  if(AT_CH.length) $('atList').insertAdjacentHTML('beforeend','<div class="atm">لیست آماده انتقال به اکسل: '+AT_CH.map(esc).join('، ')+'</div>');
   $('atList').querySelectorAll('.ar').forEach(b=>b.addEventListener('click',()=>{ const r=R[+b.dataset.i]; try{
     if(r.dev){ const dv=(parent.ntQr&&parent.ntQr.DEVS||[]).find(d=>flKey(d.name)===flKey(r.dev)); if(dv) parent.postMessage({nt:'qrdev',id:dv.id},'*'); else parent.postMessage({nt:'go',tab:'توقف شیفت'},'*'); }
     else if(r.go) parent.postMessage({nt:'go',tab:r.go},'*');

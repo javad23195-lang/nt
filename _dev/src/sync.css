@@ -97,3 +97,7 @@ body.ntdriver iframe{display:none!important}
   .topbar button:not(.tab){background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:14px}
   .topbar button:not(.tab) svg{stroke:#fff;color:#fff}
 }
+/* نوارهای وضعیت کوچک‌تر + عددهای زبانه‌ها آرام (قرمز فقط برای کار فوری، نه شمار لیست‌ها) */
+.sybar{padding:3px 12px;font-size:.74rem;line-height:1.4;gap:8px}
+.sybar button{min-height:24px;padding:0 10px}
+.ntnb .b,.ntmr .b{background:#5B6773!important}
