@@ -101,3 +101,7 @@ body.ntdriver iframe{display:none!important}
 .sybar{padding:3px 12px;font-size:.74rem;line-height:1.4;gap:8px}
 .sybar button{min-height:24px;padding:0 10px}
 .ntnb .b,.ntmr .b{background:#5B6773!important}
+/* بازبینی دسترس‌پذیری: هدف لمسی ۴۴ پیکسل و متن حداقل ۱۲ پیکسل در نوار بالا و پایین */
+#ntQrScan,#ntSyBtn{min-height:44px;min-width:44px}
+.ntnb{font-size:12px!important}
+#today{font-size:12px}

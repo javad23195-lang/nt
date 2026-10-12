@@ -34,7 +34,7 @@ header h1{font-size:1.2rem}header h1 span{display:none}
 .flsum{display:none}
 .flbar{display:flex;gap:4px;margin:2px 0 10px}.flbar i{flex:1;height:10px;border-radius:3px;background:#C9D1D9}
 .flbar i.b-bad{background:#B3261E}.flbar i.b-wa,.flbar i.b-svc{background:#C98A1B}.flbar i.b-off{background:#E3E8ED}
-.fl-ok{--c:#51606E;--cb:#EEF1F4}.fl-off{--c:#7B8793;--cb:#EEF1F4}
+.fl-ok{--c:#51606E;--cb:#EEF1F4}.fl-off{--c:#5A6673;--cb:#EEF1F4}
 .fld{min-height:0;padding:9px 12px}
 .fld.fl-ok,.fld.fl-off{box-shadow:none}
 .fld .nmb{display:flex;flex-direction:column}
