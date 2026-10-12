@@ -76,13 +76,16 @@ export function buildReport(keys,now){
   if(faults.length){ L.push('','خرابی‌های ثبت‌شده:'); faults.slice(0,6).forEach(f=>L.push(`• ${f.dev}: ${String(f.fdesc).slice(0,60)}${f.pri?' (اولویت '+FA(f.pri)+')':''}`)); }
   // فاکتور برون‌سپاری: کارهای باز و دیرکرد (بیش از ۳ روز بعد از پایان یا شروع کار)
   try{
-    const jobs=JSON.parse(store.nt_outsrc_v1||'[]'); const open=(Array.isArray(jobs)?jobs:[]).filter(j=>j&&j.id&&!(j.steps&&j.steps.fin));
+    const jobs=JSON.parse(store.nt_outsrc_v1||'[]'); const open=(Array.isArray(jobs)?jobs:[]).filter(j=>j&&j.id&&(!(j.steps&&j.steps.fin)||(Array.isArray(j.more)&&j.more.some(x=>x&&x.id&&!(x.steps&&x.steps.fin)))));
     if(open.length){
       const j2g=dy=>{ const m=/^(\d{4})\/(\d{2})\/(\d{2})$/.exec(dy||''); if(!m) return null; let jy=+m[1]-979, jm=+m[2]-1, jd=+m[3]-1; let n=365*jy+Math.floor(jy/33)*8+Math.floor(((jy%33)+3)/4); for(let i=0;i<jm;i++) n+=i<6?31:30; n+=jd; return n; };
       const t0=j2g(today);
-      const late=open.map(j=>{ const rc=normDay(j.steps&&j.steps.rcv||''), b=rc||normDay(j.ws||j.bd||''), g=b?j2g(b):null; return {j,rc:!!rc,d:(g===null||t0===null)?0:t0-g-(rc?1:3)}; }).filter(x=>x.d>0).sort((a,b)=>b.d-a.d);
+      const one=(rcRaw,baseRaw)=>{ const rc=normDay(rcRaw||''), b=rc||normDay(baseRaw||''), g=b?j2g(b):null; return {rc:!!rc,d:(g===null||t0===null)?0:t0-g-(rc?1:3)}; };
+      const late=open.map(j=>{ const c=[]; if(!(j.steps&&j.steps.fin)) c.push(Object.assign(one(j.steps&&j.steps.rcv,j.ws||j.bd),{x:false}));
+        (Array.isArray(j.more)?j.more:[]).filter(x=>x&&x.id&&!(x.steps&&x.steps.fin)).forEach(x=>c.push(Object.assign(one(x.steps&&x.steps.rcv,x.d),{x:true})));
+        const w=c.sort((a,b)=>b.d-a.d)[0]||{d:0}; return Object.assign({j},w); }).filter(x=>x.d>0).sort((a,b)=>b.d-a.d);
       L.push('',`فاکتور برون‌سپاری: ${FA(open.length)} کار باز${late.length?` — ${FA(late.length)} دیرکرد`:''}`);
-      late.slice(0,3).forEach(x=>L.push(`  - ${String(x.j.dev).slice(0,40)}: ${x.rc?'فاکتور رسیده، در سندپرداز ثبت کنید':'فاکتور را از پیمانکار بگیرید'} (${FA(x.d)} روز دیرکرد)`));
+      late.slice(0,3).forEach(x=>L.push(`  - ${String(x.j.dev).slice(0,40)}: ${x.rc?(x.x?'فاکتور دیگر رسیده، در سندپرداز ثبت کنید':'فاکتور رسیده، در سندپرداز ثبت کنید'):(x.x?'فاکتور دیگر مانده، بگیرید':'فاکتور را از پیمانکار بگیرید')} (${FA(x.d)} روز دیرکرد)`));
     }
   }catch(e){}
   // خدمت چاپ‌نشده: خدمت ۱۴ روز اخیر که برگه‌اش هنوز چاپ نشده (همان قاعده زبانه «خدمات»)

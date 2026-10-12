@@ -47,6 +47,15 @@ h1{margin:0;font-size:1.25rem;font-weight:800;line-height:1.4}
 .nx{margin-top:8px;font-size:.88rem;font-weight:700}
 .nx.w{color:var(--wink)}
 .acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.xs{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.xr{border:1px solid var(--rule);border-radius:12px;padding:8px 10px;background:#FAFBFC}
+.xr.od{border-color:var(--wline);background:var(--wbg)}.xr.dn{opacity:.75}
+.xh{display:flex;align-items:center;gap:8px}.xh b{flex:none;font-size:.9rem}
+.xn{flex:1;min-width:0;min-height:40px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:15px}
+.xd{flex:none;min-width:40px;min-height:40px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--del)}
+.xd.arm{background:var(--del);color:#fff;border-color:var(--del);font-weight:800;padding:0 8px}
+.xst{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.xa{align-self:flex-start}
 .sheet{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
 .sheet h4{margin:10px 0 2px;font-size:.9rem;color:var(--acc)}
 .row{display:flex;align-items:center;gap:8px;min-height:40px;border-bottom:1px solid #EEF1F4}
@@ -225,9 +234,30 @@ const P=()=>{ try{ return parent; }catch(e){ return null; } };
 const who=()=>{ try{ return (P().ntSync && P().ntSync.myName && P().ntSync.myName())||''; }catch(e){ return ''; } };
 function missing(j,st){ return st.need.filter(x=>!String(j[x[0]]||'').trim()).map(x=>x[1]); }
 function doneN(j){ let n=0; STEPS.forEach(s=>{ if(j.steps&&j.steps[s.k]) n++; }); return n; }
-const isDone=j=>!!(j.steps&&j.steps.fin);
+/* «یک فاکتور دیگر مانده»: فاکتورهای بعدی همان کار در j.more = [{id, note, d (تاریخ افزودن), steps:{rcv,fin}}] */
+const xs=j=>Array.isArray(j&&j.more)?j.more.filter(x=>x&&x.id):[];
+const xOpen=x=>!(x.steps&&x.steps.fin);
+const isDone=j=>!!(j.steps&&j.steps.fin)&&!xs(j).some(xOpen);
+function lateOne(rc,base){ const d=daysSince(rc||base||''); return d===null?0:Math.max(0,d-(rc?1:LAST_LATE)); }
+function nextLabel(j){ const nxt=STEPS.find(s=>!(j.steps&&j.steps[s.k])); if(nxt) return nxText(j,nxt);
+  const x=xs(j).find(xOpen); if(!x) return 'تمام شد'; return (x.steps&&x.steps.rcv)?'ثبت فاکتور دیگر در سندپرداز':'گرفتن فاکتور دیگر'+(x.note?' ('+x.note+')':''); }
+let armX='';
+function xHtml(j){
+  const L=xs(j);
+  return `<div class="xs">${L.map((x,k)=>{ const rc=x.steps&&x.steps.rcv, fn=x.steps&&x.steps.fin, lt=fn?0:lateOne(rc,x.d);
+    return `<div class="xr${fn?' dn':''}${lt?' od':''}"><div class="xh"><b>فاکتور ${fa(k+2)}</b><input class="xn" data-xn="${esc(x.id)}" data-id="${esc(j.id)}" value="${esc(x.note||'')}" placeholder="از کی؟ (اختیاری)" aria-label="فاکتور از کی"><button type="button" class="xd${armX===x.id?' arm':''}" data-xdel="${esc(x.id)}" data-id="${esc(j.id)}" aria-label="حذف این فاکتور">${armX===x.id?'حذف؟':'✕'}</button></div>
+      <div class="xst"><button type="button" class="sp ${rc?'done':'next'}" data-xst="rcv" data-xid="${esc(x.id)}" data-id="${esc(j.id)}" aria-pressed="${rc?'true':'false'}">${rc?'✓ ':''}فاکتور رسید<small>${rc?esc(fa(rc)):'ثبت شد؟'}</small></button><button type="button" class="sp ${fn?'done':(rc?'next':'')}" data-xst="fin" data-xid="${esc(x.id)}" data-id="${esc(j.id)}" ${!rc&&!fn?'disabled':''} aria-pressed="${fn?'true':'false'}">${fn?'✓ ':''}ثبت در سندپرداز<small>${fn?esc(fa(fn)):(rc?'ثبت شد؟':'')}</small></button></div>${lt?`<div class="nx w">${fa(lt)} روز دیرکرد</div>`:''}</div>`; }).join('')}
+    <button type="button" class="btn s xa" data-xadd="${esc(j.id)}">+ یک فاکتور دیگر مانده</button></div>`; }
+function xAdd(id){ const j=jobs.find(x=>x.id===id); if(!j) return; j.more=xs(j); j.more.push({id:'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,4),note:'',d:jNow(),steps:{}}); save(); render(); say('فاکتور دیگر اضافه شد؛ یادآور دوباره روشن است');
+  setTimeout(()=>{ try{ const a=$('list').querySelectorAll('.xn[data-id="'+CSS.escape(id)+'"]'); a[a.length-1].focus(); }catch(e){} },50); }
+function xStep(id,xid,k){ const j=jobs.find(x=>x.id===id), x=j&&xs(j).find(y=>y.id===xid); if(!x) return; x.steps=x.steps||{};
+  if(x.steps[k]){ if(k==='rcv'&&x.steps.fin){ say('اول «ثبت در سندپرداز» را بردارید',true); return; } delete x.steps[k]; save(); render(); say('برداشته شد'); return; }
+  if(k==='fin'&&!x.steps.rcv){ say('اول «فاکتور رسید» را ثبت کنید',true); return; }
+  x.steps[k]=jNow(); save(); render(); say(k==='rcv'?'«فاکتور رسید» ثبت شد':'«ثبت در سندپرداز» ثبت شد'); }
+function xDel(id,xid){ if(armX!==xid){ armX=xid; render(); setTimeout(()=>{ if(armX===xid){ armX=''; render(); } },3000); return; }
+  const j=jobs.find(x=>x.id===id); if(j){ j.more=xs(j).filter(y=>y.id!==xid); } armX=''; save(); render(); say('حذف شد'); }
 /** پایه شمارش دیرکرد: پایان کار، وگرنه شروع کار، وگرنه تاریخ خرابی */
-function lateDays(j){ if(isDone(j)) return 0; const rc=j.steps&&j.steps.rcv; const d=daysSince(rc||j.ws||j.bd||''); return d===null?0:Math.max(0,d-(rc?1:LAST_LATE)); }
+function lateDays(j){ if(isDone(j)) return 0; let m=0; if(!(j.steps&&j.steps.fin)) m=lateOne(j.steps&&j.steps.rcv,j.ws||j.bd); xs(j).filter(xOpen).forEach(x=>{ m=Math.max(m,lateOne(x.steps&&x.steps.rcv,x.d)); }); return m; }
 const isLate=j=>lateDays(j)>0;
 
 function renderNarrow(){
@@ -246,12 +276,12 @@ function renderNarrow(){
       const cls=dt?'done':(!dt&&prev?'next':''); const lock=!dt&&!prev; if(!dt) prev=false;
       return `<button type="button" class="sp ${cls}" data-st="${s.k}" data-id="${esc(j.id)}" ${lock?'disabled':''} aria-pressed="${dt?'true':'false'}">${dt?'✓ ':''}${esc(s.n)}<small>${dt?esc(fa(dt)):(lock?'':'ثبت شد؟')}</small></button>`; }).join('');
     let nx='';
-    if(nxt){ nx=`<div class="nx${isLate(j)?' w':''}">${esc(nxText(j,nxt))}</div>`; }
+    if(!dn){ nx=`<div class="nx${isLate(j)?' w':''}">${esc(nextLabel(j))}</div>`; }
     const sh=openSheet.has(j.id)?sheetHtml(j):'';
     return `<section class="jb${late?' od':''}${dn?' dn':''}" data-id="${esc(j.id)}">
       <h3>${esc(j.dev)} <span class="chip">${esc(j.ven||'پیمانکار نامعلوم')}</span></h3>
       <p>${esc(j.desc||'')}</p><div class="meta">${meta.join('')}</div>
-      <div class="stp">${sp}</div>${nx}
+      <div class="stp">${sp}</div>${xHtml(j)}${nx}
       <div class="acts"><button type="button" class="btn s" data-a="edit" data-id="${esc(j.id)}">ویرایش</button>
         <button type="button" class="btn s d" data-a="del" data-id="${esc(j.id)}">${armDel===j.id?'مطمئنید؟ دوباره بزنید':'حذف'}</button></div>${sh}</section>`; }).join('');
 }
@@ -291,13 +321,13 @@ function paneHtml(j){
     const rows=(dt&&!cur)?'':stepFields(j,s.k).map(r=>{ const t=String(r[1]||'').trim(); return `<button type="button" class="fr" data-copy="${esc(lat(t))}" ${t?'':'disabled'}><span class="l">${esc(r[0])}</span><span class="v${t?'':' no'}">${t?esc(lat(t)):'ننوشته‌اید'}</span><span class="k">${t?'کپی':''}</span></button>`; }).join('');
     return `<li class="ts${dt?' done':''}${cur?' cur':''}${lock?' lock':''}"><div class="tt"><span class="mk" aria-hidden="true">${dt?'✓':fa(i+1)}</span><b>${esc(s.n)}</b>${dt?`<span class="dt">${esc(fa(dt))}</span>`:''}${act}</div>${rows?`<div class="fl">${rows}</div>`:''}${cur&&m.length?`<p class="wn">اول بنویسید: ${esc(m.join('، '))}</p>`:''}</li>`; }).join('');
   return `<div class="ph"><h2>${esc(j.dev)}</h2><p>${esc(j.ven||'پیمانکار نامعلوم')} — ${esc(j.desc||'')}</p><div class="meta">${meta.join('')}</div>
-    <div class="acts"><button type="button" class="btn s" data-a="edit" data-id="${esc(j.id)}">ویرایش</button><button type="button" class="btn s d" data-a="del" data-id="${esc(j.id)}">${armDel===j.id?'مطمئنید؟ دوباره بزنید':'حذف'}</button></div></div><ol class="trk">${trk}</ol>`; }
+    <div class="acts"><button type="button" class="btn s" data-a="edit" data-id="${esc(j.id)}">ویرایش</button><button type="button" class="btn s d" data-a="del" data-id="${esc(j.id)}">${armDel===j.id?'مطمئنید؟ دوباره بزنید':'حذف'}</button></div></div><ol class="trk">${trk}</ol>${xHtml(j)}`; }
 function renderWide(){
   const L=$('list'), arr=shownJobs();
   if(!arr.some(j=>j.id===sel)) sel=arr.length?arr[0].id:'';
   const cur=arr.find(j=>j.id===sel);
   const rows=arr.map(j=>{ const dn=isDone(j), late=isLate(j), nxt=STEPS.find(s=>!(j.steps&&j.steps[s.k])), segs=STEPS.map(s=>`<i class="${j.steps&&j.steps[s.k]?'d':(nxt&&nxt.k===s.k?'c':'')}"></i>`).join('');
-    return `<button type="button" class="rw${late?' od':''}${dn?' dn':''}" data-sel="${esc(j.id)}" aria-selected="${j.id===sel?'true':'false'}"><span class="dv">${esc(j.dev)}<small>${esc(j.desc||'')}</small></span><span class="vn">${esc(j.ven||'—')}</span><span class="rb" aria-label="${fa(doneN(j))} از ${fa(STEPS.length)} مرحله">${segs}</span><span class="nx2">${dn?'تمام شد':esc(nxText(j,nxt))}</span><span class="lt${dn?' g':''}">${late?fa(lateDays(j))+' روز دیرکرد':(dn?'✓':'')}</span></button>`; }).join('');
+    return `<button type="button" class="rw${late?' od':''}${dn?' dn':''}" data-sel="${esc(j.id)}" aria-selected="${j.id===sel?'true':'false'}"><span class="dv">${esc(j.dev)}<small>${esc(j.desc||'')}</small></span><span class="vn">${esc(j.ven||'—')}</span><span class="rb" aria-label="${fa(doneN(j))} از ${fa(STEPS.length)} مرحله">${segs}</span><span class="nx2">${dn?'تمام شد':esc(nextLabel(j))}</span><span class="lt${dn?' g':''}">${late?fa(lateDays(j))+' روز دیرکرد':(dn?'✓':'')}</span></button>`; }).join('');
   L.innerHTML=`<div class="app"><div class="lst"><div class="lh"><span>دستگاه</span><span>پیمانکار</span><span>پیشرفت</span><span>قدم بعد</span><span></span></div>${rows||`<div class="pe"><b>${filter==='open'?'کار باز نیست':'هنوز کاری ثبت نشده'}</b><br>با «+ کار تازه» شروع کنید.</div>`}</div><aside class="pane" aria-label="برگه سندپرداز">${paneHtml(cur)}</aside></div>`;
 }
 let sess=false;
@@ -386,6 +416,10 @@ $('seg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b
 $('list').addEventListener('click',e=>{
   const r=e.target.closest('[data-sel]'); if(r){ sel=r.dataset.sel; armDel=''; render(); try{ $('list').querySelector('.rw[aria-selected="true"]').focus(); }catch(x){} return; }
   const c=e.target.closest('[data-copy]'); if(c){ copy(c.dataset.copy); return; }
+  const xa=e.target.closest('[data-xadd]'); if(xa){ xAdd(xa.dataset.xadd); return; }
+  const xt=e.target.closest('[data-xst]'); if(xt){ xStep(xt.dataset.id,xt.dataset.xid,xt.dataset.xst); return; }
+  const xd=e.target.closest('[data-xdel]'); if(xd){ xDel(xd.dataset.id,xd.dataset.xdel); return; }
+  if(e.target.closest('.xn')) return;
   const s=e.target.closest('[data-st]'); if(s){ toggleStep(s.dataset.id,s.dataset.st); return; }
   const a=e.target.closest('[data-a]'); if(!a) return; const id=a.dataset.id;
   if(a.dataset.a==='sheet'){ openSheet.has(id)?openSheet.delete(id):openSheet.add(id); armDel=''; render(); }
@@ -393,6 +427,7 @@ $('list').addEventListener('click',e=>{
   else if(a.dataset.a==='del'){ if(armDel===id){ jobs=jobs.filter(x=>x.id!==id); armDel=''; save(); render(); say('حذف شد'); } else{ armDel=id; render(); setTimeout(()=>{ if(armDel===id){ armDel=''; render(); } },4000); } }
 });
 window.addEventListener('message',e=>{ if(!e||!e.data||e.data.nt!=='show') return; if($('dlg').classList.contains('on')) return; reload(); consumeDraft(); });
+$('list').addEventListener('change',e=>{ const n=e.target.closest('.xn'); if(!n) return; const j=jobs.find(x=>x.id===n.dataset.id), x=j&&xs(j).find(y=>y.id===n.dataset.xn); if(!x) return; x.note=n.value.trim().slice(0,60); save(); });
 render(); setTimeout(consumeDraft,300);
 </script>
 </body>

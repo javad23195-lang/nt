@@ -136,7 +136,7 @@ function home(id){
   const ow=openWork(dev);
   if(canSee('توقف شیفت') && (trk0(dev)||ow)) kv+=`<span>اضافه‌کار</span><b class="${ow?'run':''}">${ow?'● در جریان از '+fa(ow.w.from)+(ow.day!==jStr(jNow())?' ('+fa(ow.day)+')':''):'در جریان نیست'}</b>`;
   if(canSee('انبار') && lastSvc) kv+=`<span>آخرین سرویس</span><b>${fa(rDate(lastSvc))} — ${esc(lastSvc.svcName||'تعویض روغن')}</b>`;
-  if(canSee('برون‌سپاری')){ try{ const oj=(JSON.parse(localStorage.getItem('nt_outsrc_v1')||'[]')||[]).filter(j=>j&&j.id&&!(j.steps&&j.steps.fin)&&norm(j.dev)===norm(dev.name)); if(oj.length) kv+=`<span>تعمیر بیرونی</span><b class="stop">${fa(oj.length)} کار باز</b>`; }catch(e){} }
+  if(canSee('برون‌سپاری')){ try{ const oj=(JSON.parse(localStorage.getItem('nt_outsrc_v1')||'[]')||[]).filter(j=>j&&j.id&&(!(j.steps&&j.steps.fin)||(Array.isArray(j.more)&&j.more.some(x=>x&&x.id&&!(x.steps&&x.steps.fin))))&&norm(j.dev)===norm(dev.name)); if(oj.length) kv+=`<span>تعمیر بیرونی</span><b class="stop">${fa(oj.length)} کار باز</b>`; }catch(e){} }
   if(canSee('ثبت مشکلات')) kv+=`<span>مشکل باز</span><b class="${open.length?'stop':''}">${open.length?fa(open.length)+' — '+esc(String(open[open.length-1].desc||'').slice(0,40)):'ندارد'}</b>`;
   let acts='';
   if(canW('دفترچه قرائت')) acts+='<button type="button" class="go" id="qrRead">ثبت قرائت</button>';

@@ -11,6 +11,7 @@ const keys={
     {id:'a',dev:'لودر کوماتسو WA470',from:'08:00',to:'11:00',cause:'خرابی هیدرولیک'},
     {id:'b',dev:'کامیون TRS01',from:'09:00',to:'09:30',cause:'نبود راننده'},
     {id:'c',dev:'کامیون TRS02',from:'10:00',to:'',cause:'خرابی موتور'}]}}),
+  nt_outsrc_v1:JSON.stringify([{id:'o1',dev:'کامیون TRS01',desc:'تعمیر موتور',ws:'1405/07/01',steps:{rcv:'1405/07/05',fin:'1405/07/06'},more:[{id:'x1',note:'جوشکاری',d:'1405/07/10',steps:{}}]}]),
   nt_khadamat_v1:JSON.stringify({rows:[{dev:'کامیون TRS02',act:'تعمیر موتور',y:1405,m:7,d:17},{dev:'لودر ZL50',act:'چاپ‌شده',y:1405,m:7,d:17,pr:'1405/07/17'},{dev:'لودر ZL50',act:'قدیمی',y:1405,m:5,d:1}]}),
   nt_prog_v1:JSON.stringify({'۱۴۰۵/۰۷/۱۸':{tasks:[{dev:'بیل مکانیکی کوماتسو PC400',prog:'تعویض فیلتر هوا',done:false},{dev:'نیسان',prog:'سرویس',done:false}],faults:[{dev:'لودر ZL50',fdesc:'نشت روغن',pri:'2'}]},
     '1405/07/17':{tasks:[{dev:'ژنراتور 1',prog:'بازدید',done:true,sdur:'1:30'},{dev:'لودر ZL50',prog:'تعویض روغن',done:false}]}})
@@ -31,5 +32,6 @@ t('برنامه امروز (کلید فارسی)',/۲ کار برنامه‌ری
 t('کار انجام‌نشده دیروز',/۱ کار دیروز انجام نشده/.test(r.stdout));
 t('خرابی ثبت‌شده',/لودر ZL50: نشت روغن/.test(r.stdout));
 t('خدمت چاپ‌نشده: فقط ۱ مورد تازه',/خدمت چاپ‌نشده: ۱ مورد/.test(r.stdout) && /کامیون TRS02: تعمیر موتور/.test(r.stdout) && !/قدیمی|چاپ‌شده:/.test(r.stdout));
+t('فاکتور دیگر مانده در گزارش',/فاکتور برون‌سپاری: ۱ کار باز — ۱ دیرکرد/.test(r.stdout) && /کامیون TRS01: فاکتور دیگر مانده، بگیرید \(۵ روز دیرکرد\)/.test(r.stdout));
 t('رمز نادرست = خطا و بدون متن گزارش',run('wrong').status!==0 && !/گزارش نت/.test(run('wrong').stdout));
 fs.rmSync(dir,{recursive:true,force:true}); process.exit(ok?0:1);
