@@ -30,6 +30,11 @@ header h1{font-size:1.2rem}header h1 span{display:none}
 .ar .go{flex:none;color:#51606E;font-size:1.2rem}
 .atz{padding:18px 14px;text-align:center;color:#1E7F4F;font-weight:700}
 .atm{padding:8px 14px;font-size:.8rem;color:#51606E;border-top:1px solid #EEF1F4}
+/* یادداشت‌ها: تاریخ (معوق از …) در خط دوم، تا متن یادداشت جا داشته باشد */
+.td:not(.ed){flex-wrap:wrap;row-gap:2px}
+.td:not(.ed) .tx{flex:1 0 calc(100% - 45px);min-width:0;overflow-wrap:anywhere}
+.td:not(.ed) .tx+*{margin-inline-start:33px}
+.td:not(.ed) .dt2{flex:1 1 auto;white-space:normal}
 /* ناوگان */
 .flsum{display:none}
 .flbar{display:flex;gap:4px;margin:2px 0 10px}.flbar i{flex:1;height:10px;border-radius:3px;background:#C9D1D9}
