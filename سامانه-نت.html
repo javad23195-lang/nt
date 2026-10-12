@@ -389,11 +389,16 @@ const UKEY='nt_users_v1', SKEY='nt_seen_v1';      // لیست کاربران (ف
 const TEST=window.NTSYNC_TEST||{};
 const API=TEST.api||'https://api.github.com', RAW=TEST.raw||'https://raw.githubusercontent.com';
 const TAG='nt-data', FILE='nt-data.json';
+/* true بعد از اینکه مدیر اطلاعات را به مخزن خصوصی برد: سیستم وصل‌نشده همیشه قفل است و «مشاهده با رمز» نیست */
+const DATA_PRIVATE=!!TEST.private;
 let OWNER='javad23195-lang', REPO='nt';
 try{
   const m=/^([a-z0-9-]+)\.github\.io$/i.exec(location.hostname);
   if(m){ OWNER=m[1]; const p=decodeURIComponent(location.pathname).split('/').filter(Boolean)[0]; if(p && !/\.html?$/i.test(p)) REPO=p; }
 }catch(e){}
+/* محل اطلاعات: پیش‌فرض همان مخزن کد. بعد از «انتقال به مخزن خصوصی»، cfg.d = 'مالک/نام' (مثلاً javad23195-lang/nt-data) */
+let DOWNER=OWNER, DREPO=REPO;
+function setData(d){ DOWNER=OWNER; DREPO=REPO; const m=/^([A-Za-z0-9-]+)\/([A-Za-z0-9._-]+)$/.exec(String(d||'')); if(m){ DOWNER=m[1]; DREPO=m[2]; } }
 /* کلیدهایی که مخصوص همین سیستم است و فرستاده نمی‌شود */
 const SKIP={nt_lasttab:1,nt_al_seen_v1:1,nt_backup_at:1,nt_alerts_v1:1,nt_bridge_sh_v1:1,nt_tavaqof_name:1,nt_tavaqof_dev:1};
 /* کلیدهای محاسبه‌ای: ادغام نمی‌شوند؛ هر سیستم خودش دوباره می‌سازد */
@@ -660,7 +665,7 @@ async function bad(res){
   const e=new Error(res.status===401?'AUTH':rate?'RATE':(res.status===403||res.status===404)?'PERM':'HTTP');
   e.status=res.status; e.detail=msg; return e;
 }
-const repoPath=()=>`/repos/${OWNER}/${REPO}`;
+const repoPath=()=>`/repos/${DOWNER}/${DREPO}`;
 async function getRef(){
   const r=await gh(`${repoPath()}/git/ref/tags/${TAG}`,{auth:true});
   if(r.status===404) return null;
@@ -679,13 +684,13 @@ async function getFile(auth,etag,at){
   return {w:parseFile(await r.text()), etag:r.headers.get('ETag')||''};
 }
 async function getRaw(){
-  let r; try{ r=await fetch(`${RAW}/${OWNER}/${REPO}/${TAG}/${FILE}?t=${Date.now()}`,{cache:'no-store'}); }catch(e){ throw new Error('NET'); }
+  let r; try{ r=await fetch(`${RAW}/${DOWNER}/${DREPO}/${TAG}/${FILE}?t=${Date.now()}`,{cache:'no-store'}); }catch(e){ throw new Error('NET'); }
   if(r.status===404) return {none:true};
   if(!r.ok) throw new Error('HTTP');
   return {w:parseFile(await r.text()), etag:''};
 }
 async function getAny(etag){
-  try{ return await getFile(false,etag); }
+  try{ return await getFile(!!cfg.token,etag); }
   catch(e){ if(e && e.message==='RATE') return await getRaw(); throw e; }
 }
 /** پرونده را روی نسخه parent می‌گذارد. اگر در همین فاصله سیستم دیگری ارسال کرده باشد، خطای MOVED می‌دهد
@@ -870,7 +875,7 @@ async function sync(opt){
       if(!ref || (ref===s.sha && !(incoming && incoming.fix && incoming.ref===ref))) incoming=null;
     }else{
       const f=await getAny(opt.manual?'':s.etag);
-      if(f.none){ busy=false; setPhase('err','اطلاعات مشترک هنوز ارسال نشده است'); return; }
+      if(f.none){ busy=false; setPhase('err',DATA_PRIVATE?'اطلاعات به مخزن خصوصی رفته است. از مدیر کد اتصال بگیرید':'اطلاعات مشترک هنوز ارسال نشده است'); return; }
       if(f.same || f.w.iv===s.iv){ if(f.etag) stSet({etag:f.etag}); incoming=null; }
       else{
         if(f.w.salt!==cfg.salt) throw new Error('PASS');
@@ -1045,7 +1050,7 @@ async function pinKey(pin,salt){
 }
 async function codeMake(uid,pin){
   const salt=crypto.getRandomValues(new Uint8Array(16)), iv=crypto.getRandomValues(new Uint8Array(12));
-  const body=enc.encode(JSON.stringify({v:1,o:OWNER,r:REPO,t:cfg.token,k:cfg.key,s:cfg.salt,u:uid}));
+  const body=enc.encode(JSON.stringify({v:1,o:OWNER,r:REPO,d:cfg.d||'',t:cfg.token,k:cfg.key,s:cfg.salt,u:uid}));
   const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},await pinKey(pin,salt),body));
   return 'NT1.'+u64e(salt)+'.'+u64e(iv)+'.'+u64e(ct);
 }
@@ -1093,10 +1098,10 @@ async function join(){
   if(pin.length<6){ msg('رمز ۶ رقمی را وارد کنید',true); return; }
   lock(true); msg('در حال اتصال…');
   const keep=cfg, ko=OWNER, kr=REPO;
-  const fail=t=>{ cfg=keep; OWNER=ko; REPO=kr; lsSet(CFG,cfg); lock(false); msg(t,true); };
+  const fail=t=>{ cfg=keep; OWNER=ko; REPO=kr; setData(cfg.d); lsSet(CFG,cfg); lock(false); msg(t,true); };
   try{
     let c; try{ c=await codeOpen(code,pin); }catch(e){ return fail('رمز ۶ رقمی یا کد اتصال درست نیست'); }
-    if(c.o) OWNER=c.o; if(c.r) REPO=c.r;
+    if(c.o) OWNER=c.o; if(c.r) REPO=c.r; setData(c.d);
     cfg={token:c.t,key:c.k,salt:c.s};
     const ref0=await getRef();
     const f=ref0?await getFile(true,'',ref0):{none:true};
@@ -1104,7 +1109,7 @@ async function join(){
     let o; try{ if(f.w.salt!==c.s) throw new Error('PASS'); o=await unseal(f.w,c.k); }catch(e){ return fail('این کد قدیمی است. از مدیر کد اتصال جدید بگیرید.'); }
     const U=usersGet(o.keys[UKEY]||''), me=U && U[c.u];
     if(!me || me.off) return fail('این کد دیگر معتبر نیست. از مدیر کد اتصال جدید بگیرید.');
-    cfg={mode:'w',token:c.t,key:c.k,salt:c.s,uid:c.u,uname:me.name||'',o:OWNER,r:REPO}; if(isObj(me.acl)) cfg.acl=me.acl;
+    cfg={mode:'w',token:c.t,key:c.k,salt:c.s,uid:c.u,uname:me.name||'',o:OWNER,r:REPO}; if(c.d) cfg.d=c.d; if(isObj(me.acl)) cfg.acl=me.acl;
     lsSet(CFG,cfg); lsSet(STK,{}); try{ localStorage.removeItem(BASE); }catch(e){}
     incoming=null; conflict=null; waiting=false; needCode=false;
     await sync({force:true});
@@ -1219,6 +1224,11 @@ function viewMain(){
       <div class="sycard"><h3>کلید دسترسی جدید</h3>
         <label>فقط اگر کلید قبلی باطل شده است<input id="syTok" data-p type="password" autocomplete="off" placeholder="github_pat_..."></label>
         <button type="button" id="syTokSave">ذخیره کلید جدید</button></div>
+      ${cfg.d?`<div class="sycard"><h3>مخزن اطلاعات</h3><small>اطلاعات در مخزن خصوصی <b dir="ltr">${esc(cfg.d)}</b> است.</small></div>`:`<details class="sycard" id="syMvBox"><summary>انتقال اطلاعات به مخزن خصوصی</summary>
+        <small>۱) در GitHub مخزن خصوصی بسازید (با README). ۲) کلیدی بسازید که فقط به همان مخزن دسترسی «Contents: Read and write» دارد. ۳) اینجا وارد کنید و «انتقال» را بزنید. بعد از انتقال، همه سیستم‌ها کد اتصال تازه لازم دارند.</small>
+        <label>نام مخزن خصوصی<input id="syMvRepo" dir="ltr" autocomplete="off" value="${esc(OWNER+'/nt-data')}"></label>
+        <label>کلید دسترسی تازه<input id="syMvTok" data-p type="password" autocomplete="off" placeholder="github_pat_..."></label>
+        <button type="button" class="warn" id="syMv">انتقال</button></details>`}
       <details class="sycard"><summary>قطع قطعی همه کاربران</summary>
         <small>وقتی لازم است که یک کاربر قطع‌شده دیگر به هیچ روشی نتواند اطلاعات را بخواند. بعد از این کار، همه کاربران باید کد اتصال جدید بگیرند.</small>
         <small>۱) در GitHub یک کلید جدید بسازید. ۲) کلید جدید و رمز جدید را اینجا وارد کنید. ۳) کلید قدیمی را در GitHub پاک کنید (Delete).</small>
@@ -1242,6 +1252,7 @@ function viewMain(){
     lock(false);
   });
   arm('syRot','همه کاربران قطع می‌شوند. دوباره بزنید',rotate);
+  arm('syMv','همه سیستم‌ها کد تازه لازم دارند. دوباره بزنید',moveData);
   arm('syOff','مطمئن هستید؟ دوباره بزنید',()=>{ disconnect(); toast('اتصال این سیستم قطع شد'); setTimeout(()=>location.reload(),600); });
   bindShow();
   on('syClose',dlgClose);
@@ -1264,12 +1275,45 @@ async function rotate(){
     lock(false); msg('انجام شد. حالا کلید قدیمی را در GitHub پاک کنید و از بخش «کاربران» به هر کاربر کد اتصال جدید بدهید.');
   }catch(e){ cfg=keep; lsSet(CFG,cfg); lock(false); msg(e.text||errText(e),true); }
 }
+/** انتقال اطلاعات به مخزن خصوصی: اول آخرین اطلاعات گرفته می‌شود، بعد با کلید تازه در مخزن خصوصی نوشته می‌شود،
+    بعد نسخه قدیمی از مخزن عمومی (با کلید قدیمی) پاک می‌شود. اگر جایی خطا داد، همه چیز به حالت قبل برمی‌گردد. */
+async function moveData(){
+  const d=String($('syMvRepo').value||'').trim().replace(/^https?:\/\/github\.com\//i,'').replace(/\/+$/,''), tok=$('syMvTok').value.trim();
+  if(!/^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/.test(d)){ msg('نام مخزن را مثل javad23195-lang/nt-data بنویسید',true); return; }
+  if(d.toLowerCase()===(OWNER+'/'+REPO).toLowerCase()){ msg('مخزن خصوصی باید جدا از مخزن سامانه باشد',true); return; }
+  if(!tok){ msg('کلید دسترسی تازه را وارد کنید',true); return; }
+  lock(true); msg('در حال گرفتن آخرین اطلاعات…');
+  const keep=Object.assign({},cfg), keepSt=st(), oldTok=cfg.token, oldOwner=OWNER, oldRepo=REPO;
+  try{
+    await sync({force:true});
+    if(phase==='err'||phase==='off') throw Object.assign(new Error('X'),{text:'اول باید همگام‌سازی درست کار کند: '+note});
+    msg('در حال بررسی مخزن خصوصی…');
+    cfg.token=tok; setData(d);
+    const r=await gh(repoPath(),{auth:true}); if(!r.ok) throw await bad(r);
+    const info=await r.json();
+    if(info && info.private===false) throw Object.assign(new Error('X'),{text:'این مخزن عمومی است. در GitHub آن را Private کنید.'});
+    if(await getRef()) throw Object.assign(new Error('X'),{text:'در این مخزن از قبل اطلاعات هست. یک مخزن تازه بسازید.'});
+    cfg.d=d; lsSet(STK,{});
+    msg('در حال انتقال…');
+    await sync({force:true});
+    if(phase==='err'||phase==='off') throw Object.assign(new Error('X'),{text:note});
+    lsSet(CFG,cfg);
+    /* نسخه قدیمی از مخزن عمومی پاک شود (با کلید قدیمی) */
+    let gone=false;
+    try{ const h={'Accept':'application/vnd.github+json','Authorization':'Bearer '+oldTok};
+      const q=await fetch(`${API}/repos/${oldOwner}/${oldRepo}/git/refs/tags/${TAG}`,{method:'DELETE',headers:h,cache:'no-store'}); gone=q.ok||q.status===422; }catch(e){}
+    lock(false);
+    msg('انتقال انجام شد.'+(gone?' نسخه قدیمی از مخزن عمومی پاک شد.':' نسخه قدیمی پاک نشد؛ در GitHub برچسب nt-data مخزن سامانه را دستی پاک کنید.')+' حالا از «کاربران» به هر سیستم کد اتصال تازه بدهید.');
+    const b=$('syMvBox'); if(b) b.hidden=true;
+  }catch(e){ cfg=keep; setData(cfg.d); lsSet(CFG,cfg); lsSet(STK,keepSt); lock(false); msg(e.text||errText(e),true); }
+}
 /** تنظیم سیستم مدیر با کلید GitHub، یا مشاهده ساده با رمز اطلاعات */
 function viewSetup(){
   const n=total(collect());
   dlg('اطلاعات مشترک',`
     ${hasCrypto()?'':NOCRYPTO}
     <div class="symsg" id="syMsg"></div>
+    ${DATA_PRIVATE?'<div class="sycard"><h3>اتصال</h3><small>اطلاعات در مخزن خصوصی است. برای اتصال این سیستم، از سیستم مدیر کد اتصال بگیرید.</small></div>':`
     <div class="sycard"><h3>سیستم مدیر</h3>
       <small>این سیستم همه زبانه‌ها را دارد و کاربران را مدیریت می‌کند. نوشته‌های این سیستم (${esc(n?countText(collect()):'بدون ردیف')}) با اطلاعات مشترک یکی می‌شود.</small>
       <label>کلید دسترسی GitHub<input id="syTok" data-p type="password" autocomplete="off" placeholder="github_pat_..."></label>
@@ -1280,6 +1324,7 @@ function viewSetup(){
       <small>${n?'توجه: اطلاعات فعلی این سیستم با اطلاعات مشترک جایگزین می‌شود.':'همه زبانه‌ها دیده می‌شود، بدون ثبت. این سیستم در لیست کاربران نمی‌آید.'}</small>
       <label>رمز اطلاعات<input id="syPv" data-p type="password" autocomplete="off"></label>
       <button type="button" class="go" id="syStartV">دریافت اطلاعات</button></div>
+    `}
     ${showBox}
     <button type="button" id="syBack">بازگشت</button>`);
   on('syStartW',()=>startWriter(false));
@@ -1437,12 +1482,12 @@ function lockOff(){
 }
 async function probeLock(jc){
   let exists=true;                                        // اگر GitHub جواب نداد، قفل می‌ماند
-  try{ const f=await getFile(false); if(f.none) exists=false; }catch(e){}
+  if(!DATA_PRIVATE){ try{ const f=await getFile(false); if(f.none) exists=false; }catch(e){} }
   if(!exists && !jc && !cfg.revoked){ lockOff(); return; }
   viewJoin(jc||'');
 }
 function init(){
-  if(cfg.o) OWNER=cfg.o; if(cfg.r) REPO=cfg.r;
+  if(cfg.o) OWNER=cfg.o; if(cfg.r) REPO=cfg.r; setData(cfg.d);
   $('ntSyBtn').addEventListener('click',viewMain);
   applyAcl(); paint();
   const m=mode(), jc=hashCode();
