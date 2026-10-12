@@ -1,7 +1,7 @@
 // شبیه‌ساز GitHub برای آزمایش — با همان قانون‌های CORS که GitHub مستند کرده است
 const http=require('http'), crypto=require('crypto');
 function make(){
-  const S={tags:{},blobs:{},trees:{},commits:{},goodToken:'github_pat_GOOD',readOnlyToken:'github_pat_RO',rateLimit:false,down:false,log:[],preflights:[]};
+  const S={tags:{},tags2:{},dataToken:'github_pat_DATA',blobs:{},trees:{},commits:{},goodToken:'github_pat_GOOD',readOnlyToken:'github_pat_RO',rateLimit:false,down:false,log:[],preflights:[]};
   const sha=()=>crypto.randomBytes(20).toString('hex');
   const CORS={'Access-Control-Allow-Origin':'*',
     'Access-Control-Expose-Headers':'ETag, Link, x-ratelimit-limit, x-ratelimit-remaining, x-ratelimit-reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval'};
@@ -22,37 +22,40 @@ function make(){
       }
       const auth=(req.headers['authorization']||'').replace(/^Bearer\s+/,'');
       S.log.push(req.method+' '+u.pathname+(auth?' [auth]':''));
-      if(auth && auth!==S.goodToken && auth!==S.readOnlyToken) return send(401,{message:'Bad credentials'});
-      const base='/repos/javad23195-lang/nt';
-      if(!u.pathname.startsWith(base)) return send(404,{message:'Not Found'});
-      const p=u.pathname.slice(base.length);
+      if(auth && auth!==S.goodToken && auth!==S.readOnlyToken && auth!==S.dataToken) return send(401,{message:'Bad credentials'});
+      const mm=/^\/repos\/javad23195-lang\/(nt|nt-data)(\/.*)?$/.exec(u.pathname);
+      if(!mm) return send(404,{message:'Not Found'});
+      const repo=mm[1], p=mm[2]||'', T=repo==='nt'?S.tags:S.tags2;      // مخزن دوم (nt-data) خصوصی است
+      if(repo==='nt-data' && !auth) return send(404,{message:'Not Found'});
+      if(auth===S.dataToken && repo!=='nt-data') return send(404,{message:'Not Found'});
       const write=req.method!=='GET';
-      if(write && auth!==S.goodToken) return send(auth?403:404,{message:auth?'Resource not accessible by personal access token':'Not Found'});
+      if(write && auth!==S.goodToken && !(auth===S.dataToken && repo==='nt-data')) return send(auth?403:404,{message:auth?'Resource not accessible by personal access token':'Not Found'});
       if(!auth && S.rateLimit) return send(403,{message:'API rate limit exceeded for 1.2.3.4.'},{'x-ratelimit-remaining':'0'});
       let j={}; try{ j=body?JSON.parse(body):{}; }catch(e){}
-      if(p==='' && req.method==='GET') return send(200,{full_name:'javad23195-lang/nt',permissions:{push:true}});
+      if(p==='' && req.method==='GET') return send(200,{full_name:'javad23195-lang/'+repo,private:repo==='nt-data',permissions:{push:true}});
+      if(p==='/git/refs/tags/nt-data' && req.method==='DELETE'){ if(!T['nt-data']) return send(422,{message:'Reference does not exist'}); delete T['nt-data']; return send(204); }
       if(p==='/git/ref/tags/nt-data' && req.method==='GET'){
-        return S.tags['nt-data'] ? send(200,{ref:'refs/tags/nt-data',object:{sha:S.tags['nt-data'],type:'commit'}}) : send(404,{message:'Not Found'});
+        return T['nt-data'] ? send(200,{ref:'refs/tags/nt-data',object:{sha:T['nt-data'],type:'commit'}}) : send(404,{message:'Not Found'});
       }
       if(p==='/git/blobs' && req.method==='POST'){ const s=sha(); S.blobs[s]=j.encoding==='base64'?Buffer.from(j.content,'base64').toString('utf8'):j.content; return send(201,{sha:s}); }
       if(p==='/git/trees' && req.method==='POST'){ const s=sha(); S.trees[s]=j.tree; return send(201,{sha:s}); }
       if(p==='/git/commits' && req.method==='POST'){ if(!S.trees[j.tree]) return send(422,{message:'Tree SHA does not exist'});
         if((j.parents||[]).some(x=>!S.commits[x])) return send(422,{message:'Parent SHA does not exist'}); const s=sha(); S.commits[s]={tree:j.tree,parents:j.parents||[]}; return send(201,{sha:s}); }
       if(p==='/git/refs/tags/nt-data' && req.method==='PATCH'){
-        if(!S.tags['nt-data']) return send(422,{message:'Reference does not exist'});
+        if(!T['nt-data']) return send(422,{message:'Reference does not exist'});
         if(!S.commits[j.sha]) return send(422,{message:'Object does not exist'});
-        if(!j.force && !(S.commits[j.sha].parents||[]).includes(S.tags['nt-data'])) return send(422,{message:'Update is not a fast forward'});
+        if(!j.force && !(S.commits[j.sha].parents||[]).includes(T['nt-data'])) return send(422,{message:'Update is not a fast forward'});
         if(j.force) S.forced=(S.forced||0)+1;
-        S.prev=S.tags['nt-data']; S.tags['nt-data']=j.sha; return send(200,{ref:'refs/tags/nt-data',object:{sha:j.sha}});
+        S.prev=T['nt-data']; T['nt-data']=j.sha; return send(200,{ref:'refs/tags/nt-data',object:{sha:j.sha}});
       }
       if(p==='/git/refs' && req.method==='POST'){
         if(j.ref!=='refs/tags/nt-data') return send(422,{message:'bad ref'});
-        if(S.tags['nt-data']) return send(422,{message:'Reference already exists'});
-        S.tags['nt-data']=j.sha; return send(201,{ref:j.ref,object:{sha:j.sha}});
+        if(T['nt-data']) return send(422,{message:'Reference already exists'});
+        T['nt-data']=j.sha; return send(201,{ref:j.ref,object:{sha:j.sha}});
       }
       if(p==='/contents/nt-data.json' && req.method==='GET'){
-        const rq=u.searchParams.get('ref'); let c=S.tags[rq] || (S.commits[rq]?rq:null); if(!c) return send(404,{message:'No commit found for the ref'});
-        if(S.tags[rq] && S.staleTag && S.prev) c=S.prev;      // GitHub گاهی با نام برچسب، نسخه قبلی را می‌دهد
+        const rq=u.searchParams.get('ref'); let c=T[rq] || (S.commits[rq]?rq:null); if(!c) return send(404,{message:'No commit found for the ref'});
+        if(T[rq] && S.staleTag && S.prev) c=S.prev;      // GitHub گاهی با نام برچسب، نسخه قبلی را می‌دهد
         const t=S.trees[S.commits[c].tree].find(x=>x.path==='nt-data.json'); if(!t) return send(404,{message:'Not Found'});
         const etag='W/"'+t.sha+'"';
         if(req.headers['if-none-match']===etag){ res.writeHead(304,Object.assign({},CORS,{ETag:etag})); res.end(); return; }
@@ -64,6 +67,7 @@ function make(){
     });
   });
   S.file=()=>{ const c=S.tags['nt-data']; if(!c) return null; const t=S.trees[S.commits[c].tree][0]; return S.blobs[t.sha]; };
+  S.file2=()=>{ const c=S.tags2['nt-data']; if(!c) return null; const t=S.trees[S.commits[c].tree][0]; return S.blobs[t.sha]; };
   return {S,srv};
 }
 module.exports={make};

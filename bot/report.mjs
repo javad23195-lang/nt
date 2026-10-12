@@ -20,9 +20,11 @@ async function open(w,pass){
 }
 async function load(){
   if(E.NT_SOURCE_FILE) return JSON.parse(fs.readFileSync(E.NT_SOURCE_FILE,'utf8'));
-  const hdr={'Accept':'application/vnd.github.raw+json'}; if(E.GITHUB_TOKEN) hdr.Authorization='Bearer '+E.GITHUB_TOKEN;
-  let r=await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}?ref=${TAG}`,{headers:hdr,signal:AbortSignal.timeout(30000)});
-  if(!r.ok) r=await fetch(`https://raw.githubusercontent.com/${OWNER}/${REPO}/${TAG}/${FILE}`,{signal:AbortSignal.timeout(30000)});
+  /* بعد از انتقال به مخزن خصوصی: NT_DATA_TOKEN (کلید فقط‌همان مخزن) در GitHub Secrets؛ مخزن پیش‌فرض: <مالک>/nt-data */
+  const priv=!!E.NT_DATA_TOKEN, repo=priv?(E.NT_DATA_REPO||OWNER+'/nt-data'):OWNER+'/'+REPO;
+  const hdr={'Accept':'application/vnd.github.raw+json'}; const tk=priv?E.NT_DATA_TOKEN:E.GITHUB_TOKEN; if(tk) hdr.Authorization='Bearer '+tk;
+  let r=await fetch(`https://api.github.com/repos/${repo}/contents/${FILE}?ref=${TAG}`,{headers:hdr,signal:AbortSignal.timeout(30000)});
+  if(!r.ok && !priv) r=await fetch(`https://raw.githubusercontent.com/${repo}/${TAG}/${FILE}`,{signal:AbortSignal.timeout(30000)});
   if(!r.ok) throw new Error('فایل داده از GitHub خوانده نشد ('+r.status+')');
   return JSON.parse(await r.text());
 }
