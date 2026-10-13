@@ -65,7 +65,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   ok(R.length===5 && z.dur==='6:30:00' && z.costA==='7000000' && z.rep==='لاستیک‌سازی','ZL50: مدت و مبلغ خودش');
   console.log('5) ویرایش');
   await fr.evaluate(()=>{ [...document.querySelectorAll('#slips .slip')].find(x=>/تعمیرکار الف/.test(x.innerText)).querySelector('.edit').click(); }); await sleep(400);
-  ok(await fr.evaluate(()=>[...document.querySelectorAll('#xInv .xinv [data-f=who]')].map(x=>x.value).join('|'))==='تعمیرکار الف|فروشنده ب','در ویرایش، اجرت و خرید ردیف در فهرست آمدند');
+  ok(await fr.evaluate(()=>[...document.querySelectorAll('#xInv .xinv [data-f=who]')].map(x=>x.value).join('|'))==='تعمیرکار الف|فروشنده ب|جوشکار','در ویرایش، همه فاکتورهای تعمیر در فهرست آمدند');
   await addInv('A','بارگیری','باربری','700000','A3');
   ok(/فاکتور ۴/.test(await fr.evaluate(()=>[...document.querySelectorAll('#xInv .invhd .t')].pop().textContent)),'فاکتور تازه «فاکتور ۴» (جوشکار ۳ بود)');
   await fr.evaluate(()=>document.getElementById('bAdd').click()); await sleep(500);
