@@ -105,6 +105,19 @@ export function buildReport(keys,now){
     if(R.length){ L.push('','⚠ خرابی تکراری:'); R.slice(0,5).forEach(x=>{ L.push(`• ${String(x.dev).slice(0,40)} — ${String(x.type).slice(0,30)}: ${FA(x.n)} بار در ${FA(x.gap)} روز`);
       x.list.forEach(l=>L.push(`  - ${FA(l.date)}${l.rep?' — '+l.rep.slice(0,40):''}`)); }); }
   }catch(e){}
+  // روز اول هر ماه: هزینه تعمیرات ماه قبل از شناسنامه (ماه = تاریخ ارسال)، ۵ دستگاه پرهزینه
+  try{
+    const [ty,tm,td]=today.split('/').map(Number);
+    if(td===1){
+      const w3={}; vm.runInNewContext(fs.readFileSync(path.join(HERE,'..','_dev','src','cost.js'),'utf8'),{window:w3,globalThis:w3,String,Math,Object,Array,isFinite});
+      const py=tm===1?ty-1:ty, pm=tm===1?12:tm-1, sh=JSON.parse(store.nt_sh8_v1||'{}');
+      const C=w3.ntCost.month(Array.isArray(sh.rows)?sh.rows:[],py,pm), N=n=>FA(Math.round(n).toLocaleString('en-US'));
+      L.push('',`هزینه تعمیرات ${MONTHS[pm-1]} ${FA(py)} (از شناسنامه):`);
+      if(!C.sum) L.push('• هزینه‌ای ثبت نشده');
+      else{ L.push(`• جمع: ${N(C.sum)} ریال — اجرت ${N(C.a)}، خرید ${N(C.k)}`);
+        L.push('• پرهزینه‌ترین دستگاه‌ها:'); C.devs.slice(0,5).forEach((x,i)=>L.push(`  ${FA(i+1)}. ${String(x.dev).slice(0,40)} — ${N(x.sum)} (${FA(x.n)} فاکتور)`)); }
+    }
+  }catch(e){}
   return L.join('\n').slice(0,3800);
 }
 

@@ -26,5 +26,6 @@ python3 add_sh_payer.py "$T/b20.html" "$T/b21.html"
 python3 add_sh_group.py "$T/b21.html" "$T/b22.html"
 python3 add_td_cancel.py "$T/b22.html" "$T/b23.html"
 python3 add_repeat.py "$T/b23.html" "$T/b24.html"
-python3 build.py "$T/b24.html" ../out.html
+python3 add_sh_cost.py "$T/b24.html" "$T/b25.html"
+python3 build.py "$T/b25.html" ../out.html
 echo "ساخته شد: _dev/out.html — بعد از آزمایش، به جای ../سامانه-نت.html بگذارید"

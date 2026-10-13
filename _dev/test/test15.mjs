@@ -18,7 +18,9 @@ const keys={
     {dev:'کامیون TRS02',type:'شیلنگ باد',st:'1405/07/16',reg:'1405/07/17',desc:'تعویض شیلنگ باد',rep:'تعمیرکار الف'},
     {dev:'کامیون TRS02',type:'شیلنگ باد',st:'1405/07/16',reg:'1405/07/17',desc:'خرید',sup:'فروشنده',xof:1},
     {dev:'لودر ZL50',type:'ترمز',st:'1405/05/01',reg:'1405/05/01'},{dev:'لودر ZL50',type:'ترمز',st:'1405/07/16',reg:'1405/07/17'},
-    {dev:'نیسان',type:'کلاچ',st:'1405/07/01',reg:'1405/07/01'},{dev:'نیسان',type:'کلاچ',st:'1405/07/09',reg:'1405/07/10'}]}),
+    {dev:'نیسان',type:'کلاچ',st:'1405/07/01',reg:'1405/07/01'},
+    {dev:'کاپرا',st:'1405/06/28',costA:'5000000',costK:'8650000',hasA:true,hasK:true},{dev:'کاپرا',st:'1405/06/28',costA:'2000000',xof:1,hasA:true},
+    {dev:'لودر WA470',st:'1405/06/10',costK:'62000000',hasK:true},{dev:'کامیون TRS01',st:'1405/05/30',costA:'99000000',hasA:true},{dev:'نیسان',type:'کلاچ',st:'1405/07/09',reg:'1405/07/10'}]}),
   nt_prog_v1:JSON.stringify({'۱۴۰۵/۰۷/۱۸':{tasks:[{dev:'بیل مکانیکی کوماتسو PC400',prog:'تعویض فیلتر هوا',done:false},{dev:'نیسان',prog:'سرویس',done:false}],faults:[{dev:'لودر ZL50',fdesc:'نشت روغن',pri:'2'}]},
     '1405/07/17':{tasks:[{dev:'ژنراتور 1',prog:'بازدید',done:true,sdur:'1:30'},{dev:'لودر ZL50',prog:'تعویض روغن',done:false}]}})
 };
@@ -26,9 +28,16 @@ const ct=Buffer.from(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,zlib.gz
 const file=path.join(dir,'nt-data.json');
 fs.writeFileSync(file,JSON.stringify({app:'nt-sync',v:2,at:'x',n:1,salt:salt.toString('base64'),iv:iv.toString('base64'),gz:1,data:ct.toString('base64')}));
 const run=pass=>spawnSync('node',['../bot/report.mjs'],{encoding:'utf8',env:{...process.env,DRY:'1',NT_SOURCE_FILE:file,NT_PASS:pass,NT_NOW:'2026-10-10T03:00:00Z'}});
+const r1=spawnSync('node',['../bot/report.mjs'],{encoding:'utf8',env:{...process.env,DRY:'1',NT_SOURCE_FILE:file,NT_PASS:PASS,NT_NOW:'2026-09-23T03:00:00Z'}});
 let ok=true; const t=(n,c)=>{ console.log((c?'✓ ':'✗ ')+n); if(!c) ok=false; };
 const r=run(PASS); console.log(r.stdout); 
 t('خروج موفق',r.status===0);
+console.log(r1.stdout.split('هزینه تعمیرات')[1]||'');
+t('روز اول ماه: هزینه شهریور',/هزینه تعمیرات شهریور ۱۴۰۵/.test(r1.stdout));
+t('جمع ۷۷٬۶۵۰٬۰۰۰ (ماه = تاریخ ارسال؛ TRS01 مرداد شمرده نشد)',/جمع: ۷۷,۶۵۰,۰۰۰ ریال — اجرت ۷,۰۰۰,۰۰۰، خرید ۷۰,۶۵۰,۰۰۰/.test(r1.stdout));
+t('اول: لودر WA470',/۱\. لودر WA470 — ۶۲,۰۰۰,۰۰۰ \(۱ فاکتور\)/.test(r1.stdout));
+t('دوم: کاپرا ۳ فاکتور',/۲\. کاپرا — ۱۵,۶۵۰,۰۰۰ \(۳ فاکتور\)/.test(r1.stdout));
+t('روزهای دیگر: بخش هزینه نیست',!/هزینه تعمیرات/.test(r.stdout));
 t('خرابی تکراری: TRS02 شیلنگ باد ۲ بار در ۱۳ روز',/⚠ خرابی تکراری:[\s\S]*کامیون TRS02 — شیلنگ باد: ۲ بار در ۱۳ روز/.test(r.stdout));
 t('تاریخ‌ها و تعمیرکار',/۱۴۰۵\/۰۷\/۰۳ — تعمیرکار الف/.test(r.stdout));
 t('ترمز ZL50 با فاصله بیش از ۳۰ روز: نیست',!/ZL50 — ترمز/.test(r.stdout));
