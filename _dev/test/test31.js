@@ -73,7 +73,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   ok(await fr.evaluate(()=>document.querySelectorAll('#dvList .dvc').length===2 && !!document.getElementById('dv0a') && !document.getElementById('dv0k')),'دو دستگاه؛ فقط مبلغ اجرت (چون خرید ندارد)');
   // دستگاه دوم انتخاب نشده → ثبت نمی‌شود
   await setv('#dv0n','ZL50'); await sleep(150); await fr.evaluate(()=>{ const o=document.querySelector('#dl0n > *'); o.dispatchEvent(new MouseEvent('mousedown',{bubbles:true})); o.click(); });
-  await setv('#dv0d','6:30'); await setv('#dv0a','7000000'); await setv('#dv1d','5:00');
+  await setv('#dv0d','630'); ok(await fr.evaluate(()=>document.getElementById('dv0d').value)==='6:30','مدت دستگاه ۲: «630» خودش «6:30» شد (مثل کادر اصلی)'); ok(await fr.evaluate(()=>getComputedStyle(document.getElementById('dv0d')).direction==='ltr' && getComputedStyle(document.getElementById('dv0d')).textAlign==='center'),'قالب مدت مثل کادر اصلی (چپ‌به‌راست، وسط)'); await setv('#dv0a','7000000'); await setv('#dv1d','5:00');
   const before=(await p.evaluate(()=>JSON.parse(localStorage.nt_sh8_v1).rows.length));
   await fr.evaluate(()=>document.getElementById('bAdd').click()); await sleep(500);
   ok((await p.evaluate(()=>JSON.parse(localStorage.nt_sh8_v1).rows.length))===before && await fr.evaluate(()=>document.getElementById('dv1e').classList.contains('show')),'دستگاه انتخاب‌نشده: ثبت نشد و خطا دیده شد');

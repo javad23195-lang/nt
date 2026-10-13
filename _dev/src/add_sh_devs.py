@@ -27,12 +27,12 @@ function dvRender(){
       <button type="button" class="dvdel" data-k="${k}" aria-label="حذف دستگاه ${fa(k+2)}" style="margin-inline-start:auto;min-width:44px;min-height:44px;border:1px solid #C3CDD5;border-radius:8px;background:#fff;color:#A32018">✕</button></div>
     <div class="field"><label for="dv${k}n">نام دستگاه <span class="req">*</span></label><div class="combo"><input id="dv${k}n" data-f="devTxt" value="${esc(x.devTxt||x.dev||'')}" autocomplete="off" placeholder="تایپ کنید و از فهرست انتخاب کنید"><div class="combo-list" id="dl${k}n"></div></div><div class="err" id="dv${k}e">دستگاه را از فهرست انتخاب کنید.</div></div>
     <div class="row3">
-      <div class="field"><label for="dv${k}d">مدت (ساعت) <span class="req">*</span></label><input id="dv${k}d" data-f="dur" class="mono" value="${esc(x.dur||'')}" placeholder="8:00" inputmode="numeric" autocomplete="off"><div class="err" id="dv${k}de">مدت را مثل 8:00 بنویسید.</div></div>
+      <div class="field"><label for="dv${k}d">مدت (ساعت) <span class="req">*</span></label><input id="dv${k}d" data-f="dur" class="mono tm" value="${esc(x.dur||'')}" placeholder="8:00" inputmode="numeric" autocomplete="off"><div class="fhint">فقط رقم: <b>800</b>←<b>8:00</b></div><div class="err" id="dv${k}de">قالب ساعت:دقیقه</div></div>
       <div class="field"><label for="dv${k}s">توقف</label><select id="dv${k}s" data-f="stop">${opt('fStop',x.stop||$('fStop').value)}</select></div>
       <div class="field"><label for="dv${k}c">وضعیت</label><select id="dv${k}c" data-f="cond">${opt('fCond',x.cond||$('fCond').value)}</select></div>
     </div>
     <div class="row3">
-      <div class="field"><label for="dv${k}m">ساعت کارکرد</label><input id="dv${k}m" data-f="meter" class="mono" type="number" min="0" value="${esc(x.meter||'')}"></div>
+      <div class="field"><label for="dv${k}m">ساعت کارکرد</label><input id="dv${k}m" data-f="meter" class="mono" type="number" min="0" value="${esc(x.meter||'')}" placeholder="${esc($('fMeter').getAttribute('placeholder')||'')}"></div>
       ${A?`<div class="field"><label for="dv${k}a">مبلغ اجرت (ریال)</label><input id="dv${k}a" data-f="costA" class="mono" type="number" min="0" step="1000" value="${esc(x.costA||'')}"><div class="fhint dvh">${(+x.costA||0)?faNum(x.costA)+' ریال':'—'}</div></div>`:''}
       ${K?`<div class="field"><label for="dv${k}k">مبلغ خرید (ریال)</label><input id="dv${k}k" data-f="costK" class="mono" type="number" min="0" step="1000" value="${esc(x.costK||'')}"><div class="fhint dvh">${(+x.costK||0)?faNum(x.costK)+' ریال':'—'}</div></div>`:''}
     </div></div>`).join('');
@@ -41,8 +41,12 @@ function dvRender(){
 $('dvAdd').addEventListener('click',()=>{ dvSync(); dvs.push({dev:'',devTxt:'',dur:$('fDur').value,stop:$('fStop').value,cond:$('fCond').value,meter:'',costA:'',costK:''}); dvRender();
   try{ const el=$('dvList').querySelectorAll('.dvc'); el[el.length-1].querySelector('[data-f=devTxt]').focus(); }catch(e){} });
 $('dvList').addEventListener('click',e=>{ const b=e.target.closest('.dvdel'); if(!b) return; dvSync(); dvs.splice(+b.dataset.k,1); dvRender(); try{ showTotal(); }catch(x){} });
-$('dvList').addEventListener('input',e=>{ const f=e.target.dataset.f; if(f==='costA'||f==='costK'){ const h=e.target.parentElement.querySelector('.dvh'); if(h) h.textContent=(+e.target.value||0)?faNum(e.target.value)+' ریال':'—'; try{ showTotal(); }catch(x){} } });
+$('dvList').addEventListener('input',e=>{ const f=e.target.dataset.f; if(f==='dur'){ maskTime(e.target); return; } if(f==='costA'||f==='costK'){ const h=e.target.parentElement.querySelector('.dvh'); if(h) h.textContent=(+e.target.value||0)?faNum(e.target.value)+' ریال':'—'; try{ showTotal(); }catch(x){} } });
 ['onAjr','onKhr'].forEach(id=>{ try{ $(id).addEventListener('change',()=>{ dvSync(); dvRender(); }); }catch(e){} });
+$('dvList').addEventListener('focusout',e=>{ const el=e.target; if(!el||el.dataset.f!=='dur') return;
+  let v=el.value.trim(); if(/^\d{1,2}$/.test(v)) v='0:'+v.padStart(2,'0');
+  const mm=/^(\d{1,3}):(\d{0,2})$/.exec(v); if(mm) v=mm[1]+':'+(mm[2]===''?'00':mm[2].padStart(2,'0'));
+  const t=parseTime(v); if(t!==null&&v!=='') el.value=hhmm(t).replace(/:00$/,''); });
 /** پیش از ثبت: هر دستگاه از فهرست انتخاب شده و مدت درست است؟ */
 function dvValid(){
   dvSync(); let ok=true, first=null;

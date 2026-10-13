@@ -12,6 +12,8 @@ button.go,button.btn,button.mini,button.kbtn,button.mkcam,button.xd,.btn.s,.btn-
 .slip .drop,.slip .edit,.slip .prn,.slip .tosh,#selAll,#selInt,#selExt,#selNone,input#mRow,input.xn,.ar button,.al button{min-height:44px!important}
 .slip .drop,.slip .edit,.slip .prn,.slip .tosh,button.xd{min-width:44px}
 input.pick{width:30px!important;height:30px!important}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
 .wd,.sb,.cp,.ch,#flSub,.sp small,.kbtn,.flnote,small{font-size:max(12px,.75rem)!important}
 .slip .op{color:#7A4E00!important}
 #mAjr{color:#8A5300!important}#mKhr{color:#17663F!important}
