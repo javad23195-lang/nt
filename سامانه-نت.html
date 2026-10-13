@@ -394,7 +394,8 @@ const TEST=window.NTSYNC_TEST||{};
 const API=TEST.api||'https://api.github.com', RAW=TEST.raw||'https://raw.githubusercontent.com';
 const TAG='nt-data', FILE='nt-data.json';
 /* true بعد از اینکه مدیر اطلاعات را به مخزن خصوصی برد: سیستم وصل‌نشده همیشه قفل است و «مشاهده با رمز» نیست */
-const DATA_PRIVATE=!!TEST.private;
+/* اطلاعات از ۱۴۰۵/۰۷/۲۱ در مخزن خصوصی است. آزمایش‌ها با NTSYNC_TEST حالت قبلی را دارند مگر private بدهند */
+const DATA_PRIVATE=('private' in TEST)?!!TEST.private:!window.NTSYNC_TEST;
 let OWNER='javad23195-lang', REPO='nt';
 try{
   const m=/^([a-z0-9-]+)\.github\.io$/i.exec(location.hostname);
