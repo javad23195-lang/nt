@@ -21,24 +21,38 @@ function xRender(){
   const box=$('xInv'); if(!box) return;
   $('xInvBox').hidden=false;
   box.innerHTML=xinv.map((x,k)=>`<div class="inv xinv" data-k="${k}">
-    <div class="invhd"><span class="t" style="white-space:nowrap">فاکتور ${fa(k+2)}</span>
-      <select data-f="t" aria-label="نوع فاکتور ${fa(k+2)}"><option value="A"${x.t==='A'?' selected':''}>اجرت</option><option value="K"${x.t==='K'?' selected':''}>خرید قطعه</option></select>
-      <button type="button" class="xdel" data-k="${k}" aria-label="حذف فاکتور ${fa(k+2)}" style="margin-inline-start:auto;min-width:44px;min-height:44px;border:1px solid #C3CDD5;border-radius:8px;background:#fff;color:#A32018">✕</button></div>
-    <div class="field"><label>${x.t==='A'?'شرح کار (مثلاً جوش و تراش)':'شرح قطعه'}</label><input data-f="desc" value="${esc(x.desc)}" autocomplete="off" aria-label="${x.t==='A'?'شرح کار':'شرح قطعه'} فاکتور ${fa(k+2)}"></div>
-    <div class="field"><label>${x.t==='A'?'تعمیرکار':'تامین‌کننده'}</label><input data-f="who" aria-label="${x.t==='A'?'تعمیرکار':'تامین‌کننده'} فاکتور ${fa(k+2)}" value="${esc(x.who)}" autocomplete="off" list="${x.t==='A'?'xlRep':'xlSup'}"></div>
+    <div class="invhd"><span class="t" style="white-space:nowrap">فاکتور ${fa(xBase()+k+1)}</span>
+      <select data-f="t" aria-label="نوع فاکتور ${fa(xBase()+k+1)}"><option value="A"${x.t==='A'?' selected':''}>اجرت</option><option value="K"${x.t==='K'?' selected':''}>خرید قطعه</option></select>
+      <button type="button" class="xdel" data-k="${k}" aria-label="حذف فاکتور ${fa(xBase()+k+1)}" style="margin-inline-start:auto;min-width:44px;min-height:44px;border:1px solid #C3CDD5;border-radius:8px;background:#fff;color:#A32018">✕</button></div>
+    <div class="field"><label for="xi${k}d">${x.t==='A'?'شرح کار (مثلاً جوش و تراش)':'شرح قطعه مصرفی'}</label><div class="combo"><input id="xi${k}d" data-f="desc" value="${esc(x.desc)}" autocomplete="off"><div class="combo-list" id="xl${k}d"></div></div></div>
+    <div class="field"><label for="xi${k}w">${x.t==='A'?'تعمیرکار':'تامین‌کننده قطعه'}</label><div class="combo"><input id="xi${k}w" data-f="who" value="${esc(x.who)}" autocomplete="off" placeholder="تایپ کنید یا انتخاب کنید"><div class="combo-list" id="xl${k}w"></div></div></div>
     <div class="row3">
-      <div class="field"><label>مبلغ (ریال)</label><input data-f="cost" aria-label="مبلغ فاکتور ${fa(k+2)}" class="mono" type="number" min="0" step="1000" value="${esc(x.cost)}"></div>
-      <div class="field"><label>نوع پرداخت</label><select data-f="pay" aria-label="نوع پرداخت فاکتور ${fa(k+2)}"><option value="">— انتخاب —</option><option${x.pay==='اعتباری'?' selected':''}>اعتباری</option><option${x.pay==='نقدی'?' selected':''}>نقدی</option></select></div>
-      <div class="field"><label>شماره سند</label><input data-f="doc" aria-label="شماره سند فاکتور ${fa(k+2)}" class="mono" value="${esc(x.doc)}" autocomplete="off"></div>
+      <div class="field"><label>مبلغ (ریال)</label><input data-f="cost" aria-label="مبلغ فاکتور ${fa(xBase()+k+1)}" class="mono" type="number" min="0" step="1000" value="${esc(x.cost)}"></div>
+      <div class="field"><label>نوع پرداخت</label><select data-f="pay" aria-label="نوع پرداخت فاکتور ${fa(xBase()+k+1)}"><option value="">— انتخاب —</option><option${x.pay==='اعتباری'?' selected':''}>اعتباری</option><option${x.pay==='نقدی'?' selected':''}>نقدی</option></select></div>
+      <div class="field"><label>شماره سند</label><input data-f="doc" aria-label="شماره سند فاکتور ${fa(xBase()+k+1)}" class="mono" value="${esc(x.doc)}" autocomplete="off"></div>
     </div></div>`).join('')
-    +`<datalist id="xlRep">${(typeof myReps!=='undefined'?myReps:[]).map(v=>`<option value="${esc(v)}">`).join('')}</datalist><datalist id="xlSup">${(typeof mySups!=='undefined'?mySups:[]).map(v=>`<option value="${esc(v)}">`).join('')}</datalist>`;
+    ;
+  xinv.forEach((x,k)=>{ try{
+    if(x.t==='A'){ combo('xi'+k+'d','xl'+k+'d',src(DATA.desc),true,null,{list:myDesc2,save:()=>saveMine(),onRename:(o,n)=>renameField('desc',o,n)});
+                   combo('xi'+k+'w','xl'+k+'w',src(DATA.rep),true,null,{list:myReps,save:()=>saveLists(),onRename:(o,n)=>renameIn('rep',o,n)}); }
+    else{ combo('xi'+k+'d','xl'+k+'d',src(DATA.part),true,null,{list:myPart2,save:()=>saveMine(),onRename:(o,n)=>renameField('part',o,n)});
+          combo('xi'+k+'w','xl'+k+'w',src(DATA.sup),true,null,{list:mySups,save:()=>saveLists(),onRename:(o,n)=>renameIn('sup',o,n)}); }
+  }catch(e){} });
 }
-$('xInvAdd').addEventListener('click',()=>{ xinv.push({t:'A',desc:'',who:'',cost:'',pay:'',doc:''}); xRender(); try{ $('xInv').lastElementChild.previousElementSibling&&0; const el=$('xInv').querySelectorAll('.xinv'); el[el.length-1].querySelector('[data-f=desc]').focus(); }catch(e){} });
+/* مقدارها از خود کادرها خوانده می‌شود (انتخاب از فهرست کشویی رویداد input نمی‌دهد) */
+function xSync(){ document.querySelectorAll('#xInv .xinv').forEach(c=>{ const k=+c.dataset.k; if(!xinv[k]) return; c.querySelectorAll('[data-f]').forEach(e=>{ xinv[k][e.dataset.f]=e.value; }); }); }
+/** ردیف‌های «فاکتور دیگر» که از قبل زیر ردیف در حال ویرایش هستند */
+function xAfter(){ if(editIdx===null) return 0; const r0=rows[editIdx]; let n=0; for(let i=editIdx+1;i<rows.length&&rows[i].xof&&rows[i].dev===r0.dev&&rows[i].reg===r0.reg;i++) n++; return n; }
+/** شماره فاکتور بعدی: اجرت و خرید بالا (اگر «دارم» زده شده) + فاکتورهای قبلی همین تعمیر */
+function xBase(){ let b=0; try{ b=($('onAjr').checked?1:0)+($('onKhr').checked?1:0)+xAfter(); }catch(e){} return b; }
+$('xInvAdd').addEventListener('click',()=>{ xSync(); xinv.push({t:'A',desc:'',who:'',cost:'',pay:'',doc:''}); xRender(); try{ $('xInv').lastElementChild.previousElementSibling&&0; const el=$('xInv').querySelectorAll('.xinv'); el[el.length-1].querySelector('[data-f=desc]').focus(); }catch(e){} });
 $('xInv').addEventListener('input',e=>{ const c=e.target.closest('.xinv'), f=e.target.dataset.f; if(!c||!f) return; xinv[+c.dataset.k][f]=e.target.value; });
-$('xInv').addEventListener('change',e=>{ const c=e.target.closest('.xinv'), f=e.target.dataset.f; if(!c||!f) return; xinv[+c.dataset.k][f]=e.target.value; if(f==='t') xRender(); });
-$('xInv').addEventListener('click',e=>{ const b=e.target.closest('.xdel'); if(!b) return; xinv.splice(+b.dataset.k,1); xRender(); });
+$('xInv').addEventListener('change',e=>{ const c=e.target.closest('.xinv'), f=e.target.dataset.f; if(!c||!f) return; xinv[+c.dataset.k][f]=e.target.value; if(f==='t'){ xSync(); xRender(); } });
+$('xInv').addEventListener('click',e=>{ const b=e.target.closest('.xdel'); if(!b) return; xSync(); xinv.splice(+b.dataset.k,1); xRender(); });
+['onAjr','onKhr'].forEach(id=>{ try{ $(id).addEventListener('change',()=>{ xSync(); xRender(); }); }catch(e){} });
 /** بعد از ثبت ردیف اصلی: هر فاکتور دیگر یک ردیف جدا (بدون مدت و توقف) */
 function xPush(rec,at){
+  xSync();
   const L=xinv.filter(x=>String(x.who||'').trim()||String(x.cost||'').trim()||String(x.doc||'').trim()); let n=0;
   L.forEach(x=>{ const A=x.t==='A';
     const r=Object.assign({},rec,{dur:'',stop:'',xof:1,
@@ -51,7 +65,7 @@ function xPush(rec,at){
   xinv=[]; xRender(); return n;
 }
 """
-rep("  if(editIdx!==null){ const n=editIdx+1; rows[editIdx]=rec; stopEdit(); clearForm(); render();","  if(editIdx!==null){ const n=editIdx+1; rows[editIdx]=rec; const _xe=xPush(rec,editIdx+1); stopEdit(); clearForm(); render(); if(_xe) setTimeout(()=>say(fa(_xe)+' فاکتور دیگر زیر همین ردیف اضافه شد'),300);")
+rep("  if(editIdx!==null){ const n=editIdx+1; rows[editIdx]=rec; stopEdit(); clearForm(); render();","  if(editIdx!==null){ const n=editIdx+1; rows[editIdx]=rec; const _xe=xPush(rec,editIdx+1+xAfter()); stopEdit(); clearForm(); render(); if(_xe) setTimeout(()=>say(fa(_xe)+' فاکتور دیگر زیر همین ردیف اضافه شد'),300);")
 rep("function clearForm(){","function clearForm(){\n  try{ xinv=[]; xRender(); }catch(e){}")
 rep("  else{ rows.push(rec); clearForm(); $('fDesc').focus(); render();","  else{ rows.push(rec); const _xn=xPush(rec); clearForm(); $('fDesc').focus(); render(); if(_xn) setTimeout(()=>say(fa(_xn+1)+' ردیف ثبت شد (۱ تعمیر، '+fa(_xn+1)+' فاکتور)'),300);")
 rep("$('bAdd').addEventListener('click',()=>{",JS+"\n$('bAdd').addEventListener('click',()=>{")
