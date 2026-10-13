@@ -3,15 +3,18 @@ const {chromium}=require('playwright'); const http=require('http'), fs=require('
 const HTML=fs.readFileSync(path.join(__dirname,'..','out.html'));
 let fails=0; const ok=(c,m)=>{ console.log((c?'  ok  ':'  FAIL ')+m); if(!c) fails++; };
 const sleep=ms=>new Promise(r=>setTimeout(r,ms)); const pad=n=>String(n).padStart(2,'0');
+const FIXED=new Date(2026,9,11,10,0);
 const hm=m=>{ m=((m%1440)+1440)%1440; return pad(Math.floor(m/60))+':'+pad(m%60); };
 (async()=>{
   const web=http.createServer((q,r)=>{ r.writeHead(200,{'Content-Type':'text/html; charset=utf-8'}); r.end(HTML); }); await new Promise(r=>web.listen(0,r));
   const br=await chromium.launch({executablePath:process.env.CHROMIUM||undefined});
   async function boot(seed){ const c=await br.newContext({locale:'fa-IR',viewport:{width:390,height:844}}); const p=await c.newPage(); p.errs=[];
+    /* ساعت ثابت (روز کاری، ۱۰:۰۰) تا آزمایش به ساعت اجرا وابسته نباشد */
+    await p.clock.setFixedTime(FIXED);
     p.on('pageerror',e=>p.errs.push(String(e))); p.on('dialog',d=>{ p.dlg=(p.dlg||0)+1; d.dismiss(); });
     await p.goto(`http://localhost:${web.address().port}/nt/s.html`); await p.waitForFunction(()=>window.ntSync&&window.ntNav,null,{timeout:15000});
     await p.addStyleTag({content:'.sydlg,.sybd{display:none!important}'});
-    const jk=await p.evaluate(()=>todayKey()); const n=new Date(), nm=n.getHours()*60+n.getMinutes();
+    const jk=await p.evaluate(()=>todayKey()); const n=FIXED, nm=n.getHours()*60+n.getMinutes();
     await p.evaluate(([seed])=>{ Object.keys(seed).forEach(k=>localStorage.setItem(k,JSON.stringify(seed[k]))); window.ntLocked=false; document.body.classList.remove('ntlocked'); try{ ntBoot(); }catch(e){} },[seed(jk,nm)]);
     await p.waitForFunction(()=>{ try{ return !!frames[0].contentDocument.getElementById('flGrid'); }catch(e){ return false; } },null,{timeout:15000});
     await sleep(700); return p; }
