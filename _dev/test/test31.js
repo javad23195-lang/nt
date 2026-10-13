@@ -1,0 +1,47 @@
+// شناسنامه: چند فاکتور برای یک تعمیر (ردیف اول مدت و توقف؛ بقیه فقط فاکتور)
+const {chromium}=require('playwright'); const http=require('http'), fs=require('fs'), path=require('path');
+const HTML=fs.readFileSync(path.join(__dirname,'..','out.html'));
+let fails=0; const ok=(c,m)=>{ console.log((c?'  ok  ':'  FAIL ')+m); if(!c) fails++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+(async()=>{
+  const web=http.createServer((q,r)=>{ r.writeHead(200,{'Content-Type':'text/html; charset=utf-8'}); r.end(HTML); }); await new Promise(r=>web.listen(0,r));
+  const br=await chromium.launch({executablePath:process.env.CHROMIUM||undefined});
+  const c=await br.newContext({locale:'fa-IR',viewport:{width:390,height:844},deviceScaleFactor:1.5}); const p=await c.newPage(); const errs=[];
+  p.on('pageerror',e=>errs.push(String(e)));
+  await p.goto(`http://localhost:${web.address().port}/nt/s.html`); await p.waitForFunction(()=>window.ntSync&&window.ntNav,null,{timeout:15000});
+  await p.addStyleTag({content:'.sydlg,.sybd{display:none!important}'});
+  await p.evaluate(()=>{ window.ntLocked=false; document.body.classList.remove('ntlocked'); try{ ntBoot(); }catch(e){} });
+  const IDX=await p.evaluate(()=>DOCS.findIndex(d=>d.name==='شناسنامه'));
+  await p.evaluate(i=>show(i),IDX); await sleep(1800);
+  const fr=(await (await p.$$('iframe'))[IDX].contentFrame());
+  const setv=(sel,v)=>fr.evaluate(([s,v])=>{ const e=document.querySelector(s); e.value=v; e.dispatchEvent(new Event('input',{bubbles:true})); e.dispatchEvent(new Event('change',{bubbles:true})); },[sel,v]);
+  await fr.evaluate(()=>{ const b=document.querySelector('.nh2 .nadd, #xNew, .newbtn'); if(b) b.click(); });
+  await setv('#fReg','1405/07/21'); await setv('#fStart','1405/07/21'); await setv('#fDev','PC290'); await sleep(150); await fr.evaluate(()=>{ const o=document.querySelector('#lDev > *'); if(o){ o.dispatchEvent(new MouseEvent('mousedown',{bubbles:true})); o.click(); } });
+  await fr.evaluate(()=>{ document.getElementById('onAjr').checked=true; document.getElementById('onAjr').dispatchEvent(new Event('change')); document.getElementById('onKhr').checked=true; document.getElementById('onKhr').dispatchEvent(new Event('change')); });
+  await setv('#fDesc','تعمیر کله گاوی'); await setv('#fRep','تعمیرکار الف'); await setv('#fCostA','5000000'); await setv('#fDocA','A1');
+  await setv('#fPart','بلبرینگ'); await setv('#fSup','فروشنده ب'); await setv('#fCostK','3000000'); await setv('#fDocK','K1');
+  const act=await fr.evaluate(()=>{ const o=document.querySelector('#lAct .opt, #lAct [data-v], #lAct div'); return o?o.textContent.trim():''; });
+  await setv('#fAct',''); await fr.evaluate(()=>document.getElementById('fAct').focus()); await sleep(150); await fr.evaluate(()=>{ const o=document.querySelector('#lAct > *'); if(o){ o.dispatchEvent(new MouseEvent('mousedown',{bubbles:true})); o.click(); } });
+  await setv('#fType',''); await fr.evaluate(()=>document.getElementById('fType').focus()); await sleep(150); await fr.evaluate(()=>{ const o=document.querySelector('#lType > *'); if(o){ o.dispatchEvent(new MouseEvent('mousedown',{bubbles:true})); o.click(); } }); await setv('#fDur','8:00');
+  await fr.evaluate(()=>{ const s=document.getElementById('fStop'); if(s&&s.options.length>1) s.selectedIndex=1; });
+  ok(await fr.evaluate(()=>!!document.getElementById('xInvAdd')),'دکمه «+ فاکتور دیگر برای همین تعمیر» هست');
+  await fr.click('#xInvAdd'); await sleep(200);
+  await setv('.xinv [data-f=desc]','جوش و تراش'); await setv('.xinv [data-f=who]','جوشکار'); await setv('.xinv [data-f=cost]','2000000'); await setv('.xinv [data-f=doc]','A2');
+  await fr.click('#xInvAdd'); await sleep(200);
+  await fr.evaluate(()=>{ const s=document.querySelectorAll('.xinv [data-f=t]')[1]; s.value='K'; s.dispatchEvent(new Event('change',{bubbles:true})); });
+  await sleep(100);
+  await fr.evaluate(()=>{ const set=(f,v)=>{ const e=document.querySelectorAll('.xinv')[1].querySelector('[data-f='+f+']'); e.value=v; e.dispatchEvent(new Event('input',{bubbles:true})); }; set('desc','واشر'); set('who','فروشنده ج'); set('cost','400000'); set('doc','K2'); });
+  await p.screenshot({path:'/tmp/claude-0/shmulti.png'});
+  await fr.evaluate(()=>document.getElementById('bAdd').click()); await sleep(600);
+  const R=await p.evaluate(()=>{ const o=JSON.parse(localStorage.nt_sh8_v1||'{}'); return o.rows||[]; });
+  const e=JSON.stringify(await fr.evaluate(()=>[...document.querySelectorAll('.err')].filter(x=>getComputedStyle(x).display!=='none').map(x=>x.id)));
+  ok(R.length===3,'۳ ردیف ساخته شد (۱ تعمیر، ۳ فاکتور) — خطاهای فرم: '+e);
+  if(R.length===3){
+    ok(R[0].dur && R[0].hasA && R[0].hasK && R[0].rep==='تعمیرکار الف' && R[0].sup==='فروشنده ب','ردیف ۱: مدت + اجرت + خرید');
+    ok(R[1].dur==='' && R[1].stop==='' && R[1].hasA && !R[1].hasK && R[1].rep==='جوشکار' && R[1].costA==='2000000' && R[1].docA==='A2' && R[1].desc==='جوش و تراش','ردیف ۲: فقط اجرت جوشکار، بدون مدت و توقف');
+    ok(R[2].dur==='' && !R[2].hasA && R[2].hasK && R[2].sup==='فروشنده ج' && R[2].part==='واشر' && R[2].docK==='K2' && R[2].dev==='بیل مکانیکی کوماتسو PC290','ردیف ۳: فقط خرید، همان دستگاه');
+  }
+  ok(await fr.evaluate(()=>document.querySelectorAll('.xinv').length===0),'بعد از ثبت، فرم فاکتورهای دیگر خالی شد');
+  ok(errs.length===0,'بدون خطا '+errs.join('|'));
+  console.log(fails?fails+' شکست':'همه موفق'); await br.close(); web.close(); process.exit(fails?1:0);
+})();
