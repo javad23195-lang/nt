@@ -42,6 +42,17 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
     ok(R[2].dur==='' && !R[2].hasA && R[2].hasK && R[2].sup==='فروشنده ج' && R[2].part==='واشر' && R[2].docK==='K2' && R[2].dev==='بیل مکانیکی کوماتسو PC290','ردیف ۳: فقط خرید، همان دستگاه');
   }
   ok(await fr.evaluate(()=>document.querySelectorAll('.xinv').length===0),'بعد از ثبت، فرم فاکتورهای دیگر خالی شد');
+  console.log('ویرایش یک ردیف و افزودن فاکتور');
+  await fr.evaluate(()=>{ const b=[...document.querySelectorAll('#slips .slip')].find(x=>/تعمیرکار الف/.test(x.innerText)).querySelector('.edit'); b.click(); });
+  await sleep(400);
+  ok(await fr.evaluate(()=>{ const b=document.getElementById('xInvBox'); return b && !b.hidden && !!document.getElementById('xInvAdd'); }),'در حالت ویرایش، «+ فاکتور دیگر» هست');
+  await fr.click('#xInvAdd'); await sleep(200);
+  await setv('.xinv [data-f=desc]','بارگیری'); await setv('.xinv [data-f=who]','باربری'); await setv('.xinv [data-f=cost]','700000'); await setv('.xinv [data-f=doc]','A3');
+  await fr.evaluate(()=>document.getElementById('bAdd').click()); await sleep(600);
+  const R2=await p.evaluate(()=>{ const o=JSON.parse(localStorage.nt_sh8_v1||'{}'); return o.rows||[]; });
+  ok(R2.length===4,'۴ ردیف شد');
+  const k=R2.findIndex(r=>r.rep==='تعمیرکار الف');
+  ok(k>-1 && R2[k+1] && R2[k+1].rep==='باربری' && R2[k+1].dur==='' && R2[k+1].xof,'فاکتور تازه درست زیر همان ردیف آمد، بدون مدت');
   ok(errs.length===0,'بدون خطا '+errs.join('|'));
   console.log(fails?fails+' شکست':'همه موفق'); await br.close(); web.close(); process.exit(fails?1:0);
 })();
