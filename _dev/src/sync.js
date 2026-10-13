@@ -856,8 +856,15 @@ function viewMain(){
         <div id="syBkList"><small>در حال خواندن…</small></div>
         <button type="button" id="syBkNow">پشتیبان الان</button></details>
       <details class="sycard"><summary>قطع قطعی همه کاربران</summary>
-        <small>وقتی لازم است که یک کاربر قطع‌شده دیگر به هیچ روشی نتواند اطلاعات را بخواند. بعد از این کار، همه کاربران باید کد اتصال جدید بگیرند.</small>
-        <small>۱) در GitHub یک کلید جدید بسازید. ۲) کلید جدید و رمز جدید را اینجا وارد کنید. ۳) کلید قدیمی را در GitHub پاک کنید (Delete).</small>
+        <small>وقتی یک گوشی یا سیستم گم شده است، یا یک کاربر قطع‌شده دیگر به هیچ روشی نباید اطلاعات را بخواند. همان روز انجام دهید:</small>
+        <ol class="syst">
+          <li>در GitHub یک کلید تازه بسازید: Settings ← Developer settings ← Fine-grained tokens ← Generate new token. فقط مخزن ${esc(cfg.d||(DOWNER+'/'+DREPO))}، Contents: Read and write.</li>
+          <li>کلید تازه و یک رمز اطلاعات تازه را همین پایین وارد کنید و «تعویض کلید و رمز» را دو بار بزنید.</li>
+          <li>در GitHub کلید قدیمی را پاک کنید (Delete).</li>
+          <li>در GitHub، مخزن ${esc(OWNER+'/'+REPO)} ← Settings ← Secrets and variables ← Actions: مقدار NT_DATA_TOKEN را با کلید تازه عوض کنید (Update). اگر رمز اطلاعات را عوض کردید، NT_PASS را هم عوض کنید. بدون این کار گزارش تلگرام قطع می‌شود.</li>
+          <li>در «کاربران» به هر سیستم کد اتصال تازه بدهید.</li>
+        </ol>
+        <small>کلید و رمز تازه را روی کاغذ، بیرون از گوشی، نگه دارید.</small>
         <label>کلید دسترسی جدید GitHub<input id="syRTok" data-p type="password" autocomplete="off" placeholder="github_pat_..."></label>
         <label>رمز اطلاعات جدید (حداقل ۶ حرف)<input id="syRP1" data-p type="password" autocomplete="new-password"></label>
         <label>تکرار رمز اطلاعات جدید<input id="syRP2" data-p type="password" autocomplete="new-password"></label>

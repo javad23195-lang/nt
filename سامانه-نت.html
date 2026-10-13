@@ -194,6 +194,8 @@ body.ntdriver iframe{display:none!important}
 .sybox .sybk{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid #E3E8EC}
 .sybox .sybk span{font-variant-numeric:tabular-nums}
 .sybox .sybk button{width:auto!important;margin:0!important;min-height:44px;padding:0 14px}
+.sybox .syst{margin:6px 0 8px;padding-inline-start:20px;font-size:.82rem;line-height:1.7;color:#3D4852}
+.sybox .syst li{margin-bottom:4px}
 </style>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://api.github.com https://raw.githubusercontent.com https://cdn.jsdelivr.net http://localhost:* http://127.0.0.1:*; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self' blob: mediastream:; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <script>window.addEventListener("message",function(e){ if(e.origin!==location.origin && location.origin!=="null"){ e.stopImmediatePropagation(); } },true);</script>
@@ -1242,8 +1244,15 @@ function viewMain(){
         <div id="syBkList"><small>در حال خواندن…</small></div>
         <button type="button" id="syBkNow">پشتیبان الان</button></details>
       <details class="sycard"><summary>قطع قطعی همه کاربران</summary>
-        <small>وقتی لازم است که یک کاربر قطع‌شده دیگر به هیچ روشی نتواند اطلاعات را بخواند. بعد از این کار، همه کاربران باید کد اتصال جدید بگیرند.</small>
-        <small>۱) در GitHub یک کلید جدید بسازید. ۲) کلید جدید و رمز جدید را اینجا وارد کنید. ۳) کلید قدیمی را در GitHub پاک کنید (Delete).</small>
+        <small>وقتی یک گوشی یا سیستم گم شده است، یا یک کاربر قطع‌شده دیگر به هیچ روشی نباید اطلاعات را بخواند. همان روز انجام دهید:</small>
+        <ol class="syst">
+          <li>در GitHub یک کلید تازه بسازید: Settings ← Developer settings ← Fine-grained tokens ← Generate new token. فقط مخزن ${esc(cfg.d||(DOWNER+'/'+DREPO))}، Contents: Read and write.</li>
+          <li>کلید تازه و یک رمز اطلاعات تازه را همین پایین وارد کنید و «تعویض کلید و رمز» را دو بار بزنید.</li>
+          <li>در GitHub کلید قدیمی را پاک کنید (Delete).</li>
+          <li>در GitHub، مخزن ${esc(OWNER+'/'+REPO)} ← Settings ← Secrets and variables ← Actions: مقدار NT_DATA_TOKEN را با کلید تازه عوض کنید (Update). اگر رمز اطلاعات را عوض کردید، NT_PASS را هم عوض کنید. بدون این کار گزارش تلگرام قطع می‌شود.</li>
+          <li>در «کاربران» به هر سیستم کد اتصال تازه بدهید.</li>
+        </ol>
+        <small>کلید و رمز تازه را روی کاغذ، بیرون از گوشی، نگه دارید.</small>
         <label>کلید دسترسی جدید GitHub<input id="syRTok" data-p type="password" autocomplete="off" placeholder="github_pat_..."></label>
         <label>رمز اطلاعات جدید (حداقل ۶ حرف)<input id="syRP1" data-p type="password" autocomplete="new-password"></label>
         <label>تکرار رمز اطلاعات جدید<input id="syRP2" data-p type="password" autocomplete="new-password"></label>
