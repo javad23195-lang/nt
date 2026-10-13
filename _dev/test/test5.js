@@ -228,7 +228,7 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   ok(await waitFor(()=>A.evaluate(()=>!!ntSync.baseGet()),20000) && await waitFor(()=>synced(A),20000) && await dlgText(A)==='' && await has(A,'nt_daftar_v1','300250'),'سیستمی که از نسخه قبلی آمده: بدون پرسش و بدون گم شدن');
 
   console.log('12) قطع قطعی: تعویض کلید و رمز');
-  await A.click('#ntSyBtn'); await A.locator('details.sycard:not(#syMvBox) summary').click();
+  await A.click('#ntSyBtn'); await A.locator('details.sycard:not(#syMvBox):not(#syBkBox) summary').click();
   await A.fill('#syRTok','github_pat_NEW2'); await A.fill('#syRP1','newpass99'); await A.fill('#syRP2','newpass99');
   S.readOnlyToken='github_pat_NEW2';     // کلید تازه هنوز اجازه نوشتن ندارد
   await A.click('#syRot'); await A.click('#syRot');

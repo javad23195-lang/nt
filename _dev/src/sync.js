@@ -851,6 +851,10 @@ function viewMain(){
         <label>نام مخزن خصوصی<input id="syMvRepo" dir="ltr" autocomplete="off" value="${esc(OWNER+'/nt-data')}"></label>
         <label>کلید دسترسی تازه<input id="syMvTok" data-p type="password" autocomplete="off" placeholder="github_pat_..."></label>
         <button type="button" class="warn" id="syMv">انتقال</button></details>`}
+      <details class="sycard" id="syBkBox"><summary>پشتیبان‌ها</summary>
+        <small>ربات هر شب (اگر اطلاعات عوض شده باشد) یک نسخه نگه می‌دارد؛ ۳۰ نسخه آخر می‌ماند. با «برگرداندن»، اطلاعات مشترک همه سیستم‌ها به همان نسخه برمی‌گردد و ثبت‌های بعد از آن از بین می‌رود. پیش از برگرداندن، از وضعیت فعلی هم یک نسخه گرفته می‌شود.</small>
+        <div id="syBkList"><small>در حال خواندن…</small></div>
+        <button type="button" id="syBkNow">پشتیبان الان</button></details>
       <details class="sycard"><summary>قطع قطعی همه کاربران</summary>
         <small>وقتی لازم است که یک کاربر قطع‌شده دیگر به هیچ روشی نتواند اطلاعات را بخواند. بعد از این کار، همه کاربران باید کد اتصال جدید بگیرند.</small>
         <small>۱) در GitHub یک کلید جدید بسازید. ۲) کلید جدید و رمز جدید را اینجا وارد کنید. ۳) کلید قدیمی را در GitHub پاک کنید (Delete).</small>
@@ -875,6 +879,8 @@ function viewMain(){
   });
   arm('syRot','همه کاربران قطع می‌شوند. دوباره بزنید',rotate);
   arm('syMv','همه سیستم‌ها کد تازه لازم دارند. دوباره بزنید',moveData);
+  { const b=$('syBkBox'); if(b) b.addEventListener('toggle',()=>{ if(b.open) bkShow(); }); }
+  on('syBkNow',bkNow);
   arm('syOff','مطمئن هستید؟ دوباره بزنید',()=>{ disconnect(); toast('اتصال این سیستم قطع شد'); setTimeout(()=>location.reload(),600); });
   bindShow();
   on('syClose',dlgClose);
@@ -928,6 +934,54 @@ async function moveData(){
     msg('انتقال انجام شد.'+(gone?' نسخه قدیمی از مخزن عمومی پاک شد.':' نسخه قدیمی پاک نشد؛ در GitHub برچسب nt-data مخزن سامانه را دستی پاک کنید.')+' حالا از «کاربران» به هر سیستم کد اتصال تازه بدهید.');
     const b=$('syMvBox'); if(b) b.hidden=true;
   }catch(e){ cfg=keep; setData(cfg.d); lsSet(CFG,cfg); lsSet(STK,keepSt); lock(false); msg(e.text||errText(e),true); }
+}
+
+/* ---------- پشتیبان‌ها: برچسب‌های bk-… در مخزن اطلاعات (ربات هر شب می‌سازد؛ bot/backup.mjs) ---------- */
+const BK_RE=/^bk-(\d{4})-(\d{2})-(\d{2})(?:-(\d{2})(\d{2}))?(?:-(pre|man))?$/;
+function bkName(kind){ const d=new Date(), p=n=>String(n).padStart(2,'0');
+  return `bk-${d.getUTCFullYear()}-${p(d.getUTCMonth()+1)}-${p(d.getUTCDate())}-${p(d.getUTCHours())}${p(d.getUTCMinutes())}-${kind}`; }
+function bkLabel(n){ const m=BK_RE.exec(n); if(!m) return n;
+  const t=Date.UTC(+m[1],+m[2]-1,+m[3],m[4]?+m[4]:3,m[5]?+m[5]:0);
+  let s=''; try{ s=new Intl.DateTimeFormat('fa-IR-u-ca-persian',Object.assign({timeZone:'Asia/Tehran',year:'numeric',month:'2-digit',day:'2-digit'},m[4]?{hour:'2-digit',minute:'2-digit',hour12:false}:{})).format(new Date(t)); }catch(e){ s=n; }
+  return s+(m[6]==='pre'?' (پیش از برگرداندن)':m[6]==='man'?' (دستی)':''); }
+async function bkList(){
+  const r=await gh(`${repoPath()}/git/matching-refs/tags/bk-`,{auth:true}); if(!r.ok) throw await bad(r);
+  const a=await r.json(); return (Array.isArray(a)?a:[]).map(x=>({n:String(x.ref||'').replace('refs/tags/',''),sha:x.object&&x.object.sha}))
+    .filter(x=>BK_RE.test(x.n) && /^[0-9a-f]{40}$/.test(x.sha||'')).sort((a,b)=>a.n<b.n?1:-1);
+}
+async function bkShow(){
+  const box=$('syBkList'); if(!box) return; box.innerHTML='<small>در حال خواندن…</small>';
+  try{ const L=await bkList();
+    box.innerHTML=L.length?L.map((x,i)=>`<div class="sybk"><span>${esc(bkLabel(x.n))}</span><button type="button" class="warn" data-bk="${i}">برگرداندن</button></div>`).join('')
+      :'<small>هنوز پشتیبانی نیست. ربات هر شب یکی می‌سازد؛ یا «پشتیبان الان» را بزنید.</small>';
+    box.querySelectorAll('[data-bk]').forEach(b=>{ const x=L[+b.dataset.bk]; armEl(b,'ثبت‌های بعد از آن از بین می‌رود. دوباره بزنید',()=>bkRestore(x)); });
+  }catch(e){ box.innerHTML='<small>'+esc(errText(e))+'</small>'; }
+}
+async function bkTag(kind){ const sha=st().sha; if(!/^[0-9a-f]{40}$/.test(sha||'')) throw new Error('HTTP');
+  const r=await gh(`${repoPath()}/git/refs`,{method:'POST',auth:true,body:{ref:'refs/tags/'+bkName(kind),sha}}); if(!r.ok && r.status!==422) throw await bad(r); }
+async function bkNow(){
+  lock(true); msg('در حال گرفتن پشتیبان…');
+  try{ await sync({force:true}); if(phase==='err'||phase==='off') throw Object.assign(new Error('X'),{text:note});
+    await bkTag('man'); lock(false); msg('پشتیبان گرفته شد.'); bkShow(); }
+  catch(e){ lock(false); msg(e.text||errText(e),true); }
+}
+/** اطلاعات مشترک به نسخه پشتیبان برمی‌گردد. لیست کاربران و «آخرین اتصال» عوض نمی‌شود (کاربر قطع‌شده دوباره وصل نشود). */
+async function bkRestore(x){
+  if(!x || !/^[0-9a-f]{40}$/.test(x.sha||'')) return;
+  lock(true); msg('در حال برگرداندن «'+bkLabel(x.n)+'»…');
+  try{
+    await sync({force:true}); if(phase==='err'||phase==='off') throw Object.assign(new Error('X'),{text:note});
+    const f=await getFile(true,'',x.sha); if(f.none) throw Object.assign(new Error('X'),{text:'این نسخه پیدا نشد'});
+    let o; try{ if(f.w.salt!==cfg.salt) throw new Error('PASS'); o=await unseal(f.w,cfg.key); }
+    catch(e){ throw Object.assign(new Error('X'),{text:'این نسخه با رمز قدیمی قفل شده است و برگردانده نمی‌شود'}); }
+    const keys=pick(o.keys), cur=collect();
+    Object.keys(cur).forEach(k=>{ if(!(k in keys) || QUIET[k]) keys[k]=cur[k]; });
+    Object.keys(QUIET).forEach(k=>{ if(!(k in cur)) delete keys[k]; });
+    try{ await bkTag('pre'); }catch(e){}
+    if(!applyKeys(keys,{now:true,keepPrev:true})) throw Object.assign(new Error('X'),{text:'دوباره امتحان کنید'});
+    await sync({force:true}); if(phase==='err'||phase==='off') throw Object.assign(new Error('X'),{text:note});
+    lock(false); msg('برگردانده شد: '+bkLabel(x.n)+'. سیستم‌های دیگر در همگام‌سازی بعدی همین را می‌گیرند.'); bkShow();
+  }catch(e){ lock(false); msg(e.text||errText(e),true); }
 }
 /** تنظیم سیستم مدیر با کلید GitHub، یا مشاهده ساده با رمز اطلاعات */
 function viewSetup(){
