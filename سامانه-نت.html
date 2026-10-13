@@ -1091,7 +1091,7 @@ function viewJoin(code){
     <label>رمز ۶ رقمی<input id="syPin" type="text" inputmode="numeric" autocomplete="off" maxlength="12"></label>
     <button type="button" class="go" id="syJoin">اتصال</button>
     ${mode()==='w'||mode()==='v'?'<small>با اتصال، تنظیم قبلی این سیستم جایگزین می‌شود.</small>':''}
-    <button type="button" id="syOther">سیستم مدیر، یا مشاهده با رمز اطلاعات…</button>
+    <button type="button" id="syOther">${DATA_PRIVATE?'بازیابی سیستم مدیر…':'سیستم مدیر، یا مشاهده با رمز اطلاعات…'}</button>
     ${locked?'':'<button type="button" id="syClose">بستن</button>'}`);
   on('syJoin',join);
   $('syPin').addEventListener('keydown',e=>{ if(e.key==='Enter') join(); });
@@ -1375,7 +1375,13 @@ function viewSetup(){
   dlg('اطلاعات مشترک',`
     ${hasCrypto()?'':NOCRYPTO}
     <div class="symsg" id="syMsg"></div>
-    ${DATA_PRIVATE?'<div class="sycard"><h3>اتصال</h3><small>اطلاعات در مخزن خصوصی است. برای اتصال این سیستم، از سیستم مدیر کد اتصال بگیرید.</small></div>':`
+    ${DATA_PRIVATE?`<div class="sycard"><h3>اتصال</h3><small>اطلاعات در مخزن خصوصی است. برای اتصال این سیستم، از سیستم مدیر کد اتصال بگیرید.</small></div>
+    <details class="sycard" id="syRcBox"><summary>بازیابی سیستم مدیر</summary>
+      <small>فقط وقتی سیستم مدیر خراب یا پاک شده است. هر سه لازم است: نام مخزن خصوصی، کلید همان مخزن، و رمز اطلاعات. روی گوشی انجام ندهید.</small>
+      <label>نام مخزن خصوصی<input id="syRcRepo" dir="ltr" autocomplete="off" value="${esc(OWNER+'/nt-data')}"></label>
+      <label>کلید دسترسی مخزن خصوصی<input id="syRcTok" data-p type="password" autocomplete="off" placeholder="github_pat_..."></label>
+      <label>رمز اطلاعات<input id="syRcPass" data-p type="password" autocomplete="off"></label>
+      <button type="button" class="go" id="syRc">بازیابی</button></details>`:`
     <div class="sycard"><h3>سیستم مدیر</h3>
       <small>این سیستم همه زبانه‌ها را دارد و کاربران را مدیریت می‌کند. نوشته‌های این سیستم (${esc(n?countText(collect()):'بدون ردیف')}) با اطلاعات مشترک یکی می‌شود.</small>
       <label>کلید دسترسی GitHub<input id="syTok" data-p type="password" autocomplete="off" placeholder="github_pat_..."></label>
@@ -1390,9 +1396,41 @@ function viewSetup(){
     ${showBox}
     <button type="button" id="syBack">بازگشت</button>`);
   on('syStartW',()=>startWriter(false));
+  on('syRc',adminRecover);
   on('syStartV',()=>startViewer($('syPv').value));
   on('syBack',()=>{ if(window.ntLocked) viewJoin(''); else dlgClose(); });
   bindShow();
+}
+
+/** بازیابی سیستم مدیر در حالت خصوصی: نام مخزن + کلید همان مخزن + رمز اطلاعات (هر سه لازم) */
+async function adminRecover(){
+  if(!hasCrypto()) return;
+  const d=String($('syRcRepo').value||'').trim().replace(/^https?:\/\/github\.com\//i,'').replace(/\/+$/,''), tok=$('syRcTok').value.trim(), pass=normPass($('syRcPass').value);
+  if(!/^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/.test(d)){ msg('نام مخزن را مثل javad23195-lang/nt-data بنویسید',true); return; }
+  if(!tok){ msg('کلید دسترسی را وارد کنید',true); return; }
+  if(!pass){ msg('رمز اطلاعات را وارد کنید',true); return; }
+  lock(true); msg('در حال بررسی…');
+  const keep=cfg, keepD=cfg.d;
+  const fail=t=>{ cfg=keep; setData(keepD); lsSet(CFG,cfg); lock(false); msg(t,true); };
+  try{
+    cfg={token:tok}; setData(d);
+    const r=await gh(repoPath(),{auth:true});
+    if(r.status===404||r.status===401) return fail('مخزن با این کلید پیدا نشد');
+    if(!r.ok) throw await bad(r);
+    const info=await r.json(); if(info && info.private===false) return fail('این مخزن عمومی است؛ بازیابی فقط با مخزن خصوصی');
+    const ref=await getRef(); if(!ref) return fail('در این مخزن اطلاعاتی نیست');
+    const f=await getFile(true,'',ref); if(f.none) return fail('در این مخزن اطلاعاتی نیست');
+    const key=await derive(pass,f.w.salt);
+    try{ await unseal(f.w,key); }catch(e){ return fail('رمز اطلاعات درست نیست'); }
+    cfg={mode:'w',token:tok,salt:f.w.salt,key,d};
+    lsSet(CFG,cfg); lsSet(STK,{}); try{ localStorage.removeItem(BASE); }catch(e){}
+    incoming=null; conflict=null; waiting=false; needCode=false;
+    msg('در حال همگام‌سازی…');
+    await sync({force:true});
+    if(phase==='err'||phase==='off'){ const n=note; lsSet(STK,{}); return fail(n); }
+    if(conflict) return;
+    toast('سیستم مدیر بازیابی شد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),700);
+  }catch(e){ fail(e.text||errText(e)); }
 }
 async function startWriter(replace){
   if(!hasCrypto()) return;
