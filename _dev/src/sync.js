@@ -51,7 +51,7 @@ const LABEL={nt_anbar_out_v1:'خروج انبار',nt_anbar_in_v1:'ورود ان
 /* شناسه ردیف در لیست‌هایی که هر ردیف باید یکتا باشد */
 const IDF={nt_daftar_v1:e=>(e && typeof e==='object' && e.dev && e.date)?e.dev+'|'+e.date:null};
 /* زمان‌ها (میلی‌ثانیه) — gap: کم‌ترین فاصله دو ارسال (محدودیت GitHub) */
-const T={deb:3000,gap:40000,maxWait:60000,tick:3000,poll:180000,pollW:20000,busy:20000,maxDefer:180000,refocus:30000,retry:60000,squash:30,seen:900000,seenMin:60000};
+const T={pinIdle:1800000,deb:3000,gap:40000,maxWait:60000,tick:3000,poll:180000,pollW:20000,busy:20000,maxDefer:180000,refocus:30000,retry:60000,squash:30,seen:900000,seenMin:60000};
 if(TEST.T) Object.assign(T,TEST.T);
 
 const $=id=>document.getElementById(id);
@@ -646,8 +646,9 @@ function checkMe(){
   const me=U[cfg.uid];
   if(!me || me.off){ revoke(); return false; }
   const a=isObj(me.acl)?me.acl:null, dv=Array.isArray(me.dev)&&me.dev.length?me.dev:null;
-  if(J(a)!==J(acl()) || (me.name||'')!==(cfg.uname||'') || J(dv)!==J(cfg.devs||null)){
+  if(J(a)!==J(acl()) || (me.name||'')!==(cfg.uname||'') || J(dv)!==J(cfg.devs||null) || !!me.nopin!==!!cfg.nopin){
     if(a) cfg.acl=a; else delete cfg.acl;
+    if(me.nopin) cfg.nopin=1; else delete cfg.nopin;
     if(dv) cfg.devs=dv; else delete cfg.devs;
     cfg.uname=me.name||''; lsSet(CFG,cfg);
     toast('دسترسی این سیستم تغییر کرد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),900);
@@ -657,7 +658,7 @@ function checkMe(){
 }
 /** مدیر دسترسی را قطع کرده است: اطلاعات از این سیستم برداشته می‌شود */
 function revoke(){
-  try{ Object.keys(collect()).forEach(k=>localStorage.removeItem(k)); [STK,BASE,PREV].forEach(k=>localStorage.removeItem(k)); }catch(e){}
+  try{ Object.keys(collect()).forEach(k=>localStorage.removeItem(k)); [STK,BASE,PREV,'ntsync_pin_v1'].forEach(k=>localStorage.removeItem(k)); }catch(e){}
   cfg={mode:'off',revoked:1}; lsSet(CFG,cfg);
   location.reload();
 }
@@ -784,6 +785,9 @@ function viewUserEdit(id){
         ${DOCS.map((d,i)=>`<div class="syrow"><span>${esc(d.name)}</span><select data-tab="${i}" aria-label="دسترسی ${esc(d.name)}">
           ${[['w','ثبت'],['r','فقط مشاهده'],['h','پنهان']].map(o=>`<option value="${o[0]}" ${(a[d.name]||'h')===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></div>`).join('')}
       </div></div>
+    <div class="sycard"><h3>رمز ورود</h3>
+      <label class="chk"><input type="checkbox" id="syUNoPin" ${u&&u.nopin?'checked':''}>بدون رمز ورود — فقط برای سیستم مشترکی که از محل کار بیرون نمی‌رود</label>
+      <small>بقیه سیستم‌ها هر بار که سامانه باز می‌شود و بعد از ۳۰ دقیقه بی‌کاری، رمز ورود می‌خواهند.</small></div>
     <button type="button" class="go" id="syUSave">${u?'ذخیره':'ساخت کاربر و کد اتصال'}</button>
     <button type="button" id="syBack">انصراف</button>`);
   document.querySelectorAll('input[name="syAcc"]').forEach(r=>r.addEventListener('change',()=>{ $('syAclList').hidden=document.querySelector('input[name="syAcc"]:checked').value!=='lim'; }));
@@ -804,6 +808,7 @@ function viewUserEdit(id){
     X[nid]=Object.assign({},X[nid]||{id:nid,made:new Date().toISOString()},{name});
     if(ac) X[nid].acl=ac; else delete X[nid].acl;
     if(dev) X[nid].dev=[dev]; else delete X[nid].dev;
+    if($('syUNoPin').checked) X[nid].nopin=1; else delete X[nid].nopin;
     usersSet(X);
     if(id){ viewUsers(); toast('ذخیره شد — تا ۲ دقیقه دیگر در سیستم کاربر اجرا می‌شود'); } else viewCode(nid);
   });
@@ -871,12 +876,14 @@ function viewMain(){
         <button type="button" class="warn" id="syRot">تعویض کلید و رمز</button></details>
       ${showBox}`:''}
     ${m==='v'?'<button type="button" id="syToJoin">اتصال با کد اتصال…</button>':''}
+    ${pinNeeded()?'<button type="button" id="syPinCh">تغییر رمز ورود</button>':''}
     <button type="button" class="warn" id="syOff">قطع اتصال این سیستم</button>
     <small>${cfg.uid?'برای اتصال دوباره، کد اتصال لازم است.':'با قطع اتصال، اطلاعات این سیستم پاک نمی‌شود. فقط همگام‌سازی متوقف می‌شود.'}</small>
     <button type="button" id="syClose">بستن</button>`);
   on('syNow',async()=>{ lock(true); msg('در حال همگام‌سازی…'); await sync({manual:true}); lock(false); if(conflict) return; msg(phase==='ok'?'همگام شد — '+fmtAt(st().at):'همگام نشد — '+note,phase!=='ok'); });
   on('syUsers',viewUsers);
   on('syToJoin',()=>viewJoin(''));
+  on('syPinCh',()=>{ dlgClose(); pinShow('change'); });
   on('syTokSave',async()=>{
     const t=$('syTok').value.trim(); if(!t){ msg('کلید را وارد کنید',true); return; }
     const old=cfg.token; cfg.token=t; lock(true); msg('در حال بررسی کلید…');
@@ -1153,7 +1160,7 @@ function viewConflict(){
 function myDevs(){ return cfg.uid && mode()==='w' && Array.isArray(cfg.devs) && cfg.devs.length ? cfg.devs.slice() : null; }
 function disconnect(){
   cfg={mode:'off'}; lsSet(CFG,cfg);
-  try{ localStorage.removeItem(STK); localStorage.removeItem(BASE); }catch(e){}
+  try{ localStorage.removeItem(STK); localStorage.removeItem(BASE); localStorage.removeItem('ntsync_pin_v1'); }catch(e){}
   conflict=null; incoming=null; waiting=false; window.ntViewer=false; setPhase('');
 }
 
@@ -1188,6 +1195,81 @@ function startTimers(){
   /* اطلاعات تازه هنگام رفتن به زبانه دیگر نشان داده می‌شود */
   $('tabs').addEventListener('click',()=>{ if(waiting) sync({now:true}); },true);
 }
+
+/* ---------- رمز ورود هر سیستم ----------
+   رمز ۴ تا ۶ رقمی فقط روی همین سیستم (هش PBKDF2؛ به GitHub نمی‌رود). هنگام باز شدن سامانه و بعد از ۳۰ دقیقه بی‌کاری پرسیده می‌شود.
+   ۵ اشتباه: یک دقیقه صبر. ۱۰ اشتباه: اتصال و اطلاعات این سیستم پاک می‌شود (کد اتصال تازه لازم است).
+   سیستم مدیر همیشه رمز می‌خواهد؛ مدیر می‌تواند برای یک کاربر «بدون رمز ورود» بگذارد. */
+const PINK='ntsync_pin_v1', PINT='ntpin_t';
+const PIN_ON=window.NTSYNC_TEST?!!TEST.pin:true;
+let pinAct=0, pinLocked=false;
+function pinNeeded(){ const m=mode(); return PIN_ON && hasCrypto() && (m==='w'||m==='v') && !(cfg.uid && cfg.nopin); }
+async function pinHash(pin,salt){ const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(pin),'PBKDF2',false,['deriveBits']);
+  return b64e(new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',salt:b64d(salt),iterations:100000,hash:'SHA-256'},km,256))); }
+function pinGet(){ const o=lsGet(PINK); return (o && o.h && o.s)?o:null; }
+function pinBad(p){ return !/^\d{4,6}$/.test(p) || /^(\d)\1+$/.test(p) || '0123456789'.includes(p) || '9876543210'.includes(p); }
+function pinMark(){ pinAct=Date.now(); try{ sessionStorage.setItem(PINT,String(pinAct)); }catch(e){} }
+function pinLast(){ let t=0; try{ t=+sessionStorage.getItem(PINT)||0; }catch(e){} return Math.max(t,pinAct,lastAct||0); }
+function pinShow(kind){
+  pinLocked = kind!=='change'; if(pinLocked) document.body.classList.add('ntpin');
+  let el=$('ntPin'); if(!el){ el=document.createElement('div'); el.id='ntPin'; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); document.body.appendChild(el); }
+  const admin=isAdmin(), P=pinGet();
+  const H={new:['رمز ورود بسازید','از این به بعد، هر بار که سامانه باز می‌شود و بعد از ۳۰ دقیقه بی‌کاری، این رمز پرسیده می‌شود. رمز را به کسی ندهید.'],
+           ask:['رمز ورود','رمز ورود این سیستم را وارد کنید.'],
+           change:['تغییر رمز ورود','رمز فعلی و رمز تازه را وارد کنید.']}[kind];
+  el.hidden=false;
+  el.innerHTML=`<div class="pinbox"><div class="pinic" aria-hidden="true">🔒</div><h2>${H[0]}</h2><p>${H[1]}</p>
+    <div class="symsg" id="pinMsg" role="alert"></div>
+    ${kind!=='new'?`<label>${kind==='change'?'رمز فعلی':'رمز ورود'}<input id="pin0" type="password" inputmode="numeric" autocomplete="off" maxlength="6"></label>`:''}
+    ${kind!=='ask'?`<label>رمز تازه (۴ تا ۶ رقم)<input id="pin1" type="password" inputmode="numeric" autocomplete="new-password" maxlength="6"></label>
+      <label>تکرار رمز تازه<input id="pin2" type="password" inputmode="numeric" autocomplete="new-password" maxlength="6"></label>`:''}
+    <button type="button" class="go" id="pinGo">${kind==='ask'?'ورود':'ذخیره'}</button>
+    ${kind==='ask'?`<button type="button" class="lnk" id="pinForgot">رمز را فراموش کرده‌ام</button><div id="pinFg" hidden>
+      <small>${admin?'این سیستم، سیستم مدیر است. با «قطع اتصال» اطلاعات این سیستم پاک می‌شود؛ بعد با «بازیابی سیستم مدیر» (نام مخزن، کلید و رمز اطلاعات) دوباره وصل شوید.':'از مدیر کد اتصال تازه بگیرید. با «قطع اتصال» اطلاعات این سیستم پاک می‌شود (اطلاعات مشترک می‌ماند)؛ بعد با کد تازه وصل شوید و رمز تازه بسازید.'}</small>
+      <button type="button" class="warn" id="pinWipe">قطع اتصال این سیستم</button></div>`:''}
+    ${kind==='change'?'<button type="button" id="pinCancel">انصراف</button>':''}</div>`;
+  const m=t=>{ const b=$('pinMsg'); b.textContent=t||''; b.className='symsg'+(t?' bad':''); };
+  const f=$(kind==='new'?'pin1':'pin0'); try{ f.focus(); }catch(e){}
+  el.querySelectorAll('input').forEach(i=>i.addEventListener('keydown',e=>{ if(e.key==='Enter') $('pinGo').click(); }));
+  on('pinCancel',()=>{ el.hidden=true; el.innerHTML=''; });
+  on('pinForgot',()=>{ $('pinFg').hidden=false; });
+  { const w=$('pinWipe'); if(w) armEl(w,'اطلاعات این سیستم پاک می‌شود. دوباره بزنید',()=>revoke()); }
+  on('pinGo',async()=>{
+    const b=$('pinGo'); if(b.disabled) return;
+    const v0=pinNorm(($('pin0')||{}).value||''), v1=pinNorm(($('pin1')||{}).value||''), v2=pinNorm(($('pin2')||{}).value||'');
+    if(kind!=='new'){
+      const o=pinGet(); if(!o){ pinShow('new'); return; }
+      if(o.u && Date.now()<o.u){ m('چند رمز اشتباه زده شد. '+fa(Math.ceil((o.u-Date.now())/1000))+' ثانیه صبر کنید.'); return; }
+      b.disabled=true; let good=false; try{ good=(await pinHash(v0,o.s))===o.h; }catch(e){} b.disabled=false;
+      if(!good){
+        o.f=(o.f||0)+1; if(o.f%5===0) o.u=Date.now()+60000; lsSet(PINK,o);
+        if(o.f>=10){ m('۱۰ بار رمز اشتباه. اطلاعات این سیستم پاک می‌شود.'); setTimeout(revoke,1200); return; }
+        m(o.f%5===0?'۵ بار رمز اشتباه. یک دقیقه صبر کنید.':'رمز درست نیست. ('+fa(10-o.f)+' بار دیگر تا قطع اتصال)');
+        const i=$('pin0'); if(i){ i.value=''; i.focus(); } return;
+      }
+      o.f=0; delete o.u; lsSet(PINK,o);
+      if(kind==='ask'){ pinMark(); pinLocked=false; el.hidden=true; el.innerHTML=''; document.body.classList.remove('ntpin'); return; }
+    }
+    if(pinBad(v1)){ m('رمز باید ۴ تا ۶ رقم باشد و ساده نباشد (مثل ۱۱۱۱ یا ۱۲۳۴ نباشد).'); return; }
+    if(v1!==v2){ m('رمز و تکرار آن یکی نیست'); return; }
+    b.disabled=true; const salt=newSalt(); const h=await pinHash(v1,salt); lsSet(PINK,{s:salt,h,f:0});
+    pinMark(); pinLocked=false; el.hidden=true; el.innerHTML=''; document.body.classList.remove('ntpin');
+    toast(kind==='change'?'رمز ورود عوض شد':'رمز ورود ساخته شد');
+  });
+}
+function pinCheck(){
+  if(!pinNeeded()){ if(pinLocked){ pinLocked=false; const el=$('ntPin'); if(el){ el.hidden=true; el.innerHTML=''; } document.body.classList.remove('ntpin'); } return; }
+  if(pinLocked) return;
+  if(!pinGet()){ pinShow('new'); return; }
+  if(Date.now()-pinLast()>T.pinIdle) pinShow('ask');
+}
+function pinStart(){
+  if(!PIN_ON) return;
+  ['pointerdown','keydown','input'].forEach(ev=>document.addEventListener(ev,()=>{ if(!pinLocked) pinAct=Date.now(); },true));
+  setInterval(()=>{ if(!pinLocked && pinAct && pinNeeded()){ try{ sessionStorage.setItem(PINT,String(pinLast())); }catch(e){} } pinCheck(); },Math.min(30000,Math.max(500,T.pinIdle/4)));
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden) pinCheck(); else if(!pinLocked){ try{ sessionStorage.setItem(PINT,String(pinLast())); }catch(e){} } });
+  pinCheck();
+}
 /* ---------- قفل ورود ----------
    سیستمی که وصل نشده است، هیچ زبانه‌ای را نمی‌بیند؛ فقط پنجره ورود با کد اتصال.
    تنها استثنا: وقتی هنوز هیچ اطلاعات مشترکی ساخته نشده است (تنظیم اول سیستم مدیر). */
@@ -1214,6 +1296,7 @@ function init(){
   const m=mode(), jc=hashCode();
   const go=()=>{ try{ ntBoot(); }catch(e){} };
   if((m==='w' || m==='v') && !hasCrypto()){ setPhase('err','این مرورگر رمزگذاری را پشتیبانی نمی‌کند'); go(); return; }
+  if(m==='w'||m==='v') pinStart();
   if(m==='w'){ go(); startTimers(); sync({force:true,verify:true}); }
   else if(m==='v'){ startTimers(); sync({now:true}).then(go,go); }
   else{ lockOn(); probeLock(jc); return; }
@@ -1226,6 +1309,6 @@ function touch(keys){
 }
 function myName(){ try{ const u=cfg.uid && usersGet(); return (u && u[cfg.uid] && u[cfg.uid].name)||''; }catch(e){ return ''; } }
 window.ntSync={T,get cfg(){ return cfg; },st,sync,collect,hashOf,mergeAll,baseGet,outgoing,usersGet,seenGet,canSee:n=>tabAcc(n)!=='h',
-  canWriteTab:n=>mode()!=='v' && tabAcc(n)==='w',touch,myName,myDevs};
+  canWriteTab:n=>mode()!=='v' && tabAcc(n)==='w',touch,myName,myDevs,get pinLocked(){ return pinLocked; }};
 init();
 })();
