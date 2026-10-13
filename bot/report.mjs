@@ -97,6 +97,14 @@ export function buildReport(keys,now){
     const np=rows.filter(r=>r&&!r.pr&&Math.abs(tj-((+r.y)*372+((+r.m)-1)*31+(+r.d)))<=14);
     if(np.length){ L.push('',`خدمت چاپ‌نشده: ${FA(np.length)} مورد`); np.slice(0,4).forEach(r=>L.push(`  - ${String(r.dev||'').slice(0,40)}: ${String(r.act||'').slice(0,50)}`)); }
   }catch(e){}
+  // خرابی تکراری: همان دستگاه و همان نوع فعالیت، ۲ بار یا بیشتر در ۳۰ روز (فقط روز بعد از ثبت تعمیر تکراری)
+  try{
+    const w2={}; vm.runInNewContext(fs.readFileSync(path.join(HERE,'..','_dev','src','repeat.js'),'utf8'),{window:w2,globalThis:w2,String,Math,Object,Array});
+    const sh=JSON.parse(store.nt_sh8_v1||'{}'), y=w2.ntRepeat.dn(yest);
+    const R=w2.ntRepeat.find(Array.isArray(sh.rows)?sh.rows:[],{days:30}).filter(x=>x.reg===y);
+    if(R.length){ L.push('','⚠ خرابی تکراری:'); R.slice(0,5).forEach(x=>{ L.push(`• ${String(x.dev).slice(0,40)} — ${String(x.type).slice(0,30)}: ${FA(x.n)} بار در ${FA(x.gap)} روز`);
+      x.list.forEach(l=>L.push(`  - ${FA(l.date)}${l.rep?' — '+l.rep.slice(0,40):''}`)); }); }
+  }catch(e){}
   return L.join('\n').slice(0,3800);
 }
 
