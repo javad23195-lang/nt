@@ -35,7 +35,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   await addInv('A','جوش و تراش','جوشکار','2000000','A2');
   ok(await fr.evaluate(()=>[...document.querySelectorAll('#xInv .invhd .t')].map(x=>x.textContent.trim()).join('|'))==='فاکتور ۱|فاکتور ۲|فاکتور ۳','شماره‌ها: ۱، ۲، ۳');
   ok(/۱۰,۰۰۰,۰۰۰/.test(await fr.evaluate(()=>document.getElementById('tot').innerText)),'جمع ۱۰ میلیون');
-  ok(await fr.evaluate(()=>document.querySelectorAll('.xinv .combo .combo-list').length===6),'هر فاکتور جستجوی کشویی دارد');
+  ok(await fr.evaluate(()=>document.querySelectorAll('.xinv .combo .combo-list').length===9),'هر فاکتور جستجوی کشویی دارد');
   await fr.evaluate(()=>document.getElementById('xInv').scrollIntoView({block:'start'})); await sleep(200); await p.screenshot({path:'/tmp/claude-0/inv2.png'});
   await fr.evaluate(()=>document.getElementById('bAdd').click()); await sleep(600);
   let R=await rows();
