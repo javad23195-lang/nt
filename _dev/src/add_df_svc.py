@@ -15,7 +15,7 @@ assert '</script' not in SJ
 rep('      ${hs.length?`<details class="hist">','      ${svcHtml(m)}\n      ${hs.length?`<details class="hist">')
 rep('  <button class="btn btn-ghost" id="bImp">ورود لیست قرائت (چسباندن)</button>','''  <button class="btn btn-ghost" id="bImp">ورود لیست قرائت (چسباندن)</button>
   <button class="btn btn-ghost" id="bSvcImp" type="button">برنامه سرویس (چسباندن از اکسل)</button>
-  <div class="imp" id="svcImp" hidden>
+  <div class="imp" id="svcImp">
     <label for="svcTxt">هر خط: دستگاه، نام سرویس، آخرین سرویس (قرائت)، تاریخ آخرین سرویس، هر چند (ساعت یا کیلومتر)، سقف ماه (اختیاری). موردی که همان دستگاه و نام را دارد به‌روز می‌شود.</label>
     <textarea id="svcTxt" dir="rtl" spellcheck="false" placeholder="لودر کوماتسو WA470&#9;روغن موتور&#9;27172&#9;1405/07/18&#9;115&#9;12"></textarea>
     <div class="impinfo" id="svcInfo" aria-live="polite"></div>
@@ -102,7 +102,7 @@ function svBind(){
 }
 { const _rn=render; render=function(){ _rn.apply(this,arguments); try{ svBind(); }catch(e){ console.error(e); } }; }
 /* چسباندن برنامه سرویس */
-$('bSvcImp').addEventListener('click',()=>{ const b=$('svcImp'); b.hidden=!b.hidden; if(!b.hidden) $('svcTxt').focus(); });
+$('bSvcImp').addEventListener('click',()=>{ const b=$('svcImp'); b.classList.toggle('show'); if(b.classList.contains('show')){ try{ $('svcTxt').focus(); b.scrollIntoView({block:'center',behavior:'smooth'}); }catch(e){} } });
 $('svcTxt').addEventListener('input',()=>{ const P=ntSvc.parse($('svcTxt').value);
   $('svcInfo').textContent=P.ok.length?`${fa(P.ok.length)} مورد خوانده شد`+(P.bad.length?` — ${fa(P.bad.length)} خط نامعتبر (خط ${P.bad.slice(0,5).map(fa).join('، ')})`:''):(P.bad.length?'قالب خط‌ها درست نیست':'');
   $('svcGo').disabled=!P.ok.length || !svW; });
@@ -111,7 +111,7 @@ $('svcGo').addEventListener('click',()=>{ const P=ntSvc.parse($('svcTxt').value)
   P.ok.forEach(r=>{ const k=norm(r.dev)+'|'+norm(r.name), x=L.find(y=>norm(y.dev)+'|'+norm(y.name)===k);
     if(x){ Object.assign(x,{every:r.every,last:r.last,ld:r.ld,months:r.months}); if(r.every==='') x.ok=0; else delete x.ok; u++; }
     else{ const y=Object.assign({id:svId()},r); if(r.every==='') y.ok=0; L.push(y); n++; } });
-  if(svSet(SVK,L)){ $('svcTxt').value=''; $('svcInfo').textContent=''; $('svcGo').disabled=true; $('svcImp').hidden=true; render(); say(`${fa(n)} مورد تازه، ${fa(u)} به‌روز شد`); } });
+  if(svSet(SVK,L)){ $('svcTxt').value=''; $('svcInfo').textContent=''; $('svcGo').disabled=true; $('svcImp').classList.remove('show'); render(); say(`${fa(n)} مورد تازه، ${fa(u)} به‌روز شد`); } });
 """
 rep("function render(){",JS+"\nfunction render(){")
 CSS=""".svc{margin-top:10px;border-top:1px dashed #D5DCE2;padding-top:8px}

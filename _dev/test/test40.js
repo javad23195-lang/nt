@@ -23,6 +23,7 @@ const J=ago=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZo
   const TSV=[[D,'روغن موتور','27060',J(5),'115','12'],[D,'فیلتر آب','26600',J(90),'500','12'],[D,'روغن گیربکس','27000',J(10),'1000','12'],
     [D,'روغن دیفرانسیل','26900',J(400),'2000','12'],[D,'روغن تاندوم','','','','12'],[D,'<img src=x onerror=window.__x=1>','27000','','1000','12'],['خط بد']].map(r=>r.join('\t')).join('\n');
   await fr.evaluate(t=>{ document.getElementById('bSvcImp').click(); const a=document.getElementById('svcTxt'); a.value=t; a.dispatchEvent(new Event('input',{bubbles:true})); },TSV);
+  ok(await fr.evaluate(()=>{ const b=document.getElementById('svcImp'), t=document.getElementById('svcTxt'); return getComputedStyle(b).display!=='none' && t.offsetHeight>50; }),'با زدن دکمه، کادر چسباندن دیده می‌شود');
   ok(/۶ مورد خوانده شد/.test(await fr.evaluate(()=>document.getElementById('svcInfo').textContent)) && /۱ خط نامعتبر/.test(await fr.evaluate(()=>document.getElementById('svcInfo').textContent)),'پیش‌نمایش: ۶ مورد، ۱ خط نامعتبر');
   await fr.evaluate(()=>document.getElementById('svcGo').click()); await sleep(300);
   let L=await SV(); ok(L.length===6 && L.every(x=>x.id),'۶ مورد ذخیره شد');
