@@ -59,8 +59,8 @@ function kpRender(){
   } }catch(e){}
   /* ۴) خرابی باز */
   try{ const mk=LS('nt_moshkel_v1'), rows=(mk&&Array.isArray(mk.rows))?mk.rows:[]; if(rows.length){
-    const open=rows.filter(r=>r&&r.dev&&String(r.state||'باز').trim()!=='بسته'), act=open.filter(r=>String(r.state).trim()==='در حال اقدام').length;
-    C.push({k:'fix',t:'خرابی باز',v:fa(open.length),d:`<span class="kpd eq">${act?fa(act)+' در حال اقدام':'هیچ‌کدام در حال اقدام نیست'}</span>`,cls:open.length?'hot':'',go:'ثبت مشکلات'});
+    const open=rows.filter(r=>r&&r.dev&&String(r.state||'باز').trim()!=='بسته'), act=open.filter(r=>String(r.state).trim()==='در حال اقدام').length, wp=open.filter(r=>String(r.state).trim()==='منتظر قطعه').length;
+    C.push({k:'fix',t:'خرابی باز',v:fa(open.length),d:`<span class="kpd eq">${[act?fa(act)+' در حال اقدام':'',wp?fa(wp)+' منتظر قطعه':''].filter(Boolean).join(' · ')||'هیچ‌کدام در حال اقدام نیست'}</span>`,cls:open.length?'hot':'',go:'ثبت مشکلات'});
   } }catch(e){}
   if(!C.length){ box.innerHTML=''; box.hidden=true; return; }
   box.hidden=false; if(!kpRender.n){ kpRender.n=1; box.classList.add('anim'); setTimeout(()=>box.classList.remove('anim'),900); }
