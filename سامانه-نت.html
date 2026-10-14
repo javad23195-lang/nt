@@ -2769,7 +2769,7 @@ window.ntPwa={standalone,get canInstall(){ return !!prompt; },install:()=>{ if(p
 /* ============ نوار پایین و دکمه «+» (گوشی) ============
    فقط ظاهر و رفتن بین زبانه‌ها. هیچ اطلاعاتی نمی‌خواند و نمی‌نویسد.
    زبانه‌های قبلی در همان جا هستند (دسترسی، شمارنده، قفل ورود و حالت راننده همان قبل کار می‌کنند).
-   روی صفحه بزرگ (≥۹۰۰) همان زبانه‌های بالا می‌ماند. */
+   روی صفحه متوسط (۹۰۰ تا ۹۹۹) زبانه‌های بالا؛ روی کامپیوتر (≥۱۰۰۰) منوی کناری سمت راست. */
 (function(){
 'use strict';
 if(typeof DOCS==='undefined' || typeof tabs==='undefined' || typeof frames==='undefined') return;
@@ -2856,6 +2856,38 @@ body.ntnav:not(.ntlocked):not(.ntdriver) #ntFab.has{display:grid}
 @media (prefers-reduced-motion:no-preference){ #ntNavSh.on{animation:ntUp .2s ease-out} @keyframes ntUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}} }
 }`;
 const st=document.createElement('style'); st.textContent=CSS; document.head.appendChild(st);
+/* ---------- کامپیوتر (≥۱۰۰۰): منوی کناری سمت راست ---------- */
+const CSSD=`
+.tab .i svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block}
+@media (min-width:1000px){
+body{flex-direction:row}
+.topbar{width:236px;flex:none;height:100%;display:flex;flex-direction:column;background:#fff;border:0;border-inline-end:1px solid #DDE3E9;padding:18px 12px 14px;overflow-y:auto;overflow-x:hidden}
+.topbar .brand{display:flex!important;align-items:center;gap:10px;padding:2px 8px 18px;margin-bottom:8px;border-bottom:1px solid #EEF1F4}
+.topbar .brand .lg{color:#E6A52E;font-size:1.3rem}
+.topbar .brand .tt{color:#17212B;font-size:1rem;font-weight:800;line-height:1.5}
+.topbar .brand .dt{display:block;color:#51606E;font-size:.78rem;font-weight:400}
+.tabrow{flex:1;display:flex!important;flex-direction:column;align-items:stretch;gap:8px;min-height:0}
+.tabs{flex-direction:column;overflow:visible!important;gap:2px;padding:0!important}
+.tab{width:100%;justify-content:flex-start;border:0!important;border-radius:10px!important;min-height:44px;padding:0 12px!important;background:transparent!important;color:#3D4852!important;font-size:.93rem;font-weight:600!important;gap:12px}
+.tab:hover{background:#F1F4F7!important;color:#17212B!important}
+.tab .i{color:#7A8794!important;font-size:1rem;width:18px;display:flex;justify-content:center}
+.tab.on{background:#E7F1F5!important;color:#0B5C7A!important;font-weight:800!important}
+.tab.on .i{color:#0B5C7A!important}
+.tab.on::before{content:"";position:absolute;inset-inline-start:-12px;top:9px;bottom:9px;width:4px;border-radius:0 4px 4px 0;background:#0B5C7A}
+.tab .n{position:static!important;margin-inline-start:auto;min-width:22px;height:22px;border-radius:11px;font-size:.72rem;background:#C0392B!important;color:#fff!important;border:0!important}
+.tab .n:not(.show){display:none!important}
+#ntSyBtn,#ntQrScan{width:100%;justify-content:center;min-height:44px;background:#F7F9FA!important;border:1px solid #D5DCE3!important;color:#17212B!important;border-radius:10px!important;font-size:.85rem!important}
+#ntSyBtn svg,#ntQrScan svg{stroke:#51606E!important;color:#51606E!important}
+#ntSyBtn .tx,#ntQrScan .tx{display:inline!important}
+#ntSyBtn.err{border-color:#C0392B!important;color:#8E2219!important}
+.tabrow>.tabs+*{margin-top:auto}
+.topbar .sybar{margin-top:8px}
+.stage{flex:1;min-width:0;height:100%}
+body.ntdriver .topbar{width:200px}
+}`;
+const stD=document.createElement('style'); stD.textContent=CSSD; document.head.appendChild(stD);
+try{ tabs.forEach((t,i)=>{ const k=TABICON[DOCS[i].name]; const e=t.querySelector('.i'); if(k && e) e.innerHTML=svg(k); }); }catch(e){}
+
 document.body.classList.add('ntnav');
 
 const nav=document.createElement('nav'); nav.id='ntNav'; nav.setAttribute('aria-label','منوی اصلی');
