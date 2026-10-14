@@ -30,5 +30,7 @@ python3 add_sh_cost.py "$T/b24.html" "$T/b25.html"
 python3 add_df_hist.py "$T/b25.html" "$T/b26.html"
 python3 add_df_svc.py "$T/b26.html" "$T/b27.html"
 python3 add_svc_today.py "$T/b27.html" "$T/b28.html"
-python3 build.py "$T/b28.html" ../out.html
+python3 add_an_svc.py "$T/b28.html" "$T/b29.html"
+python3 add_df_fast.py "$T/b29.html" "$T/b30.html"
+python3 build.py "$T/b30.html" ../out.html
 echo "ساخته شد: _dev/out.html — بعد از آزمایش، به جای ../سامانه-نت.html بگذارید"
