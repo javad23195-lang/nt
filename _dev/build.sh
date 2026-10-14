@@ -28,5 +28,7 @@ python3 add_td_cancel.py "$T/b22.html" "$T/b23.html"
 python3 add_repeat.py "$T/b23.html" "$T/b24.html"
 python3 add_sh_cost.py "$T/b24.html" "$T/b25.html"
 python3 add_df_hist.py "$T/b25.html" "$T/b26.html"
-python3 build.py "$T/b26.html" ../out.html
+python3 add_df_svc.py "$T/b26.html" "$T/b27.html"
+python3 add_svc_today.py "$T/b27.html" "$T/b28.html"
+python3 build.py "$T/b28.html" ../out.html
 echo "ساخته شد: _dev/out.html — بعد از آزمایش، به جای ../سامانه-نت.html بگذارید"
