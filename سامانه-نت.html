@@ -2959,7 +2959,7 @@ body.ntnav:not(.ntlocked):not(.ntdriver) #ntFab.has{display:grid}
 .ntnb.on{color:#0B5C7A}
 .ntnb.on svg{transform:translateY(-1px) scale(1.08)}
 .ntnb.on::after{content:"";position:absolute;bottom:-6px;width:5px;height:5px;border-radius:50%;background:#E6A52E}
-.ntnb .b{position:absolute;top:-4px;inset-inline-end:4px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#C0392B;color:#fff;font-size:.62rem;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid #fff;box-sizing:content-box}
+.ntnb .b{position:absolute;top:-5px;left:auto;right:calc(50% + 5px);inset-inline-end:auto;min-width:15px;height:15px;padding:0 3px;border-radius:8px;background:#C0392B;color:#fff;font-size:.62rem;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid #fff;box-sizing:content-box}
 .ntnb .b.show{display:flex}
 .ntnb:focus-visible,.ntfab:focus-visible,.ntac:focus-visible,.ntmr:focus-visible{outline:3px solid #1B2430;outline-offset:2px}
 .ntsp{width:64px;flex:none}
@@ -3067,7 +3067,7 @@ const navIn=document.createElement('div'); navIn.className='ntnbw'; nav.append(b
 const ind=document.createElement('span'); ind.id='ntTabInd'; ind.setAttribute('aria-hidden','true'); try{ $('tabs').prepend(ind); document.body.classList.add('ntind'); }catch(e){}
 const calm=()=>{ try{ return matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } };
 let bubX=null, indY=null;
-function moveBub(){ const b=nav.querySelector('.ntnb.on'); if(!b || !nav.offsetWidth){ bub.style.opacity='0'; return; }
+function moveBub(){ const b=(openKind==='more'&&nav.querySelector('[data-more]'))||nav.querySelector('.ntnb.on'); if(!b || !nav.offsetWidth){ bub.style.opacity='0'; return; }
   const x=b.offsetLeft+b.offsetWidth/2-26; bub.style.opacity='1';
   if(bubX!==null && bubX!==x && !calm() && bub.animate){ const d=x-bubX; bub.animate([{transform:`translateX(${bubX}px)`},{transform:`translateX(${bubX+d*.55}px) scaleX(1.45)`,offset:.45},{transform:`translateX(${x}px) scaleX(.92)`,offset:.8},{transform:`translateX(${x}px)`}],{duration:480,easing:'cubic-bezier(.3,.7,.3,1)'}); }
   bub.style.transform=`translateX(${x}px)`; bubX=x; }
@@ -3081,26 +3081,28 @@ const bd=document.createElement('div'); bd.id='ntNavBd';
 const sh=document.createElement('div'); sh.id='ntNavSh'; sh.setAttribute('role','dialog'); sh.setAttribute('aria-modal','true');
 document.body.append(nav,bd,sh,fab);
 
-function badgeOf(name){ const i=idx(name); const e=$('badge'+i); return e&&e.classList.contains('show')?String(e.textContent).replace(/[^\d۰-۹٠-٩]/g,''):''; }  /* فقط رقم (امن برای innerHTML) */
+function badgeOf(name){ const i=idx(name); const e=$('badge'+i); return e&&e.classList.contains('show')?String(e.textContent).replace(/[^\d۰-۹٠-٩]/g,''):''; }
+/** عدد نوار پایین: بیشتر از ۹۹ → «۹۹+» تا آیکون را نپوشاند */
+const cap99=v=>{ const n=+String(v||'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)); return n>99?'۹۹+':String(v||''); };  /* فقط رقم (امن برای innerHTML) */
 function activeName(){ const i=tabs.findIndex(t=>t.classList.contains('on')); return i>-1?DOCS[i].name:''; }
 function others(){ return DOCS.map(d=>d.name).filter(n=>MAIN.indexOf(n)<0 && vis(n)); }
 function paint(){
   const act=activeName(), main=MAIN.filter(vis), more=others();
-  const mk=(n,label,icon,on,badge,extra)=>`<button type="button" class="ntnb${on?' on':''}" data-n="${n}" ${on?'aria-current="page"':''}>${svg(icon)}${label}<span class="b${badge?' show':''}">${badge||''}</span></button>`;
+  const mk=(n,label,icon,on,badge,extra)=>`<button type="button" class="ntnb${on?' on':''}" data-n="${n}" ${on?'aria-current="page"':''}>${svg(icon)}${label}<span class="b${badge?' show':''}">${cap99(badge)}</span></button>`;
   let h=''; const lab={'امروز':'امروز','برنامه روزانه':'برنامه','انبار':'انبار'};
   const first=main.slice(0,2), last=main.slice(2);
   first.forEach(n=>h+=mk(n,lab[n],TABICON[n],act===n,badgeOf(n)));
   h+='<span class="ntsp" aria-hidden="true"></span>';
   last.forEach(n=>h+=mk(n,lab[n],TABICON[n],act===n,badgeOf(n)));
   if(more.length){ const faN=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]); const mb=more.reduce((s,n)=>s+(+badgeOf(n).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d))||0),0);
-    h+=`<button type="button" class="ntnb${more.indexOf(act)>-1?' on':''}" data-more="1">${svg('more')}بیشتر<span class="b${mb?' show':''}">${mb?faN(mb):''}</span></button>`; }
+    h+=`<button type="button" class="ntnb${more.indexOf(act)>-1?' on':''}" data-more="1">${svg('more')}بیشتر<span class="b${mb?' show':''}">${mb?(mb>99?'۹۹+':faN(mb)):''}</span></button>`; }
   navIn.innerHTML=h;
   requestAnimationFrame(()=>{ moveBub(); moveInd(); });
   const canAdd=ACTS.some(a=>vis(a[0]) && canW(a[0]));
   fab.classList.toggle('has',canAdd);
 }
 let openKind='';
-function closeSheet(back){ openKind=''; bd.classList.remove('on'); sh.classList.remove('on'); fab.classList.remove('open'); fab.setAttribute('aria-expanded','false'); if(back!==false){ try{ fab.focus(); }catch(e){} } }
+function closeSheet(back){ openKind=''; requestAnimationFrame(moveBub); bd.classList.remove('on'); sh.classList.remove('on'); fab.classList.remove('open'); fab.setAttribute('aria-expanded','false'); if(back!==false){ try{ fab.focus(); }catch(e){} } }
 function openSheet(kind){
   openKind=kind; let h='<div class="h"></div>';
   if(kind==='add'){
@@ -3112,7 +3114,7 @@ function openSheet(kind){
     others().forEach(n=>{ const b=badgeOf(n); h+=`<button type="button" class="ntmr" data-n="${n}">${svg(TABICON[n])}${n}<span class="b${b?' show':''}">${b}</span></button>`; });
     h+='</div>';
   }
-  sh.innerHTML=h; bd.classList.add('on'); sh.classList.add('on');
+  sh.innerHTML=h; bd.classList.add('on'); sh.classList.add('on'); requestAnimationFrame(moveBub);
   if(kind==='add'){ fab.classList.add('open'); fab.setAttribute('aria-expanded','true'); }
   const f=sh.querySelector('button'); if(f) try{ f.focus(); }catch(e){}
 }
