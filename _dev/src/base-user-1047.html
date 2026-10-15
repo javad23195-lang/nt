@@ -87,6 +87,37 @@ iframe{background:#EEF1F4}
   iframe.on{display:block!important;position:static!important;
     width:100%!important;height:auto!important;min-height:270mm;border:0!important}
 }
+
+/* ---------- صفحه شروع برنامه نصب‌شده (ادامه صفحه شروع اندروید: همان رنگ و همان کاشی NT) ---------- */
+#ntSplash{display:none}
+#ntSplash.on{display:flex;position:fixed;inset:0;z-index:2147483000;background:#F2F4F6;flex-direction:column;align-items:center;justify-content:center;gap:22px;pointer-events:none;--s:min(58vw,250px)}
+#ntSplash .tile{position:relative;width:var(--s);height:var(--s);background:#0C5C7A;overflow:hidden;border-radius:0}
+#ntSplash .tile::after{content:"";position:absolute;inset:-30%;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.28) 50%,transparent 60%);transform:translateX(-120%)}
+#ntSplash .nt{position:absolute;inset:0 0 auto 0;top:30%;display:flex;justify-content:center;gap:calc(var(--s)*.01);direction:ltr;
+  font:900 calc(var(--s)*.355)/1 Arial,"Helvetica Neue",sans-serif;color:#fff;letter-spacing:-.01em}
+#ntSplash .nt b{display:inline-block;font-weight:900}
+#ntSplash .bar{position:absolute;left:30%;right:30%;top:68%;height:calc(var(--s)*.047);border-radius:99px;background:rgba(240,194,78,.35);overflow:hidden}
+#ntSplash .bar i{position:absolute;inset:0;background:#F0C24E;border-radius:99px;transform-origin:right center}
+#ntSplash .cap{display:flex;align-items:center;gap:10px;opacity:0;font-family:inherit;direction:rtl}
+#ntSplash .cap img{width:40px;height:40px}
+#ntSplash .cap b{display:block;font-size:.78rem;color:#8A6418}
+#ntSplash .cap span{display:block;font-size:1rem;font-weight:800;color:#17212B}
+#ntSplash.out{animation:spOut .45s ease-in forwards}
+@media (prefers-reduced-motion:no-preference){
+  #ntSplash.on .tile{animation:spTile 1.9s cubic-bezier(.3,.7,.2,1) both}
+  #ntSplash.on .tile::after{animation:spShine 1s .15s ease-in-out both}
+  #ntSplash.on .nt b:nth-child(1){animation:spLift .55s .2s ease-out both}
+  #ntSplash.on .nt b:nth-child(2){animation:spLift .55s .32s ease-out both}
+  #ntSplash.on .bar i{animation:spFill 1.1s .25s cubic-bezier(.6,0,.2,1) both}
+  #ntSplash.on .cap{animation:spCap .5s .55s ease-out forwards}
+}
+@media (prefers-reduced-motion:reduce){ #ntSplash.on .cap{opacity:1} #ntSplash.on .tile{border-radius:calc(var(--s)*.14)} }
+@keyframes spTile{0%{transform:none;border-radius:0}45%{border-radius:calc(var(--s)*.14)}70%{transform:none}100%{transform:scale(.94);border-radius:calc(var(--s)*.14)}}
+@keyframes spShine{to{transform:translateX(120%)}}
+@keyframes spLift{0%{transform:none}45%{transform:translateY(-9%)}100%{transform:none}}
+@keyframes spFill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes spCap{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes spOut{to{opacity:0;transform:scale(1.04)}}
 </style>
 </head>
 <body>
@@ -98,6 +129,19 @@ iframe{background:#EEF1F4}
   </div>
   <div class="tabs" id="tabs"></div>
 </div>
+<div id="ntSplash" aria-hidden="true"><div class="tile"><div class="nt"><b>N</b><b>T</b></div><div class="bar"><i></i></div></div>
+  <div class="cap"><img alt=""><div><b>آرشیا اورنگ</b><span>واحد نگهداری و تعمیرات</span></div></div></div>
+<script>
+/* صفحه شروع: فقط در برنامه نصب‌شده (یا آدرس با ?splash برای دیدن). کلیک‌ها را نمی‌گیرد؛ حداکثر ۲ ثانیه. */
+(function(){ var sp=document.getElementById('ntSplash'); if(!sp) return;
+  var st=false; try{ st=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true; }catch(e){}
+  if(!st && !/[?&]splash\b/.test(location.search)){ sp.parentNode.removeChild(sp); return; }
+  try{ var lg=document.querySelector('.brand .lg'); if(lg) sp.querySelector('.cap img').src=lg.src; }catch(e){}
+  sp.classList.add('on');
+  var red=false; try{ red=matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+  setTimeout(function(){ sp.classList.add('out'); setTimeout(function(){ if(sp.parentNode) sp.parentNode.removeChild(sp); },460); }, red?700:1650);
+})();
+</script>
 
 <div class="ntal" id="ntAl" role="alertdialog" aria-labelledby="ntAlH" aria-live="assertive" hidden>
   <h2 id="ntAlH"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2M5 4L2.5 6.5M19 4l2.5 2.5"></path></svg><span id="ntAlT">وقت یادآور رسید</span></h2>
