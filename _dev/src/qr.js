@@ -154,6 +154,7 @@ function home(id){
   on('qrOut',()=>{ window.ntOutsrcDraft={dev:dev.name}; close(); try{ window.postMessage({nt:'go',tab:'برون‌سپاری'},'*'); }catch(e){} });
   setTimeout(()=>{ try{ const b=$('ntQrBody').querySelector('.acts button'); if(b) b.focus(); }catch(e){} },50);
   try{ if(window.ntCharts && ntCharts.devMini) ntCharts.devMini(dev.name); }catch(e){}   // نمودار کوچک کارکرد
+  try{ if(window.ntDev && ntDev.attach) ntDev.attach(dev,$('ntQrBody')); }catch(e){}   // پرونده دستگاه (dev.js)
 }
 const back=dev=>`<button type="button" id="qrBack">بازگشت</button>`;
 

@@ -37,5 +37,6 @@ python3 add_mk_board.py "$T/b31.html" "$T/b32.html"
 python3 add_kh_search.py "$T/b32.html" "$T/b33.html"
 python3 add_df_check.py "$T/b33.html" "$T/b34.html"
 python3 add_last.py "$T/b34.html" "$T/b35.html"
-python3 build.py "$T/b35.html" ../out.html
+python3 add_devlink.py "$T/b35.html" "$T/b36.html"
+python3 build.py "$T/b36.html" ../out.html
 echo "ساخته شد: _dev/out.html — بعد از آزمایش، به جای ../سامانه-نت.html بگذارید"
