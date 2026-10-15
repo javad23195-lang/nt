@@ -126,6 +126,8 @@ function fileHtml(dev){
     return U.slice(0,2).map(x=>`<bdi>${esc(cut(x))}</bdi>`).join('، ')+(U.length>2?` و ${fa(U.length-2)} قلم دیگر`:''); })():''}</small></div>`);
   if(tiles.length) h+=`<div class="pftiles">${tiles.join('')}</div>`;
   try{ h+=kpiHtml(dev); }catch(e){}
+  try{ if(canSee('دفترچه قرائت') && window.ntFluid){ const F=ntFluid.state(LS('nt_fluid_v1')||[],LS('nt_daftar_v1')||[],dev.name,today(),dev.unit==='کیلومتر');
+    if(F.length) h+=`<h3>مصرف سوخت و روغن (۳۰ روز)</h3><div class="pfsv">${F.map(x=>`<div class="pfsr"><span class="pill ${x.warn?'o':'g'}">${x.warn?'▲ '+fa(Math.round((x.ratio-1)*100))+'٪':'عادی'}</span><b>${esc(x.name)}</b><span>${x.now!==null?dec(Math.round(x.now*10)/10)+' '+esc(x.unit):'—'}${x.base!==null?' · معمول '+dec(Math.round(x.base*10)/10):''}</span></div>`).join('')}</div>`; } }catch(e){}
   const rp=repeatOf(dev);
   if(rp.length) h+=`<div class="pfrep">⚠ خرابی تکراری: ${rp.map(x=>`«${esc(x.type)}» ${fa(x.n)} بار در ${fa(x.gap)} روز`).join('؛ ')}</div>`;
   const E=events(dev);

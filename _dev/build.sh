@@ -39,5 +39,7 @@ python3 add_df_check.py "$T/b33.html" "$T/b34.html"
 python3 add_last.py "$T/b34.html" "$T/b35.html"
 python3 add_devlink.py "$T/b35.html" "$T/b36.html"
 python3 add_df_retire.py "$T/b36.html" "$T/b37.html"
-python3 build.py "$T/b37.html" ../out.html
+python3 add_kh_low.py "$T/b37.html" "$T/b38.html"
+python3 add_df_fluid.py "$T/b38.html" "$T/b39.html"
+python3 build.py "$T/b39.html" ../out.html
 echo "ساخته شد: _dev/out.html — بعد از آزمایش، به جای ../سامانه-نت.html بگذارید"
