@@ -1220,7 +1220,7 @@ function pinFx(el){ try{ if(matchMedia('(prefers-reduced-motion: reduce)').match
 /** کارت قفل: حرکت ورود، بعد از صفحه شروع (اگر هست) */
 function pinIn(el){ const go=()=>{ el.classList.remove('in'); void el.offsetWidth; el.classList.add('in'); };
   const sp=document.getElementById('ntSplash'); if(!sp){ go(); return; } el.classList.add('wait');
-  const t=setInterval(()=>{ if(!document.getElementById('ntSplash')){ clearInterval(t); el.classList.remove('wait'); go(); } },80); setTimeout(()=>{ clearInterval(t); el.classList.remove('wait'); go(); },3000); }
+  const t=setInterval(()=>{ if(!document.getElementById('ntSplash')){ clearInterval(t); el.classList.remove('wait'); go(); } },80); setTimeout(()=>{ clearInterval(t); el.classList.remove('wait'); go(); },4500); }
 /** رمز اشتباه: کارت می‌لرزد */
 function pinShake(el){ const b=el.querySelector('.pinbox'); if(!b) return; b.classList.remove('bad'); void b.offsetWidth; b.classList.add('bad'); }
 function pinShow(kind){
