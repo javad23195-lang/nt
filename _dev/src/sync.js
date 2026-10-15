@@ -848,6 +848,7 @@ function viewMain(){
     <div class="symsg" id="syMsg"></div>
     <button type="button" class="go" id="syNow">همگام‌سازی الان</button>
     ${admin?`<button type="button" class="go" id="syUsers">کاربران${nU?' ('+fa(nU)+')':''}</button>
+      <button type="button" id="syAi">خلاصه برای Claude…</button>
       <div class="sycard"><h3>کلید دسترسی جدید</h3>
         <label>فقط اگر کلید قبلی باطل شده است<input id="syTok" data-p type="password" autocomplete="off" placeholder="github_pat_..."></label>
         <button type="button" id="syTokSave">ذخیره کلید جدید</button></div>
@@ -882,6 +883,7 @@ function viewMain(){
     <button type="button" id="syClose">بستن</button>`);
   on('syNow',async()=>{ lock(true); msg('در حال همگام‌سازی…'); await sync({manual:true}); lock(false); if(conflict) return; msg(phase==='ok'?'همگام شد — '+fmtAt(st().at):'همگام نشد — '+note,phase!=='ok'); });
   on('syUsers',viewUsers);
+  on('syAi',()=>{ dlgClose(); try{ window.ntAi && window.ntAi.open(); }catch(e){} });
   on('syToJoin',()=>viewJoin(''));
   on('syPinCh',()=>{ dlgClose(); pinShow('change'); });
   on('syTokSave',async()=>{
