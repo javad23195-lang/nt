@@ -139,10 +139,10 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   await tab(A,'دفترچه قرائت'); await sleep(400);
   const inp=fr(A).locator('.dev',{hasText:'نیسان زامیاد'}).locator('input.rv');
   await inp.click(); await inp.type('3002');
-  await addReading(X,'لیفتراک کوماتسو 6تنی',12980);
+  await addReading(X,'لیفتراک کوماتسو 6تنی',13180);
   ok(await waitFor(async()=>(await bar(A)).includes('اطلاعات جدید رسید'),10000) && await inp.inputValue()==='3002','نوار «اطلاعات جدید رسید» آمد و عدد نیمه‌کاره ماند');
   await inp.type('50'); await fr(A).locator('.dev',{hasText:'نیسان زامیاد'}).locator('button.sv').click();
-  ok(await waitFor(async()=>await has(A,'nt_daftar_v1','12980') && await has(A,'nt_daftar_v1','300250') && await has(X,'nt_daftar_v1','300250'),15000),'بعد از ذخیره، هر دو طرف کامل شد');
+  ok(await waitFor(async()=>await has(A,'nt_daftar_v1','13180') && await has(A,'nt_daftar_v1','300250') && await has(X,'nt_daftar_v1','300250'),15000),'بعد از ذخیره، هر دو طرف کامل شد');
 
   console.log('7) مدیر از سیستم خودش دسترسی را تغییر می‌دهد');
   await A.click('#ntSyBtn'); await A.click('#syUsers');
