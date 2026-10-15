@@ -74,6 +74,7 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   const A2=await A.context().newPage(); A2.errs=[]; A2.on('pageerror',e=>A2.errs.push(String(e))); await A2.goto(URL1); await settle(A2);
   ok(await waitFor(()=>pinVis(A2)),'صفحه تازه (باز کردن سامانه): رمز خواست');
   await sleep(1300); await A2.screenshot({path:'/tmp/claude-0/pin1.png'});
+  ok(await A2.evaluate(()=>!document.querySelector('input[type=password]') && document.getElementById('pin0').classList.contains('ntsec') && getComputedStyle(document.getElementById('pin0')).webkitTextSecurity==='disc'),'کادر رمز ورود: مدیر گذرواژه آن را نمی‌شناسد (نقطه‌گذاری با CSS)');
   ok(await A2.evaluate(()=>!!document.querySelector('#ntPin .pinlk') && document.getElementById('ntPin').classList.contains('in')),'قفل متحرک (svg) با حرکت ورود');
   await A2.fill('#pin0','1111'); await A2.click('#pinGo'); await sleep(120); await A2.screenshot({path:'/tmp/claude-0/pin2.png'});
   ok(await A2.evaluate(()=>document.querySelector('#ntPin .pinbox').classList.contains('bad')),'رمز اشتباه: کارت می‌لرزد'); await sleep(300);

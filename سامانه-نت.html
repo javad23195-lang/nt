@@ -110,17 +110,17 @@ iframe{background:#EEF1F4}
 #ntSplash .cap span{display:block;font-size:1rem;font-weight:800;color:#17212B}
 #ntSplash.out{animation:spOut .35s ease-in forwards}
 @media (prefers-reduced-motion:no-preference){
-  #ntSplash.on .tile{animation:spTile 1.25s cubic-bezier(.3,.7,.2,1) both,spTileOut .45s 1.3s cubic-bezier(.5,0,.75,0) forwards}
-  #ntSplash.on .big{animation:spLogo 1.05s 1.45s cubic-bezier(.2,.9,.25,1.12) forwards,spWob .9s 2.5s ease-in-out}
-  #ntSplash.on .big i.r1{animation:spRing 1.1s 2.05s ease-out}
-  #ntSplash.on .big i.r2{animation:spRing 1.1s 2.35s ease-out}
-  #ntSplash.on .tile::after{animation:spShine 1s .15s ease-in-out both}
-  #ntSplash.on .nt b:nth-child(1){animation:spLift .55s .2s ease-out both}
-  #ntSplash.on .nt b:nth-child(2){animation:spLift .55s .32s ease-out both}
-  #ntSplash.on .bar i{animation:spFill 1.1s .25s cubic-bezier(.6,0,.2,1) both}
-  #ntSplash.on .cap{animation:spCap .5s 2.1s ease-out forwards}
+  #ntSplash.on.go .tile{animation:spTile 1.25s cubic-bezier(.3,.7,.2,1) both,spTileOut .45s 1.3s cubic-bezier(.5,0,.75,0) forwards}
+  #ntSplash.on.go .big{animation:spLogo 1.05s 1.45s cubic-bezier(.2,.9,.25,1.12) forwards,spWob .9s 2.5s ease-in-out}
+  #ntSplash.on.go .big i.r1{animation:spRing 1.1s 2.05s ease-out}
+  #ntSplash.on.go .big i.r2{animation:spRing 1.1s 2.35s ease-out}
+  #ntSplash.on.go .tile::after{animation:spShine 1s .15s ease-in-out both}
+  #ntSplash.on.go .nt b:nth-child(1){animation:spLift .55s .2s ease-out both}
+  #ntSplash.on.go .nt b:nth-child(2){animation:spLift .55s .32s ease-out both}
+  #ntSplash.on.go .bar i{animation:spFill 1.1s .25s cubic-bezier(.6,0,.2,1) both}
+  #ntSplash.on.go .cap{animation:spCap .5s 2.1s ease-out forwards}
 }
-@media (prefers-reduced-motion:reduce){ #ntSplash.on .cap{opacity:1} #ntSplash.on .tile{display:none} #ntSplash.on .big{opacity:1} #ntSplash.on .tile{border-radius:calc(var(--s)*.14)} }
+@media (prefers-reduced-motion:reduce){ #ntSplash.on.go .cap{opacity:1} #ntSplash.on.go .tile{display:none} #ntSplash.on.go .big{opacity:1} #ntSplash.on.go .tile{border-radius:calc(var(--s)*.14)} }
 @keyframes spTile{0%{transform:none;border-radius:0}60%{border-radius:calc(var(--s)*.14)}100%{transform:scale(.94);border-radius:calc(var(--s)*.14)}}
 @keyframes spTileOut{from{transform:scale(.94);opacity:1;border-radius:calc(var(--s)*.14)}to{transform:scale(.35) rotate(90deg);opacity:0;border-radius:50%}}
 @keyframes spLogo{0%{opacity:0;transform:scale(.2) rotate(-320deg)}70%{opacity:1}100%{opacity:1;transform:none}}
@@ -307,6 +307,9 @@ body.ntpin iframe,body.ntpin .tabs,body.ntpin .ntnav,body.ntpin main{visibility:
 #ntPin button.lnk{border:0;background:none;color:#1F5F99;font-weight:500;text-decoration:underline;min-height:44px}
 #ntPin small{display:block;font-size:.8rem;color:#3D4852;line-height:1.7;margin-top:6px;text-align:start}
 #ntPin .symsg{margin-bottom:8px}
+
+input.ntsec{-webkit-text-security:disc}
+input.ntsec.show{-webkit-text-security:none}
 </style>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://api.github.com https://raw.githubusercontent.com https://cdn.jsdelivr.net http://localhost:* http://127.0.0.1:*; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self' blob: mediastream:; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <script>window.addEventListener("message",function(e){ if(e.origin!==location.origin && location.origin!=="null"){ e.stopImmediatePropagation(); } },true);</script>
@@ -335,7 +338,10 @@ body.ntpin iframe,body.ntpin .tabs,body.ntpin .ntnav,body.ntpin main{visibility:
   try{ var lg=document.querySelector('.brand .lg'); if(lg){ sp.querySelector('.cap img').src=lg.src; sp.querySelector('.big img').src=lg.src; } }catch(e){}
   sp.classList.add('on');
   var red=false; try{ red=matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
-  setTimeout(function(){ sp.classList.add('out'); setTimeout(function(){ if(sp.parentNode) sp.parentNode.removeChild(sp); },360); }, red?700:3150);
+  /* حرکت از وقتی شروع شود که صفحه کامل آمد (صفحه شروع ثابت اندروید تا آن موقع روی صفحه است) */
+  var started=false; function go(){ if(started) return; started=true; sp.classList.add('go');
+    setTimeout(function(){ sp.classList.add('out'); setTimeout(function(){ if(sp.parentNode) sp.parentNode.removeChild(sp); },360); }, red?700:3150); }
+  window.addEventListener('load',function(){ setTimeout(go,60); }); setTimeout(go,6000);
 })();
 </script>
 
@@ -1115,7 +1121,14 @@ function armEl(el,again,fn){
 const arm=(id,again,fn)=>armEl($(id),again,fn);
 function lock(v){ document.querySelectorAll('#ntSyBody button').forEach(b=>{ if(b.id!=='syClose') b.disabled=v; }); }
 const showBox='<label class="chk"><input type="checkbox" id="syShow">نمایش رمزها</label>';
-function bindShow(){ const c=$('syShow'); if(c) c.addEventListener('change',()=>document.querySelectorAll('#ntSyBody input[data-p]').forEach(i=>i.type=c.checked?'text':'password')); }
+function bindShow(){ const c=$('syShow'); if(c) c.addEventListener('change',()=>document.querySelectorAll('#ntSyBody input[data-p]').forEach(i=>{ if(i.classList.contains('ntsec')) i.classList.toggle('show',c.checked); else i.type=c.checked?'text':'password'; })); }
+/* کادرهای رمز، کلید و رمز ورود: «مدیر گذرواژه» گوگل/مرورگر نباید آن‌ها را ذخیره یا پیشنهاد کند
+   (وگرنه کلید در حساب گوگل می‌ماند و در کادر رمز ورود پیشنهاد می‌شود). نوع text با نقطه‌گذاری CSS. */
+const SEC_OK=(()=>{ try{ return CSS.supports('-webkit-text-security','disc'); }catch(e){ return false; } })();
+function noSave(root){ if(!SEC_OK || !root || !root.querySelectorAll) return;
+  const L=root.matches&&root.matches('input[type=password]')?[root]:root.querySelectorAll('input[type=password]');
+  L.forEach(i=>{ i.type='text'; i.classList.add('ntsec'); i.setAttribute('autocomplete','off'); i.setAttribute('autocapitalize','off'); i.setAttribute('autocorrect','off'); i.setAttribute('spellcheck','false'); i.setAttribute('data-lpignore','true'); i.setAttribute('data-1p-ignore',''); }); }
+try{ noSave(document.body); new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(n=>{ if(n.nodeType===1) noSave(n); }))).observe(document.documentElement,{childList:true,subtree:true}); }catch(e){}
 const NOCRYPTO='<div class="symsg bad">این مرورگر رمزگذاری را پشتیبانی نمی‌کند. سامانه را با مرورگر Edge یا Chrome و از آدرس اینترنتی باز کنید.</div>';
 async function copyText(t){
   try{ if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(t); return true; } }catch(e){}

@@ -603,7 +603,14 @@ function armEl(el,again,fn){
 const arm=(id,again,fn)=>armEl($(id),again,fn);
 function lock(v){ document.querySelectorAll('#ntSyBody button').forEach(b=>{ if(b.id!=='syClose') b.disabled=v; }); }
 const showBox='<label class="chk"><input type="checkbox" id="syShow">نمایش رمزها</label>';
-function bindShow(){ const c=$('syShow'); if(c) c.addEventListener('change',()=>document.querySelectorAll('#ntSyBody input[data-p]').forEach(i=>i.type=c.checked?'text':'password')); }
+function bindShow(){ const c=$('syShow'); if(c) c.addEventListener('change',()=>document.querySelectorAll('#ntSyBody input[data-p]').forEach(i=>{ if(i.classList.contains('ntsec')) i.classList.toggle('show',c.checked); else i.type=c.checked?'text':'password'; })); }
+/* کادرهای رمز، کلید و رمز ورود: «مدیر گذرواژه» گوگل/مرورگر نباید آن‌ها را ذخیره یا پیشنهاد کند
+   (وگرنه کلید در حساب گوگل می‌ماند و در کادر رمز ورود پیشنهاد می‌شود). نوع text با نقطه‌گذاری CSS. */
+const SEC_OK=(()=>{ try{ return CSS.supports('-webkit-text-security','disc'); }catch(e){ return false; } })();
+function noSave(root){ if(!SEC_OK || !root || !root.querySelectorAll) return;
+  const L=root.matches&&root.matches('input[type=password]')?[root]:root.querySelectorAll('input[type=password]');
+  L.forEach(i=>{ i.type='text'; i.classList.add('ntsec'); i.setAttribute('autocomplete','off'); i.setAttribute('autocapitalize','off'); i.setAttribute('autocorrect','off'); i.setAttribute('spellcheck','false'); i.setAttribute('data-lpignore','true'); i.setAttribute('data-1p-ignore',''); }); }
+try{ noSave(document.body); new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(n=>{ if(n.nodeType===1) noSave(n); }))).observe(document.documentElement,{childList:true,subtree:true}); }catch(e){}
 const NOCRYPTO='<div class="symsg bad">این مرورگر رمزگذاری را پشتیبانی نمی‌کند. سامانه را با مرورگر Edge یا Chrome و از آدرس اینترنتی باز کنید.</div>';
 async function copyText(t){
   try{ if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(t); return true; } }catch(e){}
