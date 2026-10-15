@@ -2928,7 +2928,7 @@ const ACTS=[
 ];
 
 const CSS=`
-#ntNav,#ntFab,#ntNavBd,#ntNavSh{display:none}
+#ntNav,#ntFab,#ntNavBd,#ntNavSh,#ntTabInd{display:none}
 @media (max-width:899px){
 body.ntnav .tabs{display:none}
 body.ntnav .topbar{background:#1B2430;border-bottom:3px solid #E6A52E;padding:10px 12px 10px;padding-top:calc(10px + env(safe-area-inset-top));
@@ -2952,8 +2952,13 @@ body.ntnav:not(.ntlocked):not(.ntdriver) #ntFab.has{display:grid}
   background:none;border:0;font:inherit;font-size:.7rem;font-weight:700;color:#5B6874;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .ntnb svg,.ntfab svg,.ntac .ic svg,.ntmr svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ntnb svg{width:26px;height:26px}
-.ntnb.on{color:#1B2430}
-.ntnb.on::before{content:"";position:absolute;top:-8px;width:36px;height:4px;border-radius:0 0 4px 4px;background:#E6A52E}
+.ntnbw{display:contents}
+#ntNavBub{position:absolute;left:0;top:8px;width:52px;height:32px;border-radius:16px;background:#E2EEF3;box-shadow:inset 0 0 0 1px #CFE1E9;opacity:0;pointer-events:none;z-index:0;transition:opacity .2s}
+.ntnb{z-index:1}
+.ntnb svg{transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+.ntnb.on{color:#0B5C7A}
+.ntnb.on svg{transform:translateY(-1px) scale(1.08)}
+.ntnb.on::after{content:"";position:absolute;bottom:-6px;width:5px;height:5px;border-radius:50%;background:#E6A52E}
 .ntnb .b{position:absolute;top:-4px;inset-inline-end:4px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#C0392B;color:#fff;font-size:.62rem;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid #fff;box-sizing:content-box}
 .ntnb .b.show{display:flex}
 .ntnb:focus-visible,.ntfab:focus-visible,.ntac:focus-visible,.ntmr:focus-visible{outline:3px solid #1B2430;outline-offset:2px}
@@ -3001,6 +3006,12 @@ body{flex-direction:row}
 .tab:hover{background:#F1F4F7!important;color:#17212B!important}
 .tab .i{color:#7A8794!important;font-size:1rem;width:18px;display:flex;justify-content:center}
 .tab.on{background:#E7F1F5!important;color:#0B5C7A!important;font-weight:800!important}
+.tabs{position:relative}
+.tab{position:relative;z-index:1}
+#ntTabInd{display:block;position:absolute;top:0;left:0;right:0;height:44px;border-radius:10px;background:#E7F1F5;opacity:0;pointer-events:none;z-index:0}
+#ntTabInd::before{content:"";position:absolute;inset-inline-start:-12px;top:9px;bottom:9px;width:4px;border-radius:0 4px 4px 0;background:#0B5C7A}
+body.ntind .tab.on{background:transparent!important}
+body.ntind .tab.on::before{display:none}
 .tab.on .i{color:#0B5C7A!important}
 .tab.on::before{content:"";position:absolute;inset-inline-start:-12px;top:9px;bottom:9px;width:4px;border-radius:0 4px 4px 0;background:#0B5C7A}
 .tab .n{position:static!important;margin-inline-start:auto;min-width:22px;height:22px;border-radius:11px;font-size:.72rem;background:#C0392B!important;color:#fff!important;border:0!important}
@@ -3050,6 +3061,21 @@ try{ tabs.forEach((t,i)=>{ t.style.setProperty('--k',i); const k=TABICON[DOCS[i]
 document.body.classList.add('ntnav');
 
 const nav=document.createElement('nav'); nav.id='ntNav'; nav.setAttribute('aria-label','منوی اصلی');
+/* حباب متحرک زیر گزینه فعال (گوشی) و نشانگر متحرک منوی کناری (کامپیوتر) — فقط ظاهر */
+const bub=document.createElement('span'); bub.id='ntNavBub'; bub.setAttribute('aria-hidden','true');
+const navIn=document.createElement('div'); navIn.className='ntnbw'; nav.append(bub,navIn);
+const ind=document.createElement('span'); ind.id='ntTabInd'; ind.setAttribute('aria-hidden','true'); try{ $('tabs').prepend(ind); document.body.classList.add('ntind'); }catch(e){}
+const calm=()=>{ try{ return matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } };
+let bubX=null, indY=null;
+function moveBub(){ const b=nav.querySelector('.ntnb.on'); if(!b || !nav.offsetWidth){ bub.style.opacity='0'; return; }
+  const x=b.offsetLeft+b.offsetWidth/2-26; bub.style.opacity='1';
+  if(bubX!==null && bubX!==x && !calm() && bub.animate){ const d=x-bubX; bub.animate([{transform:`translateX(${bubX}px)`},{transform:`translateX(${bubX+d*.55}px) scaleX(1.45)`,offset:.45},{transform:`translateX(${x}px) scaleX(.92)`,offset:.8},{transform:`translateX(${x}px)`}],{duration:480,easing:'cubic-bezier(.3,.7,.3,1)'}); }
+  bub.style.transform=`translateX(${x}px)`; bubX=x; }
+function moveInd(){ const t=tabs.find(x=>x.classList.contains('on') && !x.hidden); if(!t || !t.offsetHeight || getComputedStyle(ind).display==='none'){ indY=null; return; }
+  const y=t.offsetTop, h=t.offsetHeight; ind.style.height=h+'px'; ind.style.opacity='1';
+  if(indY!==null && indY!==y && !calm() && ind.animate){ const d=y-indY; ind.animate([{transform:`translateY(${indY}px)`},{transform:`translateY(${indY+d*.6}px) scaleY(1.25)`,offset:.5},{transform:`translateY(${y}px)`}],{duration:420,easing:'cubic-bezier(.3,.7,.3,1)'}); }
+  ind.style.transform=`translateY(${y}px)`; indY=y; }
+window.addEventListener('resize',()=>{ bubX=null; indY=null; moveBub(); moveInd(); });
 const fab=document.createElement('button'); fab.id='ntFab'; fab.type='button'; fab.className='ntfab'; fab.setAttribute('aria-label','ثبت تازه'); fab.setAttribute('aria-haspopup','dialog'); fab.innerHTML=svg('plus');
 const bd=document.createElement('div'); bd.id='ntNavBd';
 const sh=document.createElement('div'); sh.id='ntNavSh'; sh.setAttribute('role','dialog'); sh.setAttribute('aria-modal','true');
@@ -3068,7 +3094,8 @@ function paint(){
   last.forEach(n=>h+=mk(n,lab[n],TABICON[n],act===n,badgeOf(n)));
   if(more.length){ const faN=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]); const mb=more.reduce((s,n)=>s+(+badgeOf(n).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d))||0),0);
     h+=`<button type="button" class="ntnb${more.indexOf(act)>-1?' on':''}" data-more="1">${svg('more')}بیشتر<span class="b${mb?' show':''}">${mb?faN(mb):''}</span></button>`; }
-  nav.innerHTML=h;
+  navIn.innerHTML=h;
+  requestAnimationFrame(()=>{ moveBub(); moveInd(); });
   const canAdd=ACTS.some(a=>vis(a[0]) && canW(a[0]));
   fab.classList.toggle('has',canAdd);
 }
