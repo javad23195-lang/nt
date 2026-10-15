@@ -23,6 +23,9 @@ html.ntsun{filter:saturate(1.25) contrast(1.12) brightness(.95)}
 #ntThBtn svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 @media (min-width:1000px){ #ntThBtn{width:100%;justify-content:center;min-height:44px;background:#F7F9FA!important;border:1px solid #D5DCE3!important;color:#17212B!important;border-radius:10px!important;font-size:.85rem!important} #ntThBtn .tx{display:inline!important} #ntThBtn svg{stroke:#51606E} }
 body.ntlocked #ntThBtn{display:none}
+@media (max-width:999px){ #ntThBtn{display:none!important} }
+body.ntnav .brand .tt{min-width:0;overflow:hidden}
+#ntThRow .tv{margin-inline-start:auto;font-size:.8rem;font-weight:700;color:#0B5C7A;background:#E2EEF3;border-radius:10px;padding:2px 10px}
 `;
 /* CSS داخل هر بخش */
 const FCSS={
@@ -69,6 +72,13 @@ function addBtn(){
     try{ if(typeof toast==='function') toast('ظاهر: '+NAME[mode]); }catch(e){} });
   const sy=$('ntSyBtn'); if(sy) row.insertBefore(b,sy); else row.appendChild(b);
 }
+/* گوشی: جای دکمه ظاهر در صفحه «بیشتر» (نوار بالا جا ندارد) */
+function sheetRow(){ const sh=$('ntNavSh'); if(!sh) return; const L=sh.querySelector('.ntmore'); if(!L || $('ntThRow')) return;
+  const b=document.createElement('button'); b.type='button'; b.className='ntmr'; b.id='ntThRow';
+  const draw=()=>{ b.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">${ICON[mode]}</svg>ظاهر<span class="tv">${NAME[mode]}</span>`; b.setAttribute('aria-label','ظاهر: '+NAME[mode]+' — برای عوض کردن بزنید'); };
+  draw(); b.addEventListener('click',e=>{ e.stopPropagation(); mode=MODES[(MODES.indexOf(mode)+1)%MODES.length]; try{ localStorage.setItem(K,mode); }catch(x){} apply(); draw(); });
+  L.appendChild(b); }
+try{ new MutationObserver(sheetRow).observe($('ntNavSh'),{childList:true}); }catch(e){}
 addBtn(); apply();
 setInterval(()=>{ try{ frames.forEach(fr=>{ if(fr.dataset.loaded) frameCss(fr); }); if(!$('ntThBtn')) addBtn(); }catch(e){} },1000);
 window.ntTheme={get:()=>mode,set:v=>{ if(MODES.indexOf(v)>-1){ mode=v; try{ localStorage.setItem(K,v); }catch(e){} apply(); } }};
