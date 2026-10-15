@@ -11,12 +11,12 @@ const D=d=>`${Y}/${p2(M)}/${p2(Math.min(d,DD))}`, d1=D(1), d2=D(2);
   const br=await chromium.launch({executablePath:process.env.CHROMIUM||undefined});
   const seed={
     nt_daftar_v1:[{dev:'لودر ZL50',unit:'ساعت',val:16000,date:d1},{dev:'لودر ZL50',unit:'ساعت',val:16300,date:d2}],
-    nt_svc_v1:[{id:'s1',dev:'لودر ZL50',name:'تعویض روغن موتور',every:250,last:16000,ld:d1,months:6},{id:'s2',dev:'لودر ZL50',name:'فیلتر هوا',every:1000,last:16000,ld:d1,months:12}],
+    nt_svc_v1:[{id:'s1',dev:'لودر ZL50',name:'تعویض روغن موتور',every:250,last:16000,ld:d1,months:6},{id:'s2',dev:'لودر ZL50',name:'فیلتر هوا',every:1000,last:16000,ld:d1,months:12},{id:'s3',dev:'لودر ZL50',name:'روغن دیفرانسیل',every:5000,last:16000,ld:'1404/01/01',months:6}],
     nt_svc_log_v1:[{id:'l1',item:'s1',dev:'لودر ZL50',name:'تعویض روغن موتور',at:16000,d:d1}],
     nt_moshkel_v1:{row:5,rows:[{y:Y,m:M,d:1,mn:'',dev:'لودر ZL50',sys:'سیستم برقی',desc:'استارت <img src=x onerror=window.__x=1>',sev:'بالا',cur:'در حال کار',part:'خیر',state:'باز',fix:'',src:'دفترچه'}]},
     nt_tavaqof_v1:{[d1+'|صبح']:{stops:[{id:'a',dev:'لودر ZL50',from:'08:00',to:'10:30',cause:'خرابی برق',note:''}]}},
     nt_sh8_v1:{rows:[{dev:'لودر ZL-50',st:d1,type:'سیستم برقی',desc:'تعویض استارت',costA:5000000,costK:2500000},{dev:'لودر ZL-50',st:d2,type:'سیستم برقی',desc:'سیم‌کشی'}]},
-    nt_kharid9_v1:{row:5,rows:[{date:d1,unit:'لودر ZL50',item:'<img src=x onerror=window.__y=1>',qty:2,bought:''},{date:d1,unit:'لودر ZL50',item:'فیلتر روغن',qty:1,bought:1},{date:d1,unit:'لودر ZL50',item:'لغوی',qty:1,bought:'',over:'لغو شد'}]}};
+    nt_kharid9_v1:{row:5,rows:[{date:d1,unit:'لودر ZL50',item:'<img src=x onerror=window.__y=1>',qty:2,bought:''},{date:d1,unit:'لودر ZL50',item:'فیلتر روغن',qty:1,bought:1},{date:d1,unit:'لودر ZL50',item:'فیلتر روغن',qty:1,bought:1},{date:d1,unit:'لودر ZL50',item:'فیلتر روغن',qty:1,bought:1},{date:d1,unit:'لودر ZL50',item:'لغوی',qty:1,bought:'',over:'لغو شد'}]}};
   const c=await br.newContext({locale:'fa-IR',viewport:{width:412,height:900}});
   await c.addInitScript(s=>{ if(!localStorage.getItem('__s')){ localStorage.setItem('__s','1'); Object.keys(s).forEach(k=>localStorage.setItem(k,JSON.stringify(s[k]))); } },seed);
   const p=await c.newPage(); const errs=[]; p.on('pageerror',e=>errs.push(String(e)));
@@ -40,6 +40,8 @@ const D=d=>`${Y}/${p2(M)}/${p2(Math.min(d,DD))}`, d1=D(1), d2=D(2);
   ok(/پرونده/.test(T),'بخش «پرونده» هست');
   ok(/گذشته تعویض روغن موتور ۵۰ ساعت گذشته/.test(T),'سرویس گذشته با مقدار: '+(T.match(/سرویس‌ها.{0,90}/)||[''])[0]);
   ok(/وقت هست فیلتر هوا/.test(T),'سرویس دوم');
+  ok(/گذشته روغن دیفرانسیل \S+ روز از سقف ۶ ماه گذشته/.test(T) && !/روغن دیفرانسیل \S+ ساعت مانده/.test(T),'گذشتهِ زمانی: «روز از سقف ماه گذشته»، نه «ساعت مانده»');
+  ok(/درخواست خرید \(۱\): فیلتر روغن ۳ بار/.test(T),'سه درخواست یکسان یک خط با «۳ بار»');
   ok(/توقف این ماه ۲٫۳ ساعت/.test(T),'توقف این ماه');
   ok(/هزینه تعمیر این ماه ۷٫۵ میلیون/.test(T),'هزینه این ماه (نام دیگر «ZL-50» هم شمرده شد)');
   ok(/خرید باز ۱ قلم/.test(T),'خرید باز: فقط قلم باز (خریده و لغوشده نه)');

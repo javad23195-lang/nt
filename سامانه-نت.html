@@ -3239,10 +3239,13 @@ function events(dev){
     if(String(r.state||'').trim()==='بسته' && r.fix) add(r.fix,'fix',`رفع شد: ${r.desc||''}`); });
   if(canSee('شناسنامه')) rowsOf('nt_sh8_v1').filter(r=>r&&!r.xof&&isDev(dev,r.dev)).forEach(r=>add(r.st||r.reg||(r.y?`${r.y}/${r.m}/${r.d}`:''),'rep',`تعمیر: ${[r.type,r.desc].filter(Boolean).join(' — ')}`));
   if(canSee('دفترچه قرائت')){ const G=LS('nt_svc_log_v1'); (Array.isArray(G)?G:[]).filter(x=>x&&isDev(dev,x.dev)).forEach(x=>add(x.d,'svc',`سرویس: ${x.name||''}${x.at!=null?' در '+faD(Number(x.at).toLocaleString('en-US')).replace(/,/g,'٬'):''}${x.late?' (دیر)':''}`)); }
-  if(canSee('درخواست خرید')) rowsOf('nt_kharid9_v1').filter(r=>r&&isDev(dev,r.unit)).forEach(r=>add(r.date,'buy',`درخواست خرید: ${r.item||''} × ${faD(r.qty||'')}${/لغو/.test(String(r.over||''))?' (لغو شد)':''}`));
-  return E.sort((a,b)=>b.d.localeCompare(a.d));
+  if(canSee('درخواست خرید')) rowsOf('nt_kharid9_v1').filter(r=>r&&isDev(dev,r.unit)).forEach(r=>add(r.date,'buy',`درخواست خرید (${faD(r.qty||'')}): ${r.item||''}${/لغو/.test(String(r.over||''))?' — لغو شد':''}`));
+  // رویدادهای یکسان (همان روز، همان متن) یکی شوند با «N بار»
+  const M=new Map(); E.forEach(e=>{ const k=e.d+'|'+e.k+'|'+e.t, o=M.get(k); if(o) o.n++; else M.set(k,Object.assign(e,{n:1})); });
+  return [...M.values()].sort((a,b)=>b.d.localeCompare(a.d));
 }
 
+const evLi=e=>`<li class="k-${e.k}"><span>${fa(e.d)}</span><bdi>${esc(e.t)}</bdi>${e.n>1?` <b class="pfn">${fa(e.n)} بار</b>`:''}</li>`;
 /* ---------- بخش «پرونده» در صفحه دستگاه ---------- */
 const ST={r:['گذشته','r'],o:['نزدیک','o'],g:['وقت هست','g'],n:['—','n']};
 function fileHtml(dev){
@@ -3250,7 +3253,8 @@ function fileHtml(dev){
   const sv=svcOf(dev);
   if(sv.length){
     h+=`<h3>سرویس‌ها</h3><div class="pfsv">${sv.slice(0,4).map(x=>{ const s=ST[x.st]||ST.n;
-      const rem=x.rem!==null?(x.rem>=0?`${sep(x.rem)} ${esc(dev.unit)} مانده`:`${sep(-x.rem)} ${esc(dev.unit)} گذشته`):(x.days!==null?(x.days>=0?`${fa(x.days)} روز مانده`:`${fa(-x.days)} روز گذشته`):'');
+      const mo=window.ntSvc?(ntSvc.num(x.it.months)||12):12;
+      const rem=(x.by==='time'&&x.days!==null&&(x.st==='r'||x.st==='o'))?(x.days<0?`${fa(-x.days)} روز از سقف ${fa(mo)} ماه گذشته`:`${fa(x.days)} روز تا سقف ${fa(mo)} ماه`):x.rem!==null?(x.rem>=0?`${sep(x.rem)} ${esc(dev.unit)} مانده`:`${sep(-x.rem)} ${esc(dev.unit)} گذشته`):(x.days!==null?(x.days>=0?`${fa(x.days)} روز مانده`:`${fa(-x.days)} روز گذشته`):'');
       return `<div class="pfsr"><span class="pill ${s[1]}">${s[0]}</span><b>${esc(x.it.name)}</b><span>${rem}</span></div>`; }).join('')}
       ${sv.length>4?`<div class="pfmore">و ${fa(sv.length-4)} سرویس دیگر</div>`:''}</div>`;
   }
@@ -3258,13 +3262,14 @@ function fileHtml(dev){
   const tiles=[];
   if(st) tiles.push(`<div class="pft"><span>توقف این ماه</span><b>${st.n?dec(Math.round(st.min/6)/10)+' ساعت':'ندارد'}</b><small>${st.n?fa(st.n)+' بار'+(st.open?'، هنوز متوقف':''):''}</small></div>`);
   if(co) tiles.push(`<div class="pft"><span>هزینه تعمیر این ماه</span><b>${co.sum?(co.sum>=1e6?dec(Math.round(co.sum/1e5)/10)+' میلیون':sep(co.sum)):'ندارد'}</b><small>${co.sum?'ریال، '+fa(co.n)+' فاکتور':''}</small></div>`);
-  if(bu) tiles.push(`<div class="pft"><span>خرید باز</span><b>${bu.length?fa(bu.length)+' قلم':'ندارد'}</b><small>${bu.length?esc(bu.slice(-2).map(r=>r.item).join('، ').slice(0,60)):''}</small></div>`);
+  if(bu) tiles.push(`<div class="pft"><span>خرید باز</span><b>${bu.length?fa(bu.length)+' قلم':'ندارد'}</b><small>${bu.length?(()=>{ const U=[...new Set(bu.map(r=>String(r.item||'').trim()).filter(Boolean))], cut=x=>x.length>34?x.slice(0,33)+'…':x;
+    return U.slice(0,2).map(x=>`<bdi>${esc(cut(x))}</bdi>`).join('، ')+(U.length>2?` و ${fa(U.length-2)} قلم دیگر`:''); })():''}</small></div>`);
   if(tiles.length) h+=`<div class="pftiles">${tiles.join('')}</div>`;
   const rp=repeatOf(dev);
   if(rp.length) h+=`<div class="pfrep">⚠ خرابی تکراری: ${rp.map(x=>`«${esc(x.type)}» ${fa(x.n)} بار در ${fa(x.gap)} روز`).join('؛ ')}</div>`;
   const E=events(dev);
   if(E.length){
-    h+=`<h3>آخرین رویدادها</h3><ol class="pfev">${E.slice(0,10).map(e=>`<li class="k-${e.k}"><span>${fa(e.d)}</span>${esc(e.t)}</li>`).join('')}</ol>`;
+    h+=`<h3>آخرین رویدادها</h3><ol class="pfev">${E.slice(0,10).map(evLi).join('')}</ol>`;
     if(E.length>10) h+=`<button type="button" id="pfAll">همه رویدادها (${fa(E.length)})</button>`;
   }
   return h;
@@ -3277,7 +3282,7 @@ function attach(dev,body){
   box.innerHTML='<h2 class="pfh">پرونده</h2>'+h;
   const cl=body.querySelector('#qrClose'); if(cl) body.insertBefore(box,cl); else body.appendChild(box);
   const all=box.querySelector('#pfAll'); if(all) all.addEventListener('click',()=>{ const E=events(dev);
-    box.querySelector('.pfev').innerHTML=E.map(e=>`<li class="k-${e.k}"><span>${fa(e.d)}</span>${esc(e.t)}</li>`).join(''); all.remove(); });
+    box.querySelector('.pfev').innerHTML=E.map(evLi).join(''); all.remove(); });
 }
 
 /* ---------- «دستگاه‌ها»: فهرست همه دستگاه‌ها ---------- */
@@ -3324,6 +3329,7 @@ const CSS=`
 .qrdev .pfsr span:last-child{color:#3D4852;font-variant-numeric:tabular-nums}
 .qrdev .pill{font-size:.72rem;font-weight:800;border-radius:10px;padding:2px 8px;background:#EEF1F4;color:#3D4852}
 .qrdev .pill.r{background:#FBE5E2;color:#A32018}.qrdev .pill.o{background:#FFF1D6;color:#7A4300}.qrdev .pill.g{background:#E3F4EA;color:#17663F}
+.qrdev .pfev .pfn{font-size:.72rem;background:#FFF1D6;color:#7A4300;border-radius:8px;padding:1px 6px}
 .qrdev .pfmore{font-size:.76rem;color:#51606E}
 .qrdev .pftiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px;margin-top:10px}
 .qrdev .pft{border:1px solid #DDE3E9;border-radius:12px;padding:8px 10px;background:#fff}
