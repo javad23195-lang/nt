@@ -1,0 +1,35 @@
+// ظاهر: روشن / تیره / آفتاب (فقط همین گوشی) + بازخورد بعد از ذخیره
+const {chromium}=require('playwright'); const http=require('http'), fs=require('fs'), path=require('path');
+const HTML=fs.readFileSync(path.join(__dirname,'..','out.html'));
+let fails=0; const ok=(c,m)=>{ console.log((c?'  ok  ':'  FAIL ')+m); if(!c) fails++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+(async()=>{
+  const web=http.createServer((q,r)=>{ r.writeHead(200,{'Content-Type':'text/html; charset=utf-8'}); r.end(HTML); }); await new Promise(r=>web.listen(0,r));
+  const br=await chromium.launch({executablePath:process.env.CHROMIUM||undefined});
+  const c=await br.newContext({locale:'fa-IR',viewport:{width:412,height:860}});
+  await c.addInitScript(()=>{ if(!localStorage.getItem('__s')){ localStorage.setItem('__s','1'); localStorage.setItem('nt_daftar_v1',JSON.stringify([{dev:'لودر ZL50',unit:'ساعت',val:16000,date:'1405/07/20'}])); } });
+  const p=await c.newPage(); const errs=[]; p.on('pageerror',e=>errs.push(String(e)));
+  const U=`http://localhost:${web.address().port}/nt/s.html`;
+  await p.goto(U); await p.waitForFunction(()=>window.ntSync&&window.ntNav&&window.ntTheme,null,{timeout:15000});
+  await p.addStyleTag({content:'.sydlg,.sybd{display:none!important}'}); await p.evaluate(()=>{ window.ntLocked=false; document.body.classList.remove('ntlocked'); try{ ntBoot(); }catch(e){} }); await sleep(1500);
+  const cls=()=>p.evaluate(()=>document.documentElement.className);
+  ok(!/ntdark|ntsun/.test(await cls()) && await p.evaluate(()=>!!document.getElementById('ntThBtn')),'پیش‌فرض: روشن، دکمه ظاهر هست');
+  await p.click('#ntThBtn'); await sleep(300);
+  ok(/ntdark/.test(await cls()) && await p.evaluate(()=>localStorage.getItem('ntui_theme')==='dark'),'یک بار زدن: تیره (فقط در همین گوشی ذخیره شد)');
+  ok(await p.evaluate(()=>getComputedStyle(document.documentElement).filter.includes('invert')),'تیره: صفحه برعکس شد');
+  await sleep(1200);
+  ok(await p.evaluate(()=>frames.filter(f=>f.dataset.loaded).every(f=>{ const s=f.contentDocument.getElementById('ntThCss'); return s && /invert/.test(s.textContent); })),'داخل بخش‌ها: عکس و نمودار دوباره برعکس (رنگ واقعی)');
+  await p.click('#ntThBtn'); await sleep(300); ok(/ntsun/.test(await cls()) && !/ntdark/.test(await cls()),'بار دوم: آفتاب');
+  await p.reload(); await p.waitForFunction(()=>window.ntTheme); ok(/ntsun/.test(await cls()),'بعد از باز کردن دوباره همان حالت می‌ماند');
+  ok(await p.evaluate(()=>!Object.keys(localStorage).some(k=>/^nt_/.test(k)&&/theme/.test(k))),'کلید ظاهر با nt_ شروع نمی‌شود (ارسال نمی‌شود)');
+  await p.evaluate(()=>ntTheme.set('light')); await p.addStyleTag({content:'.sydlg,.sybd{display:none!important}'}); await p.evaluate(()=>{ window.ntLocked=false; document.body.classList.remove('ntlocked'); try{ ntBoot(); }catch(e){} }); await sleep(800);
+  const IDX=await p.evaluate(()=>DOCS.findIndex(d=>d.name==='دفترچه قرائت')); await p.evaluate(i=>show(i),IDX); await sleep(2200);
+  const fr=(await (await p.$$('iframe'))[IDX].contentFrame());
+  await fr.evaluate(()=>{ const f=document.getElementById('fDate'); f.value='1405/07/22'; f.dispatchEvent(new Event('input')); });
+  await fr.evaluate(()=>{ const el=[...document.querySelectorAll('#list input.rv')].find(x=>x.dataset.dev==='لودر ZL50'); el.value='16010'; el.dispatchEvent(new Event('input')); });
+  await (await fr.$('#list .sv.on')).click(); await sleep(120);
+  ok(await fr.evaluate(()=>!!document.querySelector('.ntokck') && !!window.__ntSay),'ذخیره موفق: تیک سبز روی همان جا');
+  ok(await fr.evaluate(()=>JSON.parse(localStorage.nt_daftar_v1).some(x=>x.val===16010)),'ذخیره خودش درست انجام شد');
+  ok(errs.length===0,'بدون خطا '+errs.join('|'));
+  console.log(fails?fails+' شکست':'همه موفق'); await br.close(); web.close(); process.exit(fails?1:0);
+})();
