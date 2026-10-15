@@ -43,6 +43,8 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   await typ('لودر ZL50','15000'); try{ await (await fr.$('.dev.rbad')).screenshot({path:'/tmp/claude-0/rchk.png'}); }catch(e){}
   await typ('کامیون TRS01',''); await typ('لودر ZL50','16100');
 
+  ok(await fr.evaluate(()=>![...document.querySelectorAll('#list input.rv')].some(x=>/17KVA/.test(x.dataset.dev)) && document.querySelectorAll('#list input.rv').length===17),'ژنراتور کامینز 17KVA در دفترچه قرائت نیست (۱۷ دستگاه)');
+  ok(await p.evaluate(()=>ntSvc.all([{dev:'ژنراتور کامینز 17KVA',name:'روغن موتور',every:250,last:9802,ld:'1403/08/29'},{dev:'لودر ZL50',name:'روغن',every:250,last:1}],[]).length===1),'سرویس دستگاه حذف‌شده شمرده نمی‌شود');
   console.log('— توقف شیفت');
   fr=await open('توقف شیفت');
   await fr.evaluate(()=>document.getElementById('bNew').click()); await sleep(300);

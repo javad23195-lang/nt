@@ -23,10 +23,13 @@
       const rank={r:3,o:2,g:1,n:0}; if(rank[ts]>rank[st]){ st=ts; out.by='time'; } else if(st==='n'){ st=ts; out.by='time'; } }
     out.st=st; return out;
   }
+  /** دستگاه‌هایی که دیگر در معدن نیستند: سرویسشان نشان داده و شمرده نمی‌شود (همان فهرست add_df_retire.py) */
+  const GONE=['ژنراتور کامینز17KVA'], gk=s=>lat(s).replace(/[\s‌]+/g,'').replace(/ي/g,'ی').replace(/ك/g,'ک').toLowerCase();
+  const gone=dev=>GONE.some(g=>gk(g)===gk(dev));
   /** همه موردها با وضعیت، به ترتیب فوریت */
   function all(items,log,todayKey){
     const L=latest(log), rank={r:0,o:1,g:2,n:3};
-    return (Array.isArray(items)?items:[]).filter(x=>x&&x.dev&&x.name).map(it=>{ const c=L[it.dev]; return Object.assign({it,cur:c?c.val:null,curDate:c?c.date:''},state(it,c?c.val:null,todayKey)); })
+    return (Array.isArray(items)?items:[]).filter(x=>x&&x.dev&&x.name&&!gone(x.dev)).map(it=>{ const c=L[it.dev]; return Object.assign({it,cur:c?c.val:null,curDate:c?c.date:''},state(it,c?c.val:null,todayKey)); })
       .sort((a,b)=>rank[a.st]-rank[b.st] || (a.rem===null?1e12:a.rem/(a.every||1))-(b.rem===null?1e12:b.rem/(b.every||1)));
   }
   /** متن TSV چسبانده‌شده: دستگاه، نام، آخرین سرویس، تاریخ، فاصله، [ماه] */
@@ -39,5 +42,5 @@
       ok.push({dev:c[0].slice(0,80),name:c[1].slice(0,80),last:last===null?'':last,ld:dn(c[3])!==null?lat(c[3]).trim().slice(0,10):'',every:every===null?'':every,months:num(c[5])||12}); });
     return {ok,bad};
   }
-  root.ntSvc={state,all,latest,parse,dn,today,num};
+  root.ntSvc={state,all,latest,parse,dn,today,num,gone};
 })(typeof window!=='undefined'?window:globalThis);
