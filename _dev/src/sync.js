@@ -1212,6 +1212,17 @@ function pinGet(){ const o=lsGet(PINK); return (o && o.h && o.s)?o:null; }
 function pinBad(p){ return !/^\d{4,6}$/.test(p) || /^(\d)\1+$/.test(p) || '0123456789'.includes(p) || '9876543210'.includes(p); }
 function pinMark(){ pinAct=Date.now(); try{ sessionStorage.setItem(PINT,String(pinAct)); }catch(e){} }
 function pinLast(){ let t=0; try{ t=+sessionStorage.getItem(PINT)||0; }catch(e){} return Math.max(t,pinAct,lastAct||0); }
+function pinLogo(){ try{ const l=document.querySelector('.brand .lg'); return l&&l.src&&/^data:image\/png;base64,/.test(l.src)?l.src:''; }catch(e){ return ''; } }
+/** قفل باز می‌شود: یک کپی از کارت روی صفحه حرکت «باز شدن» را نشان می‌دهد و خودش حذف می‌شود (خود قفل همان لحظه بسته می‌شود) */
+function pinFx(el){ try{ if(matchMedia('(prefers-reduced-motion: reduce)').matches) return; const box=el.querySelector('.pinbox'); if(!box) return;
+  const fx=document.createElement('div'); fx.id='ntPinFx'; fx.setAttribute('aria-hidden','true'); fx.innerHTML=el.innerHTML; fx.querySelectorAll('input,button').forEach(x=>{ x.disabled=true; x.tabIndex=-1; });
+  document.body.appendChild(fx); requestAnimationFrame(()=>fx.classList.add('ok')); setTimeout(()=>fx.remove(),1100); }catch(e){} }
+/** کارت قفل: حرکت ورود، بعد از صفحه شروع (اگر هست) */
+function pinIn(el){ const go=()=>{ el.classList.remove('in'); void el.offsetWidth; el.classList.add('in'); };
+  const sp=document.getElementById('ntSplash'); if(!sp){ go(); return; } el.classList.add('wait');
+  const t=setInterval(()=>{ if(!document.getElementById('ntSplash')){ clearInterval(t); el.classList.remove('wait'); go(); } },80); setTimeout(()=>{ clearInterval(t); el.classList.remove('wait'); go(); },3000); }
+/** رمز اشتباه: کارت می‌لرزد */
+function pinShake(el){ const b=el.querySelector('.pinbox'); if(!b) return; b.classList.remove('bad'); void b.offsetWidth; b.classList.add('bad'); }
 function pinShow(kind){
   pinLocked = kind!=='change'; if(pinLocked) document.body.classList.add('ntpin');
   let el=$('ntPin'); if(!el){ el=document.createElement('div'); el.id='ntPin'; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); document.body.appendChild(el); }
@@ -1219,8 +1230,8 @@ function pinShow(kind){
   const H={new:['رمز ورود بسازید','از این به بعد، هر بار که سامانه باز می‌شود و بعد از ۳۰ دقیقه بی‌کاری، این رمز پرسیده می‌شود. رمز را به کسی ندهید.'],
            ask:['رمز ورود','رمز ورود این سیستم را وارد کنید.'],
            change:['تغییر رمز ورود','رمز فعلی و رمز تازه را وارد کنید.']}[kind];
-  el.hidden=false;
-  el.innerHTML=`<div class="pinbox"><div class="pinic" aria-hidden="true">🔒</div><h2>${H[0]}</h2><p>${H[1]}</p>
+  el.hidden=false; el.dataset.k=kind;
+  el.innerHTML=`<div class="pinbr" aria-hidden="true"><img alt="" src="${pinLogo()}"><span>واحد نگهداری و تعمیرات</span></div><div class="pinbox"><div class="pinic"><svg class="pinlk" viewBox="0 0 64 74" aria-hidden="true"><path class="sh" d="M19 33V22a13 13 0 0 1 26 0v11"/><rect class="bd" x="8" y="31" width="48" height="39" rx="10"/><g class="kh"><circle cx="32" cy="47" r="5"/><path d="M29.6 49h4.8l1.6 9h-8z"/></g><path class="ck" d="M21 51l7.5 7.5L44 43"/></svg></div><h2>${H[0]}</h2><p>${H[1]}</p>
     <div class="symsg" id="pinMsg" role="alert"></div>
     ${kind!=='new'?`<label>${kind==='change'?'رمز فعلی':'رمز ورود'}<input id="pin0" type="password" inputmode="numeric" autocomplete="off" maxlength="6"></label>`:''}
     ${kind!=='ask'?`<label>رمز تازه (۴ تا ۶ رقم)<input id="pin1" type="password" inputmode="numeric" autocomplete="new-password" maxlength="6"></label>
@@ -1232,6 +1243,8 @@ function pinShow(kind){
     ${kind==='change'?'<button type="button" id="pinCancel">انصراف</button>':''}</div>`;
   const m=t=>{ const b=$('pinMsg'); b.textContent=t||''; b.className='symsg'+(t?' bad':''); };
   const f=$(kind==='new'?'pin1':'pin0'); try{ f.focus(); }catch(e){}
+  pinIn(el);
+  el.querySelectorAll('input').forEach(i=>i.addEventListener('input',()=>{ const k=el.querySelector('.pinlk'); if(k){ k.classList.remove('tick'); void k.getBoundingClientRect(); k.classList.add('tick'); } }));
   el.querySelectorAll('input').forEach(i=>i.addEventListener('keydown',e=>{ if(e.key==='Enter') $('pinGo').click(); }));
   on('pinCancel',()=>{ el.hidden=true; el.innerHTML=''; });
   on('pinForgot',()=>{ $('pinFg').hidden=false; });
@@ -1247,15 +1260,15 @@ function pinShow(kind){
         o.f=(o.f||0)+1; if(o.f%5===0) o.u=Date.now()+60000; lsSet(PINK,o);
         if(o.f>=10){ m('۱۰ بار رمز اشتباه. اطلاعات این سیستم پاک می‌شود.'); setTimeout(revoke,1200); return; }
         m(o.f%5===0?'۵ بار رمز اشتباه. یک دقیقه صبر کنید.':'رمز درست نیست. ('+fa(10-o.f)+' بار دیگر تا قطع اتصال)');
-        const i=$('pin0'); if(i){ i.value=''; i.focus(); } return;
+        pinShake(el); const i=$('pin0'); if(i){ i.value=''; i.focus(); } return;
       }
       o.f=0; delete o.u; lsSet(PINK,o);
-      if(kind==='ask'){ pinMark(); pinLocked=false; el.hidden=true; el.innerHTML=''; document.body.classList.remove('ntpin'); return; }
+      if(kind==='ask'){ pinMark(); pinLocked=false; pinFx(el); el.hidden=true; el.innerHTML=''; document.body.classList.remove('ntpin'); return; }
     }
-    if(pinBad(v1)){ m('رمز باید ۴ تا ۶ رقم باشد و ساده نباشد (مثل ۱۱۱۱ یا ۱۲۳۴ نباشد).'); return; }
-    if(v1!==v2){ m('رمز و تکرار آن یکی نیست'); return; }
+    if(pinBad(v1)){ pinShake(el); m('رمز باید ۴ تا ۶ رقم باشد و ساده نباشد (مثل ۱۱۱۱ یا ۱۲۳۴ نباشد).'); return; }
+    if(v1!==v2){ pinShake(el); m('رمز و تکرار آن یکی نیست'); return; }
     b.disabled=true; const salt=newSalt(); const h=await pinHash(v1,salt); lsSet(PINK,{s:salt,h,f:0});
-    pinMark(); pinLocked=false; el.hidden=true; el.innerHTML=''; document.body.classList.remove('ntpin');
+    pinMark(); pinLocked=false; pinFx(el); el.hidden=true; el.innerHTML=''; document.body.classList.remove('ntpin');
     toast(kind==='change'?'رمز ورود عوض شد':'رمز ورود ساخته شد');
   });
 }

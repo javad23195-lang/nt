@@ -73,8 +73,15 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   await A.reload(); await settle(A); ok(!(await pinVis(A)),'بارگذاری دوباره در کمتر از زمان بی‌کاری: رمز نخواست');
   const A2=await A.context().newPage(); A2.errs=[]; A2.on('pageerror',e=>A2.errs.push(String(e))); await A2.goto(URL1); await settle(A2);
   ok(await waitFor(()=>pinVis(A2)),'صفحه تازه (باز کردن سامانه): رمز خواست');
-  await pinType(A2,'1111'); ok(/درست نیست/.test(await pmsg(A2)),'رمز اشتباه: پیام');
-  await pinType(A2,'2580'); ok(!(await pinVis(A2)),'رمز درست: باز شد');
+  await sleep(1300); await A2.screenshot({path:'/tmp/claude-0/pin1.png'});
+  ok(await A2.evaluate(()=>!!document.querySelector('#ntPin .pinlk') && document.getElementById('ntPin').classList.contains('in')),'قفل متحرک (svg) با حرکت ورود');
+  await A2.fill('#pin0','1111'); await A2.click('#pinGo'); await sleep(120); await A2.screenshot({path:'/tmp/claude-0/pin2.png'});
+  ok(await A2.evaluate(()=>document.querySelector('#ntPin .pinbox').classList.contains('bad')),'رمز اشتباه: کارت می‌لرزد'); await sleep(300);
+  ok(/درست نیست/.test(await pmsg(A2)),'رمز اشتباه: پیام');
+  await A2.fill('#pin0','2580'); await A2.click('#pinGo'); await sleep(350); await A2.screenshot({path:'/tmp/claude-0/pin3.png'});
+  ok(!(await pinVis(A2)),'رمز درست: باز شد');
+  ok(await A2.evaluate(()=>{ const f=document.getElementById('ntPinFx'); return !!f && !f.querySelector('input:not([disabled])') && getComputedStyle(f).pointerEvents==='none'; }),'حرکت باز شدن قفل: کپی بی‌اثر روی صفحه، کلیک را نمی‌گیرد');
+  await sleep(1000); ok(await A2.evaluate(()=>!document.getElementById('ntPinFx')),'حرکت باز شدن تمام شد و حذف شد');
   ok(JSON.parse(await ls(A2,'ntsync_pin_v1')).f===0,'شمارش اشتباه صفر شد');
   console.log('3) بی‌کاری');
   await sleep(5500); ok(await pinVis(A2),'بعد از زمان بی‌کاری: رمز خواست');

@@ -102,7 +102,7 @@ iframe{background:#EEF1F4}
 #ntSplash .cap img{width:40px;height:40px}
 #ntSplash .cap b{display:block;font-size:.78rem;color:#8A6418}
 #ntSplash .cap span{display:block;font-size:1rem;font-weight:800;color:#17212B}
-#ntSplash.out{animation:spOut .45s ease-in forwards}
+#ntSplash.out{animation:spOut .35s ease-in forwards}
 @media (prefers-reduced-motion:no-preference){
   #ntSplash.on .tile{animation:spTile 1.9s cubic-bezier(.3,.7,.2,1) both}
   #ntSplash.on .tile::after{animation:spShine 1s .15s ease-in-out both}
@@ -235,7 +235,54 @@ body.ntpin iframe,body.ntpin .tabs,body.ntpin .ntnav,body.ntpin main{visibility:
 #ntPin{position:fixed;inset:0;z-index:200;background:#17212B;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:max(48px,env(safe-area-inset-top)) 16px 24px}
 #ntPin[hidden]{display:none}
 #ntPin .pinbox{width:100%;max-width:360px;background:#fff;color:#17212B;border-radius:16px;padding:22px 18px;text-align:center}
-#ntPin .pinic{font-size:2rem;line-height:1}
+#ntPin .pinic,#ntPinFx .pinic{line-height:1;display:flex;justify-content:center}
+#ntPin,#ntPinFx{background:radial-gradient(120% 70% at 85% 0%,rgba(11,92,122,.55),transparent 60%),radial-gradient(90% 60% at 0% 100%,rgba(230,165,46,.18),transparent 60%),#17212B}
+#ntPin{flex-direction:column;align-items:center;justify-content:flex-start}
+.pinbr{display:flex;align-items:center;gap:10px;margin:0 0 16px;color:#fff;font-weight:800;font-size:.95rem}
+.pinbr img{width:40px;height:40px;background:#fff;border-radius:50%;padding:3px;box-sizing:border-box}
+.pinbr img:not([src]),.pinbr img[src=""]{display:none}
+.pinlk{width:58px;height:66px;overflow:visible}
+.pinlk .sh{fill:none;stroke:#8A97A3;stroke-width:7;stroke-linecap:round;transform-box:fill-box;transform-origin:100% 100%;transition:transform .45s cubic-bezier(.3,1.6,.5,1),stroke .3s}
+.pinlk .bd{fill:#0B5C7A;transition:fill .3s}
+.pinlk .kh{fill:#E6A52E;transition:opacity .2s}
+.pinlk .ck{fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40}
+#ntPinFx{position:fixed;inset:0;z-index:201;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:max(48px,env(safe-area-inset-top)) 16px 24px;pointer-events:none}
+#ntPinFx .pinbox{width:100%;max-width:360px;background:#fff;color:#17212B;border-radius:16px;padding:22px 18px;text-align:center}
+#ntPinFx h2{margin:8px 0 6px;font-size:1.15rem}#ntPinFx p{margin:0 0 12px;font-size:.88rem;color:#3D4852;line-height:1.7}
+#ntPinFx label{display:block;text-align:start;font-size:.85rem;font-weight:700;margin:0 0 10px}
+#ntPinFx input{display:block;width:100%;box-sizing:border-box;margin-top:4px;min-height:52px;border:1px solid #9AA6AF;border-radius:10px;background:#fff}
+#ntPinFx button{display:block;width:100%;min-height:48px;margin-top:8px;border-radius:10px;border:1px solid #C3CDD5;background:#fff;font:inherit;font-weight:700;color:#17212B}
+#ntPinFx button.go{background:#1E7F4F;border-color:#1E7F4F;color:#fff}#ntPinFx button.lnk{border:0;background:none;color:#1F5F99}
+#ntPinFx #pinFg,#ntPinFx .symsg:empty{display:none}
+#ntPinFx .pinlk .sh{transform:translateY(-9px) rotate(26deg);stroke:#1E7F4F}
+#ntPinFx .pinlk .bd{fill:#1E7F4F}#ntPinFx .pinlk .kh{opacity:0}
+#ntPinFx .pinlk .ck{stroke-dashoffset:0;transition:stroke-dashoffset .35s .15s ease-out}
+#ntPin.wait .pinbox,#ntPin.wait .pinbr{opacity:0}
+@media (prefers-reduced-motion:no-preference){
+  #ntPin.in .pinbr{animation:pinFade .5s ease-out both}
+  #ntPin.in .pinbox{animation:pinUp .5s .06s cubic-bezier(.2,.9,.25,1.15) both}
+  #ntPin.in .pinlk{animation:pinDrop .7s .25s cubic-bezier(.3,1.5,.5,1) both}
+  #ntPin.in .pinlk .sh{animation:pinRattle .5s .95s ease-in-out}
+  #ntPin .pinlk .kh{animation:pinGlow 2.2s 1.2s ease-in-out infinite}
+  #ntPin .pinlk.tick{animation:pinTick .18s ease-out}
+  #ntPin .pinbox.bad{animation:pinShake .45s ease-in-out}
+  #ntPin .pinbox.bad .pinlk .bd{fill:#B3261E}
+  #ntPin .pinbox.bad .pinlk .sh{animation:pinRattle .45s ease-in-out}
+  #ntPin{background-size:160% 160%,160% 160%,auto;animation:pinBg 14s ease-in-out infinite alternate}
+  #ntPinFx.ok .pinbox{animation:pinAway .55s .5s cubic-bezier(.5,0,.75,0) forwards}
+  #ntPinFx.ok{animation:pinBgOut .45s .65s ease-in forwards}
+  #ntPinFx.ok .pinbr{animation:pinBgOut .3s .5s forwards}
+  @keyframes pinFade{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+  @keyframes pinUp{from{opacity:0;transform:translateY(40px) scale(.96)}to{opacity:1;transform:none}}
+  @keyframes pinDrop{0%{opacity:0;transform:translateY(-26px) scale(.7)}100%{opacity:1;transform:none}}
+  @keyframes pinRattle{0%,100%{transform:none}25%{transform:rotate(-7deg)}50%{transform:rotate(6deg)}75%{transform:rotate(-3deg)}}
+  @keyframes pinGlow{0%,100%{opacity:1}50%{opacity:.45}}
+  @keyframes pinTick{50%{transform:scale(.92)}}
+  @keyframes pinShake{0%,100%{transform:none}20%{transform:translateX(-12px)}40%{transform:translateX(10px)}60%{transform:translateX(-7px)}80%{transform:translateX(4px)}}
+  @keyframes pinBg{from{background-position:0% 0%,100% 100%,0 0}to{background-position:100% 30%,0% 60%,0 0}}
+  @keyframes pinAway{to{opacity:0;transform:translateY(-30px) scale(.9)}}
+  @keyframes pinBgOut{to{opacity:0}}
+}
 #ntPin h2{margin:8px 0 6px;font-size:1.15rem}
 #ntPin p{margin:0 0 12px;font-size:.88rem;color:#3D4852;line-height:1.7}
 #ntPin label{display:block;text-align:start;font-size:.85rem;font-weight:700;margin:0 0 10px}
@@ -275,7 +322,7 @@ body.ntpin iframe,body.ntpin .tabs,body.ntpin .ntnav,body.ntpin main{visibility:
   try{ var lg=document.querySelector('.brand .lg'); if(lg) sp.querySelector('.cap img').src=lg.src; }catch(e){}
   sp.classList.add('on');
   var red=false; try{ red=matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
-  setTimeout(function(){ sp.classList.add('out'); setTimeout(function(){ if(sp.parentNode) sp.parentNode.removeChild(sp); },460); }, red?700:1650);
+  setTimeout(function(){ sp.classList.add('out'); setTimeout(function(){ if(sp.parentNode) sp.parentNode.removeChild(sp); },360); }, red?700:1650);
 })();
 </script>
 
@@ -1664,6 +1711,17 @@ function pinGet(){ const o=lsGet(PINK); return (o && o.h && o.s)?o:null; }
 function pinBad(p){ return !/^\d{4,6}$/.test(p) || /^(\d)\1+$/.test(p) || '0123456789'.includes(p) || '9876543210'.includes(p); }
 function pinMark(){ pinAct=Date.now(); try{ sessionStorage.setItem(PINT,String(pinAct)); }catch(e){} }
 function pinLast(){ let t=0; try{ t=+sessionStorage.getItem(PINT)||0; }catch(e){} return Math.max(t,pinAct,lastAct||0); }
+function pinLogo(){ try{ const l=document.querySelector('.brand .lg'); return l&&l.src&&/^data:image\/png;base64,/.test(l.src)?l.src:''; }catch(e){ return ''; } }
+/** قفل باز می‌شود: یک کپی از کارت روی صفحه حرکت «باز شدن» را نشان می‌دهد و خودش حذف می‌شود (خود قفل همان لحظه بسته می‌شود) */
+function pinFx(el){ try{ if(matchMedia('(prefers-reduced-motion: reduce)').matches) return; const box=el.querySelector('.pinbox'); if(!box) return;
+  const fx=document.createElement('div'); fx.id='ntPinFx'; fx.setAttribute('aria-hidden','true'); fx.innerHTML=el.innerHTML; fx.querySelectorAll('input,button').forEach(x=>{ x.disabled=true; x.tabIndex=-1; });
+  document.body.appendChild(fx); requestAnimationFrame(()=>fx.classList.add('ok')); setTimeout(()=>fx.remove(),1100); }catch(e){} }
+/** کارت قفل: حرکت ورود، بعد از صفحه شروع (اگر هست) */
+function pinIn(el){ const go=()=>{ el.classList.remove('in'); void el.offsetWidth; el.classList.add('in'); };
+  const sp=document.getElementById('ntSplash'); if(!sp){ go(); return; } el.classList.add('wait');
+  const t=setInterval(()=>{ if(!document.getElementById('ntSplash')){ clearInterval(t); el.classList.remove('wait'); go(); } },80); setTimeout(()=>{ clearInterval(t); el.classList.remove('wait'); go(); },3000); }
+/** رمز اشتباه: کارت می‌لرزد */
+function pinShake(el){ const b=el.querySelector('.pinbox'); if(!b) return; b.classList.remove('bad'); void b.offsetWidth; b.classList.add('bad'); }
 function pinShow(kind){
   pinLocked = kind!=='change'; if(pinLocked) document.body.classList.add('ntpin');
   let el=$('ntPin'); if(!el){ el=document.createElement('div'); el.id='ntPin'; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); document.body.appendChild(el); }
@@ -1671,8 +1729,8 @@ function pinShow(kind){
   const H={new:['رمز ورود بسازید','از این به بعد، هر بار که سامانه باز می‌شود و بعد از ۳۰ دقیقه بی‌کاری، این رمز پرسیده می‌شود. رمز را به کسی ندهید.'],
            ask:['رمز ورود','رمز ورود این سیستم را وارد کنید.'],
            change:['تغییر رمز ورود','رمز فعلی و رمز تازه را وارد کنید.']}[kind];
-  el.hidden=false;
-  el.innerHTML=`<div class="pinbox"><div class="pinic" aria-hidden="true">🔒</div><h2>${H[0]}</h2><p>${H[1]}</p>
+  el.hidden=false; el.dataset.k=kind;
+  el.innerHTML=`<div class="pinbr" aria-hidden="true"><img alt="" src="${pinLogo()}"><span>واحد نگهداری و تعمیرات</span></div><div class="pinbox"><div class="pinic"><svg class="pinlk" viewBox="0 0 64 74" aria-hidden="true"><path class="sh" d="M19 33V22a13 13 0 0 1 26 0v11"/><rect class="bd" x="8" y="31" width="48" height="39" rx="10"/><g class="kh"><circle cx="32" cy="47" r="5"/><path d="M29.6 49h4.8l1.6 9h-8z"/></g><path class="ck" d="M21 51l7.5 7.5L44 43"/></svg></div><h2>${H[0]}</h2><p>${H[1]}</p>
     <div class="symsg" id="pinMsg" role="alert"></div>
     ${kind!=='new'?`<label>${kind==='change'?'رمز فعلی':'رمز ورود'}<input id="pin0" type="password" inputmode="numeric" autocomplete="off" maxlength="6"></label>`:''}
     ${kind!=='ask'?`<label>رمز تازه (۴ تا ۶ رقم)<input id="pin1" type="password" inputmode="numeric" autocomplete="new-password" maxlength="6"></label>
@@ -1684,6 +1742,8 @@ function pinShow(kind){
     ${kind==='change'?'<button type="button" id="pinCancel">انصراف</button>':''}</div>`;
   const m=t=>{ const b=$('pinMsg'); b.textContent=t||''; b.className='symsg'+(t?' bad':''); };
   const f=$(kind==='new'?'pin1':'pin0'); try{ f.focus(); }catch(e){}
+  pinIn(el);
+  el.querySelectorAll('input').forEach(i=>i.addEventListener('input',()=>{ const k=el.querySelector('.pinlk'); if(k){ k.classList.remove('tick'); void k.getBoundingClientRect(); k.classList.add('tick'); } }));
   el.querySelectorAll('input').forEach(i=>i.addEventListener('keydown',e=>{ if(e.key==='Enter') $('pinGo').click(); }));
   on('pinCancel',()=>{ el.hidden=true; el.innerHTML=''; });
   on('pinForgot',()=>{ $('pinFg').hidden=false; });
@@ -1699,15 +1759,15 @@ function pinShow(kind){
         o.f=(o.f||0)+1; if(o.f%5===0) o.u=Date.now()+60000; lsSet(PINK,o);
         if(o.f>=10){ m('۱۰ بار رمز اشتباه. اطلاعات این سیستم پاک می‌شود.'); setTimeout(revoke,1200); return; }
         m(o.f%5===0?'۵ بار رمز اشتباه. یک دقیقه صبر کنید.':'رمز درست نیست. ('+fa(10-o.f)+' بار دیگر تا قطع اتصال)');
-        const i=$('pin0'); if(i){ i.value=''; i.focus(); } return;
+        pinShake(el); const i=$('pin0'); if(i){ i.value=''; i.focus(); } return;
       }
       o.f=0; delete o.u; lsSet(PINK,o);
-      if(kind==='ask'){ pinMark(); pinLocked=false; el.hidden=true; el.innerHTML=''; document.body.classList.remove('ntpin'); return; }
+      if(kind==='ask'){ pinMark(); pinLocked=false; pinFx(el); el.hidden=true; el.innerHTML=''; document.body.classList.remove('ntpin'); return; }
     }
-    if(pinBad(v1)){ m('رمز باید ۴ تا ۶ رقم باشد و ساده نباشد (مثل ۱۱۱۱ یا ۱۲۳۴ نباشد).'); return; }
-    if(v1!==v2){ m('رمز و تکرار آن یکی نیست'); return; }
+    if(pinBad(v1)){ pinShake(el); m('رمز باید ۴ تا ۶ رقم باشد و ساده نباشد (مثل ۱۱۱۱ یا ۱۲۳۴ نباشد).'); return; }
+    if(v1!==v2){ pinShake(el); m('رمز و تکرار آن یکی نیست'); return; }
     b.disabled=true; const salt=newSalt(); const h=await pinHash(v1,salt); lsSet(PINK,{s:salt,h,f:0});
-    pinMark(); pinLocked=false; el.hidden=true; el.innerHTML=''; document.body.classList.remove('ntpin');
+    pinMark(); pinLocked=false; pinFx(el); el.hidden=true; el.innerHTML=''; document.body.classList.remove('ntpin');
     toast(kind==='change'?'رمز ورود عوض شد':'رمز ورود ساخته شد');
   });
 }

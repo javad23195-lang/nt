@@ -102,7 +102,7 @@ iframe{background:#EEF1F4}
 #ntSplash .cap img{width:40px;height:40px}
 #ntSplash .cap b{display:block;font-size:.78rem;color:#8A6418}
 #ntSplash .cap span{display:block;font-size:1rem;font-weight:800;color:#17212B}
-#ntSplash.out{animation:spOut .45s ease-in forwards}
+#ntSplash.out{animation:spOut .35s ease-in forwards}
 @media (prefers-reduced-motion:no-preference){
   #ntSplash.on .tile{animation:spTile 1.9s cubic-bezier(.3,.7,.2,1) both}
   #ntSplash.on .tile::after{animation:spShine 1s .15s ease-in-out both}
@@ -139,7 +139,7 @@ iframe{background:#EEF1F4}
   try{ var lg=document.querySelector('.brand .lg'); if(lg) sp.querySelector('.cap img').src=lg.src; }catch(e){}
   sp.classList.add('on');
   var red=false; try{ red=matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
-  setTimeout(function(){ sp.classList.add('out'); setTimeout(function(){ if(sp.parentNode) sp.parentNode.removeChild(sp); },460); }, red?700:1650);
+  setTimeout(function(){ sp.classList.add('out'); setTimeout(function(){ if(sp.parentNode) sp.parentNode.removeChild(sp); },360); }, red?700:1650);
 })();
 </script>
 
