@@ -43,7 +43,10 @@ body.ntnav .tabs{display:none}
 body.ntnav .topbar{background:#1B2430;border-bottom:3px solid #E6A52E;padding:10px 12px 10px;padding-top:calc(10px + env(safe-area-inset-top));
   display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 body.ntnav .brand{display:flex;order:1;flex:1;min-width:0;padding:0;color:#fff}
-body.ntnav .brand .lg{color:#E6A52E}
+body.ntnav .brand{align-items:center;gap:10px}
+body.ntnav .brand .lg{width:38px;height:38px;background:#fff;border-radius:50%;padding:3px;box-sizing:border-box;box-shadow:0 0 0 2px rgba(230,165,46,.55)}
+body.ntnav .brand .co{color:#E6A52E;font-size:.68rem}
+body.ntnav .brand .un{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 body.ntnav .brand .tt{color:#fff;font-size:.95rem;font-weight:800}
 body.ntnav .brand .dt{display:block;color:#AEB9C5;font-size:.74rem;font-weight:400;margin-top:2px}
 body.ntnav .tabrow{order:2;flex:none;display:flex;gap:8px;align-items:center}
@@ -94,10 +97,13 @@ const CSSD=`
 @media (min-width:1000px){
 body{flex-direction:row}
 .topbar{width:236px;flex:none;height:100%;display:flex;flex-direction:column;background:#fff;border:0;border-inline-end:1px solid #DDE3E9;padding:18px 12px 14px;overflow-y:auto;overflow-x:hidden}
-.topbar .brand{display:flex!important;align-items:center;gap:10px;padding:2px 8px 18px;margin-bottom:8px;border-bottom:1px solid #EEF1F4}
-.topbar .brand .lg{color:#E6A52E;font-size:1.3rem}
-.topbar .brand .tt{color:#17212B;font-size:1rem;font-weight:800;line-height:1.5}
-.topbar .brand .dt{display:block;color:#51606E;font-size:.78rem;font-weight:400}
+.topbar .brand{display:flex!important;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:6px 8px 16px;margin-bottom:10px;border-bottom:1px solid #EEF1F4;position:relative}
+.topbar .brand::after{content:"";position:absolute;bottom:-1px;left:50%;width:56px;height:3px;margin-left:-28px;border-radius:3px;background:#E6A52E}
+.topbar .brand .lg{width:64px;height:64px;padding:6px;box-sizing:border-box;border-radius:50%;background:#fff;box-shadow:0 2px 10px rgba(27,36,48,.10),0 0 0 1px #EEF1F4}
+.topbar .brand .tt{color:#17212B;font-size:1rem;font-weight:800;line-height:1.45;flex:none;width:100%}
+.topbar .brand .co{color:#8A6418;font-size:.74rem;font-weight:800;margin-bottom:1px}
+.topbar .brand .un{font-size:.98rem;white-space:nowrap}
+.topbar .brand .dt{display:block;color:#51606E;font-size:.76rem;font-weight:400;margin-top:3px}
 .tabrow{flex:1;display:flex!important;flex-direction:column;align-items:stretch;gap:8px;min-height:0}
 .tabs{flex-direction:column;overflow:visible!important;gap:2px;padding:0!important}
 .tab{width:100%;justify-content:flex-start;border:0!important;border-radius:10px!important;min-height:44px;padding:0 12px!important;background:transparent!important;color:#3D4852!important;font-size:.93rem;font-weight:600!important;gap:12px}
@@ -108,17 +114,47 @@ body{flex-direction:row}
 .tab.on::before{content:"";position:absolute;inset-inline-start:-12px;top:9px;bottom:9px;width:4px;border-radius:0 4px 4px 0;background:#0B5C7A}
 .tab .n{position:static!important;margin-inline-start:auto;min-width:22px;height:22px;border-radius:11px;font-size:.72rem;background:#C0392B!important;color:#fff!important;border:0!important}
 .tab .n:not(.show){display:none!important}
-#ntSyBtn,#ntQrScan{width:100%;justify-content:center;min-height:44px;background:#F7F9FA!important;border:1px solid #D5DCE3!important;color:#17212B!important;border-radius:10px!important;font-size:.85rem!important}
-#ntSyBtn svg,#ntQrScan svg{stroke:#51606E!important;color:#51606E!important}
-#ntSyBtn .tx,#ntQrScan .tx{display:inline!important}
+#ntSyBtn,#ntQrScan,#ntDevBtn{width:100%;justify-content:center;min-height:44px;background:#F7F9FA!important;border:1px solid #D5DCE3!important;color:#17212B!important;border-radius:10px!important;font-size:.85rem!important}
+#ntSyBtn svg,#ntQrScan svg,#ntDevBtn svg{stroke:#51606E!important;color:#51606E!important}
+#ntSyBtn .tx,#ntQrScan .tx,#ntDevBtn .tx{display:inline!important}
 #ntSyBtn.err{border-color:#C0392B!important;color:#8E2219!important}
 .tabrow>.tabs+*{margin-top:auto}
 .topbar .sybar{margin-top:8px}
 .stage{flex:1;min-width:0;height:100%}
 body.ntdriver .topbar{width:200px}
+.tab,.tab .i svg,#ntSyBtn,#ntQrScan,#ntDevBtn{transition:background-color .18s,color .18s,transform .18s,box-shadow .18s}
+#ntSyBtn:hover,#ntQrScan:hover,#ntDevBtn:hover{background:#EEF3F6!important;box-shadow:0 1px 4px rgba(27,36,48,.08)}
+@media (prefers-reduced-motion:no-preference){
+  .topbar .brand .lg{animation:ntLogo .8s cubic-bezier(.2,.8,.2,1) both}
+  .topbar .brand .tt{animation:ntUp2 .5s .25s ease-out both}
+  .topbar .brand::after{animation:ntLine .6s .45s ease-out both}
+  .topbar .brand .lg:hover{animation:ntSpin .9s ease-in-out}
+  .tab{animation:ntIn .38s ease-out both;animation-delay:calc(var(--k,0) * 45ms + .2s)}
+  .tab:hover .i svg{transform:scale(1.15)}
+  .tab:active{transform:scale(.98)}
+  .tab.on::before{animation:ntBar .28s ease-out both;transform-origin:center}
+  .tab.on .i svg{animation:ntPop .35s ease-out}
+  .tab .n.show{animation:ntPop .4s ease-out}
+  #ntSyBtn.ok .d{animation:ntPulse 2.4s ease-out infinite}
+  @keyframes ntLogo{from{opacity:0;transform:rotate(-140deg) scale(.5)}to{opacity:1;transform:none}}
+  @keyframes ntSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  @keyframes ntUp2{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @keyframes ntLine{from{width:0;margin-left:0}to{width:56px;margin-left:-28px}}
+  @keyframes ntIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+  @keyframes ntBar{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+  @keyframes ntPop{0%{transform:scale(.6)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+  @keyframes ntPulse{0%{box-shadow:0 0 0 0 rgba(30,142,90,.55)}70%{box-shadow:0 0 0 7px rgba(30,142,90,0)}100%{box-shadow:0 0 0 0 rgba(30,142,90,0)}}
+}
+}
+@media (max-width:999px) and (prefers-reduced-motion:no-preference){
+  body.ntnav .brand .lg{animation:ntLogoM .7s cubic-bezier(.2,.8,.2,1) both}
+  .ntnb.on svg{animation:ntPopM .35s ease-out}
+  .ntnb .b.show{animation:ntPopM .4s ease-out}
+  @keyframes ntLogoM{from{opacity:0;transform:rotate(-140deg) scale(.5)}to{opacity:1;transform:none}}
+  @keyframes ntPopM{0%{transform:scale(.6)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
 }`;
 const stD=document.createElement('style'); stD.textContent=CSSD; document.head.appendChild(stD);
-try{ tabs.forEach((t,i)=>{ const k=TABICON[DOCS[i].name]; const e=t.querySelector('.i'); if(k && e) e.innerHTML=svg(k); }); }catch(e){}
+try{ tabs.forEach((t,i)=>{ t.style.setProperty('--k',i); const k=TABICON[DOCS[i].name]; const e=t.querySelector('.i'); if(k && e) e.innerHTML=svg(k); }); }catch(e){}
 
 document.body.classList.add('ntnav');
 
