@@ -3444,6 +3444,43 @@ function events(dev){
 }
 
 const evLi=e=>`<li class="k-${e.k}"><span>${fa(e.d)}</span><bdi>${esc(e.t)}</bdi>${e.n>1?` <b class="pfn">${fa(e.n)} بار</b>`:''}</li>`;
+
+/* ---------- شاخص‌های نگهداری یک ماه (آمادگی، MTBF، MTTR، سهم کار برنامه‌ای) ----------
+   کارکرد = قرائت آخر ماه − قرائت قبل از ماه (دفترچه قرائت). خرابی = توقف‌های گروه «خرابی» (em) در توقف شیفت / برنامه روزانه.
+   آمادگی = کارکرد ÷ (کارکرد + ساعت توقف خرابی) — فقط دستگاه‌های ساعتی. MTBF = کارکرد ÷ تعداد خرابی. MTTR = ساعت توقف خرابی ÷ تعداد خرابی.
+   برنامه‌ای = توقف سرویس (pm) ÷ (سرویس + خرابی). */
+function kpi(dev,y,m,toDay){
+  const sh=canSee('توقف شیفت'), pg=canSee('برنامه روزانه'); if(!window.ntStops || (!sh&&!pg)) return null;
+  const from=`${y}/${p2(m)}/01`, to=toDay||`${y}/${p2(m)}/31`;
+  const L=ntStops.list(from,to,{shift:sh,prog:pg}).filter(x=>isDev(dev,x.dev));
+  const em=L.filter(x=>x.cls==='em'), pm=L.filter(x=>x.cls==='pm');
+  const n=em.length, D=em.reduce((a,x)=>a+(x.min||0),0)/60, P=pm.reduce((a,x)=>a+(x.min||0),0)/60;
+  let run=null;
+  if(canSee('دفترچه قرائت')){ const R=(LS('nt_daftar_v1')||[]).filter(x=>x&&isDev(dev,x.dev)&&isFinite(+x.val)).map(x=>({d:day(x.date),v:+x.val})).filter(x=>x.d).sort((a,b)=>a.d.localeCompare(b.d));
+    const before=R.filter(x=>x.d<from), inM=R.filter(x=>x.d>=from&&x.d<=to);
+    if(inM.length){ const base=before.length?before[before.length-1].v:inM[0].v, end=inM[inM.length-1].v; if(end>=base) run=end-base; } }
+  const hourly=dev.unit==='ساعت';
+  const avail=(hourly&&run!==null&&run>0)?Math.round(run/(run+D)*1000)/10:null;
+  const mtbf=(run!==null&&run>0&&n)?run/n:null, mttr=n?D/n:null;
+  const plan=(P+D)>0?Math.round(P/(P+D)*100):null;
+  return {n,D,P,run,avail,mtbf,mttr,plan,hourly};
+}
+const prevYM=(y,m)=>m>1?[y,m-1]:[y-1,12];
+function kpiHtml(dev){
+  const t=today(); if(!t) return '';
+  const y=+t.slice(0,4), m=+t.slice(5,7), K=kpi(dev,y,m,t); if(!K) return '';
+  const [py,pm]=prevYM(y,m), Q=kpi(dev,py,pm);
+  const u=esc(dev.unit), h1=v=>v>=100?sep(v):dec(Math.round(v*10)/10);
+  const arrow=(a,b,up)=>{ if(a===null||b===null||!isFinite(a)||!isFinite(b)||Math.abs(a-b)<0.05*Math.max(1,Math.abs(b))) return '';
+    const good=up?a>b:a<b; return `<i class="${good?'up':'dn'}">${a>b?'▲':'▼'}</i>`; };
+  const cls=v=>v===null?'':(v>=90?'g':(v>=75?'o':'r'));
+  const T=[];
+  if(K.hourly) T.push(`<div class="pk ${cls(K.avail)}"><span>آمادگی</span><b>${K.avail===null?'—':dec(K.avail)+'٪'}${arrow(K.avail,Q&&Q.avail,true)}</b><small>${K.run!==null?h1(K.run)+' ساعت کار':'قرائت این ماه نیست'}</small></div>`);
+  T.push(`<div class="pk"><span>MTBF · کار بین دو خرابی</span><b>${K.mtbf!==null?h1(K.mtbf)+' '+u:(K.n?'—':(K.run?'بدون خرابی':'—'))}${arrow(K.mtbf,Q&&Q.mtbf,true)}</b><small>${fa(K.n)} خرابی در این ماه</small></div>`);
+  T.push(`<div class="pk"><span>MTTR · زمان هر تعمیر</span><b>${K.mttr!==null?h1(K.mttr)+' ساعت':'—'}${arrow(K.mttr,Q&&Q.mttr,false)}</b><small>${K.D?h1(K.D)+' ساعت توقف خرابی':'توقف خرابی ندارد'}</small></div>`);
+  T.push(`<div class="pk"><span>کار برنامه‌ای</span><b>${K.plan===null?'—':fa(K.plan)+'٪'}${arrow(K.plan,Q&&Q.plan,true)}</b><small>سرویس در برابر خرابی</small></div>`);
+  return `<h3>شاخص‌های این ماه <small class="pkq" title="▲▼ = نسبت به ماه قبل">نسبت به ماه قبل ▲▼</small></h3><div class="pkg">${T.join('')}</div>`;
+}
 /* ---------- بخش «پرونده» در صفحه دستگاه ---------- */
 const ST={r:['گذشته','r'],o:['نزدیک','o'],g:['وقت هست','g'],n:['—','n']};
 function fileHtml(dev){
@@ -3463,6 +3500,7 @@ function fileHtml(dev){
   if(bu) tiles.push(`<div class="pft"><span>خرید باز</span><b>${bu.length?fa(bu.length)+' قلم':'ندارد'}</b><small>${bu.length?(()=>{ const U=[...new Set(bu.map(r=>String(r.item||'').trim()).filter(Boolean))], cut=x=>x.length>34?x.slice(0,33)+'…':x;
     return U.slice(0,2).map(x=>`<bdi>${esc(cut(x))}</bdi>`).join('، ')+(U.length>2?` و ${fa(U.length-2)} قلم دیگر`:''); })():''}</small></div>`);
   if(tiles.length) h+=`<div class="pftiles">${tiles.join('')}</div>`;
+  try{ h+=kpiHtml(dev); }catch(e){}
   const rp=repeatOf(dev);
   if(rp.length) h+=`<div class="pfrep">⚠ خرابی تکراری: ${rp.map(x=>`«${esc(x.type)}» ${fa(x.n)} بار در ${fa(x.gap)} روز`).join('؛ ')}</div>`;
   const E=events(dev);
@@ -3489,6 +3527,7 @@ function line(dev){
   try{ if(canSee('ثبت مشکلات')){ const n=rowsOf('nt_moshkel_v1').filter(r=>r&&isDev(dev,r.dev)&&String(r.state||'باز').trim()!=='بسته').length; if(n) bits.push(['r',fa(n)+' خرابی باز']); } }catch(e){}
   try{ const sv=svcOf(dev); const r=sv.filter(x=>x.st==='r').length, o=sv.filter(x=>x.st==='o').length; if(r) bits.push(['r',fa(r)+' سرویس گذشته']); else if(o) bits.push(['o','سرویس نزدیک']); }catch(e){}
   try{ const st=stopsMonth(dev); if(st&&st.open) bits.push(['r','متوقف']); }catch(e){}
+  try{ const t=today(); const K=t&&kpi(dev,+t.slice(0,4),+t.slice(5,7),t); if(K&&K.avail!==null) bits.push([K.avail>=90?'g':(K.avail>=75?'o':'r'),'آمادگی '+dec(K.avail)+'٪']); }catch(e){}
   return bits;
 }
 function pick(){
@@ -3534,6 +3573,14 @@ const CSS=`
 .qrdev .pft span{display:block;font-size:.74rem;color:#51606E}
 .qrdev .pft b{display:block;font-size:1.05rem;margin:2px 0}
 .qrdev .pft small{display:block;font-size:.72rem;color:#51606E;overflow-wrap:anywhere}
+.qrdev .pkg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.qrdev .pk{border:1px solid #DDE3E9;border-radius:12px;padding:8px 10px;background:#fff;border-top:3px solid #9AA6AF}
+.qrdev .pk.g{border-top-color:#1E7F4F}.qrdev .pk.o{border-top-color:#C98A1B}.qrdev .pk.r{border-top-color:#B3261E}
+.qrdev .pk span{display:block;font-size:.72rem;color:#51606E}
+.qrdev .pk b{display:flex;align-items:center;gap:6px;font-size:1.05rem;margin:2px 0}
+.qrdev .pk b i{font-style:normal;font-size:.68rem}.qrdev .pk b i.up{color:#1E7F4F}.qrdev .pk b i.dn{color:#B3261E}
+.qrdev .pk small{display:block;font-size:.7rem;color:#51606E}
+.qrdev .pkq{font-weight:400;font-size:.7rem;color:#8A959E}
 .qrdev .pfrep{margin-top:10px;background:#FFF1DB;color:#7A4300;border-radius:10px;padding:8px 10px;font-size:.84rem;font-weight:700}
 .qrdev .pfev{list-style:none;margin:0;padding:0 14px 0 0;border-right:2px solid #DDE3E9}
 .qrdev .pfev li{position:relative;font-size:.82rem;padding:4px 0;line-height:1.6;overflow-wrap:anywhere}
@@ -3553,7 +3600,7 @@ addBtn();
 window.addEventListener('message',e=>{ const d=e&&e.data; if(!d) return;
   if(d.nt==='devfile' && typeof d.name==='string') open(d.name.slice(0,120)); else if(d.nt==='devpick') pick(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape' && $('ntDevDlg') && !$('ntDevDlg').hidden) $('ntDevDlg').hidden=true; });
-window.ntDev={attach,open,pick,events,isDev,find};
+window.ntDev={attach,open,pick,events,isDev,find,kpi};
 })();
 
 </script>
