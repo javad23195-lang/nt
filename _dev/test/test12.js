@@ -30,7 +30,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   await p.goto(URL1); await p.waitForFunction(()=>window.ntSync);
   ok(await p.evaluate(()=>!!document.querySelector('link[rel="manifest"]')),'صفحه manifest دارد');
   const man=JSON.parse(fs.readFileSync(path.join(ROOT,'manifest.webmanifest'),'utf8'));
-  ok(man.start_url==='سامانه-نت.html' && man.display==='standalone' && man.icons.length===2,'manifest: نام، شروع، آیکن');
+  ok(man.start_url==='سامانه-نت.html' && man.display==='standalone' && man.icons.length===4 && man.icons.some(i=>i.purpose==='maskable') && man.icons.every(i=>fs.existsSync(path.join(ROOT,i.src))),'manifest: نام، شروع، آیکن (معمولی + maskable، فایل‌ها هست)');
   await p.waitForFunction(()=>window.ntLocked===false); await p.click('#ntSyBtn'); if(await p.locator('#syOther').count()) await p.click('#syOther');
   await p.waitForSelector('#syTok'); await p.fill('#syTok',S.goodToken); await p.fill('#syP1','mine1405'); await p.fill('#syP2','mine1405'); await p.click('#syStartW');
   await waitFor(()=>!!S.tags['nt-data']); await booted(); await sleep(800);
