@@ -2393,7 +2393,9 @@ function home(id){
   if(canW('ثبت مشکلات')) acts+=`<button type="button" id="qrProb">${ic('prob')}ثبت مشکل</button>`;
   if(canW('توقف شیفت') && (trk||ow)) sub+=ow?'<button type="button" class="rn" id="qrWEnd">پایان اضافه‌کار</button>':'<button type="button" id="qrWStart">شروع اضافه‌کار</button>';
   if(canW('برون‌سپاری')) sub+='<button type="button" id="qrOut">تعمیر بیرونی</button>';
-  sub+='<button type="button" id="qrPhoto">عکس تازه</button>';
+  /* عکس‌ها فقط روی همان گوشی می‌ماند و در زبانه «عکس‌ها» گرفته می‌شود؛ راننده یا کاربری که این زبانه را ندارد، دکمه را نمی‌بیند */
+  const tabOk=n=>{ try{ if(document.body.classList.contains('ntdriver')) return false; const i=DOCS.findIndex(d=>d.name===n); return i>-1 && tabs[i] && !tabs[i].hidden; }catch(e){ return false; } };
+  if(tabOk('عکس‌ها')) sub+='<button type="button" id="qrPhoto">عکس تازه</button>';
   sub+='<button type="button" id="qrHist">سوابق</button>';
   view(dev.name,`${kv?'<div class="kv">'+kv+'</div>':''}${myDevs()?svcCard(dev):''}${oldStop&&canW('توقف شیفت')?`<div class="warn">توقف از روز ${fa(os.day)} هنوز باز است. اگر دستگاه کار می‌کند، «پایان توقف» را بزنید و روز راه افتادن را بنویسید.</div>`:''}<div class="acts">${acts}</div><div class="subacts">${sub}</div><button type="button" id="qrClose">بستن</button>`);
   on('qrRead',()=>readForm(dev)); on('qrFuel',()=>fuelForm(dev)); on('qrStop',()=>stopForm(dev)); on('qrRun',()=>runForm(dev));
