@@ -522,7 +522,9 @@ function driverHome(){
 }
 
 /* ---------- شروع ---------- */
-function booted(){ try{ return typeof ntBooted!=='undefined' && ntBooted && !window.ntLocked; }catch(e){ return false; } }
+/* «بالا آمده» = اتصال آماده + همه کدهای صفحه خوانده شده (بخش‌های بعد از qr.js مثل پرونده، سرویس، سوخت، تصویر و نمودار).
+   بدون شرط دوم، راننده‌ای که سامانه‌اش زود آماده بود، اولین بار صفحه دستگاه را ناقص می‌دید. */
+function booted(){ try{ return document.readyState!=='loading' && typeof ntBooted!=='undefined' && ntBooted && !window.ntLocked; }catch(e){ return false; } }
 function fromHash(){
   const id=idFrom(location.hash); if(!id) return;
   const go=()=>{ if(!booted()){ setTimeout(go,500); return; }

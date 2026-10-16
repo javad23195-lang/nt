@@ -324,7 +324,7 @@ input.ntsec.show{-webkit-text-security:none}
 <meta name="theme-color" content="#0B5C7A">
 <link rel="apple-touch-icon" href="lib/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="nt-build" content="31b1c61d380857de">
+<meta name="nt-build" content="ff5615a0b0d6404e">
 </head>
 <body>
 
@@ -2757,7 +2757,9 @@ function driverHome(){
 }
 
 /* ---------- شروع ---------- */
-function booted(){ try{ return typeof ntBooted!=='undefined' && ntBooted && !window.ntLocked; }catch(e){ return false; } }
+/* «بالا آمده» = اتصال آماده + همه کدهای صفحه خوانده شده (بخش‌های بعد از qr.js مثل پرونده، سرویس، سوخت، تصویر و نمودار).
+   بدون شرط دوم، راننده‌ای که سامانه‌اش زود آماده بود، اولین بار صفحه دستگاه را ناقص می‌دید. */
+function booted(){ try{ return document.readyState!=='loading' && typeof ntBooted!=='undefined' && ntBooted && !window.ntLocked; }catch(e){ return false; } }
 function fromHash(){
   const id=idFrom(location.hash); if(!id) return;
   const go=()=>{ if(!booted()){ setTimeout(go,500); return; }
