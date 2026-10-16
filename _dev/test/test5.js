@@ -117,6 +117,14 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   ok(await waitFor(async()=>await has(A,'nt_daftar_v1','27200') && await has(A,'nt_today_todo_v1','سفارش فیلتر') && await has(A,'nt_daftar_v1','15094'),15000),'نوشته‌های مدیر سر جایش است');
   ok(await waitFor(async()=>await has(X,'nt_daftar_v1','27200'),15000),'قرائت مدیر به همکار رسید');
   ok(await waitFor(async()=>await synced(A) && await synced(X),15000) && await dlgText(A)==='' && await dlgText(X)==='','هر دو همگام، بدون پرسش');
+  { const L=JSON.parse(await A.evaluate(()=>localStorage.getItem('nt_log_v1')||'[]')), uid=await X.evaluate(()=>JSON.parse(localStorage.getItem('ntsync_cfg_v1')).uid);
+    const mine=L.filter(e=>e.u===uid);
+    ok(mine.some(e=>e.k==='nt_daftar_v1' && e.a>=1 && (e.s||[]).some(x=>/PC290/.test(x))) && mine.some(e=>e.k==='nt_tavaqof_v1'),'تاریخچه: قرائت و توقف همکار با نام کاربر او ثبت شد');
+    ok(L.some(e=>e.u==='' && e.k==='nt_daftar_v1' && (e.s||[]).some(x=>/WA470/.test(x))),'تاریخچه: قرائت مدیر با «مدیر» ثبت شد');
+    ok(!L.some(e=>e.u===uid && e.k==='nt_anbar_out_v1'),'تاریخچه: بخشی که کاربر اجازه ندارد ثبت نمی‌شود');
+    await A.click('#ntSyBtn'); await A.click('#syLog'); const t=await dlgText(A);
+    ok(/استخراج — شیفت صبح/.test(t) && /قرائت/.test(t) && /مدیر/.test(t),'پنجره «تاریخچه تغییرات» در سیستم مدیر');
+    await A.click('#syBack'); await A.click('#syClose'); }
   await tab(A,'توقف شیفت');
   ok(await waitFor(async()=>(await fr(A).locator('body').innerText()).includes('ثبت: رضا احمدی')),'توقف با نام ثبت‌کننده در سیستم مدیر دیده می‌شود');
   await A.evaluate(()=>{ ntSync.T.gap=1e9; }); await X.evaluate(()=>{ ntSync.T.gap=1e9; });

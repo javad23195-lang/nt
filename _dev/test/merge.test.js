@@ -1,7 +1,7 @@
 const fs=require('fs'); const src=fs.readFileSync(require('path').join(__dirname,'..','src','sync.js'),'utf8');
 const a=src.indexOf('/* ---------- ادغام سه‌طرفه'), b=src.indexOf('/* ---------- رمزگذاری');
 let W=null;   // null = همه
-const code=`const CALC={nt_anbar_sum_v1:1}; const QUIET={nt_users_v1:1,nt_seen_v1:1}; const IDF={nt_daftar_v1:e=>(e && typeof e==='object' && e.dev && e.date)?e.dev+'|'+e.date:null};
+const code=`const LKEY='nt_log_v1', LMAX=1500; const CALC={nt_anbar_sum_v1:1}; const QUIET={nt_users_v1:1,nt_seen_v1:1}; const IDF={nt_daftar_v1:e=>(e && typeof e==='object' && e.dev && e.date)?e.dev+'|'+e.date:null};
 const canWrite=k=>!W||W.includes(k);
 ${src.slice(a,b)}
 return {mergeAll,get note(){return mergeNote;}};`;
@@ -78,4 +78,8 @@ eq(bad,0,'۳۰۰ ترکیب تصادفی افزودن/حذف: نتیجه دقی�
 // انبار: دو سیستم همان اصلاح خودکار (کد جدید / دلیل نیاز) را جدا انجام دادند → تکراری نشود
 { const o=R(5), n=Object.assign(R(5),{item:'NEW'}), n2=Object.assign(R(6),{why:'W6'});
   eq(m({out:{rows:[R(1),o,R(6)]}},{out:{rows:[R(1),n,n2]}},{out:{rows:[R(1),n,n2,R(7)]}}),{out:{rows:[R(1),n,n2,R(7)]}},'اصلاح یکسان در دو سیستم: ردیف تکراری نمی‌شود'); }
+// تاریخچه تغییرات: فقط اضافه می‌شود؛ حذف یا تغییر یک سیستم اثر ندارد
+{ const E=(id,u)=>({id,u,t:'2026-10-16T0'+id+':00:00Z',k:'nt_daftar_v1',a:1,c:0,d:0,s:[]});
+  const r=m({nt_log_v1:[E('1','a'),E('2','b')]},{nt_log_v1:[E('3','b')]},{nt_log_v1:[E('1','a'),E('2','b'),E('4','a')]});
+  eq(r.nt_log_v1.map(e=>e.id),['1','2','3','4'],'تاریخچه: ردیف‌هایی که یک سیستم پاک کرده برمی‌گردد و ردیف تازه هر دو می‌ماند'); }
 console.log(fails?`\n${fails} مورد ناموفق`:'\nهمه موارد موفق'); process.exit(fails?1:0);

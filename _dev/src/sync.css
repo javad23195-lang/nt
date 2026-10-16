@@ -177,3 +177,7 @@ body.ntpin iframe,body.ntpin .tabs,body.ntpin .ntnav,body.ntpin main{visibility:
 
 input.ntsec{-webkit-text-security:disc}
 input.ntsec.show{-webkit-text-security:none}
+.sylog{padding:8px 0;border-top:1px solid #E3E8ED;font-size:.86rem;line-height:1.7}
+.sylog .sylt{display:block;font-size:.74rem;color:#51606E}
+.sylog small{display:block;color:#3D4852;overflow-wrap:anywhere}
+#syLogL{max-height:60vh;overflow:auto;margin:8px 0}

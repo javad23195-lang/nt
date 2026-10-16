@@ -311,6 +311,10 @@ body.ntpin iframe,body.ntpin .tabs,body.ntpin .ntnav,body.ntpin main{visibility:
 
 input.ntsec{-webkit-text-security:disc}
 input.ntsec.show{-webkit-text-security:none}
+.sylog{padding:8px 0;border-top:1px solid #E3E8ED;font-size:.86rem;line-height:1.7}
+.sylog .sylt{display:block;font-size:.74rem;color:#51606E}
+.sylog small{display:block;color:#3D4852;overflow-wrap:anywhere}
+#syLogL{max-height:60vh;overflow:auto;margin:8px 0}
 </style>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://api.github.com https://raw.githubusercontent.com https://cdn.jsdelivr.net http://localhost:* http://127.0.0.1:*; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self' blob: mediastream:; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <script>window.addEventListener("message",function(e){ if(e.origin!==location.origin && location.origin!=="null"){ e.stopImmediatePropagation(); } },true);</script>
@@ -525,7 +529,7 @@ window.addEventListener('message',ev=>{
 (function(){
 'use strict';
 const CFG='ntsync_cfg_v1', STK='ntsync_state_v1', BASE='ntsync_base_v1', PREV='ntsync_prev_v1';
-const UKEY='nt_users_v1', SKEY='nt_seen_v1';      // لیست کاربران (فقط مدیر می‌نویسد) و آخرین اتصال هر کاربر
+const UKEY='nt_users_v1', SKEY='nt_seen_v1', LKEY='nt_log_v1', LMAX=1500;      // لیست کاربران (فقط مدیر می‌نویسد) و آخرین اتصال هر کاربر
 const TEST=window.NTSYNC_TEST||{};
 const API=TEST.api||'https://api.github.com', RAW=TEST.raw||'https://raw.githubusercontent.com';
 const TAG='nt-data', FILE='nt-data.json';
@@ -589,7 +593,7 @@ const tabAcc=name=>{ const a=acl(); return a?(a[name]||'h'):'w'; };
 function canWrite(k){
   if(mode()!=='w') return false;
   if(k===UKEY) return isAdmin();
-  if(k===SKEY) return true;
+  if(k===SKEY || k===LKEY) return true;
   const a=acl(); if(!a) return true;
   return Object.keys(TABKEYS).some(t=>a[t]==='w' && TABKEYS[t].indexOf(k)>-1);
 }
@@ -740,6 +744,7 @@ function mergeKey(k,b,l,r){
   if(l===r) return l;
   if(l===b) return r;
   if(r===b) return l;
+  if(k===LKEY) return logMerge(l,r);
   if(CALC[k]) return l===undefined?r:l;
   if(l===undefined || r===undefined){ return l===undefined?r:l; }   // یک طرف کل بخش را پاک کرده و طرف دیگر تغییر داده: تغییر می‌ماند
   let bv,lv,rv;
@@ -758,6 +763,57 @@ function mergeAll(base,local,remote){
   return out;
 }
 
+
+/* ---------- تاریخچه تغییرات: چه کسی، کی، در کدام بخش، چه چیزی ----------
+   هنگام هر ارسال، تفاوت این سیستم با آخرین اطلاعات مشترک (ردیف تازه / اصلاح / حذف) در nt_log_v1 ثبت می‌شود.
+   فقط اضافه می‌شود (ادغام = اجتماع با شناسه؛ هیچ ردیفی پاک نمی‌شود)، ۱۵۰۰ ردیف آخر می‌ماند. زمان = زمان ارسال.
+   محدودیت: هر سیستم وصل‌شده کلید را دارد؛ پس این تاریخچه برای کار روزانه است، نه سند حقوقی. */
+function logArr(v){ try{ const o=JSON.parse(v||'[]'); return Array.isArray(o)?o.filter(x=>isObj(x)&&typeof x.id==='string'):[]; }catch(e){ return []; } }
+function logMerge(l,r){ const m=new Map(); logArr(r).concat(logArr(l)).forEach(e=>{ if(!m.has(e.id)) m.set(e.id,e); });
+  const a=[...m.values()].sort((x,y)=>String(x.t).localeCompare(String(y.t))); return J(a.slice(-LMAX)); }
+function hs(str){ let a=5381,b=52711; for(let i=0;i<str.length;i++){ const c=str.charCodeAt(i); a=((a<<5)+a+c)|0; b=((b<<5)+b^c)|0; } return (a>>>0).toString(36)+(b>>>0).toString(36); }
+/** ردیف‌های یک کلید (لیست، {rows}، یا نقشه روز → stops/tasks/rows) به صورت متن */
+function logRows(v){ let o; try{ o=JSON.parse(v||'null'); }catch(e){ return []; } const out=[];
+  const add=x=>{ if(isArr(x)) x.forEach(y=>out.push(y)); };
+  if(isArr(o)) add(o); else if(isObj(o)){ if(isArr(o.rows)) add(o.rows); else Object.keys(o).forEach(k=>{ const x=o[k]; if(isArr(x)) add(x); else if(isObj(x)) ['rows','stops','tasks','work','items'].forEach(f=>add(x[f])); }); }
+  return out; }
+function logTxt(x){ if(typeof x==='string'||typeof x==='number') return String(x).slice(0,60);
+  if(!isObj(x)) return ''; const f=['item','dev','unit','desc','name','t','cause','sys','act','val','note'].map(k=>x[k]).filter(v=>v!==undefined&&v!==null&&String(v).trim()!=='');
+  return f.slice(0,2).map(String).join(' — ').replace(/\s+/g,' ').slice(0,60); }
+function logMake(base,local){
+  const out=[], now=new Date().toISOString(), u=cfg.uid||'';
+  Object.keys(local).forEach(k=>{
+    if(k===UKEY||k===SKEY||k===LKEY||QUIET[k]||CALC[k]||!canWrite(k)||local[k]===base[k]) return;
+    const B=logRows(base[k]).map(J), L=logRows(local[k]).map(J), cnt=new Map();
+    B.forEach(x=>cnt.set(x,(cnt.get(x)||0)+1));
+    const added=[]; L.forEach(x=>{ const n=cnt.get(x)||0; if(n>0) cnt.set(x,n-1); else added.push(x); });
+    const removed=[]; cnt.forEach((n,x)=>{ for(;n>0;n--) removed.push(x); });
+    if(!added.length && !removed.length) return;
+    const c=Math.min(added.length,removed.length);
+    const sm=added.slice(-3).map(x=>{ try{ return logTxt(JSON.parse(x)); }catch(e){ return ''; } }).filter(Boolean);
+    if(!sm.length) removed.slice(-2).forEach(x=>{ try{ const t=logTxt(JSON.parse(x)); if(t) sm.push(t); }catch(e){} });
+    out.push({id:hs(u+'|'+k+'|'+added.slice().sort().join('\u0001')+'|'+removed.slice().sort().join('\u0001')),u,t:now,k,a:added.length-c,c,d:removed.length-c,s:sm});
+  });
+  return out;
+}
+function logAppend(list){ if(!list.length) return false; try{ localStorage.setItem(LKEY,logMerge(J(list),localStorage.getItem(LKEY))); return true; }catch(e){ return false; } }
+function logLabel(k){ if(LABEL[k]) return LABEL[k]; const t=Object.keys(TABKEYS).find(n=>TABKEYS[n].indexOf(k)>-1); return t||k; }
+function viewLog(){
+  const L=logArr(localStorage.getItem(LKEY)).slice().reverse(), U=usersGet()||{};
+  const who=u=>u?((U[u]&&U[u].name)||'کاربر حذف‌شده'):'مدیر';
+  const us=[...new Set(L.map(e=>e.u||''))];
+  let f='', n=150;
+  const draw=()=>{ const A=L.filter(e=>f==='*'||!f||(e.u||'')===f), V=A.slice(0,n);
+    $('syLogL').innerHTML=V.length?V.map(e=>`<div class="sylog"><span class="sylt">${esc(fmtAt(e.t))}</span><b>${esc(who(e.u))}</b> · ${esc(logLabel(e.k))}:
+      ${[e.a?fa(e.a)+' تازه':'',e.c?fa(e.c)+' اصلاح':'',e.d?fa(e.d)+' حذف':''].filter(Boolean).join('، ')}${Array.isArray(e.s)&&e.s.length?`<small>${e.s.map(x=>esc(x)).join(' · ')}</small>`:''}</div>`).join('')
+      +(A.length>n?'<button type="button" id="syLogMore">بیشتر</button>':''):'<small>هنوز تغییری ثبت نشده است.</small>';
+    on('syLogMore',()=>{ n+=150; draw(); }); };
+  dlg('تاریخچه تغییرات',`<small>هر بار که یک سیستم اطلاعاتش را می‌فرستد، اینجا ثبت می‌شود: چه کسی، کی (زمان ارسال)، کدام بخش، چند ردیف تازه/اصلاح/حذف.</small>
+    <label>کاربر<select id="syLogU"><option value="*">همه</option>${us.map(u=>`<option value="${esc(u)}">${esc(who(u))}</option>`).join('')}</select></label>
+    <div id="syLogL"></div><button type="button" id="syBack">بازگشت</button>`);
+  $('syLogU').addEventListener('change',e=>{ f=e.target.value; n=150; draw(); });
+  on('syBack',()=>viewMain()); draw();
+}
 /* ---------- رمزگذاری ---------- */
 const enc=new TextEncoder(), dec=new TextDecoder();
 const hasCrypto=()=>!!(window.crypto && crypto.subtle);
@@ -1064,6 +1120,7 @@ async function sync(opt){
         const hold = !opt.force && !opt.manual && !opt.resolve && ref && ((lastPush && now-lastPush<T.gap) || (now-changedAt<T.deb && now-(dirtyAt||now)<T.maxWait));
         if(hold){ mayDirty=true; if(!dirtyAt) dirtyAt=now; }
         else{
+          try{ if(base && logAppend(logMake(base,local))){ local=collect(); out=outgoing(local,base||{}); h=hashOf(out); } }catch(e){}
           const n=((s.n||0)+1), squash=n>=T.squash || opt.replace;
           const z=await seal(out,squash?0:n);
           let sha;
@@ -1374,6 +1431,7 @@ function viewMain(){
     <div class="symsg" id="syMsg"></div>
     <button type="button" class="go" id="syNow">همگام‌سازی الان</button>
     ${admin?`<button type="button" class="go" id="syUsers">کاربران${nU?' ('+fa(nU)+')':''}</button>
+      <button type="button" id="syLog">تاریخچه تغییرات (چه کسی، چه چیزی)</button>
       <button type="button" id="syAi">خلاصه برای Claude…</button>
       <div class="sycard"><h3>کلید دسترسی جدید</h3>
         <label>فقط اگر کلید قبلی باطل شده است<input id="syTok" data-p type="password" autocomplete="off" placeholder="github_pat_..."></label>
@@ -1409,6 +1467,7 @@ function viewMain(){
     <button type="button" id="syClose">بستن</button>`);
   on('syNow',async()=>{ lock(true); msg('در حال همگام‌سازی…'); await sync({manual:true}); lock(false); if(conflict) return; msg(phase==='ok'?'همگام شد — '+fmtAt(st().at):'همگام نشد — '+note,phase!=='ok'); });
   on('syUsers',viewUsers);
+  on('syLog',viewLog);
   on('syAi',()=>{ dlgClose(); try{ window.ntAi && window.ntAi.open(); }catch(e){} });
   on('syToJoin',()=>viewJoin(''));
   on('syPinCh',()=>{ dlgClose(); pinShow('change'); });
