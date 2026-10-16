@@ -33,7 +33,7 @@ CSS=r"""
 .tlb .pm{background:repeating-linear-gradient(45deg,#1F5F99 0 4px,#7FA9D3 4px 8px)}
 .tlb .idle{background:radial-gradient(#7A4A00 28%,transparent 30%) 0 0/6px 6px,#F2B544}
 .tlb .nw{position:absolute;top:0;bottom:0;width:3px;margin-right:-1px;background:#1B2430}
-.tlax{display:flex;justify-content:space-between;direction:rtl;font-size:.68rem;color:#51606E;margin:2px 0 8px;font-variant-numeric:tabular-nums}
+.tlax{display:flex;justify-content:space-between;direction:rtl;font-size:.75rem;color:#51606E;margin:2px 0 8px;font-variant-numeric:tabular-nums}
 .tlsm{margin:4px 2px 8px;font-size:.78rem;color:#17212B}
 .tlg{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 2px 0;font-size:.72rem;color:#51606E}
 .tlg i{display:inline-block;width:16px;height:10px;border-radius:3px;vertical-align:-1px;margin-inline-end:4px}

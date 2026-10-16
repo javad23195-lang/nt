@@ -14,7 +14,7 @@ GO=r"""
 document.addEventListener('click',e=>{ const b=e.target&&e.target.closest&&e.target.closest('[data-pf]'); if(!b) return;
   e.preventDefault(); e.stopPropagation(); try{ parent.postMessage({nt:'devfile',name:String(b.dataset.pf||'')},'*'); }catch(x){} },true);
 """
-BTN=""".pfb{flex:none;min-height:32px;margin-inline-start:8px;border:1px solid #9FB4C3;background:#fff;color:#0B3F5C;border-radius:16px;font:inherit;font-size:.74rem;font-weight:700;padding:0 10px;cursor:pointer;vertical-align:middle}
+BTN=""".pfb{flex:none;min-height:44px;margin-inline-start:8px;border:1px solid #9FB4C3;background:#fff;color:#0B3F5C;border-radius:16px;font:inherit;font-size:.74rem;font-weight:700;padding:0 10px;cursor:pointer;vertical-align:middle}
 .pfb:focus-visible{outline:2px solid #0B5C7A;outline-offset:2px}
 body.fast .pfb{display:none!important}
 """
@@ -28,6 +28,6 @@ t=addjs(t,GO,BTN); put(d,t)
 d,t=get('ثبت مشکلات')
 t=rep(t,'''<button type="button" class="bed" data-i="${i}" aria-label="ویرایش">✎</button></div>''',
         '''<button type="button" class="bed" data-i="${i}" aria-label="ویرایش">✎</button><button type="button" class="pfb" data-pf="${esc(r.dev)}" aria-label="پرونده ${esc(r.dev)}">پرونده</button></div>''')
-t=addjs(t,GO,BTN+".bcard .bb .pfb{margin:0;min-height:40px;border-radius:8px}\n"); put(d,t)
+t=addjs(t,GO,BTN+".bcard .bb .pfb{margin:0;min-height:44px;border-radius:8px}\n"); put(d,t)
 s=s[:i]+json.dumps(docs,ensure_ascii=False)+s[j:]
 open(out,'w',encoding='utf-8').write(s); print('devlink')

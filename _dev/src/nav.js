@@ -45,7 +45,7 @@ body.ntnav .topbar{background:#1B2430;border-bottom:3px solid #E6A52E;padding:10
 body.ntnav .brand{display:flex;order:1;flex:1;min-width:0;padding:0;color:#fff}
 body.ntnav .brand{align-items:center;gap:10px}
 body.ntnav .brand .lg{width:38px;height:38px;background:#fff;border-radius:50%;padding:3px;box-sizing:border-box;box-shadow:0 0 0 2px rgba(230,165,46,.55)}
-body.ntnav .brand .co{color:#E6A52E;font-size:.68rem}
+body.ntnav .brand .co{color:#E6A52E;font-size:.75rem}
 body.ntnav .brand .un{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 body.ntnav .brand .tt{color:#fff;font-size:.95rem;font-weight:800}
 body.ntnav .brand .dt{display:block;color:#AEB9C5;font-size:.74rem;font-weight:400;margin-top:2px}
@@ -68,7 +68,7 @@ body.ntnav:not(.ntlocked):not(.ntdriver) #ntFab.has{display:grid}
 .ntnb.on{color:#0B5C7A}
 .ntnb.on svg{transform:translateY(-1px) scale(1.08)}
 .ntnb.on::after{content:"";position:absolute;bottom:-6px;width:5px;height:5px;border-radius:50%;background:#E6A52E}
-.ntnb .b{position:absolute;top:-5px;left:auto;right:calc(50% + 5px);inset-inline-end:auto;min-width:15px;height:15px;padding:0 3px;border-radius:8px;background:#C0392B;color:#fff;font-size:.62rem;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid #fff;box-sizing:content-box}
+.ntnb .b{position:absolute;top:-5px;left:auto;right:calc(50% + 5px);inset-inline-end:auto;min-width:17px;height:17px;padding:0 3px;border-radius:9px;background:#C0392B;color:#fff;font-size:.7rem;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid #fff;box-sizing:content-box}
 .ntnb .b.show{display:flex}
 .ntnb:focus-visible,.ntfab:focus-visible,.ntac:focus-visible,.ntmr:focus-visible{outline:3px solid #1B2430;outline-offset:2px}
 .ntsp{width:64px;flex:none}
@@ -144,8 +144,8 @@ body.ntdriver .topbar{width:200px}
   .tab:hover .i svg{transform:scale(1.15)}
   .tab:active{transform:scale(.98)}
   .tab.on::before{animation:ntBar .28s ease-out both;transform-origin:center}
-  .tab.on .i svg{animation:ntPop .35s ease-out}
-  .tab .n.show{animation:ntPop .4s ease-out}
+  .tab.on .i svg{animation:ntPop .2s cubic-bezier(.23,1,.32,1)}
+  .tab .n.show{animation:ntPop .2s cubic-bezier(.23,1,.32,1)}
   #ntSyBtn.ok .d{animation:ntPulse 2.4s ease-out infinite}
   @keyframes ntLogo{from{opacity:0;transform:rotate(-140deg) scale(.5)}to{opacity:1;transform:none}}
   @keyframes ntSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
@@ -153,16 +153,16 @@ body.ntdriver .topbar{width:200px}
   @keyframes ntLine{from{width:0;margin-left:0}to{width:56px;margin-left:-28px}}
   @keyframes ntIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
   @keyframes ntBar{from{transform:scaleY(0)}to{transform:scaleY(1)}}
-  @keyframes ntPop{0%{transform:scale(.6)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+  @keyframes ntPop{0%{transform:scale(.88)}100%{transform:scale(1)}}
   @keyframes ntPulse{0%{box-shadow:0 0 0 0 rgba(30,142,90,.55)}70%{box-shadow:0 0 0 7px rgba(30,142,90,0)}100%{box-shadow:0 0 0 0 rgba(30,142,90,0)}}
 }
 }
 @media (max-width:999px) and (prefers-reduced-motion:no-preference){
   body.ntnav .brand .lg{animation:ntLogoM .7s cubic-bezier(.2,.8,.2,1) both}
-  .ntnb.on svg{animation:ntPopM .35s ease-out}
-  .ntnb .b.show{animation:ntPopM .4s ease-out}
+  .ntnb.on svg{animation:ntPopM .2s cubic-bezier(.23,1,.32,1)}
+  .ntnb .b.show{animation:ntPopM .2s cubic-bezier(.23,1,.32,1)}
   @keyframes ntLogoM{from{opacity:0;transform:rotate(-140deg) scale(.5)}to{opacity:1;transform:none}}
-  @keyframes ntPopM{0%{transform:scale(.6)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+  @keyframes ntPopM{0%{transform:scale(.88)}100%{transform:scale(1)}}
 }`;
 const stD=document.createElement('style'); stD.textContent=CSSD; document.head.appendChild(stD);
 try{ tabs.forEach((t,i)=>{ t.style.setProperty('--k',i); const k=TABICON[DOCS[i].name]; const e=t.querySelector('.i'); if(k && e) e.innerHTML=svg(k); }); }catch(e){}

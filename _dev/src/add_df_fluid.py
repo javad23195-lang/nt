@@ -74,8 +74,8 @@ CSS="""
 .flr{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:.82rem;background:#F4F7F9;border-radius:8px;padding:5px 9px}
 .flr b{font-size:.8rem}.flr span{color:#3D4852;font-variant-numeric:tabular-nums}
 .flr.warn{background:#FFF1D6;border:1px solid #E0A75E}.flr i{font-style:normal;font-weight:800;color:#8A4B00;font-size:.78rem}
-.flb{align-self:flex-start;min-height:40px;border:1px dashed #9FB4C3;border-radius:10px;background:#fff;color:#0B3F5C;font:inherit;font-size:.82rem;font-weight:700;padding:0 12px;cursor:pointer}
-.flb2{align-self:flex-start;min-height:36px;border:0;background:none;color:#1F5F99;font:inherit;font-size:.78rem;text-decoration:underline;cursor:pointer;padding:0 4px}
+.flb{align-self:flex-start;min-height:44px;border:1px dashed #9FB4C3;border-radius:10px;background:#fff;color:#0B3F5C;font:inherit;font-size:.82rem;font-weight:700;padding:0 12px;cursor:pointer}
+.flb2{align-self:flex-start;min-height:44px;border:0;background:none;color:#1F5F99;font:inherit;font-size:.78rem;text-decoration:underline;cursor:pointer;padding:0 4px}
 .fle{border:1px solid #CFE1E9;background:#F7FAFC;border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px}
 .fle small{font-size:.74rem;color:#51606E}
 .fle .flet{font:inherit;font-size:.92rem;border:1px solid #9AA6AF;border-radius:10px;padding:6px 8px;line-height:1.8}

@@ -89,7 +89,7 @@ const CSS=`
 .qrdev .warn{background:#FFF1DB;color:#7A4300;border-radius:10px;padding:8px 10px;font-size:.86rem;font-weight:700;margin:0 0 10px}
 .qrlist{max-height:46vh;overflow:auto;border:1px solid #D5DCE3;border-radius:10px;padding:4px 10px;margin:0 0 10px}
 #ntQrCam{width:100%;min-height:260px;background:#17212B;border-radius:12px;overflow:hidden;margin:0 0 10px}
-.qrscan{flex:none;min-height:40px;display:flex;align-items:center;gap:6px;border:1px solid #D5DCE3;background:#fff;color:#17212B;font:inherit;font-size:.78rem;
+.qrscan{flex:none;min-height:44px;min-width:44px;justify-content:center;display:flex;align-items:center;gap:6px;border:1px solid #D5DCE3;background:#fff;color:#17212B;font:inherit;font-size:.78rem;
   font-weight:500;padding:0 11px;border-radius:20px;cursor:pointer;white-space:nowrap}
 .qrscan:focus-visible{outline:2px solid #0B5C7A;outline-offset:2px}
 @media (max-width:560px){ .qrscan{padding:0 9px} .qrscan .tx{display:none} }

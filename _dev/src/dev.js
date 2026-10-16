@@ -205,7 +205,7 @@ const CSS=`
 .qrdev .pk.g{border-top-color:#1E7F4F}.qrdev .pk.o{border-top-color:#C98A1B}.qrdev .pk.r{border-top-color:#B3261E}
 .qrdev .pk span{display:block;font-size:.72rem;color:#51606E}
 .qrdev .pk b{display:flex;align-items:center;gap:6px;font-size:1.05rem;margin:2px 0}
-.qrdev .pk b i{font-style:normal;font-size:.68rem}.qrdev .pk b i.up{color:#1E7F4F}.qrdev .pk b i.dn{color:#B3261E}
+.qrdev .pk b i{font-style:normal;font-size:.75rem}.qrdev .pk b i.up{color:#1E7F4F}.qrdev .pk b i.dn{color:#B3261E}
 .qrdev .pk small{display:block;font-size:.7rem;color:#51606E}
 .qrdev .pkq{font-weight:400;font-size:.7rem;color:#8A959E}
 .qrdev .pfrep{margin-top:10px;background:#FFF1DB;color:#7A4300;border-radius:10px;padding:8px 10px;font-size:.84rem;font-weight:700}

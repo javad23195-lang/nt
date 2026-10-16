@@ -1,0 +1,45 @@
+// بازبینی طراحی: واکنش لمس، hover فقط با موس، دکمه‌های ۴۴، انتخاب روز داخل صفحه (بدون prompt)، ورود نرم پنجره‌ها
+const {chromium}=require('playwright'); const http=require('http'), fs=require('fs'), path=require('path');
+const HTML=fs.readFileSync(path.join(__dirname,'..','out.html'));
+let fails=0; const ok=(c,m)=>{ console.log((c?'  ok  ':'  FAIL ')+m); if(!c) fails++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+(async()=>{
+  const web=http.createServer((q,r)=>{ r.writeHead(200,{'Content-Type':'text/html; charset=utf-8'}); r.end(HTML); }); await new Promise(r=>web.listen(0,r));
+  const br=await chromium.launch({executablePath:process.env.CHROMIUM||undefined});
+  const c=await br.newContext({locale:'fa-IR',viewport:{width:390,height:844},hasTouch:true,isMobile:true});
+  await c.addInitScript(()=>{ if(!localStorage.getItem('__s')){ localStorage.setItem('__s','1');
+    localStorage.setItem('nt_prog_v1',JSON.stringify({'1405/07/01':{sup:'',tasks:[{id:'a',prog:'آزمایش کپی',dev:'لودر ZL50',fault:false,done:false}]},'1405/07/02':{sup:'',tasks:[{id:'b',prog:'کار دوم',dev:'لودر ZL50',fault:false,done:false}]}})); }
+    window.prompt=()=>{ window.__prompted=1; return null; }; });
+  const p=await c.newPage(); const errs=[]; p.on('pageerror',e=>{ if(!/Unexpected token '<'/.test(String(e))) errs.push(String(e)); });
+  await p.goto(`http://localhost:${web.address().port}/nt/s.html`); await p.waitForFunction(()=>window.ntSync&&window.ntQr,null,{timeout:15000});
+  await p.addStyleTag({content:'.sydlg:not(#ntQrDlg),.sybd{display:none!important}'}); await p.evaluate(()=>{ window.ntLocked=false; document.body.classList.remove('ntlocked'); try{ ntBoot(); }catch(e){} }); await sleep(800);
+  ok(await p.evaluate(()=>[...document.styleSheets].some(s=>{ try{ return [...s.cssRules].some(r=>/button:active/.test(r.cssText)&&/scale/.test(r.cssText)); }catch(e){ return false; } })),'پوسته: دکمه‌ها هنگام لمس کوچک می‌شوند');
+  const hv=await p.evaluate(()=>{ let bare=0, wrapped=0; const walk=(L,inH)=>{ for(const r of L){ if(r.media){ walk(r.cssRules, inH||/hover:\s*hover/.test(r.media.mediaText)); } else if(r.selectorText && /:hover/.test(r.selectorText)){ inH?wrapped++:bare++; } } };
+    for(const s of document.styleSheets){ try{ walk(s.cssRules,false); }catch(e){} } return [bare,wrapped]; });
+  ok(hv[0]===0 && hv[1]>0,'پوسته: همه :hover فقط برای موس ('+hv.join(' / ')+')');
+  await p.evaluate(()=>window.postMessage({nt:'go',tab:'برنامه روزانه'},'*')); await sleep(1500);
+  const f=p.frames().find(x=>x!==p.mainFrame() && x.url()!=='' ) ; const fr=await (async()=>{ for(const x of p.frames()){ if(x===p.mainFrame()) continue; try{ if(await x.evaluate(()=>!!document.getElementById('bCopyPick'))) return x; }catch(e){} } })();
+  ok(!!fr,'بخش برنامه روزانه پیدا شد');
+  await fr.evaluate(()=>{ window.prompt=()=>{ window.__prompted=1; return null; }; }); await fr.waitForFunction(()=>typeof daysWithTasks==='function' && daysWithTasks().length>0,null,{timeout:5000}).catch(()=>{});
+  await fr.evaluate(()=>{ const i=document.getElementById('date')||document.querySelector('input[type=text]'); });
+  const kk=await fr.evaluate(()=>key()); console.log('    روز فرم:',kk);
+  await fr.evaluate(()=>{ const t=document.querySelector('#bCopyPick'); t.scrollIntoView(); t.click(); }); await sleep(300);
+  ok(await fr.evaluate(()=>!window.__prompted && document.querySelectorAll('#pickDays .pkd').length>=1),'«کپی از روز دیگر»: فهرست دکمه‌دار داخل صفحه، بدون پنجره مرورگر');
+  const hs=await fr.evaluate(()=>[...document.querySelectorAll('#pickDays button')].map(b=>Math.round(b.getBoundingClientRect().width)+'x'+Math.round(b.getBoundingClientRect().height)+' '+getComputedStyle(b).minHeight));
+  ok(hs.every(h=>parseFloat(h.split(' ')[1])>=44),'دکمه‌های فهرست ۴۴ یا بیشتر '+hs.join(','));
+  ok(await fr.evaluate(()=>!/<|&lt;/.test(document.querySelector('#pickDays .pkd').innerHTML.replace(/<\/?(b|span)>/g,''))),'متن روزها امن (textContent)');
+  await fr.evaluate(()=>document.querySelector('#pickDays .pkd').click()); await sleep(300);
+  ok(await fr.evaluate(()=>!document.getElementById('pickDays') && /کپی شد|از قبل در لیست/.test((document.getElementById('toast')||{}).textContent||'')),'انتخاب روز: کار کپی شد و فهرست بسته شد');
+  const hv2=await fr.evaluate(()=>{ let bare=0; const walk=(L,inH)=>{ for(const r of L){ if(r.media) walk(r.cssRules, inH||/hover:\s*hover/.test(r.media.mediaText)); else if(r.selectorText && /:hover/.test(r.selectorText) && !inH) bare++; } }; for(const s of document.styleSheets){ try{ walk(s.cssRules,false); }catch(e){} } return bare; });
+  ok(hv2===0,'بخش: :hover بدون شرط موس نمانده');
+  ok(await fr.evaluate(()=>[...document.querySelectorAll('style')].some(s=>/button:active:not\(:disabled\)/.test(s.textContent))),'بخش: واکنش لمس تزریق شده');
+  await p.evaluate(()=>window.postMessage({nt:'go',tab:'دفترچه قرائت'},'*')); await sleep(1500);
+  const fd=await (async()=>{ for(const x of p.frames()){ if(x===p.mainFrame()) continue; try{ if(await x.evaluate(()=>!!document.querySelector('.dev .pfb'))) return x; }catch(e){} } })();
+  ok(await fd.evaluate(()=>{ const a=document.querySelector('.dev .pfb').getBoundingClientRect(), b=document.querySelector('.flb'); return a.height>=44 && (!b || b.getBoundingClientRect().height>=44); }),'دفترچه قرائت: «پرونده» و «سوخت / روغن» ۴۴');
+  ok(await p.evaluate(()=>{ const b=document.getElementById('ntQrScan'); if(!b) return true; const r=b.getBoundingClientRect(); return r.width>=44 && r.height>=44; }),'دکمه‌های نوار بالا ۴۴×۴۴');
+  ok(await p.evaluate(()=>{ const e=document.querySelector('.ntnav .brand .co, .brand .co'); return !e || parseFloat(getComputedStyle(e).fontSize)>=12; }),'«آرشیا اورنگ» حداقل ۱۲ پیکسل');
+  await p.evaluate(()=>ntQr.home('WA470')); await sleep(60);
+  ok(await p.evaluate(()=>{ const b=document.querySelector('#ntQrDlg .sybox')||document.querySelector('.sydlg:not([hidden]) .sybox'); return !!b && b.getAnimations().length>0; }),'صفحه دستگاه: ورود نرم');
+  ok(errs.length===0,'بدون خطا '+errs.join('|'));
+  console.log(fails?fails+' شکست':'همه موفق'); await br.close(); web.close(); process.exit(fails?1:0);
+})();

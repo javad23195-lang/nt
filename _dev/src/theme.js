@@ -23,6 +23,7 @@ html.ntsun{filter:saturate(1.25) contrast(1.12) brightness(.95)}
 #ntThBtn svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 @media (min-width:1000px){ #ntThBtn{width:100%;justify-content:center;min-height:44px;background:#F7F9FA!important;border:1px solid #D5DCE3!important;color:#17212B!important;border-radius:10px!important;font-size:.85rem!important} #ntThBtn .tx{display:inline!important} #ntThBtn svg{stroke:#51606E} }
 body.ntlocked #ntThBtn{display:none}
+@media (prefers-reduced-motion:no-preference){ button:active:not(:disabled),.btn:active,[role=button]:active,label.chk:active{scale:.97} }
 @media (max-width:999px){ #ntThBtn{display:none!important} }
 body.ntnav .brand .tt{min-width:0;overflow:hidden}
 #ntThRow .tv{margin-inline-start:auto;font-size:.8rem;font-weight:700;color:#0B5C7A;background:#E2EEF3;border-radius:10px;padding:2px 10px}
@@ -31,7 +32,8 @@ body.ntnav .brand .tt{min-width:0;overflow:hidden}
 const FCSS={
   dark:'img,video,canvas,.ntico{filter:invert(1) hue-rotate(180deg)}',
   sun:'body{font-weight:500}small,.dim,.hint,.fhint{opacity:1!important}',
-  fx:`.ntok{animation:ntOk .7s ease-out}.ntbad{animation:ntBad .5s ease-in-out}
+  fx:`@media (prefers-reduced-motion:no-preference){ button:active:not(:disabled),.btn:active,[role=button]:active,label.chk:active{scale:.97} }
+.ntok{animation:ntOk .7s ease-out}.ntbad{animation:ntBad .5s ease-in-out}
 @keyframes ntOk{0%{box-shadow:0 0 0 0 rgba(30,127,79,.55)}100%{box-shadow:0 0 0 14px rgba(30,127,79,0)}}
 @keyframes ntBad{0%,100%{transform:none;box-shadow:0 0 0 3px rgba(179,38,30,.5)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 .ntokck{position:fixed;z-index:9999;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:#1E7F4F;pointer-events:none;display:grid;place-items:center;animation:ntCk .75s ease-out forwards}

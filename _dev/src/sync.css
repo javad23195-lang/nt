@@ -23,6 +23,8 @@
 .sydlg{position:fixed;inset:0;z-index:80;background:rgba(23,33,43,.45);display:flex;align-items:flex-start;justify-content:center;
   padding:calc(14px + env(safe-area-inset-top)) 10px 14px;overflow:auto}
 .sydlg[hidden]{display:none}
+@media (prefers-reduced-motion:no-preference){ .sydlg:not([hidden]){animation:syDim .18s ease-out} .sydlg:not([hidden]) .sybox{animation:syRise .22s cubic-bezier(.23,1,.32,1)}
+  @keyframes syDim{from{background:rgba(23,33,43,0)}} @keyframes syRise{from{opacity:0;transform:translateY(14px) scale(.98)}} }
 .sybox{width:100%;max-width:480px;background:#fff;color:#17212B;border-radius:16px;padding:16px;box-shadow:0 14px 40px rgba(23,33,43,.35);
   font-size:.92rem;line-height:1.8}
 .sybox h2{margin:0 0 8px;font-size:1.05rem;font-weight:800}
