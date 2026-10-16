@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 40 560 240">
+ <ellipse cx="290" cy="270" rx="270" ry="6" fill="#17212B" opacity=".14"/>
+ <!-- پایه -->
+ <rect x="28" y="236" width="530" height="24" rx="3" fill="#1A7A68"/>
+ <rect x="28" y="236" width="530" height="6" fill="#23A088"/>
+ <g fill="#F2C318"><rect x="120" y="246" width="12" height="8" rx="1"/><rect x="420" y="246" width="12" height="8" rx="1"/></g>
+ <!-- رادیاتور -->
+ <rect x="32" y="70" width="74" height="166" rx="4" fill="#17212B"/>
+ <g stroke="#3A4652" stroke-width="3"><path d="M44 80v146M56 80v146M68 80v146M80 80v146M92 80v146"/></g>
+ <rect x="106" y="120" width="14" height="20" rx="3" fill="#2A3540"/>
+ <!-- موتور -->
+ <path d="M118 236 V150 Q118 132 136 132 H300 Q318 132 318 150 V236 Z" fill="#1F9E8A"/>
+ <rect x="132" y="112" width="170" height="24" rx="6" fill="#1A7A68"/>
+ <g fill="#23B39A"><rect x="140" y="104" width="30" height="12" rx="3"/><rect x="180" y="104" width="30" height="12" rx="3"/><rect x="220" y="104" width="30" height="12" rx="3"/><rect x="260" y="104" width="30" height="12" rx="3"/></g>
+ <circle cx="240" cy="84" r="20" fill="#17212B"/><circle cx="240" cy="84" r="8" fill="#3A4652"/>
+ <circle cx="290" cy="84" r="20" fill="#17212B"/><circle cx="290" cy="84" r="8" fill="#3A4652"/>
+ <path d="M150 112 Q150 84 190 82 H220" fill="none" stroke="#1A7A68" stroke-width="12" stroke-linecap="round"/>
+ <rect x="140" y="160" width="160" height="10" rx="4" fill="#1A7A68"/>
+ <circle cx="160" cy="205" r="14" fill="#1A7A68"/><circle cx="160" cy="205" r="5" fill="#17212B"/>
+ <!-- ژنراتور -->
+ <path d="M318 236 V140 Q318 128 332 128 H392 Q404 128 404 140 V236 Z" fill="#1A7A68"/>
+ <g stroke="#23A088" stroke-width="3"><path d="M332 150h60M332 162h60M332 174h60"/></g>
+ <!-- تابلو برق -->
+ <rect x="404" y="70" width="150" height="166" rx="4" fill="#1F9E8A"/>
+ <rect x="404" y="70" width="150" height="10" rx="4" fill="#23B39A"/>
+ <rect x="420" y="92" width="70" height="38" rx="3" fill="#17212B"/>
+ <rect x="426" y="98" width="58" height="20" rx="2" fill="#7FD1C3"/>
+ <g fill="#17212B"><circle cx="508" cy="104" r="8"/><circle cx="532" cy="104" r="8"/><circle cx="508" cy="126" r="5"/><circle cx="532" cy="126" r="5"/></g>
+ <path d="M452 148 L464 168 H440 Z" fill="#F2C318"/>
+ <g stroke="#1A7A68" stroke-width="3"><path d="M500 180h40M500 190h40M500 200h40M500 210h40M500 220h40"/></g>
+ <rect x="420" y="190" width="6" height="22" rx="2" fill="#17212B"/>
+</svg>

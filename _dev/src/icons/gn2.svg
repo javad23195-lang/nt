@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 30 560 250">
+ <ellipse cx="290" cy="270" rx="270" ry="6" fill="#17212B" opacity=".14"/>
+ <!-- پایه -->
+ <rect x="28" y="236" width="530" height="24" rx="3" fill="#2A3540"/>
+ <rect x="28" y="236" width="530" height="5" fill="#3A4652"/>
+ <!-- تابلو برق سفید -->
+ <rect x="34" y="96" width="78" height="140" rx="4" fill="#E6EBEF" stroke="#B5C0CA" stroke-width="2"/>
+ <rect x="46" y="108" width="54" height="30" rx="3" fill="#17212B"/>
+ <rect x="51" y="113" width="44" height="14" rx="2" fill="#7FD1C3"/>
+ <rect x="46" y="150" width="54" height="10" rx="2" fill="#2F6FC0"/>
+ <path d="M73 178 L85 198 H61 Z" fill="#F2C318"/>
+ <rect x="104" y="160" width="5" height="20" rx="2" fill="#8A97A3"/>
+ <!-- ژنراتور خاکستری -->
+ <path d="M112 236 V140 Q112 124 128 124 H206 Q222 124 222 140 V236 Z" fill="#AEB8C1"/>
+ <g stroke="#8A97A3" stroke-width="3"><path d="M126 150h82M126 164h82M126 178h82"/></g>
+ <!-- موتور سبزآبی -->
+ <path d="M222 236 V146 Q222 128 240 128 H392 Q410 128 410 146 V236 Z" fill="#1F9E8A"/>
+ <rect x="236" y="108" width="160" height="24" rx="6" fill="#1A7A68"/>
+ <g fill="#23B39A"><rect x="244" y="100" width="28" height="12" rx="3"/><rect x="280" y="100" width="28" height="12" rx="3"/><rect x="316" y="100" width="28" height="12" rx="3"/><rect x="352" y="100" width="28" height="12" rx="3"/></g>
+ <rect x="240" y="160" width="150" height="10" rx="4" fill="#1A7A68"/>
+ <circle cx="262" cy="205" r="14" fill="#1A7A68"/><circle cx="262" cy="205" r="5" fill="#17212B"/>
+ <!-- فیلتر هوای بزرگ -->
+ <rect x="200" y="50" width="70" height="44" rx="10" fill="#17212B"/>
+ <rect x="206" y="56" width="58" height="6" rx="3" fill="#3A4652"/>
+ <path d="M270 74 H300 Q314 74 314 90 V102" fill="none" stroke="#17212B" stroke-width="12"/>
+ <path d="M396 120 Q440 70 470 76" fill="none" stroke="#17212B" stroke-width="8" stroke-linecap="round"/>
+ <path d="M396 134 Q446 92 470 96" fill="none" stroke="#17212B" stroke-width="8" stroke-linecap="round"/>
+ <!-- رادیاتور بزرگ -->
+ <rect x="460" y="44" width="94" height="192" rx="4" fill="#2A3540"/>
+ <g stroke="#51606E" stroke-width="3"><path d="M474 56v170M490 56v170M506 56v170M522 56v170M538 56v170"/></g>
+ <rect x="530" y="70" width="14" height="10" rx="2" fill="#F2C318"/>
+</svg>

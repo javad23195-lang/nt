@@ -58,6 +58,8 @@ const qrUrl=id=>(location.protocol==='https:'?location.origin+location.pathname:
 
 /* ---------- ظاهر ---------- */
 const CSS=`
+.qrdev .qrico{display:flex;justify-content:center;margin:0 0 8px}.qrdev .qrico svg{width:min(240px,70%);height:auto;max-height:120px}
+.qrdico{flex:none;width:64px}.qrdico svg{display:block;width:100%;height:auto;max-height:44px}
 .qrdev .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:.86rem;background:#F7F9FA;border:1px solid #D5DCE3;border-radius:10px;padding:8px 10px;margin:0 0 10px}
 .qrdev .kv span{color:#51606E}.qrdev .kv b{font-weight:700}
 .qrdev .run{color:#1E7A4C}.qrdev .stop{color:#A32018}
@@ -165,7 +167,7 @@ function home(id){
   const tabOk=n=>{ try{ if(document.body.classList.contains('ntdriver')) return false; const i=DOCS.findIndex(d=>d.name===n); return i>-1 && tabs[i] && !tabs[i].hidden; }catch(e){ return false; } };
   if(tabOk('عکس‌ها')) sub+='<button type="button" id="qrPhoto">عکس تازه</button>';
   sub+='<button type="button" id="qrHist">سوابق</button>';
-  view(dev.name,`${kv?'<div class="kv">'+kv+'</div>':''}${myDevs()?svcCard(dev):''}${oldStop&&canW('توقف شیفت')?`<div class="warn">توقف از روز ${fa(os.day)} هنوز باز است. اگر دستگاه کار می‌کند، «پایان توقف» را بزنید و روز راه افتادن را بنویسید.</div>`:''}<div class="acts">${acts}</div><div class="subacts">${sub}</div><button type="button" id="qrClose">بستن</button>`);
+  view(dev.name,`${devIco(dev.name,'qrico')}${kv?'<div class="kv">'+kv+'</div>':''}${myDevs()?svcCard(dev):''}${oldStop&&canW('توقف شیفت')?`<div class="warn">توقف از روز ${fa(os.day)} هنوز باز است. اگر دستگاه کار می‌کند، «پایان توقف» را بزنید و روز راه افتادن را بنویسید.</div>`:''}<div class="acts">${acts}</div><div class="subacts">${sub}</div><button type="button" id="qrClose">بستن</button>`);
   on('qrRead',()=>readForm(dev)); on('qrFuel',()=>fuelForm(dev)); on('qrStop',()=>stopForm(dev)); on('qrRun',()=>runForm(dev));
   on('qrWStart',()=>workStart(dev)); on('qrWEnd',()=>workEnd(dev)); on('qrProb',()=>probForm(dev)); on('qrHist',()=>hist(dev)); on('qrClose',close);
   on('qrPhoto',()=>{ window.ntPhotoDraft={dev:dev.name}; close(); try{ window.postMessage({nt:'go',tab:'عکس‌ها'},'*'); }catch(e){} });
@@ -175,6 +177,8 @@ function home(id){
   try{ if(window.ntDev && ntDev.attach) ntDev.attach(dev,$('ntQrBody')); }catch(e){}   // پرونده دستگاه (dev.js)
 }
 const back=dev=>`<button type="button" id="qrBack">بازگشت</button>`;
+/* تصویر دستگاه (icons.js) — SVG ثابت، بدون اطلاعات کاربر */
+const devIco=(n,c)=>{ try{ const s=window.ntIcon?ntIcon.byName(n):''; return s?`<div class="${c}">${s}</div>`:''; }catch(e){ return ''; } };
 
 /* ---------- ثبت قرائت ---------- */
 function readForm(dev){
@@ -509,7 +513,7 @@ function driverHome(){
   box.style.cssText='max-width:480px;margin:16px auto;padding:0 12px';
   box.innerHTML=`<div class="sybox" style="box-shadow:none;border:1px solid #D5DCE3"><h2>${name?esc(name):'راننده'}</h2>
     <p>${ds.length?'دستگاه شما:':'دستگاه شما در سامانه پیدا نشد. به مدیر خبر دهید.'}</p>
-    ${ds.map(d=>`<button type="button" class="go" data-drv="${d.id}" style="min-height:64px;font-size:1.1rem">${esc(d.name)}</button>`).join('')}
+    ${ds.map(d=>`<button type="button" class="go" data-drv="${d.id}" style="min-height:64px;font-size:1.1rem;display:flex;align-items:center;gap:12px;justify-content:center">${devIco(d.name,'qrdico')}<span>${esc(d.name)}</span></button>`).join('')}
     <button type="button" id="ntDrvScan">اسکن کد QR</button>
     <small>برای ثبت توقف، قرائت یا مشکل، دستگاه را بزنید یا برچسب روی دستگاه را اسکن کنید. بدون اینترنت هم ثبت می‌شود و بعداً فرستاده می‌شود.</small></div>`;
   box.querySelectorAll('[data-drv]').forEach(b=>b.addEventListener('click',()=>home(b.dataset.drv)));

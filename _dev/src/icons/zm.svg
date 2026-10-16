@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 50 535 200">
+ <ellipse cx="275" cy="240" rx="255" ry="6" fill="#17212B" opacity=".14"/>
+ <!-- بدنه و کابین -->
+ <path d="M36 204 V162 Q36 142 60 140 H150 L190 84 H262 V204 Z" fill="#2F6FC0"/>
+ <path d="M200 94 H252 V136 H170 Z" fill="#0B5C7A"/>
+ <path d="M208 98 L218 98 L204 128 L196 128 Z" fill="#fff" opacity=".28"/>
+ <path d="M170 144 H254 M254 144 V198" stroke="#1F4F94" stroke-width="3"/>
+ <rect x="236" y="152" width="12" height="4" rx="2" fill="#17212B"/>
+ <rect x="168" y="116" width="10" height="16" rx="3" fill="#17212B"/>
+ <!-- اتاق بار -->
+ <rect x="266" y="74" width="258" height="130" rx="4" fill="#2A64B0"/>
+ <rect x="184" y="64" width="344" height="12" rx="3" fill="#1F4F94"/>
+ <g fill="#F2B21B"><circle cx="210" cy="70" r="3"/><circle cx="240" cy="70" r="3"/></g>
+ <path d="M276 86 H514 V150 H276 Z" fill="none" stroke="#1F4F94" stroke-width="3"/>
+ <!-- خط کناری و سپر -->
+ <path d="M40 172 H520" stroke="#C3CDD5" stroke-width="3"/>
+ <rect x="22" y="184" width="40" height="18" rx="4" fill="#C3CDD5"/>
+ <rect x="24" y="152" width="14" height="12" rx="3" fill="#F2B21B"/>
+ <rect x="510" y="186" width="20" height="16" rx="3" fill="#C3CDD5"/>
+ <!-- رکاب و گلگیرها -->
+ <path d="M70 206 Q72 166 110 166 Q148 166 150 206 Z" fill="#17212B"/>
+ <path d="M400 206 Q402 166 440 166 Q478 166 480 206 Z" fill="#17212B"/>
+ <!-- چرخ‌ها -->
+ <circle cx="110" cy="208" r="31" fill="#17212B"/><circle cx="110" cy="208" r="17" fill="#C3CDD5"/><circle cx="110" cy="208" r="6" fill="#8A97A3"/>
+ <circle cx="440" cy="208" r="31" fill="#17212B"/><circle cx="440" cy="208" r="17" fill="#C3CDD5"/><circle cx="440" cy="208" r="6" fill="#8A97A3"/>
+</svg>

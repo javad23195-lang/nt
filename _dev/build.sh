@@ -2,6 +2,7 @@
 # ساخت سامانه-نت.html از روی کدها. خروجی: _dev/out.html
 set -e
 cd "$(dirname "$0")/src"
+python3 mk_icons.py
 T=$(mktemp -d)
 python3 patch_daftar.py base-user-1047.html "$T/b2.html"
 python3 add_tavaqof.py "$T/b2.html" "$T/b3.html"
@@ -41,5 +42,6 @@ python3 add_devlink.py "$T/b35.html" "$T/b36.html"
 python3 add_df_retire.py "$T/b36.html" "$T/b37.html"
 python3 add_kh_low.py "$T/b37.html" "$T/b38.html"
 python3 add_df_fluid.py "$T/b38.html" "$T/b39.html"
-python3 build.py "$T/b39.html" ../out.html
+python3 add_icons.py "$T/b39.html" "$T/b40.html"
+python3 build.py "$T/b40.html" ../out.html
 echo "ساخته شد: _dev/out.html — بعد از آزمایش، به جای ../سامانه-نت.html بگذارید"

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="20 270 720 300">
+ <ellipse cx="420" cy="556" rx="290" ry="9" fill="#17212B" opacity=".14"/>
+ <!-- شاسی پایین و وزنه عقب -->
+ <rect x="320" y="440" width="350" height="62" rx="8" fill="#17212B"/>
+ <path d="M640 405 H700 a12 12 0 0 1 12 12 V478 a12 12 0 0 1 -12 12 H640 Z" fill="#17212B"/>
+ <!-- کاپوت موتور -->
+ <path d="M488 368 H660 Q684 368 686 392 V450 H488 Z" fill="#F2C318"/>
+ <path d="M488 438 H686 V450 H488 Z" fill="#CFA010"/>
+ <g stroke="#2A3540" stroke-width="5" stroke-linecap="round"><path d="M606 398v40M618 398v40M630 398v40M642 398v40"/></g>
+ <rect x="580" y="330" width="12" height="40" rx="4" fill="#2A3540"/>
+ <rect x="533" y="345" width="24" height="25" rx="7" fill="#2A3540"/>
+ <path d="M500 400 V328 H526 V372" fill="none" stroke="#2A3540" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+ <!-- شاسی جلو -->
+ <path d="M300 392 H400 V452 H300 Z" fill="#F2C318"/>
+ <path d="M300 440 H400 V452 H300 Z" fill="#CFA010"/>
+ <!-- کابین -->
+ <rect x="384" y="290" width="110" height="10" rx="4" fill="#CFA010"/>
+ <path d="M392 298 H490 V444 H356 L366 384 Z" fill="#F2C318"/>
+ <path d="M402 310 H444 V378 H374 Z" fill="#0B5C7A"/>
+ <path d="M452 310 H482 V378 H452 Z" fill="#0B5C7A"/>
+ <path d="M410 316 L426 316 L398 368 L388 368 Z" fill="#fff" opacity=".28"/>
+ <!-- پله -->
+ <g stroke="#2A3540" stroke-width="5" stroke-linecap="round"><path d="M412 436v80M440 436v80M412 462h28M412 488h28M412 514h28"/></g>
+ <!-- بازوی بالابر -->
+ <path d="M178 422 L338 366 L356 398 L196 462 Z" fill="#F2C318"/>
+ <path d="M196 462 L356 398 L352 388 L190 450 Z" fill="#CFA010"/>
+ <!-- جک بالابر -->
+ <path d="M318 418 L240 440" stroke="#8A97A3" stroke-width="10" stroke-linecap="round"/>
+ <path d="M318 418 L280 429" stroke="#51606E" stroke-width="12" stroke-linecap="round"/>
+ <!-- جک جام و اهرم Z -->
+ <path d="M336 372 L232 366" stroke="#8A97A3" stroke-width="9" stroke-linecap="round"/>
+ <path d="M336 372 L282 369" stroke="#51606E" stroke-width="11" stroke-linecap="round"/>
+ <path d="M232 366 L204 360 L214 398 Z" fill="#CFA010"/>
+ <path d="M206 362 L186 378" stroke="#2A3540" stroke-width="7" stroke-linecap="round"/>
+ <!-- جام -->
+ <path d="M36 424 L156 376 Q198 362 206 396 L210 452 Q204 500 128 502 Q104 502 92 486 Z" fill="#F2C318"/>
+ <path d="M36 424 L152 384 Q178 380 178 404 L168 462 Q160 480 120 478 Z" fill="#CFA010"/>
+ <path d="M36 424 L48 418 L128 494 L118 498 Z" fill="#B88E0C"/>
+ <!-- چرخ‌ها -->
+ <g>
+  <circle cx="276" cy="488" r="68" fill="#17212B"/><circle cx="276" cy="488" r="34" fill="#F2C318"/><circle cx="276" cy="488" r="22" fill="#CFA010"/><circle cx="276" cy="488" r="9" fill="#2A3540"/>
+  <circle cx="546" cy="488" r="68" fill="#17212B"/><circle cx="546" cy="488" r="34" fill="#F2C318"/><circle cx="546" cy="488" r="22" fill="#CFA010"/><circle cx="546" cy="488" r="9" fill="#2A3540"/>
+ </g>
+</svg>

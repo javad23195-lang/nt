@@ -1,0 +1,33 @@
+// تصویر دستگاه‌ها (icons.js): هر دستگاه تصویر دارد، صفحه دستگاه، فهرست راننده، دفترچه قرائت، حالت تیره
+const {chromium}=require('playwright'); const http=require('http'), fs=require('fs'), path=require('path');
+const HTML=fs.readFileSync(path.join(__dirname,'..','out.html'));
+let fails=0; const ok=(c,m)=>{ console.log((c?'  ok  ':'  FAIL ')+m); if(!c) fails++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+(async()=>{
+  const web=http.createServer((q,r)=>{ r.writeHead(200,{'Content-Type':'text/html; charset=utf-8'}); r.end(HTML); }); await new Promise(r=>web.listen(0,r));
+  const br=await chromium.launch({executablePath:process.env.CHROMIUM||undefined});
+  const c=await br.newContext({locale:'fa-IR',viewport:{width:412,height:900}});
+  const p=await c.newPage(); const errs=[]; p.on('pageerror',e=>{ if(!/Unexpected token '<'/.test(String(e))) errs.push(String(e)); });
+  await p.goto(`http://localhost:${web.address().port}/nt/s.html`); await p.waitForFunction(()=>window.ntSync&&window.ntQr&&window.ntIcon,null,{timeout:15000});
+  await p.addStyleTag({content:'.sydlg:not(#ntQrDlg),.sybd{display:none!important}'}); await p.evaluate(()=>{ window.ntLocked=false; document.body.classList.remove('ntlocked'); try{ ntBoot(); }catch(e){} }); await sleep(800);
+  const K=await p.evaluate(()=>ntQr.DEVS.map(d=>[d.id,ntIcon.key(d.name)]));
+  ok(K.every(x=>x[1]),'همه ۱۷ دستگاه تصویر دارند: '+K.map(x=>x.join('=')).join(' '));
+  const g=Object.fromEntries(K);
+  ok(g.PC290!==g.PC400 && g.WA470!==g.ZL50 && g.TRS01==='lk' && g.TRS03==='lk' && g.MYLER==='my' && new Set([g.G700,g.G1030,g.G220,g.KIPOR]).size===4,'دستگاه‌های شبیه تصویر جدا دارند؛ سه کامیون TRS یکی');
+  ok(await p.evaluate(()=>ntIcon.byName('دستگاه ناشناخته')==='' && ntIcon.byName('<img src=x onerror=alert(1)>')===''),'نام ناشناخته یا خطرناک → بدون تصویر');
+  ok(await p.evaluate(()=>Object.values(ntQr.DEVS).every(d=>!/<script|on\w+=|href/i.test(ntIcon.byName(d.name)))),'SVGها اسکریپت یا پیوند ندارند');
+  await p.evaluate(()=>ntQr.home('WA470')); await sleep(300);
+  ok(await p.evaluate(()=>!!document.querySelector('#ntQrBody .qrico svg.ntico')),'صفحه دستگاه: تصویر بالای صفحه');
+  const r=await p.evaluate(()=>{ const b=document.querySelector('#ntQrBody .qrico svg').getBoundingClientRect(); return [b.width,b.height]; });
+  ok(r[0]>100 && r[0]<=260 && r[1]<=125,'اندازه تصویر مناسب گوشی: '+r.map(Math.round).join('×'));
+  await p.evaluate(()=>{ localStorage.setItem('ntui_theme','dark'); ntTheme.set('dark'); });
+  ok(await p.evaluate(()=>/invert/.test(getComputedStyle(document.querySelector('#ntQrBody .ntico')).filter)),'حالت تیره: رنگ تصویر برعکس نمی‌شود (دوباره برعکس)');
+  await p.evaluate(()=>ntTheme.set('light'));
+  await p.evaluate(()=>{ ntSync.myDevs=()=>['لودر کوماتسو WA470','کامیون TRS01']; ntSync.myName=()=>'آزمایش'; document.body.classList.add('ntdriver'); try{ ntQr.driverHome(); }catch(e){} }); await sleep(300);
+  ok(await p.evaluate(()=>document.querySelectorAll('[data-drv] .qrdico svg').length===2),'راننده: کنار نام هر دستگاه تصویر دارد');
+  await p.evaluate(()=>{ document.body.classList.remove('ntdriver'); try{ document.getElementById('ntQrDlg').close(); }catch(e){} window.postMessage({nt:'go',tab:'دفترچه قرائت'},'*'); }); await sleep(1500);
+  const n=await p.evaluate(()=>{ const f=[...document.querySelectorAll('iframe')].find(x=>x.contentDocument && x.contentDocument.querySelector('.dev .nm')); if(!f) return [-1,0]; const d=f.contentDocument; return [d.querySelectorAll('.dev .nm').length,d.querySelectorAll('.dev .nm .dico svg').length,d.querySelectorAll('.dico').length,[...d.querySelectorAll('.dev .nm')].slice(0,2).map(x=>x.outerHTML.slice(0,200)).join(' // ')]; });
+  ok(n[0]>5 && n[1]>=n[0]-1,'دفترچه قرائت: کنار نام دستگاه‌ها تصویر ('+n[1]+' از '+n[0]+')'+(n[1]<n[0]-1?' '+n.slice(2).join(' | '):''));
+  ok(errs.length===0,'بدون خطا '+errs.join('|'));
+  console.log(fails?fails+' شکست':'همه موفق'); await br.close(); web.close(); process.exit(fails?1:0);
+})();

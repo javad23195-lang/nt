@@ -16,7 +16,7 @@ const ICON={light:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4
 /* CSS پوسته */
 const CSS=`
 html.ntdark{filter:invert(.93) hue-rotate(180deg);background:#fff}
-html.ntdark img,html.ntdark video,html.ntdark canvas,html.ntdark #ntSplash,html.ntdark #ntPin,html.ntdark #ntPinFx,html.ntdark #ntQrCam,html.ntdark .chmini canvas{filter:invert(1) hue-rotate(180deg)}
+html.ntdark img,html.ntdark video,html.ntdark canvas,html.ntdark #ntSplash,html.ntdark #ntPin,html.ntdark #ntPinFx,html.ntdark #ntQrCam,html.ntdark .chmini canvas,html.ntdark .ntico{filter:invert(1) hue-rotate(180deg)}
 html.ntdark #ntSplash img,html.ntdark #ntPin img,html.ntdark #ntPinFx img{filter:none}
 @media (max-width:999px){ html.ntdark .topbar{filter:invert(1) hue-rotate(180deg)} html.ntdark .topbar img{filter:none} }
 html.ntsun{filter:saturate(1.25) contrast(1.12) brightness(.95)}
@@ -29,7 +29,7 @@ body.ntnav .brand .tt{min-width:0;overflow:hidden}
 `;
 /* CSS داخل هر بخش */
 const FCSS={
-  dark:'img,video,canvas{filter:invert(1) hue-rotate(180deg)}',
+  dark:'img,video,canvas,.ntico{filter:invert(1) hue-rotate(180deg)}',
   sun:'body{font-weight:500}small,.dim,.hint,.fhint{opacity:1!important}',
   fx:`.ntok{animation:ntOk .7s ease-out}.ntbad{animation:ntBad .5s ease-in-out}
 @keyframes ntOk{0%{box-shadow:0 0 0 0 rgba(30,127,79,.55)}100%{box-shadow:0 0 0 14px rgba(30,127,79,0)}}
