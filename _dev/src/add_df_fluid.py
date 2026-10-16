@@ -27,13 +27,14 @@ const fl1=v=>v===null||v===undefined?'—':fa((Math.round(v*10)/10).toString()).
 function flHtml(m){
   const all=flGet().filter(x=>x&&x.dev===m.dev), st=ntFluid.state(flGet(),log,m.dev,normDate($('fDate').value)||ntSvc.today(),m.unit==='کیلومتر');
   let h='<div class="flw">';
+  try{ const lf=ntFluid.lastFuel(flGet(),m.dev,ntSvc.today()); if(lf) h+=`<div class="flr flast"><b>آخرین سوخت</b><span>${lf.days===0?'امروز':lf.days===1?'دیروز':fa(esc(lf.d))+(lf.days>1?' ('+fa(lf.days)+' روز پیش)':'')}${lf.t?' ساعت '+fa(esc(lf.t)):''}${lf.l>0?' — '+fa(lf.l)+' لیتر':''}</span></div>`; }catch(e){}
   st.forEach(x=>{ h+=`<div class="flr${x.warn?' warn':''}"><b>${esc(x.name)}</b><span>${x.now!==null?fl1(x.now)+' '+esc(x.unit):(x.lit30?fa(Math.round(x.lit30))+' لیتر در ۳۰ روز':'—')}${x.base!==null?` · معمول ${fl1(x.base)}`:''}</span>${x.warn?`<i>▲ ${fa(Math.round((x.ratio-1)*100))}٪ بیشتر از معمول</i>`:''}</div>`; });
   if(flOpen===m.dev){
     const KK=ntFluid.kinds(m.dev,flCfg(),svGet(SVK)); if(!KK.some(x=>x.k===flKind)) flKind='fuel';
     h+=`<div class="flf"><div class="flk" role="group" aria-label="نوع">${KK.map(x=>`<button type="button" data-flk="${esc(x.k)}" aria-pressed="${flKind===x.k}">${esc(x.name)}</button>`).join('')}</div>
-      <div class="fli"><input class="fll" inputmode="decimal" placeholder="چند لیتر؟" aria-label="لیتر"><span>لیتر</span>
+      <div class="fli"><input class="fll" inputmode="decimal" placeholder="چند لیتر؟ (سوخت: اختیاری)" aria-label="لیتر"><span>لیتر</span>
       <button type="button" class="ok" data-fls="${esc(m.dev)}">ثبت</button><button type="button" data-flc="1">بستن</button></div>
-      ${all.length?`<div class="flh">${all.slice(-5).reverse().map(x=>`<div><span>${fa(esc(x.d))}</span>${esc(ntFluid.nameOf(x.k))} · ${fa(esc(x.l))} لیتر<button type="button" class="fld" data-fld="${esc(x.id)}" aria-label="حذف">✕</button></div>`).join('')}</div>`:''}</div>`;
+      ${all.length?`<div class="flh">${all.slice(-5).reverse().map(x=>`<div><span>${fa(esc(x.d))}${x.t?' '+fa(esc(x.t)):''}</span>${esc(ntFluid.nameOf(x.k))} · ${+x.l>0?fa(esc(x.l))+' لیتر':'زده شد'}${x.by?' · '+esc(x.by):''}<button type="button" class="fld" data-fld="${esc(x.id)}" aria-label="حذف">✕</button></div>`).join('')}</div>`:''}</div>`;
     if(svW) h+=flEd===m.dev?`<div class="fle"><b>روغن‌های این دستگاه</b><small>هر خط یک روغن (بدون کلمه «روغن»). مثال: موتور، گیربکس، دیفرانسیل جلو، ترمز</small>
       <textarea class="flet" rows="6">${esc(ntFluid.parts(m.dev,flCfg(),svGet(SVK)).join('\n'))}</textarea>
       <div class="fli"><button type="button" class="ok" data-fles="${esc(m.dev)}">ذخیره فهرست</button><button type="button" data-fler="${esc(m.dev)}">پیش‌فرض</button><button type="button" data-flec="1">انصراف</button></div></div>`
@@ -56,10 +57,11 @@ if($('list')) $('list').addEventListener('click',e=>{
   if(b.dataset.flk){ flKind=b.dataset.flk; b.parentNode.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); const i=b.closest('.flf').querySelector('.fll'); if(i) i.focus(); return; }
   if(b.dataset.fls){ const dev=b.dataset.fls, inp=b.closest('.flf').querySelector('.fll');
     const v=+String(inp.value).replace(/[۰-۹]/g,c=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(c)).replace(/[٫,]/g,'.');
-    if(!(v>0) || v>5000){ say('لیتر را درست بنویسید',true); inp.focus(); return; }
+    const empty=!String(inp.value).trim();
+    if(!(empty && flKind==='fuel') && (!(v>0) || v>5000)){ say('لیتر را درست بنویسید',true); inp.focus(); return; }
     const day=normDate($('fDate').value)||ntSvc.today(); const cur=todayVal(dev), prev=lastOf(dev);
-    const L=flGet(); L.push({id:'f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),dev,k:flKind,l:Math.round(v*10)/10,d:day,at:cur!==undefined?+cur:(prev?prev.val:'')});
-    if(flSet(L)){ flOpen=dev; render(); say(`${ntFluid.nameOf(flKind)}: ${fa(v)} لیتر ثبت شد`); } }
+    const L=flGet(); L.push({id:'f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),dev,k:flKind,l:empty?'':Math.round(v*10)/10,d:day,at:cur!==undefined?+cur:(prev?prev.val:'')});
+    if(flSet(L)){ flOpen=dev; render(); say(empty?'سوخت زدن ثبت شد':`${ntFluid.nameOf(flKind)}: ${fa(v)} لیتر ثبت شد`); } }
 });
 { const _fb=bind; bind=function(){ _fb.apply(this,arguments);
   document.querySelectorAll('#list .fld').forEach(b=>armButton(b,'✕','حذف؟',()=>{ const L=flGet().filter(x=>x.id!==b.dataset.fld); if(flSet(L)){ render(); say('حذف شد'); } },4000));

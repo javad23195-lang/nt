@@ -66,5 +66,13 @@
     devs.forEach(dv=>{ const km=unitOf?unitOf(dv)==='کیلومتر':false; state(entries,log,dv,todayKey,km).forEach(s=>{ if(s.warn) out.push(Object.assign({dev:dv},s)); }); });
     return out.sort((a,b)=>b.ratio-a.ratio);
   }
-  root.ntFluid={KINDS,state,warnings,dn,parts,kinds,kOf,nameOf};
+  /** آخرین «سوخت زده شد» دستگاه (لیتر اختیاری): {d,t,l,by,days} یا null. days = چند روز پیش نسبت به todayKey */
+  function lastFuel(entries,dev,todayKey){
+    const K=nk(dev); let best=null;
+    (Array.isArray(entries)?entries:[]).forEach(x=>{ if(!x||x.k!=='fuel'||nk(x.dev)!==K) return; const t=dn(x.d); if(t===null) return;
+      const key=t*1440+(/^\d{1,2}:\d{2}$/.test(String(x.t||''))?(+x.t.split(':')[0])*60+(+x.t.split(':')[1]):0);
+      if(!best||key>=best.key) best={key,t0:t,d:x.d,t:x.t||'',l:+lat(x.l)||0,by:x.by||''}; });
+    if(!best) return null; const td=dn(todayKey); return {d:best.d,t:best.t,l:best.l,by:best.by,days:td===null?null:td-best.t0};
+  }
+  root.ntFluid={KINDS,state,warnings,dn,parts,kinds,kOf,nameOf,lastFuel};
 })(typeof window!=='undefined'?window:globalThis);
