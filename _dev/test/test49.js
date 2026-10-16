@@ -51,6 +51,12 @@ for(let n=150;n>=0;n-=10){ daf.push({dev:'لودر ZL50',unit:'ساعت',val:h,d
   await fr.evaluate(()=>{ document.querySelector('#list .fll').value='abc'; document.querySelector('#list [data-fls]').click(); }); await sleep(200);
   ok((await p.evaluate(()=>JSON.parse(localStorage.nt_fluid_v1).length))===E.length,'لیتر نادرست ثبت نشد');
   ok(await p.evaluate(()=>ntSync&&true),'');
+  await fr.evaluate(()=>{ const b=[...document.querySelectorAll('#list [data-flo]')].find(b=>b.dataset.flo==='لودر ZL50'); if(b) b.click(); }); await sleep(200);
+  ok(await fr.evaluate(()=>/روغن گیربکس/.test(document.querySelector('#list .flk').innerText) && /دیفرانسیل عقب/.test(document.querySelector('#list .flk').innerText)),'دفترچه: گزینه‌های روغن مخصوص لودر');
+  await fr.evaluate(()=>document.querySelector('#list [data-fleo]').click()); await sleep(200);
+  await fr.evaluate(()=>{ document.querySelector('#list .flet').value='روغن موتور\nگیربکس\nترمز'; document.querySelector('#list [data-fles]').click(); }); await sleep(250);
+  ok(await p.evaluate(()=>JSON.stringify(JSON.parse(localStorage.nt_fluid_cfg_v1)['لودر ZL50'])==='["موتور","گیربکس","ترمز"]'),'ویرایش فهرست روغن‌های دستگاه ذخیره شد');
+  ok(await fr.evaluate(()=>/روغن ترمز/.test(document.querySelector('#list .flk').innerText) && !/دیفرانسیل/.test(document.querySelector('#list .flk').innerText)),'گزینه‌ها از فهرست تازه');
   fr=await open('امروز'); await sleep(500);
   ok(/مصرف بالاتر از معمول/.test(await fr.evaluate(()=>document.body.innerText)),'«امروز»: مصرف بالاتر از معمول');
   await p.evaluate(()=>ntDev.open('لودر ZL50')); await sleep(400);

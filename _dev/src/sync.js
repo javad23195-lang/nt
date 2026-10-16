@@ -31,7 +31,7 @@ const QUIET={nt_users_v1:1,nt_seen_v1:1};
 const TABKEYS={
   'امروز':['nt_today_todo_v1','nt_fixed_done_v1'],
   'برنامه روزانه':['nt_prog_v1','nt_prog_rules_v1'],
-  'دفترچه قرائت':['nt_daftar_v1','nt_svc_v1','nt_svc_log_v1','nt_fluid_v1'],
+  'دفترچه قرائت':['nt_daftar_v1','nt_svc_v1','nt_svc_log_v1','nt_fluid_v1','nt_fluid_cfg_v1'],
   'ثبت مشکلات':['nt_moshkel_v1','nt_mk_desc_v1','nt_mk_sys_v1'],
   'شناسنامه':['nt_sh8_v1','nt_sh8_reps_v1','nt_sh8_sups_v1','nt_sh_desc_v1','nt_sh_part_v1','nt_sh_from_v1','nt_khadamat_v1'],
   'خدمات':['nt_khadamat_v1','nt_kh_act_v1','nt_kh_part_v1','nt_daftar_v1'],
