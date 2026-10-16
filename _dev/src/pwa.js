@@ -35,5 +35,25 @@ function later(){ if(window.ntLocked){ setTimeout(later,3000); return; } bar(); 
 window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); prompt=e; later(); });
 window.addEventListener('appinstalled',()=>{ prompt=null; const b=$('ntPwaBar'); if(b) b.remove(); });
 if(ios && mobile) setTimeout(later,4000);
-window.ntPwa={standalone,get canInstall(){ return !!prompt; },install:()=>{ if(prompt){ const p=prompt; prompt=null; try{ p.prompt(); }catch(e){} } }};
+/* ۴) نسخه تازه: اگر گوشی نسخه ذخیره‌شده قبلی را باز کرد (اینترنت کند)، نسخه تازه را پیدا کن و جایگزین کن.
+   تا وقتی کاربر چیزی را لمس نکرده، بی‌صدا دوباره بارگذاری می‌شود؛ بعد از آن فقط نوار «به‌روزرسانی» نشان داده می‌شود. */
+const BUILD=(()=>{ try{ return document.querySelector('meta[name="nt-build"]').content||''; }catch(e){ return ''; } })();
+let touched=false, upShown=false, lastChk=0;
+document.addEventListener('pointerdown',()=>{ touched=true; },{capture:true,passive:true});
+document.addEventListener('keydown',()=>{ touched=true; },{capture:true});
+async function checkNew(force){
+  if(!BUILD || upShown || !navigator.onLine || (!force && Date.now()-lastChk<60000)) return; lastChk=Date.now();
+  try{ const r=await fetch(location.href.split('#')[0],{cache:'no-store',credentials:'same-origin'}); if(!r.ok) return;
+    const m=/<meta name="nt-build" content="([0-9a-f]+)"/.exec(await r.text()); if(!m || m[1]===BUILD) return;
+    if(!touched && !document.querySelector('.sydlg:not([hidden]):not(#ntSyDlg)')){ location.reload(); return; }
+    upShown=true; const b=document.createElement('div'); b.className='sybar new'; b.id='ntUpBar';
+    b.innerHTML='<span>نسخه تازه سامانه آماده است.</span><button type="button" id="ntUpGo">به‌روزرسانی</button>';
+    const at=$('ntSyBar'); if(at && at.parentNode) at.parentNode.insertBefore(b,at.nextSibling); else document.body.prepend(b);
+    $('ntUpGo').addEventListener('click',()=>location.reload());
+  }catch(e){}
+}
+if(location.protocol==='https:'){ window.addEventListener('load',()=>setTimeout(checkNew,1500));
+  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') checkNew(); });
+  setInterval(checkNew,30*60000); }
+window.ntPwa={standalone,checkNew,build:BUILD,get canInstall(){ return !!prompt; },install:()=>{ if(prompt){ const p=prompt; prompt=null; try{ p.prompt(); }catch(e){} } }};
 })();
