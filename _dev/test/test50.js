@@ -1,0 +1,34 @@
+// پایان توقفی که از روزهای قبل باز مانده (روز راه افتادن) + دکمه «دستگاه‌ها» برای راننده پنهان
+const {chromium}=require('playwright'); const http=require('http'), fs=require('fs'), path=require('path');
+const HTML=fs.readFileSync(path.join(__dirname,'..','out.html'));
+let fails=0; const ok=(c,m)=>{ console.log((c?'  ok  ':'  FAIL ')+m); if(!c) fails++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const J=dt=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZone:'Asia/Tehran',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(dt); const g=t=>p.find(x=>x.type===t).value; return `${g('year')}/${g('month')}/${g('day')}`; };
+const ago=n=>J(new Date(Date.now()-n*864e5));
+(async()=>{
+  const web=http.createServer((q,r)=>{ r.writeHead(200,{'Content-Type':'text/html; charset=utf-8'}); r.end(HTML); }); await new Promise(r=>web.listen(0,r));
+  const br=await chromium.launch({executablePath:process.env.CHROMIUM||undefined});
+  const c=await br.newContext({locale:'fa-IR',viewport:{width:412,height:900}});
+  const d0=ago(4), d1=ago(3);
+  await c.addInitScript(([d0])=>{ if(!localStorage.getItem('__s')){ localStorage.setItem('__s','1');
+    localStorage.setItem('nt_tavaqof_v1',JSON.stringify({[d0+'|صبح']:{stops:[{id:'a',dev:'لودر کوماتسو WA470',from:'07:00',to:'',cause:'نبود راننده',note:''}]}})); } },[d0]);
+  const p=await c.newPage(); const errs=[]; p.on('pageerror',e=>{ if(!/Unexpected token '<'/.test(String(e))) errs.push(String(e)); });
+  await p.goto(`http://localhost:${web.address().port}/nt/s.html`); await p.waitForFunction(()=>window.ntSync&&window.ntQr&&window.ntDev,null,{timeout:15000});
+  await p.addStyleTag({content:'.sydlg:not(#ntQrDlg),.sybd{display:none!important}'}); await p.evaluate(()=>{ window.ntLocked=false; document.body.classList.remove('ntlocked'); try{ ntBoot(); }catch(e){} }); await sleep(800);
+  await p.evaluate(()=>ntQr.home('WA470')); await sleep(300);
+  ok(/از روز .* هنوز باز است/.test(await p.evaluate(()=>document.getElementById('ntQrBody').innerText)),'صفحه دستگاه: هشدار «توقف از روز … هنوز باز است»');
+  await p.click('#qrRun'); await sleep(200);
+  ok(await p.evaluate(()=>!!document.getElementById('qrToD')),'فرم پایان توقف: «روز راه افتادن» دارد');
+  await p.fill('#qrToD','1300/01/01'); await p.fill('#qrTo','10:00'); await p.click('#qrSave'); await sleep(150);
+  ok(/باید بین/.test(await p.evaluate(()=>document.getElementById('qrMsg').innerText)),'روز قبل از توقف قبول نمی‌شود');
+  await p.fill('#qrToD',J(new Date(Date.now()-3*864e5))); await p.fill('#qrTo','10:00'); await p.click('#qrSave'); await sleep(300);
+  const s=await p.evaluate(()=>Object.values(JSON.parse(localStorage.nt_tavaqof_v1))[0].stops[0]);
+  ok(s.to==='10:00' && s.toD===J(new Date(Date.now()-3*864e5)),'پایان با روز و ساعت ذخیره شد');
+  const L=await p.evaluate(([a,b])=>ntStops.list(a,b).filter(x=>x.dev==='لودر کوماتسو WA470'),[d0,J(new Date())]);
+  ok(L.length===1 && L[0].min===1440+180,'مدت = ۱ روز و ۳ ساعت ('+(L[0]&&L[0].min)+' دقیقه)، نه ۳ ساعت');
+  ok(!/هنوز باز است/.test(await p.evaluate(()=>document.getElementById('ntQrBody').innerText)),'بعد از ثبت، هشدار رفت');
+  await p.evaluate(()=>document.body.classList.add('ntdriver'));
+  ok(await p.evaluate(()=>getComputedStyle(document.getElementById('ntDevBtn')).display==='none'),'راننده: دکمه «دستگاه‌ها» پنهان است');
+  ok(errs.length===0,'بدون خطا '+errs.join('|'));
+  console.log(fails?fails+' شکست':'همه موفق'); await br.close(); web.close(); process.exit(fails?1:0);
+})();

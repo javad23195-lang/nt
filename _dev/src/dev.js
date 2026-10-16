@@ -215,6 +215,7 @@ const CSS=`
 .qrdev .pfev li span{display:inline-block;min-width:78px;color:#51606E;font-variant-numeric:tabular-nums;margin-left:6px}
 .qrdev .pfev .k-stop::before{background:#C98A1B}.qrdev .pfev .k-fault::before{background:#B3261E}.qrdev .pfev .k-fix::before{background:#1E7F4F}
 .qrdev .pfev .k-rep::before{background:#1F5F99}.qrdev .pfev .k-svc::before{background:#0B5C7A}.qrdev .pfev .k-buy::before{background:#6B4FA0}
+#ntDevBtn[hidden],body.ntdriver #ntDevBtn{display:none!important}
 .pfpick #ntDevQ{width:100%;box-sizing:border-box;min-height:46px;border:1px solid #C3CDD5;border-radius:10px;padding:0 12px;font:inherit;margin:0 0 8px}
 .pfpick #ntDevL{max-height:60vh;overflow:auto;display:flex;flex-direction:column;gap:6px;margin:0 0 8px}
 .pfpick #ntDevL button{margin:0;text-align:right;display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-height:56px}

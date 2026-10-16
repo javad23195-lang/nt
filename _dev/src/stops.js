@@ -27,6 +27,8 @@ const TK=new Set(TRACKED.map(key));
 const tracked=dev=>TK.has(key(dev));
 function LS(k){ try{ return JSON.parse(localStorage.getItem(k)||'null'); }catch(e){ return null; } }
 function nd(s){ const m=/^(1[34]\d{2})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/.exec(latin(s).trim()); return m?`${m[1]}/${p2(+m[2])}/${p2(+m[3])}`:''; }
+/** شماره روز از تاریخ شمسی (برای توقف چندروزه) */
+function dnum(d){ const m=/^(1[34]\d{2})\/(\d{2})\/(\d{2})$/.exec(d||''); if(!m) return null; const y=+m[1],mo=+m[2],dd=+m[3]; return (y-1)*365+Math.floor((y-1)*8/33)+(mo<=6?(mo-1)*31:186+(mo-7)*30)+dd; }
 const mins=t=>{ const m=/^(\d{1,2}):(\d{2})$/.exec(t||''); return m?(+m[1])*60+(+m[2]):null; };
 const dur=(a,b)=>{ const x=mins(a), y=mins(b); return (x===null||y===null)?null:(y-x+1440)%1440; };
 /** مدت به دقیقه: «2:30»، «2» (ساعت)، «۲ ساعت و ۳۰ دقیقه» */
@@ -39,6 +41,10 @@ function toMin(v){
   return null;
 }
 const clsOf=cause=>SERVICE.indexOf(cause)>-1?'pm':(BROKEN.indexOf(cause)>-1?'em':'idle');
+/** مدت توقف (دقیقه). اگر روز راه افتادن (toD) بعد از روز توقف باشد: روزهای کامل بین آن‌ها هم حساب می‌شود (بدون کم کردن استراحت). */
+function stopMin(day,s){ const a=dnum(day), b=dnum(nd(s.toD||''));
+  if(a!==null && b!==null && b>a){ const x=mins(s.from), y=mins(s.to); if(x===null||y===null) return null; return (b-a)*1440+(y-x); }
+  return Math.max(0,(dur(s.from,s.to)||0)-brk(mins(s.from),mins(s.to))); }
 /** همه توقف‌های بازه. opt.shift / opt.prog = خواندن هر منبع (بر اساس دسترسی).
     هر ردیف: {day,sh,dev,from,to,min(null=هنوز متوقف),cause,cls,src,note,by} */
 function list(from,to,opt){
@@ -47,7 +53,7 @@ function list(from,to,opt){
     const tv=LS('nt_tavaqof_v1')||{};
     Object.keys(tv).forEach(k=>{ const [d,sh]=k.split('|'), day=nd(d); if(!In(day)) return;
       ((tv[k]&&tv[k].stops)||[]).forEach(s=>{ if(!s || !s.dev) return; const cause=ALIAS[s.cause]||s.cause||'نامشخص';
-        out.push({day,sh:sh||'',dev:s.dev,from:s.from||'',to:s.to||'',min:s.to?Math.max(0,(dur(s.from,s.to)||0)-brk(mins(s.from),mins(s.to))):null,cause,cls:clsOf(cause),src:'توقف شیفت',note:s.note||'',by:s.by||''}); }); });
+        out.push({day,sh:sh||'',dev:s.dev,from:s.from||'',to:s.to||'',min:s.to?stopMin(day,s):null,toD:s.toD||'',cause,cls:clsOf(cause),src:'توقف شیفت',note:s.note||'',by:s.by||''}); }); });
   }
   if(opt.prog!==false){
     const db=LS('nt_prog_v1')||{};

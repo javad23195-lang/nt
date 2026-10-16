@@ -137,6 +137,7 @@ function home(id){
   if(canSee('توقف شیفت') && (trk0(dev)||ow)) kv+=`<span>اضافه‌کار</span><b class="${ow?'run':''}">${ow?'● در جریان از '+fa(ow.w.from)+(ow.day!==jStr(jNow())?' ('+fa(ow.day)+')':''):'در جریان نیست'}</b>`;
   if(canSee('انبار') && lastSvc) kv+=`<span>آخرین سرویس</span><b>${fa(rDate(lastSvc))} — ${esc(lastSvc.svcName||'تعویض روغن')}</b>`;
   if(canSee('برون‌سپاری')){ try{ const oj=(JSON.parse(localStorage.getItem('nt_outsrc_v1')||'[]')||[]).filter(j=>j&&j.id&&(!(j.steps&&j.steps.fin)||(Array.isArray(j.more)&&j.more.some(x=>x&&x.id&&!(x.steps&&x.steps.fin))))&&norm(j.dev)===norm(dev.name)); if(oj.length) kv+=`<span>تعمیر بیرونی</span><b class="stop">${fa(oj.length)} کار باز</b>`; }catch(e){} }
+  const oldStop=os && os.day!==jStr(jNow());
   if(canSee('ثبت مشکلات')) kv+=`<span>مشکل باز</span><b class="${open.length?'stop':''}">${open.length?fa(open.length)+' — '+esc(String(open[open.length-1].desc||'').slice(0,40)):'ندارد'}</b>`;
   let acts='';
   if(canW('دفترچه قرائت')) acts+='<button type="button" class="go" id="qrRead">ثبت قرائت</button>';
@@ -147,7 +148,7 @@ function home(id){
   if(canW('برون‌سپاری')) acts+='<button type="button" id="qrOut">نیاز به تعمیر بیرونی</button>';
   acts+='<button type="button" id="qrPhoto">عکس تازه</button>';
   acts+='<button type="button" id="qrHist">دیدن سوابق</button>';
-  view(dev.name,`${kv?'<div class="kv">'+kv+'</div>':''}<div class="acts">${acts}</div><button type="button" id="qrClose">بستن</button>`);
+  view(dev.name,`${kv?'<div class="kv">'+kv+'</div>':''}${oldStop&&canW('توقف شیفت')?`<div class="warn">توقف از روز ${fa(os.day)} هنوز باز است. اگر دستگاه کار می‌کند، «پایان توقف» را بزنید و روز راه افتادن را بنویسید.</div>`:''}<div class="acts">${acts}</div><button type="button" id="qrClose">بستن</button>`);
   on('qrRead',()=>readForm(dev)); on('qrStop',()=>stopForm(dev)); on('qrRun',()=>runForm(dev));
   on('qrWStart',()=>workStart(dev)); on('qrWEnd',()=>workEnd(dev)); on('qrProb',()=>probForm(dev)); on('qrHist',()=>hist(dev)); on('qrClose',close);
   on('qrPhoto',()=>{ window.ntPhotoDraft={dev:dev.name}; close(); try{ window.postMessage({nt:'go',tab:'عکس‌ها'},'*'); }catch(e){} });
@@ -222,16 +223,21 @@ function runForm(dev){
   const os=openStop(dev); if(!os){ home(dev.id); return; }
   view('پایان توقف — '+dev.name,`
     <p>متوقف از <b>${fa(os.s.from)}</b>${os.day!==jStr(jNow())?' ('+fa(os.day)+')':''} — ${esc(os.s.cause)}</p>
+    ${os.day!==jStr(jNow())?`<div class="warn">این توقف از روز ${fa(os.day)} باز مانده است. روز و ساعتی را بنویسید که دستگاه واقعاً راه افتاد.</div>
+    <label>روز راه افتادن<input type="text" id="qrToD" inputmode="numeric" dir="ltr" value="${jStr(jNow())}"></label>`:''}
     <label>ساعت راه افتادن<input type="text" class="big" id="qrTo" inputmode="numeric" dir="ltr" value="${nowHM()}"></label>
     <div class="symsg" id="qrMsg"></div>
     <button type="button" class="go" id="qrSave">ثبت پایان توقف</button>${back(dev)}`);
   on('qrSave',()=>{
     const to=hmOk($('qrTo').value), msg=$('qrMsg'); msg.className='symsg bad';
     if(!to){ msg.textContent='ساعت را مثل 10:15 بنویسید'; return; }
-    if(to===os.s.from){ msg.textContent='ساعت پایان با ساعت توقف یکی است'; return; }
+    const td=$('qrToD')?dayOk($('qrToD').value):os.day, today=jStr(jNow());
+    if(!td){ msg.textContent='روز را مثل 1405/07/24 بنویسید'; return; }
+    if(td<os.day || td>today){ msg.textContent='روز راه افتادن باید بین '+fa(os.day)+' و امروز باشد'; return; }
+    if(td===os.day && to===os.s.from){ msg.textContent='ساعت پایان با ساعت توقف یکی است'; return; }
     const db=LS('nt_tavaqof_v1',{})||{}, s=((db[os.k]&&db[os.k].stops)||[]).find(x=>x.id===os.s.id);
     if(!s){ msg.textContent='این توقف پیدا نشد — شاید از سیستم دیگری حذف شده است'; return; }
-    s.to=to; db[os.k].sent=false;
+    s.to=to; if(td>os.day) s.toD=td; else delete s.toD; db[os.k].sent=false;
     if(!LSset('nt_tavaqof_v1',db)){ msg.textContent='ذخیره نشد'; return; }
     touch(['nt_tavaqof_v1']); toast('راه افتاد — ساعت '+fa(to)); home(dev.id);
   });
