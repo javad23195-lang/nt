@@ -179,7 +179,7 @@ function open(idOrName){
 function addBtn(){
   const row=document.querySelector('.tabrow'); if(!row || $('ntDevBtn')) return;
   const b=document.createElement('button'); b.type='button'; b.className='qrscan'; b.id='ntDevBtn'; b.setAttribute('aria-label','پرونده دستگاه‌ها');
-  b.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h6l2 2h8v12H4z"/><path d="M8 13h8"/></svg><span class="tx">دستگاه‌ها</span>';
+  b.innerHTML=NTI.svg('files',18)+'<span class="tx">دستگاه‌ها</span>';
   b.addEventListener('click',pick);
   const sc=$('ntQrScan'); if(sc) row.insertBefore(b,sc); else row.appendChild(b);
 }

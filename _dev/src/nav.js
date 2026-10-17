@@ -25,7 +25,8 @@ const ICON={
   out:'<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5"/>',
   id:'<rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.6 1.7-2 3-2s2.4.4 3 2M14 10h4M14 14h4"/>'
 };
-const svg=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]||ICON.doc}</svg>`;
+/* آیکون‌های تازه (سرمه‌ای + کهربایی) از uicons.js؛ ICON بالا فقط پشتیبان است */
+const svg=k=>(window.NTI && NTI.P[k||'doc'])?NTI.svg(k||'doc'):`<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]||ICON.doc}</svg>`;
 const TABICON={'امروز':'today','برنامه روزانه':'plan','انبار':'box','دفترچه قرائت':'read','ثبت مشکلات':'warn','شناسنامه':'id','خدمات':'wr','درخواست خرید':'cart','توقف شیفت':'stop','برون‌سپاری':'out','عکس‌ها':'photo'};
 const MAIN=['امروز','برنامه روزانه','انبار'];
 /* کارهای دکمه «+»: [نام زبانه، دکمه افزودن داخل آن، عنوان، توضیح، آیکون، رنگ] */
@@ -60,7 +61,8 @@ body.ntnav:not(.ntlocked):not(.ntdriver) #ntFab.has{display:grid}
 .ntnb{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;width:64px;min-height:52px;padding:2px 0 0;
   background:none;border:0;font:inherit;font-size:.7rem;font-weight:700;color:#5B6874;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .ntnb svg,.ntfab svg,.ntac .ic svg,.ntmr svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.ntnb svg{width:26px;height:26px}
+.ntnb svg{width:26px;height:26px;color:#2B3846}
+.ntnb.on svg{color:#0B5C7A}
 .ntnbw{display:contents}
 #ntNavBub{position:absolute;left:0;top:8px;width:52px;height:32px;border-radius:16px;background:#E2EEF3;box-shadow:inset 0 0 0 1px #CFE1E9;opacity:0;pointer-events:none;z-index:0;transition:opacity .2s}
 .ntnb{z-index:1}
@@ -84,7 +86,7 @@ body.ntnav:not(.ntlocked):not(.ntdriver) #ntFab.has{display:grid}
 #ntNavSh h3{margin:0 0 10px;font-size:.98rem;color:#17212B}
 .ntacts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .ntac{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-height:104px;padding:12px;border-radius:16px;border:1px solid #DDE3E9;background:#F3F5F7;font:inherit;color:#17212B;text-align:start;cursor:pointer}
-.ntac .ic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:#E6A52E;color:#1B2430}
+.ntac .ic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:#fff;color:#1B2430;box-shadow:inset 0 0 0 1.5px #F1D9A8}
 .ntac .ic svg{width:26px;height:26px}
 .ntac.r .ic{background:#FBE5E2;color:#B3261E}.ntac.b .ic{background:#E2EEFA;color:#1F5F99}.ntac.g .ic{background:#E3F4EA;color:#1E7F4F}
 .ntac b{font-size:.92rem}.ntac span{font-size:.74rem;color:#5B6874}
@@ -113,7 +115,7 @@ body{flex-direction:row}
 .tabs{flex-direction:column;overflow:visible!important;gap:2px;padding:0!important}
 .tab{width:100%;justify-content:flex-start;border:0!important;border-radius:10px!important;min-height:44px;padding:0 12px!important;background:transparent!important;color:#3D4852!important;font-size:.93rem;font-weight:600!important;gap:12px}
 .tab:hover{background:#F1F4F7!important;color:#17212B!important}
-.tab .i{color:#7A8794!important;font-size:1rem;width:18px;display:flex;justify-content:center}
+.tab .i{color:#2B3846!important;font-size:1rem;width:18px;display:flex;justify-content:center}
 .tab.on{background:#E7F1F5!important;color:#0B5C7A!important;font-weight:800!important}
 .tabs{position:relative}
 .tab{position:relative;z-index:1}
@@ -126,7 +128,7 @@ body.ntind .tab.on::before{display:none}
 .tab .n{position:static!important;margin-inline-start:auto;min-width:22px;height:22px;border-radius:11px;font-size:.72rem;background:#C0392B!important;color:#fff!important;border:0!important}
 .tab .n:not(.show){display:none!important}
 #ntSyBtn,#ntQrScan,#ntDevBtn{width:100%;justify-content:center;min-height:44px;background:#F7F9FA!important;border:1px solid #D5DCE3!important;color:#17212B!important;border-radius:10px!important;font-size:.85rem!important}
-#ntSyBtn svg,#ntQrScan svg,#ntDevBtn svg{stroke:#51606E!important;color:#51606E!important}
+#ntSyBtn svg,#ntQrScan svg,#ntDevBtn svg{stroke:#1B2430!important;color:#1B2430!important}
 #ntSyBtn .tx,#ntQrScan .tx,#ntDevBtn .tx{display:inline!important}
 #ntSyBtn.err{border-color:#C0392B!important;color:#8E2219!important}
 .tabrow>.tabs+*{margin-top:auto}

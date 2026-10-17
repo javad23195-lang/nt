@@ -46,7 +46,7 @@ let mode=get();
 function apply(){
   const h=document.documentElement; h.classList.toggle('ntdark',mode==='dark'); h.classList.toggle('ntsun',mode==='sun');
   try{ const m=document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute('content',mode==='dark'?'#10161D':'#0B5C7A'); }catch(e){}
-  const b=$('ntThBtn'); if(b){ b.innerHTML=`<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">${ICON[mode]}</svg><span class="tx">${NAME[mode]}</span>`; b.setAttribute('aria-label','ظاهر: '+NAME[mode]+' — برای عوض کردن بزنید'); }
+  const b=$('ntThBtn'); if(b){ b.innerHTML=`${NTI.svg('theme',18)}<span class="tx">${NAME[mode]}</span>`; b.setAttribute('aria-label','ظاهر: '+NAME[mode]+' — برای عوض کردن بزنید'); }
   frames.forEach(fr=>frameCss(fr));
 }
 function frameCss(fr){ try{ const d=fr.contentDocument; if(!d || !d.head) return;
@@ -77,7 +77,7 @@ function addBtn(){
 /* گوشی: جای دکمه ظاهر در صفحه «بیشتر» (نوار بالا جا ندارد) */
 function sheetRow(){ const sh=$('ntNavSh'); if(!sh) return; const L=sh.querySelector('.ntmore'); if(!L || $('ntThRow')) return;
   const b=document.createElement('button'); b.type='button'; b.className='ntmr'; b.id='ntThRow';
-  const draw=()=>{ b.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">${ICON[mode]}</svg>ظاهر<span class="tv">${NAME[mode]}</span>`; b.setAttribute('aria-label','ظاهر: '+NAME[mode]+' — برای عوض کردن بزنید'); };
+  const draw=()=>{ b.innerHTML=`${NTI.svg('theme')}ظاهر<span class="tv">${NAME[mode]}</span>`; b.setAttribute('aria-label','ظاهر: '+NAME[mode]+' — برای عوض کردن بزنید'); };
   draw(); b.addEventListener('click',e=>{ e.stopPropagation(); mode=MODES[(MODES.indexOf(mode)+1)%MODES.length]; try{ localStorage.setItem(K,mode); }catch(x){} apply(); draw(); });
   L.appendChild(b); }
 try{ new MutationObserver(sheetRow).observe($('ntNavSh'),{childList:true}); }catch(e){}

@@ -6,7 +6,7 @@
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
-const ICON='<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5M5 12h11"/></svg>';
+const ICON=NTI.svg('exit',18);
 const st=document.createElement('style'); st.textContent=`
 @media (min-width:1000px){ #ntExitBtn{width:100%;justify-content:center;min-height:44px;background:#fff!important;border:1px solid #E0A39C!important;color:#A32018!important;border-radius:10px!important;font-size:.85rem!important} #ntExitBtn .tx{display:inline!important} }
 @media (max-width:999px){ #ntExitBtn{display:none!important} }
@@ -40,7 +40,7 @@ try{ new MutationObserver(sheet).observe($('ntNavSh'),{childList:true}); }catch(
 desk(); setInterval(()=>{ try{ desk(); drv(); }catch(e){} },1000);
 function unshut(){ const d=$('ntShut'); if(d) d.remove(); }
 function shut(locked){ if($('ntShut')) return; const d=document.createElement('div'); d.id='ntShut'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true');
-  d.innerHTML='<div class="sb"><svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true" style="fill:none;stroke:#F0C24E;stroke-width:2;stroke-linecap:round"><path d="M12 3v9"/><path d="M6.3 6.3a8 8 0 1 0 11.4 0"/></svg><b>'+(locked?'در حال بستن سامانه…':'سامانه بسته شد')+'</b><small id="ntShutH"></small><button type="button" id="ntShutGo"'+(locked?' hidden':'')+'>باز کردن دوباره</button></div>';
+  d.innerHTML='<div class="sb">'+NTI.svg('lock',40).replace('<svg ','<svg style="color:#fff" ')+'<b>'+(locked?'در حال بستن سامانه…':'سامانه بسته شد')+'</b><small id="ntShutH"></small><button type="button" id="ntShutGo"'+(locked?' hidden':'')+'>باز کردن دوباره</button></div>';
   document.body.appendChild(d); document.body.classList.add('ntpin'); $('ntShutGo').addEventListener('click',()=>location.reload()); }
 function hint(){ const t='اگر صفحه هنوز باز است: برنامه را از فهرست برنامه‌های باز گوشی (دکمه ▢ یا کشیدن از پایین) ببندید.';
   const h=$('ntShutH'); if(h){ h.textContent=t; return; } const pm=$('pinMsg'); if(pm && !pm.textContent) { pm.className='symsg'; pm.textContent=t; } }

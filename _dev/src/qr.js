@@ -159,7 +159,7 @@ function home(id){
   let acts='', sub='';
   const IC={read:'<path d="M12 13l4-4M4 14a8 8 0 1 1 16 0"/><circle cx="12" cy="13" r="1.4"/>',fuel:'<path d="M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M3 21h14M15 9h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0V8l-3-3"/><path d="M7 7h6v4H7z"/>',
     stop:'<rect x="6" y="6" width="12" height="12" rx="2"/>',run:'<path d="M8 5l11 7-11 7z"/>',prob:'<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/>'};
-  const ic=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${IC[k]}</svg>`;
+  const ic=k=>(window.NTI?NTI.svg({read:'read',fuel:'fuel',stop:'halt',run:'run',prob:'prob'}[k]):'')||`<svg viewBox="0 0 24 24" aria-hidden="true">${IC[k]}</svg>`;
   if(canW('دفترچه قرائت')) acts+=`<button type="button" class="go" id="qrRead">${ic('read')}ثبت قرائت</button>`;
   const trk=!window.ntStops || ntStops.tracked(dev.name);   // توقف دقیق فقط برای بیل، لودر و کامیون
   if(canW('توقف شیفت') && (trk||os)) acts+=os?`<button type="button" class="rn" id="qrRun">${ic('run')}پایان توقف (راه افتاد)</button>`:`<button type="button" class="stp" id="qrStop">${ic('stop')}شروع توقف</button>`;
@@ -568,7 +568,7 @@ function fromHash(){
 function addBtn(){
   const row=document.querySelector('.tabrow'); if(!row || $('ntQrScan')) return;
   const b=document.createElement('button'); b.type='button'; b.className='qrscan'; b.id='ntQrScan'; b.setAttribute('aria-label','اسکن کد QR دستگاه');
-  b.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M7 12h10"/></svg><span class="tx">اسکن</span>';
+  b.innerHTML=NTI.svg('scan',18)+'<span class="tx">اسکن</span>';
   b.addEventListener('click',scan);
   const sy=$('ntSyBtn'); if(sy) row.insertBefore(b,sy); else row.appendChild(b);
 }

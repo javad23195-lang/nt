@@ -2,7 +2,7 @@ import sys
 src, out = sys.argv[1], sys.argv[2]
 s=open(src,encoding='utf-8').read()
 css=open('sync.css',encoding='utf-8').read()
-js=open('sync.js',encoding='utf-8').read()
+js=open('uicons.js',encoding='utf-8').read()+'\n'+open('sync.js',encoding='utf-8').read()
 def rep(a,b,n=1):
     global s
     assert s.count(a)==n, (a[:60], s.count(a))
