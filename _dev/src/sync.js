@@ -1283,6 +1283,22 @@ function pinFx(el){ try{ if(matchMedia('(prefers-reduced-motion: reduce)').match
 function pinIn(el){ const go=()=>{ el.classList.remove('in'); void el.offsetWidth; el.classList.add('in'); };
   const sp=document.getElementById('ntSplash'); if(!sp){ go(); return; } el.classList.add('wait');
   const t=setInterval(()=>{ if(!document.getElementById('ntSplash')){ clearInterval(t); el.classList.remove('wait'); go(); } },80); setTimeout(()=>{ clearInterval(t); el.classList.remove('wait'); go(); },4500); }
+/** صفحه رمز: پس‌زمینه سایه دستگاه‌های خودمان (icons.js) + دکمه چشم برای دیدن رمز (فقط روی همین گوشی) */
+const PIN_EYE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3" fill="currentColor"/><path class="x" d="M4 4l16 16" stroke="#E6A52E" stroke-width="2.4"/></svg>';
+function pinDeco(el){ try{
+  if(!el.querySelector('.pinbg')){ const bg=document.createElement('div'); bg.className='pinbg'; bg.setAttribute('aria-hidden','true'); el.prepend(bg); let n=0;
+    const fill=()=>{ if(!window.ntIcon){ if(++n<50) setTimeout(fill,100); return; }
+      let h='<svg class="gr" viewBox="0 0 400 100" preserveAspectRatio="none" aria-hidden="true"><path d="M0 55C55 30 105 44 165 50S290 22 400 42V100H0z"/></svg>';
+      [['pc290','a'],['lk1924','b'],['wa470','c']].forEach(x=>{ const v=ntIcon.byName(x[0]); if(v) h+='<i class="'+x[1]+'">'+v+'</i>'; });
+      bg.innerHTML=h; };
+    fill(); }
+  el.querySelectorAll('label input').forEach(i=>{ if(i.nextElementSibling && i.nextElementSibling.classList.contains('eye')) return;
+    const b=document.createElement('button'); b.type='button'; b.className='eye'; b.setAttribute('aria-label','نمایش رمز'); b.innerHTML=PIN_EYE;
+    b.addEventListener('mousedown',e=>e.preventDefault());
+    b.addEventListener('click',e=>{ e.preventDefault(); let on; if(i.classList.contains('ntsec')) on=i.classList.toggle('show'); else { on=i.type==='password'; i.type=on?'text':'password'; }
+      b.classList.toggle('on',on); b.setAttribute('aria-label',on?'پنهان کردن رمز':'نمایش رمز'); try{ i.focus(); }catch(x){} });
+    i.after(b); });
+}catch(e){} }
 /** رمز اشتباه: کارت می‌لرزد */
 function pinShake(el){ const b=el.querySelector('.pinbox'); if(!b) return; b.classList.remove('bad'); void b.offsetWidth; b.classList.add('bad'); }
 function pinShow(kind){
@@ -1305,7 +1321,7 @@ function pinShow(kind){
     ${kind==='change'?'<button type="button" id="pinCancel">انصراف</button>':''}</div>`;
   const m=t=>{ const b=$('pinMsg'); b.textContent=t||''; b.className='symsg'+(t?' bad':''); };
   const f=$(kind==='new'?'pin1':'pin0'); try{ f.focus(); }catch(e){}
-  pinIn(el);
+  pinIn(el); pinDeco(el);
   el.querySelectorAll('input').forEach(i=>i.addEventListener('input',()=>{ const k=el.querySelector('.pinlk'); if(k){ k.classList.remove('tick'); void k.getBoundingClientRect(); k.classList.add('tick'); } }));
   el.querySelectorAll('input').forEach(i=>i.addEventListener('keydown',e=>{ if(e.key==='Enter') $('pinGo').click(); }));
   on('pinCancel',()=>{ el.hidden=true; el.innerHTML=''; });

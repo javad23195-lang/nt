@@ -309,6 +309,40 @@ input.ntsec.show{-webkit-text-security:none}
 .sylog .sylt{display:block;font-size:.74rem;color:#51606E}
 .sylog small{display:block;color:#3D4852;overflow-wrap:anywhere}
 #syLogL{max-height:60vh;overflow:auto;margin:8px 0}
+/* صفحه رمز ورود — سبک سرمه‌ای + کهربایی، پس‌زمینه سایه دستگاه‌های خودمان (pinDeco در sync.js) */
+#ntPin,#ntPinFx{background:radial-gradient(90% 45% at 50% 0%,rgba(46,82,128,.35),transparent 70%),linear-gradient(180deg,#0F1B2B 0%,#0C1726 60%,#0A1320 100%);padding-top:max(52px,calc(env(safe-area-inset-top) + 28px))}
+.pinbg{position:fixed;left:0;right:0;bottom:0;height:46vh;pointer-events:none;z-index:0;overflow:hidden}
+.pinbg i{position:absolute;display:block;opacity:.16}
+.pinbg i svg{display:block;width:100%;height:auto}
+.pinbg i svg *{fill:#5F86B3!important;stroke:none!important}
+.pinbg i.a{left:-6vw;bottom:5vh;width:60vw}
+.pinbg i.b{right:-10vw;bottom:2.5vh;width:58vw}
+.pinbg i.c{left:28vw;bottom:-1vh;width:34vw;opacity:.1}
+@media (min-width:700px){ .pinbg{height:60vh} .pinbg i.a{left:calc(50% - 640px);bottom:6vh;width:520px} .pinbg i.b{right:calc(50% - 660px);bottom:3vh;width:500px} .pinbg i.c{left:calc(50% - 150px);bottom:-1vh;width:300px} }
+.pinbg .gr{position:absolute;left:0;bottom:0;width:100%;height:12vh}
+.pinbg .gr path{fill:#1A2D45;opacity:.75}
+#ntPin .pinbr,#ntPin .pinbox,#ntPinFx .pinbr,#ntPinFx .pinbox{position:relative;z-index:1}
+.pinbr{flex-direction:column;gap:12px;margin:0 0 22px;font-size:1.12rem}
+.pinbr img{width:84px;height:84px;padding:7px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.pinbr::after{content:"";width:58px;height:4px;border-radius:4px;background:#E6A52E;margin-top:2px}
+#ntPin::after{content:"";position:relative;z-index:1;flex:none;width:46px;height:4px;border-radius:4px;background:#E6A52E;margin-top:16px}
+#ntPin .pinbox,#ntPinFx .pinbox{border-radius:22px;padding:28px 22px 18px;box-shadow:0 20px 50px rgba(0,0,0,.45)}
+.pinlk{width:64px;height:74px}
+.pinlk .sh{stroke:#13304A;stroke-width:7.5}
+.pinlk .bd{fill:#13304A}
+.pinlk .kh{fill:#E6A52E}
+#ntPin h2,#ntPinFx h2{font-size:1.35rem;font-weight:800;color:#13304A;margin:14px 0 4px}
+#ntPin p,#ntPinFx p{color:#6B7783;margin-bottom:18px}
+#ntPin label,#ntPinFx label{color:#13304A;position:relative}
+#ntPin input,#ntPinFx input{min-height:56px;border:2px solid #D5DCE3;border-radius:14px;background:#fff;font-size:1.6rem;padding:0 52px;transition:border-color .15s,box-shadow .15s}
+#ntPin input:focus{outline:0;border-color:#E6A52E;box-shadow:0 0 0 4px rgba(230,165,46,.2)}
+#ntPin button,#ntPinFx button{border-radius:14px;min-height:52px}
+#ntPin button.go,#ntPinFx button.go{background:#13304A;border-color:#13304A;color:#fff;font-size:1.05rem}
+#ntPin button.lnk{color:#13304A;font-weight:600}
+#ntPin button.eye,#ntPinFx button.eye{position:absolute;right:6px;bottom:6px;width:44px;min-height:44px;height:44px;margin:0;padding:0;border:0;background:none;display:grid;place-items:center;color:#13304A;border-radius:10px}
+#ntPin button.eye svg,#ntPinFx button.eye svg{width:24px;height:24px}
+#ntPin button.eye:focus-visible{outline:3px solid #E6A52E}
+#ntPin button.eye .x{display:none}#ntPin button.eye.on .x{display:inline}
 </style>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://api.github.com https://raw.githubusercontent.com https://cdn.jsdelivr.net http://localhost:* http://127.0.0.1:*; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self' blob: mediastream:; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <script>window.addEventListener("message",function(e){ if(e.origin!==location.origin && location.origin!=="null"){ e.stopImmediatePropagation(); } },true);</script>
@@ -316,7 +350,7 @@ input.ntsec.show{-webkit-text-security:none}
 <meta name="theme-color" content="#0B5C7A">
 <link rel="apple-touch-icon" href="lib/icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="nt-build" content="49c52973b534d80d">
+<meta name="nt-build" content="a0b6912d8d8681fa">
 </head>
 <body>
 
@@ -1842,6 +1876,22 @@ function pinFx(el){ try{ if(matchMedia('(prefers-reduced-motion: reduce)').match
 function pinIn(el){ const go=()=>{ el.classList.remove('in'); void el.offsetWidth; el.classList.add('in'); };
   const sp=document.getElementById('ntSplash'); if(!sp){ go(); return; } el.classList.add('wait');
   const t=setInterval(()=>{ if(!document.getElementById('ntSplash')){ clearInterval(t); el.classList.remove('wait'); go(); } },80); setTimeout(()=>{ clearInterval(t); el.classList.remove('wait'); go(); },4500); }
+/** صفحه رمز: پس‌زمینه سایه دستگاه‌های خودمان (icons.js) + دکمه چشم برای دیدن رمز (فقط روی همین گوشی) */
+const PIN_EYE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3" fill="currentColor"/><path class="x" d="M4 4l16 16" stroke="#E6A52E" stroke-width="2.4"/></svg>';
+function pinDeco(el){ try{
+  if(!el.querySelector('.pinbg')){ const bg=document.createElement('div'); bg.className='pinbg'; bg.setAttribute('aria-hidden','true'); el.prepend(bg); let n=0;
+    const fill=()=>{ if(!window.ntIcon){ if(++n<50) setTimeout(fill,100); return; }
+      let h='<svg class="gr" viewBox="0 0 400 100" preserveAspectRatio="none" aria-hidden="true"><path d="M0 55C55 30 105 44 165 50S290 22 400 42V100H0z"/></svg>';
+      [['pc290','a'],['lk1924','b'],['wa470','c']].forEach(x=>{ const v=ntIcon.byName(x[0]); if(v) h+='<i class="'+x[1]+'">'+v+'</i>'; });
+      bg.innerHTML=h; };
+    fill(); }
+  el.querySelectorAll('label input').forEach(i=>{ if(i.nextElementSibling && i.nextElementSibling.classList.contains('eye')) return;
+    const b=document.createElement('button'); b.type='button'; b.className='eye'; b.setAttribute('aria-label','نمایش رمز'); b.innerHTML=PIN_EYE;
+    b.addEventListener('mousedown',e=>e.preventDefault());
+    b.addEventListener('click',e=>{ e.preventDefault(); let on; if(i.classList.contains('ntsec')) on=i.classList.toggle('show'); else { on=i.type==='password'; i.type=on?'text':'password'; }
+      b.classList.toggle('on',on); b.setAttribute('aria-label',on?'پنهان کردن رمز':'نمایش رمز'); try{ i.focus(); }catch(x){} });
+    i.after(b); });
+}catch(e){} }
 /** رمز اشتباه: کارت می‌لرزد */
 function pinShake(el){ const b=el.querySelector('.pinbox'); if(!b) return; b.classList.remove('bad'); void b.offsetWidth; b.classList.add('bad'); }
 function pinShow(kind){
@@ -1864,7 +1914,7 @@ function pinShow(kind){
     ${kind==='change'?'<button type="button" id="pinCancel">انصراف</button>':''}</div>`;
   const m=t=>{ const b=$('pinMsg'); b.textContent=t||''; b.className='symsg'+(t?' bad':''); };
   const f=$(kind==='new'?'pin1':'pin0'); try{ f.focus(); }catch(e){}
-  pinIn(el);
+  pinIn(el); pinDeco(el);
   el.querySelectorAll('input').forEach(i=>i.addEventListener('input',()=>{ const k=el.querySelector('.pinlk'); if(k){ k.classList.remove('tick'); void k.getBoundingClientRect(); k.classList.add('tick'); } }));
   el.querySelectorAll('input').forEach(i=>i.addEventListener('keydown',e=>{ if(e.key==='Enter') $('pinGo').click(); }));
   on('pinCancel',()=>{ el.hidden=true; el.innerHTML=''; });
