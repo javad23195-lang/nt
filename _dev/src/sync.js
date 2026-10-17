@@ -1334,6 +1334,14 @@ function pinShow(kind){
     toast(kind==='change'?'رمز ورود عوض شد':'رمز ورود ساخته شد');
   });
 }
+/** «خروج»: سامانه همین الان قفل می‌شود (اطلاعات می‌ماند؛ ورود دوباره با رمز). اول تغییرها فرستاده می‌شود. سیستم بدون رمز → false */
+function lockNow(){
+  if(!pinNeeded() || pinLocked) return false;
+  try{ sync({manual:true}); }catch(e){}
+  try{ sessionStorage.removeItem(PINT); }catch(e){} pinAct=0;
+  if(!pinGet()){ pinShow('new'); return true; }
+  pinShow('ask'); return true;
+}
 function pinCheck(){
   if(!pinNeeded()){ if(pinLocked){ pinLocked=false; const el=$('ntPin'); if(el){ el.hidden=true; el.innerHTML=''; } document.body.classList.remove('ntpin'); } return; }
   if(pinLocked) return;
@@ -1385,7 +1393,7 @@ function touch(keys){
   try{ frames.forEach((f,i)=>{ if(!f || !f.dataset.loaded) return; const m=keysOfFrame(i); if((keys||[]).some(k=>m[k])) reloadFrame(i,true); }); }catch(e){}
 }
 function myName(){ try{ const u=cfg.uid && usersGet(); return (u && u[cfg.uid] && u[cfg.uid].name)||''; }catch(e){ return ''; } }
-window.ntSync={T,get cfg(){ return cfg; },st,sync,collect,hashOf,mergeAll,baseGet,outgoing,usersGet,seenGet,canSee:n=>tabAcc(n)!=='h',
+window.ntSync={T,lockNow,canLock:()=>pinNeeded(),get cfg(){ return cfg; },st,sync,collect,hashOf,mergeAll,baseGet,outgoing,usersGet,seenGet,canSee:n=>tabAcc(n)!=='h',
   canWriteTab:n=>mode()!=='v' && tabAcc(n)==='w',touch,myName,myDevs,get pinLocked(){ return pinLocked; }};
 init();
 })();

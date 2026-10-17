@@ -69,6 +69,14 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   await pinType(A,undefined,'۲۵۸۰','2580'); ok(!(await pinVis(A)),'رمز ساخته شد (رقم فارسی هم قبول است)');
   const P=JSON.parse(await ls(A,'ntsync_pin_v1')); ok(P.h && P.s && !JSON.stringify(P).includes('2580'),'رمز به صورت هش ذخیره شد، نه خود رمز');
   ok(!(S.file()||'').includes(P.h),'هش رمز به GitHub نرفت');
+  console.log('1b) دکمه «خروج»');
+  ok(await A.locator('#ntExitBtn').isVisible(),'کامپیوتر: دکمه «خروج» در منوی کناری');
+  const keys0=await A.evaluate(()=>Object.keys(localStorage).filter(k=>/^nt_/.test(k)).length);
+  await A.click('#ntExitBtn'); await sleep(300);
+  ok(await pinVis(A) && /رمز ورود/.test(await A.locator('#ntPin').innerText()),'«خروج»: سامانه قفل شد و رمز می‌خواهد');
+  ok(await A.evaluate(()=>document.body.classList.contains('ntpin')),'«خروج»: محتوای سامانه پنهان است');
+  await unlock(A,'2580'); ok(!(await pinVis(A)),'با رمز درست باز شد');
+  ok(await A.evaluate(()=>Object.keys(localStorage).filter(k=>/^nt_/.test(k)).length)===keys0,'«خروج» اطلاعات را پاک نکرد');
   console.log('2) باز کردن دوباره');
   await A.reload(); await settle(A); ok(!(await pinVis(A)),'بارگذاری دوباره در کمتر از زمان بی‌کاری: رمز نخواست');
   const A2=await A.context().newPage(); A2.errs=[]; A2.on('pageerror',e=>A2.errs.push(String(e))); await A2.goto(URL1); await settle(A2);
