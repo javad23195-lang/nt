@@ -46,7 +46,8 @@ python3 add_icons.py "$T/b39.html" "$T/b40.html"
 python3 add_ux.py "$T/b40.html" "$T/b41.html"
 python3 add_an_type.py "$T/b41.html" "$T/b42.html"
 python3 add_uicons.py "$T/b42.html" "$T/b43.html"
-python3 build.py "$T/b43.html" ../out.html
+python3 fix_req_date.py "$T/b43.html" "$T/b44.html"
+python3 build.py "$T/b44.html" ../out.html
 python3 fix_hover.py ../out.html
 python3 stamp.py ../out.html
 echo "ساخته شد: _dev/out.html — بعد از آزمایش، به جای ../سامانه-نت.html بگذارید"

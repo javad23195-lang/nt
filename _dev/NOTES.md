@@ -545,3 +545,6 @@ NT_READINGS=لیست.txt node test/test2.js   # ورود لیست قرائت
 - روی گوشی #ntMenuBox = display:contents، پس سربرگ گوشی همان قبل است.
 - بستن: Esc، زدن بیرون، ضربدر، یا زدن یک دکمه (جز «ظاهر»). `ntMenu.open()/close()` برای آزمایش‌ها (test10، test38، test56).
 - dev.js/theme.js/qr.js: insertBefore روی parentNode همان دکمه (چون دکمه‌ها داخل کشو جابه‌جا می‌شوند).
+
+## خدمات: تاریخ برگه درخواست خدمات — fix_req_date.py (b44)
+- reqSheet: تاریخ برگه = تاریخ ثبت ردیف (r.y/m/d)؛ اگر نبود: date، reg، open، done، و در آخر امروز. آزمایش: test57.
