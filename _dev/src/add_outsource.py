@@ -21,11 +21,11 @@ function osOne(rc,base){ const d=osDays(rc||base); return d===null?0:Math.max(0,
 function osXs(j){ return Array.isArray(j.more)?j.more.filter(x=>x&&x.id&&!(x.steps&&x.steps.fin)):[]; }
 function osOpen(j){ return !(j.steps&&j.steps.fin)||osXs(j).length>0; }
 function osLate(j){ let m=0; if(!(j.steps&&j.steps.fin)) m=osOne(j.steps&&j.steps.rcv,j.ws||j.bd); osXs(j).forEach(x=>{ m=Math.max(m,osOne(x.steps&&x.steps.rcv,x.d)); }); return m; }
-function osNx(j){ if(!(j.steps&&j.steps.fin)) return (j.steps&&j.steps.rcv)?'ثبت فاکتور در سندپرداز':'گرفتن فاکتور از '+(j.ven||'پیمانکار'); const x=osXs(j)[0]; return (x&&x.steps&&x.steps.rcv)?'ثبت فاکتور دیگر در سندپرداز':'گرفتن فاکتور دیگر'+(x&&x.note?' ('+x.note+')':''); }
+function osNx(j){ if(!(j.steps&&j.steps.fin)) return (j.steps&&j.steps.rcv)?'ثبت فاکتور در شناسنامه':'گرفتن فاکتور از '+(j.ven||'پیمانکار'); const x=osXs(j)[0]; return (x&&x.steps&&x.steps.rcv)?'ثبت فاکتور دیگر در شناسنامه':'گرفتن فاکتور دیگر'+(x&&x.note?' ('+x.note+')':''); }
 function osRows(){
   let jobs=[]; try{ jobs=JSON.parse(localStorage.getItem('nt_outsrc_v1')||'[]'); }catch(e){}
   if(!Array.isArray(jobs) || !osCan()) return [];
-  return jobs.filter(j=>j&&j.id&&osOpen(j)).map(j=>({j,late:osLate(j)})).filter(r=>r.late>0).sort((a,b)=>b.late-a.late)
+  return jobs.filter(j=>j&&j.id&&!j.del&&osOpen(j)).map(j=>({j,late:osLate(j)})).filter(r=>r.late>0).sort((a,b)=>b.late-a.late)
     .map(r=>({c:'w',t:osNx(r.j),s:r.j.dev+(r.j.desc?' · '+String(r.j.desc).slice(0,30):''),tag:fa(r.late)+' روز دیرکرد',go:'برون‌سپاری'}));
 }
 function osRender(){}
