@@ -35,7 +35,7 @@ function svText(x,unit){
   let a='';
   if(x.rem!==null) a = x.rem>=0 ? `${faN(x.rem)} ${unit} مانده` : `${faN(-x.rem)} ${unit} گذشته`;
   else if(x.every!==null && x.last===null) a='آخرین سرویس ثبت نشده';
-  if(x.by==='time' && x.days!==null) a = (x.days<0 ? `${fa(-x.days)} روز از سقف ${fa(ntSvc.num(x.it.months)||12)} ماه گذشته` : `${fa(x.days)} روز تا سقف ${fa(ntSvc.num(x.it.months)||12)} ماه`) + (a?' · '+a:'');
+  if(x.by==='time' && x.days!==null) a = (x.days<0 ? `${fa(-x.days)} روز از سقف ${ntSvc.moTxt(x.it.months,fa)} گذشته` : `${fa(x.days)} روز تا سقف ${ntSvc.moTxt(x.it.months,fa)}`) + (a?' · '+a:'');
   return a;
 }
 function svRow(x,unit){
@@ -52,7 +52,7 @@ function svForm(it,unit){
     <label>هر چند ${esc(unit)}<input data-f="every" inputmode="numeric" value="${esc(it.every??'')}"></label>
     <label>آخرین سرویس (${esc(unit)})<input data-f="last" inputmode="numeric" value="${esc(it.last??'')}"></label>
     <label>تاریخ آخرین سرویس<input data-f="ld" inputmode="numeric" value="${esc(it.ld||'')}" placeholder="1405/07/18"></label>
-    <label>سقف زمانی (ماه)<input data-f="months" inputmode="numeric" value="${esc(it.months??12)}"></label>
+    ${(()=>{ const s=ntSvc.moSplit(it.months??12); return `<div class="smo"><span>سقف زمانی (هر کدام زودتر برسد)</span><div><label><input data-f="mo" inputmode="numeric" value="${esc(s.mo)}" aria-label="ماه"> ماه</label><label><input data-f="md" inputmode="numeric" value="${esc(s.d)}" aria-label="روز"> روز</label></div></div>`; })()}
     <div class="sfb"><button type="button" class="ssave" data-id="${esc(it.id||'')}">ذخیره</button>
       ${it.id?`<button type="button" class="sdel" data-id="${esc(it.id)}">حذف</button>`:''}
       <button type="button" class="scan">انصراف</button></div></div>`;
@@ -90,7 +90,8 @@ function svBind(){
     const f=b.closest('.sform'), g=k=>(f.querySelector('[data-f='+k+']')||{}).value||'';
     const name=g('name').trim().slice(0,80); if(!name){ say('نام سرویس را بنویسید',true); return; }
     const ldr=String(g('ld')).trim().replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/^(\d{4})(\d{2})(\d{2})$/,'$1/$2/$3');
-    const every=ntSvc.num(g('every')), last=ntSvc.num(g('last')), months=ntSvc.num(g('months'))||12, ld=ldr?normDate(ldr):'';
+    const every=ntSvc.num(g('every')), last=ntSvc.num(g('last')), months=ntSvc.moJoin(g('mo'),g('md'))||12, ld=ldr?normDate(ldr):'';
+    if((g('mo').trim()&&ntSvc.num(g('mo'))===null)||(g('md').trim()&&ntSvc.num(g('md'))===null)){ say('«سقف زمانی» باید عدد باشد',true); return; }
     if(g('every').trim() && (every===null||every<=0)){ say('«هر چند» باید عدد باشد',true); return; }
     if(g('last').trim() && last===null){ say('«آخرین سرویس» باید عدد باشد',true); return; }
     if(g('ld').trim() && !ld){ say('تاریخ درست نیست',true); return; }
@@ -137,6 +138,10 @@ CSS=""".svc{margin-top:10px;border-top:1px dashed #D5DCE2;padding-top:8px}
 .sform label{display:block;font-size:.8rem;font-weight:700;margin-bottom:6px}
 .sform input{display:block;width:100%;box-sizing:border-box;margin-top:3px;min-height:44px;border:1px solid #9AA6AF;border-radius:8px;padding:0 8px;font:inherit}
 .sform .sfb{display:flex;gap:6px;flex-wrap:wrap}.sform .sfb button{flex:1}
+.sform .smo{margin-bottom:6px;font-size:.8rem;font-weight:700}
+.sform .smo>div{display:flex;gap:10px;margin-top:3px}
+.sform .smo label{display:flex;align-items:center;gap:6px;flex:1;margin:0}
+.sform .smo input{margin:0;text-align:center}
 .sform .ssave{background:#0B5C7A;border-color:#0B5C7A;color:#fff}.sform .sdel{color:#A32018;border-color:#E0A39C}
 .sform .sdel.armed{background:#A32018;color:#fff}
 """

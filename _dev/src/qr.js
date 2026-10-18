@@ -276,7 +276,7 @@ function svcCard(dev){
   const A=ntSvc.all(items,LS('nt_daftar_v1',[])||[]).filter(x=>x.it && norm(x.it.dev)===norm(dev.name)); if(!A.length) return '';
   const T={r:['گذشته','r'],o:['نزدیک','o'],g:['وقت هست','g'],n:['—','n']};
   const row=x=>{ const t=T[x.st]||T.n, mo=ntSvc.num(x.it.months)||12;
-    const txt=(x.by==='time'&&x.days!==null&&(x.st==='r'||x.st==='o'))?(x.days<0?fa(-x.days)+' روز از سقف '+fa(mo)+' ماه گذشته':fa(x.days)+' روز تا سقف '+fa(mo)+' ماه')
+    const txt=(x.by==='time'&&x.days!==null&&(x.st==='r'||x.st==='o'))?(x.days<0?fa(-x.days)+' روز از سقف '+ntSvc.moTxt(mo,fa)+' گذشته':fa(x.days)+' روز تا سقف '+ntSvc.moTxt(mo,fa))
       :x.rem!==null?(x.rem>=0?sep(x.rem)+' '+esc(dev.unit)+' مانده':sep(-x.rem)+' '+esc(dev.unit)+' گذشته'):'';
     return `<div class="svr ${t[1]}"><i></i><b>${esc(x.it.name)}</b><span>${txt}</span></div>`; };
   const bad=A.some(x=>x.st==='r');

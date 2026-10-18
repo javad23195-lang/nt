@@ -114,7 +114,7 @@ function fileHtml(dev){
   if(sv.length){
     h+=`<h3>سرویس‌ها</h3><div class="pfsv">${sv.slice(0,4).map(x=>{ const s=ST[x.st]||ST.n;
       const mo=window.ntSvc?(ntSvc.num(x.it.months)||12):12;
-      const rem=(x.by==='time'&&x.days!==null&&(x.st==='r'||x.st==='o'))?(x.days<0?`${fa(-x.days)} روز از سقف ${fa(mo)} ماه گذشته`:`${fa(x.days)} روز تا سقف ${fa(mo)} ماه`):x.rem!==null?(x.rem>=0?`${sep(x.rem)} ${esc(dev.unit)} مانده`:`${sep(-x.rem)} ${esc(dev.unit)} گذشته`):(x.days!==null?(x.days>=0?`${fa(x.days)} روز مانده`:`${fa(-x.days)} روز گذشته`):'');
+      const moT=window.ntSvc&&ntSvc.moTxt?ntSvc.moTxt(mo,fa):fa(mo)+' ماه'; const rem=(x.by==='time'&&x.days!==null&&(x.st==='r'||x.st==='o'))?(x.days<0?`${fa(-x.days)} روز از سقف ${moT} گذشته`:`${fa(x.days)} روز تا سقف ${moT}`):x.rem!==null?(x.rem>=0?`${sep(x.rem)} ${esc(dev.unit)} مانده`:`${sep(-x.rem)} ${esc(dev.unit)} گذشته`):(x.days!==null?(x.days>=0?`${fa(x.days)} روز مانده`:`${fa(-x.days)} روز گذشته`):'');
       return `<div class="pfsr"><span class="pill ${s[1]}">${s[0]}</span><b>${esc(x.it.name)}</b><span>${rem}</span></div>`; }).join('')}
       ${sv.length>4?`<div class="pfmore">و ${fa(sv.length-4)} سرویس دیگر</div>`:''}</div>`;
   }

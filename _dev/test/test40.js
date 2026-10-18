@@ -52,6 +52,14 @@ const J=ago=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZo
   await fr.evaluate(D=>{ [...document.querySelectorAll('.dev')].find(x=>x.querySelector('.rv').dataset.dev===D).querySelector('.sadd').click(); },D); await sleep(200);
   await fr.evaluate(()=>{ const f=document.querySelector('.sform'); f.querySelector('[data-f=name]').value='روغن هیدرولیک'; f.querySelector('[data-f=every]').value='1500'; f.querySelector('[data-f=last]').value='26054'; f.querySelector('[data-f=ld]').value='14050720'; f.querySelector('.ssave').click(); }); await sleep(300);
   L=await SV(); const H=L.find(x=>x.name==='روغن هیدرولیک'); ok(H && H.dev===D && H.every===1500 && H.ld==='1405/07/20','مورد تازه اضافه شد (تاریخ «14050720» درست شد)');
+  console.log('4b) سقف زمانی به ماه و روز');
+  await click('روغن موتور','.sed'); await sleep(200);
+  ok(await fr.evaluate(()=>{ const f=document.querySelector('.sform'); return f.querySelector('[data-f=mo]').value==='12' && f.querySelector('[data-f=md]').value==='0'; }),'فرم: سقف ۱۲ ماه و ۰ روز');
+  await fr.evaluate(()=>{ const f=document.querySelector('.sform'); f.querySelector('[data-f=mo]').value='۱'; f.querySelector('[data-f=md]').value='15'; f.querySelector('.ssave').click(); }); await sleep(300);
+  const MO=(await SV()).find(x=>x.name==='روغن موتور').months; ok(Math.abs(MO-1.493)<0.01,'«۱ ماه و ۱۵ روز» ذخیره شد ('+MO+')');
+  await click('روغن موتور','.sed'); await sleep(200);
+  ok(await fr.evaluate(()=>{ const f=document.querySelector('.sform'); const r=f.querySelector('[data-f=mo]').value==='1' && f.querySelector('[data-f=md]').value==='15'; f.querySelector('.scan').click(); return r; }),'باز کردن دوباره: ۱ ماه و ۱۵ روز');
+  ok(await p.evaluate(()=>ntSvc.moTxt(1.15)==='1 ماه و 5 روز' && ntSvc.moTxt(1.5)==='1 ماه و 15 روز' && ntSvc.moTxt(12)==='12 ماه' && ntSvc.moTxt(0.5)==='15 روز'),'نمایش: ماه و روز (۱.۱۵ → ۱ ماه و ۵ روز)');
   console.log('5) چسباندن دوباره: به‌روز، نه تکراری');
   await fr.evaluate(t=>{ document.getElementById('bSvcImp').click(); const a=document.getElementById('svcTxt'); a.value=t; a.dispatchEvent(new Event('input',{bubbles:true})); document.getElementById('svcGo').click(); },[D,'روغن تاندوم','27000','','1000','12'].join('\t')); await sleep(300);
   L=await SV(); const Tn=L.filter(x=>x.name==='روغن تاندوم'); ok(Tn.length===1 && Tn[0].every===1000 && Tn[0].ok===undefined,'تاندوم به‌روز شد و «تأیید نشده» رفت');

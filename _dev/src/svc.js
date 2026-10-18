@@ -42,5 +42,9 @@
       ok.push({dev:c[0].slice(0,80),name:c[1].slice(0,80),last:last===null?'':last,ld:dn(c[3])!==null?lat(c[3]).trim().slice(0,10):'',every:every===null?'':every,months:num(c[5])||12}); });
     return {ok,bad};
   }
-  root.ntSvc={state,all,latest,parse,dn,today,num,gone};
+  /* سقف زمانی: در اطلاعات به ماه (کسری) ذخیره می‌شود؛ برای نمایش و فرم به «ماه و روز» (ماه = ۳۰.۴ روز) */
+  function moSplit(m){ m=num(m)||12; let mo=Math.floor(m+1e-9), d=Math.round((m-mo)*30.4); if(d>=30){ mo++; d=0; } return {mo,d}; }
+  function moTxt(m,f){ f=f||(x=>String(x)); const s=moSplit(m); return s.mo&&s.d?f(s.mo)+' ماه و '+f(s.d)+' روز':(s.mo?f(s.mo)+' ماه':f(s.d)+' روز'); }
+  function moJoin(mo,d){ const a=num(mo)||0, b=num(d)||0; if(a<0||b<0) return null; const m=a+b/30.4; return m>0?Math.round(m*1000)/1000:null; }
+  root.ntSvc={state,all,latest,parse,dn,today,num,gone,moSplit,moTxt,moJoin};
 })(typeof window!=='undefined'?window:globalThis);
