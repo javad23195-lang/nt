@@ -36,6 +36,8 @@ const NTI_P={
 "edit": "<path d='M15.4 3.6a2.3 2.3 0 0 1 3.2 0l1.8 1.8a2.3 2.3 0 0 1 0 3.2L9.2 19.8l-5.4.4.4-5.4z' fill='currentColor' stroke='none'/><path d='M4.2 14.8l5 5-5.4.4z' fill='#E6A52E' stroke='none'/>",
 "del": "<path d='M3.5 6.3h17' stroke='#E6A52E' stroke-width='2.4'/><path d='M9.2 5.8V3.6h5.6v2.2' stroke='#E6A52E' stroke-width='2'/><path d='M5.4 8.4h13.2l-1 11.3a2 2 0 0 1-2 1.8H8.4a2 2 0 0 1-2-1.8z' fill='currentColor' stroke='none'/><path d='M10 11.6v5.6M14 11.6v5.6' stroke='#E6A52E' stroke-width='1.6'/>",
 "done": "<circle cx='12' cy='12' r='10' fill='currentColor' stroke='none'/><path d='M7.2 12.4l3.2 3.2 6.4-6.6' stroke='#E6A52E' stroke-width='2.6'/>",
+"menu": "<path d='M3.5 6h17M3.5 12h17' stroke='currentColor' stroke-width='2.4'/><path d='M3.5 18h10' stroke='#E6A52E' stroke-width='2.4'/>",
+"close": "<path d='M6 6l12 12M18 6L6 18' stroke='currentColor' stroke-width='2.4'/>",
 "pump": "<path d='M3.5 21V5.5A2.5 2.5 0 0 1 6 3h5.5A2.5 2.5 0 0 1 14 5.5V21z' fill='currentColor' stroke='none'/><path d='M2 21h13.5' stroke-width='2'/><path d='M14 8.5h1.8a1.7 1.7 0 0 1 1.7 1.7v5.6a1.4 1.4 0 0 0 2.8 0V8.4l-2.8-2.9' stroke-width='1.9'/><path d='M8.75 7.2c-1.9 2.4-2.9 3.9-2.9 5.2a2.9 2.9 0 0 0 5.8 0c0-1.3-1-2.8-2.9-5.2z' fill='#E6A52E' stroke='none'/>"
 };
 window.NTI={P:NTI_P,svg(k,s,cls){ const p=NTI_P[k]; if(!p) return ''; return '<svg class="nti'+(cls?' '+cls:'')+'" viewBox="0 0 24 24"'+(s?' width="'+s+'" height="'+s+'"':'')+' fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'+p+'</svg>'; }};

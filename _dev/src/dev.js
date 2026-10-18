@@ -181,7 +181,7 @@ function addBtn(){
   const b=document.createElement('button'); b.type='button'; b.className='qrscan'; b.id='ntDevBtn'; b.setAttribute('aria-label','پرونده دستگاه‌ها');
   b.innerHTML=NTI.svg('files',18)+'<span class="tx">دستگاه‌ها</span>';
   b.addEventListener('click',pick);
-  const sc=$('ntQrScan'); if(sc) row.insertBefore(b,sc); else row.appendChild(b);
+  const sc=$('ntQrScan'); if(sc) sc.parentNode.insertBefore(b,sc); else row.appendChild(b);
 }
 (function hide(){ try{ const b=$('ntDevBtn'); if(b) b.hidden=!!myDevs(); }catch(e){} setTimeout(hide,3000); })();
 const CSS=`

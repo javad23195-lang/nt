@@ -144,7 +144,7 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   const br2=await chromium.launch({executablePath:process.env.CHROMIUM||undefined,args:['--use-fake-device-for-media-stream','--use-fake-ui-for-media-stream','--use-file-for-fake-video-capture='+y4m]});
   const Z=await ctx(null,link,{browser:br2,ctx:{permissions:['camera']}});
   await waitFor(async()=>(await dlgText(Z)).includes('رمز ۶ رقمی')); await Z.fill('#syPin',pin); await Z.click('#syJoin'); await settle(Z);
-  await Z.click('#ntQrScan');
+  await Z.evaluate(()=>window.ntMenu&&ntMenu.open()); await sleep(350); await Z.click('#ntQrScan');
   ok(await waitFor(async()=>(await qrText(Z)).includes('ثبت قرائت'),20000),'اسکن با دوربین → صفحه لودر ZL50 باز شد');
   ok(libHits.includes('html5-qrcode.min.js'),'کتابخانه اسکن از همان سایت بارگذاری شد');
   await br2.close();

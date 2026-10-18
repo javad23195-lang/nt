@@ -72,7 +72,7 @@ function addBtn(){
   const b=document.createElement('button'); b.type='button'; b.className='qrscan'; b.id='ntThBtn';
   b.addEventListener('click',()=>{ mode=MODES[(MODES.indexOf(mode)+1)%MODES.length]; try{ localStorage.setItem(K,mode); }catch(e){} apply();
     try{ if(typeof toast==='function') toast('ظاهر: '+NAME[mode]); }catch(e){} });
-  const sy=$('ntSyBtn'); if(sy) row.insertBefore(b,sy); else row.appendChild(b);
+  const sy=$('ntSyBtn'); if(sy) sy.parentNode.insertBefore(b,sy); else row.appendChild(b);
 }
 /* گوشی: جای دکمه ظاهر در صفحه «بیشتر» (نوار بالا جا ندارد) */
 function sheetRow(){ const sh=$('ntNavSh'); if(!sh) return; const L=sh.querySelector('.ntmore'); if(!L || $('ntThRow')) return;

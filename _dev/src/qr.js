@@ -570,7 +570,7 @@ function addBtn(){
   const b=document.createElement('button'); b.type='button'; b.className='qrscan'; b.id='ntQrScan'; b.setAttribute('aria-label','اسکن کد QR دستگاه');
   b.innerHTML=NTI.svg('scan',18)+'<span class="tx">اسکن</span>';
   b.addEventListener('click',scan);
-  const sy=$('ntSyBtn'); if(sy) row.insertBefore(b,sy); else row.appendChild(b);
+  const sy=$('ntSyBtn'); if(sy) sy.parentNode.insertBefore(b,sy); else row.appendChild(b);
 }
 dlg(); addBtn(); fromHash();
 /* راننده: بعد از بالا آمدن سامانه، صفحه اصلی راننده؛ اگر از برچسب نیامده و یک دستگاه دارد، صفحه همان دستگاه */

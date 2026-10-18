@@ -22,10 +22,21 @@ const A='#E6A52E';
       const n=await p.evaluate(()=>[...document.querySelectorAll('.tab .i svg')].filter(s=>s.classList.contains('nti')).length);
       ok(n>=8,tag+'زبانه‌های کنار صفحه آیکون تازه دارند ('+n+')');
       if(SHOT) await p.screenshot({path:SHOT+'/d1.png'});
+      // منوی «سه خط»: دستگاه‌ها، اسکن، ظاهر، خروج داخل کشو؛ همگام بیرون
+      const m0=await p.evaluate(()=>({btn:!!document.getElementById('ntMenuBtn')&&getComputedStyle(document.getElementById('ntMenuBtn')).display!=='none', inBox:['ntDevBtn','ntQrScan','ntThBtn','ntExitBtn'].every(id=>{ const b=document.getElementById(id); return b && b.parentNode.id==='ntMenuBox'; }), syOut:document.getElementById('ntSyBtn').parentNode.id!=='ntMenuBox', hid:getComputedStyle(document.getElementById('ntMenuBox')).visibility==='hidden'}));
+      ok(m0.btn && m0.inBox && m0.syOut && m0.hid,'رایانه: دکمه سه‌خط هست؛ چهار دکمه در کشوی بسته؛ همگام بیرون '+JSON.stringify(m0));
+      await p.click('#ntMenuBtn'); await sleep(400);
+      ok(await p.evaluate(()=>getComputedStyle(document.getElementById('ntMenuBox')).visibility==='visible'),'با زدن سه‌خط کشو باز شد');
+      if(SHOT) await p.screenshot({path:SHOT+'/d1m.png'});
+      await p.keyboard.press('Escape'); await sleep(400);
+      ok(await p.evaluate(()=>!document.body.classList.contains('ntmenu')),'با Esc کشو بسته شد');
+      await p.click('#ntMenuBtn'); await sleep(400); await p.click('#ntMenuBd',{position:{x:500,y:400}}); await sleep(400);
+      ok(await p.evaluate(()=>!document.body.classList.contains('ntmenu')),'با زدن بیرون کشو بسته شد');
     } else {
       const n=await p.evaluate(()=>document.querySelectorAll('.ntnb svg.nti').length);
       ok(n>=4,tag+'نوار پایین آیکون تازه دارد ('+n+')');
       ok(await p.evaluate(()=>!!document.querySelector('.ntfab svg.nti')),tag+'دکمه + آیکون تازه دارد');
+      ok(await p.evaluate(()=>['ntSyBtn','ntQrScan','ntDevBtn'].every(id=>{ const r=document.getElementById(id).getBoundingClientRect(); return r.width>0 && r.top<120; }) && getComputedStyle(document.getElementById('ntMenuBtn')).display==='none'),tag+'سربرگ گوشی همان قبل است (بدون سه‌خط)');
       if(SHOT) await p.screenshot({path:SHOT+'/m1.png'});
       await p.click('.ntfab'); await sleep(600);
       ok(await p.evaluate(()=>document.querySelectorAll('.ntac .ic svg.nti').length>0),tag+'برگه «چه چیزی ثبت می‌کنید» آیکون تازه دارد');
