@@ -1309,7 +1309,7 @@ function pinShow(kind){
            ask:['رمز ورود','رمز ورود این سیستم را وارد کنید.'],
            change:['تغییر رمز ورود','رمز فعلی و رمز تازه را وارد کنید.']}[kind];
   el.hidden=false; el.dataset.k=kind;
-  el.innerHTML=`<div class="pinbr" aria-hidden="true"><img alt="" src="${pinLogo()}"><span>واحد نگهداری و تعمیرات</span></div><div class="pinbox"><div class="pinic"><svg class="pinlk" viewBox="0 0 64 74" aria-hidden="true"><path class="sh" d="M19 33V22a13 13 0 0 1 26 0v11"/><rect class="bd" x="8" y="31" width="48" height="39" rx="10"/><g class="kh"><circle cx="32" cy="47" r="5"/><path d="M29.6 49h4.8l1.6 9h-8z"/></g><path class="ck" d="M21 51l7.5 7.5L44 43"/></svg></div><h2>${H[0]}</h2><p>${H[1]}</p>
+  el.innerHTML=`<div class="pinbr" aria-hidden="true"><img alt="" src="${pinLogo()}"><span>واحد نگهداری و تعمیرات</span></div><div class="pinbox"><div class="pinic">${window.NT_PINLOCK||'<svg class="pinlk" viewBox="0 0 64 74" aria-hidden="true"><path class="sh" d="M19 33V22a13 13 0 0 1 26 0v11"/><rect class="bd" x="8" y="31" width="48" height="39" rx="10"/><g class="kh"><circle cx="32" cy="47" r="5"/><path d="M29.6 49h4.8l1.6 9h-8z"/></g><path class="ck" d="M21 51l7.5 7.5L44 43"/></svg>'}</div><h2>${H[0]}</h2><p>${H[1]}</p>
     <div class="symsg" id="pinMsg" role="alert"></div>
     ${kind!=='new'?`<label>${kind==='change'?'رمز فعلی':'رمز ورود'}<input id="pin0" type="password" inputmode="numeric" autocomplete="off" maxlength="6"></label>`:''}
     ${kind!=='ask'?`<label>رمز تازه (۴ تا ۶ رقم)<input id="pin1" type="password" inputmode="numeric" autocomplete="new-password" maxlength="6"></label>

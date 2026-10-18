@@ -217,3 +217,5 @@ input.ntsec.show{-webkit-text-security:none}
 #ntPin button.eye svg,#ntPinFx button.eye svg{width:24px;height:24px}
 #ntPin button.eye:focus-visible{outline:3px solid #E6A52E}
 #ntPin button.eye .x{display:none}#ntPin button.eye.on .x{display:inline}
+.pinlk.pinem{width:auto;height:124px;overflow:visible}
+@media (max-height:640px){ .pinlk.pinem{height:92px} }
