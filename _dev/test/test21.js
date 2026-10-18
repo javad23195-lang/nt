@@ -26,7 +26,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   ok(/ZL50/.test(await q('d=>d.querySelector(".pane h2").textContent')),'کلیک روی ردیف، برگه همان کار را نشان می‌دهد');
   await q('d=>d.querySelector(".rw[aria-selected=true]").focus()'); await p.keyboard.press('ArrowUp'); await sleep(200);
   ok(/TRS02/.test(await q('d=>d.querySelector(".pane h2").textContent')),'کلید ↑ کار قبلی را انتخاب کرد');
-  ok(await q('d=>[...d.querySelectorAll(".pane .fr")].some(b=>b.dataset.copy==="F9")'),'مرحله جاری: دکمه کپی شماره فاکتور');
+  ok(await q('d=>![...d.querySelectorAll(".pane .fr")].some(b=>b.dataset.copy==="F9") && [...d.querySelectorAll(".pane .fr .l")].some(l=>l.textContent==="پیمانکار")'),'مرحله جاری: فقط پیمانکار و شرح (شماره فاکتور دیگر نیست)');
   await q('d=>d.querySelector(".pane .ts.cur .go").click()'); await sleep(250);
   const J=await p.evaluate(()=>JSON.parse(localStorage.getItem('nt_outsrc_v1')));
   ok(!!J[0].steps.fin,'«ثبت شد» مرحله جاری را ثبت کرد');

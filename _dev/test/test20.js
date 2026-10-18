@@ -44,6 +44,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   await p.evaluate(i=>show(i),IDX); await sleep(500);
   console.log('4) پایان و ویرایش');
   await inn('(d)=>d.querySelector(\'[data-a="edit"]\').click()'); await sleep(200);
+  ok(await inn('(d)=>{ const m=d.getElementById("fMore"); return !!m && m.hidden && m.getBoundingClientRect().height===0; }'),'فرم: بخش «اطلاعات بیشتر» برداشته شد');
   await val('fVen','فروشنده نمونه'); await val('fAmt','12,500,000'); await val('fInv','F-1'); await click('fSave');
   J=await jobs(); ok(J[0].amt==='12500000' && J[0].ven==='فروشنده نمونه','ویرایش: مبلغ بدون ویرگول');
   await st('fin'); J=await jobs(); ok(!!J[0].steps.fin,'«ثبت در سندپرداز» ثبت شد');
