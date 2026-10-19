@@ -20,6 +20,23 @@ kr("const A=ntSvc.all(items,LS('nt_daftar_v1')||[],K)","const A=ntSvc.all(items.
 kr("const sh=LS('nt_sh8_v1'), rows=(sh&&Array.isArray(sh.rows))?sh.rows:[];","const sh=LS('nt_sh8_v1'), rows=((sh&&Array.isArray(sh.rows))?sh.rows:[]).filter(r=>r&&ntIn(r.dev));")
 kr("const mk=LS('nt_moshkel_v1'), rows=(mk&&Array.isArray(mk.rows))?mk.rows:[];","const mk=LS('nt_moshkel_v1'), rows=((mk&&Array.isArray(mk.rows))?mk.rows:[]).filter(r=>r&&ntIn(r.dev));")
 t=t[:k0]+K+t[k1:]
+# «نیاز به توجه» و هشدارها: فقط دستگاه‌های بخش؛ موردی که زبانه‌اش برای کاربر پنهان است نمی‌آید
+rep("  const kr=kh.rows||[];","  const kr=(kh.rows||[]).filter(r=>r&&ntIn(r.unit));")
+rep("  const sh=LS('nt_sh8_v1')||{}; const sr=sh.rows||[];","  const sh=LS('nt_sh8_v1')||{}; const sr=(sh.rows||[]).filter(r=>r&&ntIn(r.dev));")
+rep("  const kd=LS('nt_khadamat_v1')||{}; const dr=kd.rows||[];","  const kd=LS('nt_khadamat_v1')||{}; const dr=(kd.rows||[]).filter(r=>r&&ntIn(r.dev));")
+rep("  const mk=LS('nt_moshkel_v1')||{}; const mr=mk.rows||[];","  const mk=LS('nt_moshkel_v1')||{}; const mr=(mk.rows||[]).filter(r=>r&&ntIn(r.dev));")
+rep("  if(Array.isArray(df)&&df.length) out.push(","  if(Array.isArray(df)&&df.filter(x=>x&&ntIn(x.dev)).length) out.push(")
+rep("t:`${fa(df.length)} قرائت در دفترچه`","t:`${fa(df.filter(x=>x&&ntIn(x.dev)).length)} قرائت در دفترچه`")
+rep("  const A=ntSvc.all(items,LS('nt_daftar_v1')||[],K), R=A.filter(x=>x.st==='r')","  const A=ntSvc.all(items.filter(x=>x&&ntIn(x.dev)),LS('nt_daftar_v1')||[],K), R=A.filter(x=>x.st==='r')")
+rep("const W=ntFluid.warnings(E,LS('nt_daftar_v1')||[],K,unit); if(!W.length) return [];","const W=ntFluid.warnings(E,LS('nt_daftar_v1')||[],K,unit).filter(x=>ntIn(x.dev)); if(!W.length) return [];")
+rep("  const sh=LS('nt_sh8_v1'), rows=(sh&&Array.isArray(sh.rows))?sh.rows:[], k=ntRepeat.dn(K); if(k===null) return [];","  const sh=LS('nt_sh8_v1'), rows=((sh&&Array.isArray(sh.rows))?sh.rows:[]).filter(r=>r&&ntIn(r.dev)), k=ntRepeat.dn(K); if(k===null) return [];")
+rep("  const kh=((LS('nt_kharid9_v1')||{}).rows||[]).filter(r=>r.over!=='لغو شد' && r.over!=='بسته شد');","  const kh=((LS('nt_kharid9_v1')||{}).rows||[]).filter(r=>r && ntIn(r.unit) && r.over!=='لغو شد' && r.over!=='بسته شد');")
+rep("""    if(old) R.push({c:'i',t:fa(old)+' عکس پشتیبان ندارد',s:'در زبانه «عکس‌ها» به بله یا تلگرام بفرستید',go:'عکس‌ها'}); }catch(e){}
+  try{ const b=bkAge(); if(b===null||b>7) R.push({c:'i',t:b===null?'پشتیبان ندارید':'آخرین پشتیبان '+fa(b)+' روز پیش',s:'یک نسخه پشتیبان بگیرید',bk:1}); }catch(e){}
+  return R;""","""    if(old) R.push({c:'i',t:fa(old)+' عکس پشتیبان ندارد',s:'در زبانه «عکس‌ها» به بله یا تلگرام بفرستید',go:'عکس‌ها'}); }catch(e){}
+  try{ const b=bkAge(); if(b===null||b>7) R.push({c:'i',t:b===null?'پشتیبان ندارید':'آخرین پشتیبان '+fa(b)+' روز پیش',s:'یک نسخه پشتیبان بگیرید',bk:1}); }catch(e){}
+  { const cs=n=>{ try{ return !parent.ntSync || parent.ntSync.canSee(n); }catch(e){ return true; } };
+    AT_CH=AT_CH.filter(cs); return R.filter(r=>!r.go || cs(r.go)); }""")
 rep("  return jobs.filter(j=>j&&j.id&&!j.del&&osOpen(j))","  return jobs.filter(j=>j&&j.id&&!j.del&&ntIn(j.dev)&&osOpen(j))")
 JS=r"""
 /* ===== بخش کاربر: فقط دستگاه‌های همان بخش (add_dept_filter) ===== */
