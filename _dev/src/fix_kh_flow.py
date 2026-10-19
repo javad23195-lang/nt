@@ -4,6 +4,7 @@
 #    (نوار «ردیف تکراری» آن‌ها را تکراری نمی‌شمارد).
 # ۲) «عدم تایید» در مرحله منصوری/گودرزی: قلم‌های سند لغو می‌شوند (over='لغو شد'، rej = نام مهندس، rejAt). سند به فهرست
 #    «سند بسته» می‌رود با برچسب «عدم تایید — مهندس …» و دکمه «برگرداندن».
+# ۳) تکه‌های خرید ناقص وقتی هیچ‌کدام خریده نشده (مثلاً بعد از «یک مرحله عقب») دوباره یک ردیف می‌شوند (kSplJoin).
 import json,base64,sys
 src,out=sys.argv[1],sys.argv[2]
 s=open(src,encoding='utf-8').read()
@@ -30,6 +31,20 @@ rep("""        ${st>0?`<button type="button" class="gray fback">یک مرحله 
       </div>`}""","""        ${st>0?`<button type="button" class="gray fback">یک مرحله عقب</button>`:''}
         ${st<2?`<button type="button" class="frej">عدم تایید</button>`:''}
       </div>`}""")
+# ۳) یکی کردن دوباره تکه‌ها، پیش از رسم اسناد
+rep("""function flowRender(){
+  const box=$('flowList'), sec=$('flowBox');""","""function kSplJoin(){
+  try{ if(typeof kCanW==='function' && !kCanW()) return; }catch(e){}
+  const G={}; rows.forEach(r=>{ if(r&&r.spl) (G[r.spl]=G[r.spl]||[]).push(r); });
+  Object.values(G).forEach(L=>{
+    if(L.some(r=>String(r.bought||'').trim()!=='' || (Array.isArray(r.inw)&&r.inw.length))) return;   // هنوز خرید دارد
+    const k=L[0]; k.qty=Math.round(L.reduce((a,r)=>a+(+spNum(r.qty)||0),0)*1000)/1000; delete k.spl;
+    L.slice(1).forEach(r=>{ const i=rows.indexOf(r); if(i>-1) rows.splice(i,1); try{ const t=kTicks.indexOf(r); if(t>-1) kTicks.splice(t,1); }catch(e){} });
+  });
+}
+function flowRender(){
+  try{ kSplJoin(); }catch(e){}
+  const box=$('flowList'), sec=$('flowBox');""")
 # سند ردشده: جدا از سندهای باز
 rep("""  const act=keys.filter(k=>!isFin(k)), fin=keys.filter(isFin);""","""  const isRej=k=>g[k].rows.every(r=>r.rej);
   const act=keys.filter(k=>!isFin(k)&&!isRej(k)), fin=keys.filter(k=>isFin(k)||isRej(k));""")

@@ -33,6 +33,13 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   const pend=await fr.evaluate(c=>[...document.querySelectorAll(c+' .fr:not(.done) .nm')].map(x=>x.textContent),card('702'));
   ok(pend.some(t=>/گردگیر/.test(t)) && pend.some(t=>/سینی/.test(t)),'سند ۷۰۲ هنوز باز است: گردگیر (مانده) و سینی — '+pend.join('، '));
   ok(await fr.evaluate(()=>{ const b=document.getElementById('kDupBar'); return !b||b.hidden; }),'نوار «ردیف تکراری» تکه‌ها را تکراری نمی‌شمارد');
+  // «یک مرحله عقب» → تکه‌ها دوباره یک ردیف ۴تایی
+  await fr.click(card('702')+' .fback'); await sleep(400);
+  L=JSON.parse(await p.evaluate(()=>localStorage.getItem('nt_kharid9_v1'))).rows;
+  const g2=L.filter(r=>r.item==='گردگیر پین');
+  ok(g2.length===1 && g2[0].qty===4 && !g2[0].bought && !g2[0].spl,'یک مرحله عقب: دوباره یک ردیف ۴ عدد — '+JSON.stringify(g2.map(r=>[r.qty,r.bought])));
+  const inn2=JSON.parse(await p.evaluate(()=>localStorage.getItem('nt_anbar_in_v1'))||'{}').rows||[];
+  ok(inn2.length===0,'ورود انبار هم برگشت');
   // ۲) عدم تایید سند ۷۰۳
   ok(await fr.evaluate(c=>!!document.querySelector(c+' .frej'),card('703')),'سند در مرحله منصوری: دکمه «عدم تایید»');
   ok(await fr.evaluate(c=>!document.querySelector(c+' .frej'),card('702')),'سند در مرحله خرید: «عدم تایید» نیست');
