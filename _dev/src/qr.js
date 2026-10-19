@@ -40,7 +40,7 @@ function jNow(){ try{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',
 const jStr=j=>j?`${j.y}/${p2(j.m)}/${p2(j.d)}`:'';
 const nowHM=()=>{ const d=new Date(); return p2(d.getHours())+':'+p2(d.getMinutes()); };
 const shiftNow=()=>{ const h=new Date().getHours(); return h>=6&&h<14?'صبح':(h>=14&&h<22?'عصر':'شب'); };
-const hmOk=t=>{ const m=/^(\d{1,2}):(\d{2})$/.exec(latin(t).trim()); return m && +m[1]<24 && +m[2]<60 ? p2(+m[1])+':'+m[2] : ''; };
+const hmOk=t=>{ let x=latin(t).trim(); if(/^\d{3,4}$/.test(x)) x=x.slice(0,-2)+':'+x.slice(-2); const m=/^(\d{1,2}):(\d{2})$/.exec(x); return m && +m[1]<24 && +m[2]<60 ? p2(+m[1])+':'+m[2] : ''; };
 const S=()=>window.ntSync||null;
 const canSee=n=>{ try{ return S()&&S().canSee?S().canSee(n):true; }catch(e){ return true; } };
 const canW=n=>{ try{ return S()&&S().canWriteTab?S().canWriteTab(n):true; }catch(e){ return true; } };
