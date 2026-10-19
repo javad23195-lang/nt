@@ -27,8 +27,8 @@ const ICON={
 };
 /* آیکون‌های تازه (سرمه‌ای + کهربایی) از uicons.js؛ ICON بالا فقط پشتیبان است */
 const svg=k=>(window.NTI && NTI.P[k||'doc'])?NTI.svg(k||'doc'):`<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]||ICON.doc}</svg>`;
-const TABICON={'امروز':'today','برنامه روزانه':'plan','انبار':'box','دفترچه قرائت':'read','ثبت مشکلات':'warn','شناسنامه':'id','خدمات':'wr','درخواست خرید':'cart','توقف شیفت':'stop','برون‌سپاری':'out','عکس‌ها':'photo'};
-const MAIN=['امروز','برنامه روزانه','انبار'];
+const TABICON={'امروز':'today','مدیریت':'mgmt','برنامه روزانه':'plan','انبار':'box','دفترچه قرائت':'read','ثبت مشکلات':'warn','شناسنامه':'id','خدمات':'wr','درخواست خرید':'cart','توقف شیفت':'stop','برون‌سپاری':'out','عکس‌ها':'photo'};
+const MAIN=['امروز','مدیریت','برنامه روزانه'];
 /* کارهای دکمه «+»: [نام زبانه، دکمه افزودن داخل آن، عنوان، توضیح، آیکون، رنگ] */
 const ACTS=[
   ['توقف شیفت','bNew','ثبت توقف','دستگاه ایستاد','stop','y'],
@@ -167,7 +167,7 @@ body.ntdriver .topbar{width:200px}
   @keyframes ntPopM{0%{transform:scale(.88)}100%{transform:scale(1)}}
 }`;
 const stD=document.createElement('style'); stD.textContent=CSSD; document.head.appendChild(stD);
-try{ tabs.forEach((t,i)=>{ t.style.setProperty('--k',i); const k=TABICON[DOCS[i].name]; const e=t.querySelector('.i'); if(k && e) e.innerHTML=svg(k); }); }catch(e){}
+try{ tabs.forEach((t,i)=>{ t.style.order=DOCS[i].name==='مدیریت'?1:i*2; t.style.setProperty('--k',i); const k=TABICON[DOCS[i].name]; const e=t.querySelector('.i'); if(k && e) e.innerHTML=svg(k); }); }catch(e){}
 
 document.body.classList.add('ntnav');
 
@@ -200,7 +200,7 @@ function others(){ return DOCS.map(d=>d.name).filter(n=>MAIN.indexOf(n)<0 && vis
 function paint(){
   const act=activeName(), main=MAIN.filter(vis), more=others();
   const mk=(n,label,icon,on,badge,extra)=>`<button type="button" class="ntnb${on?' on':''}" data-n="${n}" ${on?'aria-current="page"':''}>${svg(icon)}${label}<span class="b${badge?' show':''}">${cap99(badge)}</span></button>`;
-  let h=''; const lab={'امروز':'امروز','برنامه روزانه':'برنامه','انبار':'انبار'};
+  let h=''; const lab={'امروز':'امروز','مدیریت':'مدیریت','برنامه روزانه':'برنامه','انبار':'انبار'};
   const first=main.slice(0,2), last=main.slice(2);
   first.forEach(n=>h+=mk(n,lab[n],TABICON[n],act===n,badgeOf(n)));
   h+='<span class="ntsp" aria-hidden="true"></span>';

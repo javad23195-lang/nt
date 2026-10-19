@@ -38,7 +38,8 @@ const TABKEYS={
   'انبار':['nt_anbar_out_v1','nt_anbar_in_v1','nt_anbar_sent_v1','nt_anbar_codes_v1','nt_anbar_sum_v1'],
   'درخواست خرید':['nt_kharid9_v1','nt_kharid9_hist_v1','nt_kharid_cat_v1','nt_kr_unit_v1','nt_anbar_in_v1'],
   'توقف شیفت':['nt_tavaqof_v1'],
-  'برون‌سپاری':['nt_outsrc_v1']
+  'برون‌سپاری':['nt_outsrc_v1'],
+  'مدیریت':[]
 };
 /* پیش‌فرض دسترسی محدود: واحد استخراج */
 const PRESET={'توقف شیفت':'w','دفترچه قرائت':'w'};
@@ -65,7 +66,8 @@ const st=()=>lsGet(STK);
 function stSet(p){ lsSet(STK,Object.assign(st(),p)); }
 const mode=()=>cfg.mode||'';
 const acl=()=>(cfg.acl && typeof cfg.acl==='object')?cfg.acl:null;
-const tabAcc=name=>{ const a=acl(); return a?(a[name]||'h'):'w'; };
+/* «مدیریت» اگر جدا تنظیم نشده، همان دسترسی «امروز» را دارد */
+const tabAcc=name=>{ const a=acl(); if(!a) return 'w'; if(name==='مدیریت' && !(name in a)) return a['امروز']||'h'; return a[name]||'h'; };
 /** این سیستم اجازه دارد این کلید را بنویسد؟ */
 function canWrite(k){
   if(mode()!=='w') return false;
@@ -446,9 +448,10 @@ function applyKeys(keys,opt){
   if(!Object.keys(changed).length){ deferSince=0; return true; }
   const hit=[]; let isBooted=true; try{ isBooted=!!ntBooted; }catch(e){}
   /* زبانه «امروز» بیشتر اطلاعات را فقط می‌خواند و خودش تازه می‌شود؛ فقط وقتی یادداشت‌های خودش عوض شده دوباره باز می‌شود */
-  const own0=TABKEYS[DOCS[0].name]||null;
+  /* «امروز» و «مدیریت» اطلاعات را فقط می‌خوانند و خودشان تازه می‌شوند؛ فقط برای کلیدهای خودشان دوباره باز می‌شوند */
+  const ownOf=i=>{ const n=DOCS[i]&&DOCS[i].name; return i===0?(TABKEYS[n]||null):(n==='مدیریت'?[]:null); };
   try{ frames.forEach((f,i)=>{ if(!f.dataset.loaded) return;
-    const ks=(i===0 && own0)?own0:Object.keys(keysOfFrame(i));
+    const ks=ownOf(i)||Object.keys(keysOfFrame(i));
     if(ks.some(k=>changed[k])) hit.push(i); }); }catch(e){}
   if(!opt.now && isBooted && !document.hidden && hit.indexOf(active)>-1){
     const now=Date.now(); if(!deferSince) deferSince=now;
@@ -470,7 +473,8 @@ function applyKeys(keys,opt){
   try{ localStorage.removeItem('ntbak_lock'); }catch(e){}
   if(!ok) throw new Error('FULL');
   try{ hit.forEach(i=>reloadFrame(i,true)); badges();
-       if(hit.indexOf(0)<0 && frames[0].dataset.loaded) frames[0].contentWindow.postMessage({nt:'show'},'*'); }catch(e){}
+       if(hit.indexOf(0)<0 && frames[0].dataset.loaded) frames[0].contentWindow.postMessage({nt:'show'},'*');
+       const mi=DOCS.findIndex(d=>d.name==='مدیریت'); if(mi>-1 && frames[mi] && frames[mi].dataset.loaded) frames[mi].contentWindow.postMessage({nt:'show'},'*'); }catch(e){}
   return true;
 }
 

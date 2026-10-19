@@ -20,7 +20,9 @@ const J=ago=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZo
     await p.goto(`http://localhost:${web.address().port}/nt/s.html`); await p.waitForFunction(()=>window.ntSync&&window.ntNav,null,{timeout:15000});
     await p.addStyleTag({content:'.sydlg,.sybd{display:none!important}'});
     await p.evaluate(()=>{ window.ntLocked=false; document.body.classList.remove('ntlocked'); try{ ntBoot(); }catch(e){} }); await sleep(2500);
-    const fr=(await (await p.$$('iframe'))[0].contentFrame());
+    await p.evaluate(()=>window.postMessage({nt:'go',tab:'مدیریت'},'*')); await sleep(1500);
+    const MI=await p.evaluate(()=>DOCS.findIndex(d=>d.name==='مدیریت'));
+    const fr=(await (await p.$$('iframe'))[MI].contentFrame());
     const K=await fr.evaluate(()=>{ try{ atRender(); }catch(e){} return [...document.querySelectorAll('#kpis .kp')].map(b=>({t:b.innerText.replace(/\s+/g,' '),r:b.getBoundingClientRect().top})); });
     console.log(w+'px');
     ok(K.length===4,'چهار کارت');

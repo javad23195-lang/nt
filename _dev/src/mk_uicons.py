@@ -54,6 +54,7 @@ I={
 }
 I['menu']=f"<path d='M3.5 6h17M3.5 12h17' stroke='currentColor' stroke-width='2.4'/><path d='M3.5 18h10' {AS} stroke-width='2.4'/>"
 I['close']=f"<path d='M6 6l12 12M18 6L6 18' stroke='currentColor' stroke-width='2.4'/>"
+I['mgmt']=f"<rect x='3' y='3' width='18' height='18' rx='3.2' stroke-width='2.2'/><path d='M7.5 17.2v-3.4M12 17.2v-5.6M16.5 17.2v-7.6' stroke-width='2.4'/><path d='M6.6 10.4l3.6-3.1 2.9 2 4.3-3.9' {AS} stroke-width='2'/><circle cx='17.4' cy='5.4' r='1.4' {AF}/>"
 I['pump']=I['fuel']
 js="""/* آیکون‌های رابط سامانه (ساخته‌شده از mk_uicons.py — دستی ویرایش نشود).
    سبک: سرمه‌ای = currentColor (رنگ متن)، کهربایی #E6A52E، جزئیات سفید. هر آیکون رنگ خودش را دارد، پس در قاب‌ها هم درست است.
