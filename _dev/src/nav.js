@@ -85,6 +85,9 @@ body.ntnav:not(.ntlocked):not(.ntdriver) #ntFab.has{display:grid}
 #ntNavSh .h{width:44px;height:5px;border-radius:3px;background:#CBD3DB;margin:0 auto 12px}
 #ntNavSh h3{margin:0 0 10px;font-size:.98rem;color:#17212B}
 .ntacts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ntac{position:relative}.ntac>.b{position:absolute;top:10px;inset-inline-end:10px;min-width:22px;height:22px;border-radius:11px;background:#C0392B;color:#fff;font-size:.72rem;display:none;align-items:center;justify-content:center;padding:0 6px}.ntac>.b.show{display:flex}
+.ntac.cur,.ntmr.cur{border-color:#E6A52E;box-shadow:inset 0 0 0 1.5px #E6A52E}
+.ntfab[data-b]:not([data-b=""])::after{content:attr(data-b);position:absolute;top:-2px;inset-inline-end:-2px;min-width:22px;height:22px;border-radius:11px;background:#C0392B;color:#fff;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 6px;border:2px solid #fff}
 .ntac{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-height:104px;padding:12px;border-radius:16px;border:1px solid #DDE3E9;background:#F3F5F7;font:inherit;color:#17212B;text-align:start;cursor:pointer}
 .ntac .ic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:#fff;color:#1B2430;box-shadow:inset 0 0 0 1.5px #F1D9A8}
 .ntac .ic svg{width:26px;height:26px}
@@ -200,7 +203,16 @@ function rest0(){ return DOCS.map(d=>d.name).filter(n=>MAIN.indexOf(n)<0 && vis(
 /* نوار پایین: زبانه‌های اصلی؛ اگر کاربر آن‌ها را ندارد، جای خالی (تا ۴ دکمه) با زبانه‌های دیگرش پر می‌شود و همان‌ها در «بیشتر» تکرار نمی‌شوند */
 function barTabs(){ const m=MAIN.filter(vis), r=rest0(); while(r.length && m.length<(r.length>4-m.length?3:4)) m.push(r.shift()); return m; }
 function others(){ const b=barTabs(); return rest0().filter(n=>b.indexOf(n)<0); }
+/* کاربر محدود (بدون «امروز» و «برنامه روزانه»): نوار پایین فقط دکمه وسط؛ همه زبانه‌ها یک بار در برگه همان دکمه */
+const solo=()=>!vis('امروز') && !vis('برنامه روزانه');
+const soloActs=()=>ACTS.filter(a=>vis(a[0]) && canW(a[0]));
+const soloTabs=()=>{ const A=soloActs().map(a=>a[0]); return DOCS.map(d=>d.name).filter(n=>vis(n) && A.indexOf(n)<0); };
 function paint(){
+  if(solo()){ navIn.innerHTML=''; if(!document.body.classList.contains('ntsolo')) document.body.classList.add('ntsolo');   /* بدون تغییر بی‌جا: body زیر نظر است */ fab.classList.add('has');
+    const tot=DOCS.reduce((s,d)=>s+(vis(d.name)?(+String(badgeOf(d.name)).replace(/[۰-۹]/g,c=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(c))||0):0),0);
+    fab.dataset.b=tot?(tot>99?'۹۹+':String(tot).replace(/\d/g,c=>'۰۱۲۳۴۵۶۷۸۹'[c])):'';
+    requestAnimationFrame(()=>{ moveBub(); moveInd(); }); return; }
+  if(document.body.classList.contains('ntsolo')) document.body.classList.remove('ntsolo'); delete fab.dataset.b;
   const act=activeName(), main=barTabs(), more=others();
   const mk=(n,label,icon,on,badge,extra)=>`<button type="button" class="ntnb${on?' on':''}" data-n="${n}" ${on?'aria-current="page"':''}>${svg(icon)}${label}<span class="b${badge?' show':''}">${cap99(badge)}</span></button>`;
   let h=''; const lab={'امروز':'امروز','مدیریت':'مدیریت','برنامه روزانه':'برنامه','انبار':'انبار','دفترچه قرائت':'دفترچه','توقف شیفت':'توقف','ثبت مشکلات':'مشکلات','درخواست خرید':'خرید','برون‌سپاری':'برون‌سپاری','شناسنامه':'شناسنامه','خدمات':'خدمات','عکس‌ها':'عکس‌ها'};
@@ -219,7 +231,15 @@ let openKind='';
 function closeSheet(back){ openKind=''; requestAnimationFrame(moveBub); bd.classList.remove('on'); sh.classList.remove('on'); fab.classList.remove('open'); fab.setAttribute('aria-expanded','false'); if(back!==false){ try{ fab.focus(); }catch(e){} } }
 function openSheet(kind){
   openKind=kind; let h='<div class="h"></div>';
-  if(kind==='add'){
+  if(kind==='add' && solo()){
+    const act=activeName(), A=soloActs(), T=soloTabs(), bd=n=>{ const b=badgeOf(n); return `<span class="b${b?' show':''}">${b}</span>`; };
+    if(A.length){ h+='<h3>چه چیزی ثبت می‌کنید؟</h3><div class="ntacts">';
+      A.forEach(a=>{ h+=`<button type="button" class="ntac ${a[5]}${act===a[0]?' cur':''}" data-n="${a[0]}" data-b="${a[1]}"><span class="ic">${svg(a[4])}</span><b>${a[2]}</b><span>${a[3]}</span>${bd(a[0])}</button>`; });
+      h+='</div>'; }
+    h+=`<h3${A.length?' style="margin-top:14px"':''}>${A.length?'بخش‌های دیگر':'بخش‌ها'}</h3><div class="ntmore">`;
+    T.forEach(n=>{ h+=`<button type="button" class="ntmr${act===n?' cur':''}" data-n="${n}">${svg(TABICON[n])}${n}${bd(n)}</button>`; });
+    h+='</div>';
+  }else if(kind==='add'){
     h+='<h3>چه چیزی ثبت می‌کنید؟</h3><div class="ntacts">';
     ACTS.filter(a=>vis(a[0]) && canW(a[0])).forEach(a=>{ h+=`<button type="button" class="ntac ${a[5]}" data-n="${a[0]}" data-b="${a[1]}"><span class="ic">${svg(a[4])}</span><b>${a[2]}</b><span>${a[3]}</span></button>`; });
     h+='</div>';

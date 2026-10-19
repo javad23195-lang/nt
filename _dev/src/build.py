@@ -2,7 +2,7 @@ import sys
 src, out = sys.argv[1], sys.argv[2]
 s=open(src,encoding='utf-8').read()
 css=open('sync.css',encoding='utf-8').read()
-js=open('uicons.js',encoding='utf-8').read()+'\n'+open('pinlock.js',encoding='utf-8').read()+'\n'+open('sync.js',encoding='utf-8').read()
+js=open('uicons.js',encoding='utf-8').read()+'\n'+open('pinlock.js',encoding='utf-8').read()+'\n'+open('dept.js',encoding='utf-8').read()+'\n'+open('sync.js',encoding='utf-8').read()
 def rep(a,b,n=1):
     global s
     assert s.count(a)==n, (a[:60], s.count(a))
@@ -48,7 +48,7 @@ qr=open('qr.js',encoding='utf-8').read()
 ch=open('charts.js',encoding='utf-8').read()
 pw=open('pwa.js',encoding='utf-8').read()
 nv=open('nav.js',encoding='utf-8').read()
-extra=''.join(open(f,encoding='utf-8').read()+'\n' for f in ['icons.js','svc.js','cost.js','repeat.js','fluid.js','ai.js','dev.js','theme.js','exit.js','menu.js','dedup.js','invoice.js','dept.js'])
+extra=''.join(open(f,encoding='utf-8').read()+'\n' for f in ['icons.js','svc.js','cost.js','repeat.js','fluid.js','ai.js','dev.js','theme.js','exit.js','menu.js','dedup.js','invoice.js'])
 rep("\n</script>\n</body>\n</html>", "\n</script>\n<script>\n"+js+"</script>\n<script>\n"+stp+"</script>\n<script>\n"+rpt+"</script>\n<script>\n"+qr+"</script>\n<script>\n"+ch+"</script>\n<script>\n"+pw+"</script>\n<script>\n"+nv+"</script>\n<script>\n"+extra+"</script>\n</body>\n</html>")
 open(out,'w',encoding='utf-8').write(s)
 print('built',len(s))

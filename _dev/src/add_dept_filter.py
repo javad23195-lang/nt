@@ -40,13 +40,14 @@ rep("""    if(old) R.push({c:'i',t:fa(old)+' عکس پشتیبان ندارد',s
 rep("  return jobs.filter(j=>j&&j.id&&!j.del&&osOpen(j))","  return jobs.filter(j=>j&&j.id&&!j.del&&ntIn(j.dev)&&osOpen(j))")
 JS=r"""
 /* ===== بخش کاربر: فقط دستگاه‌های همان بخش (add_dept_filter) ===== */
-(function(){ try{
-  const dp=(parent.ntDept&&parent.ntDept.my())||''; if(!dp) return;
+(function ntDeptGo(n){ try{
+  if(!parent.ntDept || !parent.ntSync || !parent.ntSync.myDept){ if((n||0)<100) setTimeout(()=>ntDeptGo((n||0)+1),100); return; }   /* پوسته هنوز آماده نیست */
+  const dp=parent.ntDept.my()||''; if(!dp) return;
   const _fl=flBuild; flBuild=function(){ const D=_fl.apply(this,arguments); if(D&&Array.isArray(D.list)) D.list=D.list.filter(x=>ntIn(x.n)); return D; };
   const _tl=tlBuild; tlBuild=function(){ const D=_tl.apply(this,arguments); if(D&&Array.isArray(D.rows)) D.rows=D.rows.filter(r=>ntIn(r.n)); return D; };
   const h=document.querySelector('header h1'); if(h){ const b=document.createElement('span'); b.className='dpt'; b.textContent='بخش '+dp; h.appendChild(b); }
-  try{ flRender(); }catch(e){} try{ kpRender(); }catch(e){} try{ atRender(); }catch(e){}
-}catch(e){} })();
+  try{ flRender(); }catch(e){} try{ kpRender(); }catch(e){} try{ atRender(); }catch(e){} try{ tlRender(); }catch(e){} try{ alRender(); }catch(e){}
+}catch(e){} })(0);
 """
 k=t.rfind("</script>"); t=t[:k]+JS+"\n"+t[k:]
 k=t.index('<script>')+8; t=t[:k]+"\nfunction ntIn(dev){ try{ return !parent.ntDept || parent.ntDept.mine(dev); }catch(e){ return true; } }\n"+t[k:]
@@ -56,9 +57,10 @@ d['b64']=base64.b64encode(t.encode('utf-8')).decode('ascii')
 d2=next(x for x in docs if x['name']=='دفترچه قرائت')
 t=base64.b64decode(d2['b64']).decode('utf-8')
 a='\nconst $ = id=>document.getElementById(id);\n'; assert t.count(a)==1
-t=t.replace(a,"\ntry{ const _D=parent.ntDept; if(_D && _D.my()) DATA.d=DATA.d.filter(m=>_D.mine(m.dev)); }catch(e){}"+a)
+t=t.replace(a,"\n/* بخش کاربر: اگر پوسته هنوز آماده نیست (این زبانه اولین زبانه باز است)، بعداً اعمال و دوباره نمایش داده می‌شود */\nfunction ntDeptD(){ try{ const _D=parent.ntDept; if(!_D || !parent.ntSync || !parent.ntSync.myDept) return false; const dp=_D.my(); if(dp){ DATA.d=DATA.d.filter(m=>_D.mine(m.dev)); const h=document.querySelector('.nh2 h1'); if(h && !h.querySelector('.dpt')){ const b=document.createElement('span'); b.className='dpt'; b.textContent='بخش '+dp; h.appendChild(b); } } return true; }catch(e){ return true; } }\nconst ntDeptLate=!ntDeptD();"+a)
 a="nh.innerHTML='<h1>دفترچه قرائت</h1><span class=\"nhd\"></span>';"; assert t.count(a)==1
-t=t.replace(a,a+" try{ const dp=parent.ntDept&&parent.ntDept.my(); if(dp){ const b=document.createElement('span'); b.className='dpt'; b.textContent='بخش '+dp; nh.querySelector('h1').appendChild(b); } }catch(e){}")
+t=t.replace(a,a+" try{ ntDeptD.lbl=1; const dp=parent.ntDept&&parent.ntDept.my(); if(dp){ const b=document.createElement('span'); b.className='dpt'; b.textContent='بخش '+dp; nh.querySelector('h1').appendChild(b); } }catch(e){}")
+k2=t.rfind("</script>"); t=t[:k2]+"\nif(ntDeptLate){ let n=0; const tm=setInterval(()=>{ n++; if(ntDeptD()||n>100){ clearInterval(tm); try{ render(); }catch(e){} } },100); }\n"+t[k2:]
 k=t.rfind("</style>"); t=t[:k]+"\n.nh2 .dpt{display:inline-block;vertical-align:middle;margin-inline-start:8px;padding:1px 10px;border-radius:10px;background:#FFF1D6;color:#7A4300;font-weight:700;font-size:.78rem}\n"+t[k:]
 d2['b64']=base64.b64encode(t.encode('utf-8')).decode('ascii')
 s=s[:i]+json.dumps(docs,ensure_ascii=False)+s[j:]
