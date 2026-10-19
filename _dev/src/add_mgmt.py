@@ -12,7 +12,7 @@ t=base64.b64decode(d['b64']).decode('utf-8')
 CSS="""
 /* دو نما: امروز / مدیریت */
 html:not(.mgmt) #kpis,html:not(.mgmt) #flCard,html:not(.mgmt) #tlCard,html:not(.mgmt) #chCard,html:not(.mgmt) #rpCard{display:none!important}
-html.mgmt .wrap>*:not(header):not(#kpis):not(#atCard):not(#flCard):not(#tlCard):not(#chCard):not(#rpCard){display:none!important}
+html.mgmt .wrap>*:not(header):not(#kpis):not(#atCard):not(#flCard):not(#tlCard):not(#chCard):not(#rpCard):not(.tools){display:none!important}
 html.mgmt #hSum{display:none!important}
 """
 k=t.find("</style>"); assert k>0

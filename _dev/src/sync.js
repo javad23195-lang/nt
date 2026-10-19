@@ -710,10 +710,12 @@ function checkMe(){
   const me=U[cfg.uid];
   if(!me || me.off){ revoke(); return false; }
   const a=isObj(me.acl)?me.acl:null, dv=Array.isArray(me.dev)&&me.dev.length?me.dev:null;
-  if(J(a)!==J(acl()) || (me.name||'')!==(cfg.uname||'') || J(dv)!==J(cfg.devs||null) || !!me.nopin!==!!cfg.nopin){
+  const dp=typeof me.dept==='string'?me.dept.slice(0,40):'';
+  if(J(a)!==J(acl()) || (me.name||'')!==(cfg.uname||'') || J(dv)!==J(cfg.devs||null) || !!me.nopin!==!!cfg.nopin || dp!==(cfg.dept||'')){
     if(a) cfg.acl=a; else delete cfg.acl;
     if(me.nopin) cfg.nopin=1; else delete cfg.nopin;
     if(dv) cfg.devs=dv; else delete cfg.devs;
+    if(dp) cfg.dept=dp; else delete cfg.dept;
     cfg.uname=me.name||''; lsSet(CFG,cfg);
     toast('دسترسی این سیستم تغییر کرد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),900);
     return false;
@@ -815,7 +817,7 @@ function viewUsers(){
     ${ids.length?ids.map(id=>{ const u=U[id], s=S[id];
       return `<div class="syuser${u.off?' off':''}" data-id="${esc(id)}">
         <b>${esc(u.name||'بدون نام')}${u.off?'<span class="sychip">قطع شده</span>':''}</b>
-        <small>${Array.isArray(u.dev)&&u.dev.length?'راننده — فقط '+esc(u.dev.join('، ')):esc(accText(isObj(u.acl)?u.acl:null))}</small>
+        <small>${Array.isArray(u.dev)&&u.dev.length?'راننده — فقط '+esc(u.dev.join('، ')):esc(accText(isObj(u.acl)?u.acl:null))+(u.dept?' — بخش '+esc(u.dept):'')}</small>
         <small>آخرین اتصال: ${s&&s.at?esc(fmtAt(s.at))+(s.dev?' ('+esc(s.dev)+')':''):'هنوز وصل نشده'}</small>
         <div class="syub"><button type="button" data-act="code">کد اتصال</button><button type="button" data-act="edit">دسترسی</button><button type="button" data-act="off">${u.off?'وصل دوباره':'قطع دسترسی'}</button><button type="button" class="warn" data-act="del">حذف</button></div>
       </div>`; }).join(''):'<p>هنوز کاربری ساخته نشده است. برای هر همکار یا هر سیستم، یک کاربر بسازید.</p>'}
@@ -842,6 +844,9 @@ function viewUserEdit(id){
     <div class="sycard"><h3>راننده (فقط یک دستگاه)</h3>
       <label>دستگاه<select id="syUDev" style="display:block;width:100%;margin-top:3px"><option value="">— کاربر عادی (همه دستگاه‌ها) —</option>${devList().map(n=>`<option ${u&&Array.isArray(u.dev)&&u.dev[0]===n?'selected':''}>${esc(n)}</option>`).join('')}</select></label>
       <small>راننده هیچ زبانه‌ای نمی‌بیند؛ فقط صفحه دستگاه خودش: ثبت قرائت، شروع و پایان توقف، ثبت مشکل.</small></div>
+    <div class="sycard" id="syDeptCard"><h3>بخش</h3>
+      <label>دستگاه‌های کدام بخش را ببیند؟<select id="syUDept" style="display:block;width:100%;margin-top:3px"><option value="">— همه بخش‌ها —</option>${((window.ntDept&&ntDept.groups())||[]).map(n=>`<option ${u&&u.dept===n?'selected':''}>${esc(n)}</option>`).join('')}</select></label>
+      <small>در «امروز» و «مدیریت» (ناوگان، خط زمان، نیاز به توجه و کارت‌های خلاصه) فقط دستگاه‌های همین بخش دیده می‌شود.</small></div>
     <div class="sycard" id="syAccCard"><h3>دسترسی</h3>
       <label class="chk"><input type="radio" name="syAcc" value="lim" ${lim?'checked':''}>محدود — فقط زبانه‌های انتخاب‌شده</label>
       <label class="chk"><input type="radio" name="syAcc" value="full" ${lim?'':'checked'}>کامل — همه زبانه‌ها (ثبت در همه)</label>
@@ -855,7 +860,7 @@ function viewUserEdit(id){
     <button type="button" class="go" id="syUSave">${u?'ذخیره':'ساخت کاربر و کد اتصال'}</button>
     <button type="button" id="syBack">انصراف</button>`);
   document.querySelectorAll('input[name="syAcc"]').forEach(r=>r.addEventListener('change',()=>{ $('syAclList').hidden=document.querySelector('input[name="syAcc"]:checked').value!=='lim'; }));
-  const dvSync=()=>{ $('syAccCard').hidden=!!$('syUDev').value; }; $('syUDev').addEventListener('change',dvSync); dvSync();
+  const dvSync=()=>{ $('syAccCard').hidden=!!$('syUDev').value; $('syDeptCard').hidden=!!$('syUDev').value; }; $('syUDev').addEventListener('change',dvSync); dvSync();
   on('syUSave',()=>{
     const name=$('syUName').value.trim().replace(/\s+/g,' ');
     if(!name){ msg('نام کاربر را بنویسید',true); return; }
@@ -872,6 +877,7 @@ function viewUserEdit(id){
     X[nid]=Object.assign({},X[nid]||{id:nid,made:new Date().toISOString()},{name});
     if(ac) X[nid].acl=ac; else delete X[nid].acl;
     if(dev) X[nid].dev=[dev]; else delete X[nid].dev;
+    const dept=dev?'':$('syUDept').value; if(dept) X[nid].dept=dept.slice(0,40); else delete X[nid].dept;
     if($('syUNoPin').checked) X[nid].nopin=1; else delete X[nid].nopin;
     usersSet(X);
     if(id){ viewUsers(); toast('ذخیره شد — تا ۲ دقیقه دیگر در سیستم کاربر اجرا می‌شود'); } else viewCode(nid);
@@ -1414,6 +1420,6 @@ function touch(keys){
 }
 function myName(){ try{ const u=cfg.uid && usersGet(); return (u && u[cfg.uid] && u[cfg.uid].name)||''; }catch(e){ return ''; } }
 window.ntSync={T,lockNow,canLock:()=>pinNeeded(),get cfg(){ return cfg; },st,sync,collect,hashOf,mergeAll,baseGet,outgoing,usersGet,seenGet,canSee:n=>tabAcc(n)!=='h',
-  canWriteTab:n=>mode()!=='v' && tabAcc(n)==='w',touch,myName,myDevs,get pinLocked(){ return pinLocked; }};
+  canWriteTab:n=>mode()!=='v' && tabAcc(n)==='w',touch,myName,myDevs,myDept:()=>(cfg.uid && mode()==='w' && typeof cfg.dept==='string')?cfg.dept:'',get pinLocked(){ return pinLocked; }};
 init();
 })();

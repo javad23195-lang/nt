@@ -51,7 +51,9 @@ python3 fix_daftar_dup.py "$T/b44.html" "$T/b45.html"
 python3 fix_outsrc_more.py "$T/b45.html" "$T/b46.html"
 python3 fix_outsrc_inv.py "$T/b46.html" "$T/b47.html"
 python3 fix_code_dup.py "$T/b47.html" "$T/b48.html"
-python3 add_mgmt.py "$T/b48.html" "$T/b49.html"
+python3 add_layout.py "$T/b48.html" "$T/b48b.html"
+python3 add_dept_filter.py "$T/b48b.html" "$T/b48c.html"
+python3 add_mgmt.py "$T/b48c.html" "$T/b49.html"
 python3 build.py "$T/b49.html" ../out.html
 python3 fix_hover.py ../out.html
 python3 stamp.py ../out.html

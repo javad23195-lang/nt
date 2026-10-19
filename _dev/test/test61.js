@@ -31,6 +31,9 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms)); const SHOT=process.env.SHOT;
     let v=await vis('مدیریت',['kpis','flCard','tlCard','tList','cGrid','bkCard','chCard','rpCard']);
     ok(v[0] && v[1] && v[2] && !v[3] && !v[4] && !v[5] && v[6] && v[7],tag+'مدیریت: خلاصه، ناوگان، خط زمان، نمودار و گزارش دیده می‌شود؛ یادداشت، تقویم و پشتیبان نه '+v);
     if(SHOT) await p.screenshot({path:SHOT+'/mg_'+(mob?'m':'d')+'.png'});
+    { const i=await p.evaluate(()=>DOCS.findIndex(d=>d.name==='مدیریت')); const fr=await (await p.$$('iframe'))[i].contentFrame();
+      const G=await fr.evaluate(()=>[...document.querySelectorAll('#flGrid .flgrp')].map(s=>s.querySelector('h3 span').textContent+':'+[...s.querySelectorAll('.fld')].map(b=>b.dataset.dev.split(' ').pop()).join(',')));
+      ok(G.length>=2 && /^تولید:.*WA470.*ZL50/.test(G[0]) && /2624/.test(G[0]) && /^استخراج:.*PC290.*PC400.*TRS01.*TRS02.*TRS03/.test(G[1]),tag+'ناوگان بر اساس بخش: '+G.join(' | ')); }
     await go('امروز');
     v=await vis('امروز',['kpis','flCard','tlCard','tList','cGrid','chCard','rpCard']);
     ok(!v[0] && !v[1] && !v[2] && v[3] && v[4] && !v[5] && !v[6],tag+'امروز: خلاصه، ناوگان، خط زمان، نمودار و گزارش پنهان؛ یادداشت و تقویم هست '+v);
