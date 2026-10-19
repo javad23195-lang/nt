@@ -35,5 +35,14 @@ k=t.rfind("</script>"); t=t[:k]+JS+"\n"+t[k:]
 k=t.index('<script>')+8; t=t[:k]+"\nfunction ntIn(dev){ try{ return !parent.ntDept || parent.ntDept.mine(dev); }catch(e){ return true; } }\n"+t[k:]
 k=t.rfind("</style>"); t=t[:k]+"\nheader .dpt{display:inline-block!important;vertical-align:middle;margin-inline-start:8px;padding:1px 10px;border-radius:10px;background:#FFF1D6;color:#7A4300;font-weight:700;font-size:.78rem}\n"+t[k:]
 d['b64']=base64.b64encode(t.encode('utf-8')).decode('ascii')
+# «دفترچه قرائت»: فهرست دستگاه‌ها (و شمارش، ورود از اکسل) فقط دستگاه‌های بخش کاربر
+d2=next(x for x in docs if x['name']=='دفترچه قرائت')
+t=base64.b64decode(d2['b64']).decode('utf-8')
+a='\nconst $ = id=>document.getElementById(id);\n'; assert t.count(a)==1
+t=t.replace(a,"\ntry{ const _D=parent.ntDept; if(_D && _D.my()) DATA.d=DATA.d.filter(m=>_D.mine(m.dev)); }catch(e){}"+a)
+a="nh.innerHTML='<h1>دفترچه قرائت</h1><span class=\"nhd\"></span>';"; assert t.count(a)==1
+t=t.replace(a,a+" try{ const dp=parent.ntDept&&parent.ntDept.my(); if(dp){ const b=document.createElement('span'); b.className='dpt'; b.textContent='بخش '+dp; nh.querySelector('h1').appendChild(b); } }catch(e){}")
+k=t.rfind("</style>"); t=t[:k]+"\n.nh2 .dpt{display:inline-block;vertical-align:middle;margin-inline-start:8px;padding:1px 10px;border-radius:10px;background:#FFF1D6;color:#7A4300;font-weight:700;font-size:.78rem}\n"+t[k:]
+d2['b64']=base64.b64encode(t.encode('utf-8')).decode('ascii')
 s=s[:i]+json.dumps(docs,ensure_ascii=False)+s[j:]
 open(out,'w',encoding='utf-8').write(s); print('dept filter')
