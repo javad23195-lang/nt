@@ -36,7 +36,7 @@ kMark(); rows.forEach(r=>{ if(r&&typeof r==='object') delete r.__i; });
 { const _s=save; save=function(){ try{ kIds(); }catch(e){} return _s.apply(this,arguments); }; }
 
 const kDupKey=r=>[String(r.date||''),sq(r.unit),sq(r.item),String(r.qty??'')].join('|');
-function kDupGroups(){ const g={}; rows.forEach(r=>{ if(r&&typeof r==='object'){ const k=kDupKey(r); (g[k]=g[k]||[]).push(r); } }); return Object.values(g).filter(a=>a.length>1); }
+function kDupGroups(){ const g={}; rows.forEach(r=>{ if(r&&typeof r==='object'&&!r.spl){   /* spl = تکه‌های خرید ناقص، تکراری نیستند */ const k=kDupKey(r); (g[k]=g[k]||[]).push(r); } }); return Object.values(g).filter(a=>a.length>1); }
 const kFill=r=>Object.keys(r).filter(k=>k!=='id'&&r[k]!==''&&r[k]!==null&&r[k]!==undefined&&r[k]!==false).length;
 /* یکی کردن: ردیفی که بیشتر پر شده می‌ماند؛ خانه‌های خالی آن از نسخه‌های دیگر پر می‌شود */
 function kDupMerge(){ let n=0;
