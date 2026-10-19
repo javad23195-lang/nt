@@ -857,7 +857,7 @@ function viewUserEdit(id){
       <label class="chk"><input type="radio" name="syAcc" value="full" ${lim?'':'checked'}>کامل — همه زبانه‌ها (ثبت در همه)</label>
       <div id="syAclList" ${lim?'':'hidden'}>
         ${DOCS.map((d,i)=>`<div class="syrow"><span>${esc(d.name)}</span><select data-tab="${i}" aria-label="دسترسی ${esc(d.name)}">
-          ${[['w','ثبت'],['r','فقط مشاهده'],['h','پنهان']].map(o=>`<option value="${o[0]}" ${(a[d.name]||'h')===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></div>`).join('')}
+          ${[['w','ثبت'],['r','فقط مشاهده'],['h','پنهان']].map(o=>`<option value="${o[0]}" ${(a[d.name]||(d.name==='مدیریت'&&a['امروز'])||'h')===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></div>`).join('')}
       </div></div>
     <div class="sycard"><h3>رمز ورود</h3>
       <label class="chk"><input type="checkbox" id="syUNoPin" ${u&&u.nopin?'checked':''}>بدون رمز ورود — فقط برای سیستم مشترکی که از محل کار بیرون نمی‌رود</label>

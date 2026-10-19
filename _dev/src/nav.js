@@ -196,15 +196,18 @@ function badgeOf(name){ const i=idx(name); const e=$('badge'+i); return e&&e.cla
 /** عدد نوار پایین: بیشتر از ۹۹ → «۹۹+» تا آیکون را نپوشاند */
 const cap99=v=>{ const n=+String(v||'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)); return n>99?'۹۹+':String(v||''); };  /* فقط رقم (امن برای innerHTML) */
 function activeName(){ const i=tabs.findIndex(t=>t.classList.contains('on')); return i>-1?DOCS[i].name:''; }
-function others(){ return DOCS.map(d=>d.name).filter(n=>MAIN.indexOf(n)<0 && vis(n)); }
+function rest0(){ return DOCS.map(d=>d.name).filter(n=>MAIN.indexOf(n)<0 && vis(n)); }
+/* نوار پایین: زبانه‌های اصلی؛ اگر کاربر آن‌ها را ندارد، جای خالی (تا ۴ دکمه) با زبانه‌های دیگرش پر می‌شود و همان‌ها در «بیشتر» تکرار نمی‌شوند */
+function barTabs(){ const m=MAIN.filter(vis), r=rest0(); while(r.length && m.length<(r.length>4-m.length?3:4)) m.push(r.shift()); return m; }
+function others(){ const b=barTabs(); return rest0().filter(n=>b.indexOf(n)<0); }
 function paint(){
-  const act=activeName(), main=MAIN.filter(vis), more=others();
+  const act=activeName(), main=barTabs(), more=others();
   const mk=(n,label,icon,on,badge,extra)=>`<button type="button" class="ntnb${on?' on':''}" data-n="${n}" ${on?'aria-current="page"':''}>${svg(icon)}${label}<span class="b${badge?' show':''}">${cap99(badge)}</span></button>`;
-  let h=''; const lab={'امروز':'امروز','مدیریت':'مدیریت','برنامه روزانه':'برنامه','انبار':'انبار'};
+  let h=''; const lab={'امروز':'امروز','مدیریت':'مدیریت','برنامه روزانه':'برنامه','انبار':'انبار','دفترچه قرائت':'دفترچه','توقف شیفت':'توقف','ثبت مشکلات':'مشکلات','درخواست خرید':'خرید','برون‌سپاری':'برون‌سپاری','شناسنامه':'شناسنامه','خدمات':'خدمات','عکس‌ها':'عکس‌ها'};
   const first=main.slice(0,2), last=main.slice(2);
-  first.forEach(n=>h+=mk(n,lab[n],TABICON[n],act===n,badgeOf(n)));
+  first.forEach(n=>h+=mk(n,lab[n]||n,TABICON[n],act===n,badgeOf(n)));
   h+='<span class="ntsp" aria-hidden="true"></span>';
-  last.forEach(n=>h+=mk(n,lab[n],TABICON[n],act===n,badgeOf(n)));
+  last.forEach(n=>h+=mk(n,lab[n]||n,TABICON[n],act===n,badgeOf(n)));
   if(more.length){ const faN=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]); const mb=more.reduce((s,n)=>s+(+badgeOf(n).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d))||0),0);
     h+=`<button type="button" class="ntnb${more.indexOf(act)>-1?' on':''}" data-more="1">${svg('more')}بیشتر<span class="b${mb?' show':''}">${mb?(mb>99?'۹۹+':faN(mb)):''}</span></button>`; }
   navIn.innerHTML=h;
