@@ -233,5 +233,20 @@ function open(){
 function close(){ const d=$('ntRpDlg'); if(d){ d.hidden=true; $('ntRpBody').innerHTML=''; } }
 window.addEventListener('message',e=>{ if(e && e.data && e.data.nt==='report') open(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape' && $('ntRpDlg') && !$('ntRpDlg').hidden) close(); });
-window.ntReport={open,collect,sheets,workbook};
+/* شناسنامه → فایل مالی: یک برگه «SHENASNAMEH» با ۲۰ ستون (مثل فایلی که برای مالی فرستاده می‌شد). aoa: ردیف اول سرستون */
+async function finance(aoa,name){
+  await loadLib();
+  const X=window.XLSX, wb=X.utils.book_new(), ws=X.utils.aoa_to_sheet(aoa);
+  ws['!cols']=[10,9,8,8,9,22,60,50,18,18,18,14,34,34,17,17,10,11,19,18].map(w=>({wch:w}));
+  const n=aoa.length, R=X.utils.decode_range(ws['!ref']||'A1');
+  for(let r=1;r<n;r++) for(const c of [18,19]){ const a=X.utils.encode_cell({r,c}); if(ws[a] && ws[a].t==='n') ws[a].z='#,##0'; }
+  if(n>1) ws['!autofilter']={ref:X.utils.encode_range({s:{r:0,c:0},e:{r:n-1,c:Math.max(R.e.c,19)}})};
+  X.utils.book_append_sheet(wb,ws,'SHENASNAMEH'); wb.Workbook={Views:[{RTL:true}]};
+  const buf=X.write(wb,{bookType:'xlsx',type:'array',compression:true});
+  const url=URL.createObjectURL(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  const el=document.createElement('a'); el.href=url; el.download=String(name||'NT-finance.xlsx').replace(/[^\w.\-]/g,'_'); el.rel='noopener'; el.style.display='none';
+  document.body.appendChild(el); el.click(); setTimeout(()=>{ try{ el.remove(); URL.revokeObjectURL(url); }catch(e){} },8000);
+  return el.download;
+}
+window.ntReport={open,collect,sheets,workbook,finance};
 })();
