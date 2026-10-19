@@ -1,4 +1,4 @@
-# زبانه تازه «مدیریت»: کارت‌های خلاصه (سرویس گذشته، توقف، خرابی باز، هزینه)، «نیاز به توجه»، «ناوگان» و «خط زمان».
+# زبانه تازه «مدیریت»: کارت‌های خلاصه (سرویس گذشته، توقف، خرابی باز، هزینه)، «نیاز به توجه»، «ناوگان»، «خط زمان»، «نمودارها» و «گزارش اکسل».
 # همان صفحه «امروز» است با html.mgmt (یک کد، دو نما). در «امروز» کارت‌های خلاصه، ناوگان و خط زمان پنهان می‌شوند؛
 # «نیاز به توجه» در هر دو هست. زبانه در انتهای DOCS (شماره زبانه‌های قبلی عوض نمی‌شود)؛ ترتیب نمایش در nav.js.
 import json,base64,sys
@@ -11,8 +11,8 @@ d=next(x for x in docs if x['name']=='امروز')
 t=base64.b64decode(d['b64']).decode('utf-8')
 CSS="""
 /* دو نما: امروز / مدیریت */
-html:not(.mgmt) #kpis,html:not(.mgmt) #flCard,html:not(.mgmt) #tlCard{display:none!important}
-html.mgmt .wrap>*:not(header):not(#kpis):not(#atCard):not(#flCard):not(#tlCard){display:none!important}
+html:not(.mgmt) #kpis,html:not(.mgmt) #flCard,html:not(.mgmt) #tlCard,html:not(.mgmt) #chCard,html:not(.mgmt) #rpCard{display:none!important}
+html.mgmt .wrap>*:not(header):not(#kpis):not(#atCard):not(#flCard):not(#tlCard):not(#chCard):not(#rpCard){display:none!important}
 html.mgmt #hSum{display:none!important}
 """
 k=t.find("</style>"); assert k>0

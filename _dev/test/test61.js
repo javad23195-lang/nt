@@ -28,12 +28,12 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms)); const SHOT=process.env.SHOT;
     const vis=async(n,ids)=>{ const i=await p.evaluate(n=>DOCS.findIndex(d=>d.name===n),n); const fr=await (await p.$$('iframe'))[i].contentFrame();
       return fr.evaluate(ids=>ids.map(id=>{ const e=document.getElementById(id); return !!e && e.getClientRects().length>0; }),ids); };
     await go('مدیریت');
-    let v=await vis('مدیریت',['kpis','flCard','tlCard','tList','cGrid','bkCard']);
-    ok(v[0] && v[1] && v[2] && !v[3] && !v[4] && !v[5],tag+'مدیریت: خلاصه، ناوگان و خط زمان دیده می‌شود؛ یادداشت، تقویم و پشتیبان نه '+v);
+    let v=await vis('مدیریت',['kpis','flCard','tlCard','tList','cGrid','bkCard','chCard','rpCard']);
+    ok(v[0] && v[1] && v[2] && !v[3] && !v[4] && !v[5] && v[6] && v[7],tag+'مدیریت: خلاصه، ناوگان، خط زمان، نمودار و گزارش دیده می‌شود؛ یادداشت، تقویم و پشتیبان نه '+v);
     if(SHOT) await p.screenshot({path:SHOT+'/mg_'+(mob?'m':'d')+'.png'});
     await go('امروز');
-    v=await vis('امروز',['kpis','flCard','tlCard','tList','cGrid']);
-    ok(!v[0] && !v[1] && !v[2] && v[3] && v[4],tag+'امروز: خلاصه، ناوگان و خط زمان پنهان؛ یادداشت و تقویم هست '+v);
+    v=await vis('امروز',['kpis','flCard','tlCard','tList','cGrid','chCard','rpCard']);
+    ok(!v[0] && !v[1] && !v[2] && v[3] && v[4] && !v[5] && !v[6],tag+'امروز: خلاصه، ناوگان، خط زمان، نمودار و گزارش پنهان؛ یادداشت و تقویم هست '+v);
     ok(errs.length===0,tag+'بدون خطا '+errs.join('|'));
     await c.close();
   }

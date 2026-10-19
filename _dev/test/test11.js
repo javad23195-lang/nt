@@ -40,7 +40,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   },GH);
   const p=await c.newPage(); const errs=[]; p.on('pageerror',e=>errs.push(String(e)));
   await p.goto(`http://localhost:${web.address().port}/nt/s.html`); await p.waitForFunction(()=>typeof ntBooted!=='undefined'&&ntBooted,null,{timeout:20000});
-  await p.evaluate(()=>show(0)); const f=p.frameLocator('iframe.on');
+  await p.evaluate(()=>show(DOCS.findIndex(d=>d.name==='مدیریت'))); await sleep(800); const f=p.frameLocator('iframe.on');
   ok(libHits.length===0,'کتابخانه نمودار هنوز بارگذاری نشده');
   await f.locator('#chOpen').click(); await p.waitForSelector('#ntChDlg:not([hidden])'); await p.waitForFunction(()=>document.querySelectorAll('#ntChBody canvas').length>=4,null,{timeout:10000}).catch(()=>{});
   ok(libHits.includes('chart.umd.js'),'کتابخانه از همان سایت بارگذاری شد');

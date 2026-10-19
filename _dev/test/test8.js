@@ -38,7 +38,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   const p=await c.newPage(); const errs=[]; p.on('pageerror',e=>errs.push(String(e)));
   await p.goto(`http://localhost:${web.address().port}/nt/s.html`); await p.waitForFunction(()=>window.ntSync && ntBooted);
   const T=await p.evaluate(()=>{ const x=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:'numeric',month:'2-digit'}).formatToParts(new Date()); return x.find(a=>a.type==='year').value+'/'+x.find(a=>a.type==='month').value; });
-  await p.evaluate(()=>show(0)); const f=p.frameLocator('iframe.on');
+  await p.evaluate(()=>show(DOCS.findIndex(d=>d.name==='مدیریت'))); await sleep(800); const f=p.frameLocator('iframe.on');
   await f.locator('#rpOpen').click(); await p.waitForSelector('#ntRpDlg:not([hidden])',{timeout:5000}).catch(()=>{});
   ok(await p.locator('#ntRpDlg').isVisible(),'دکمه «ساخت گزارش اکسل» در زبانه امروز پنجره گزارش را باز کرد');
   ok(libHits===0,'کتابخانه اکسل هنوز بارگذاری نشده (فقط هنگام ساخت)');
