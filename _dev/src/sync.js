@@ -51,6 +51,9 @@ const LABEL={nt_anbar_out_v1:'خروج انبار',nt_anbar_in_v1:'ورود ان
   nt_khadamat_v1:'خدمات',nt_daftar_v1:'قرائت',nt_prog_v1:'برنامه روزانه',nt_today_todo_v1:'یادداشت',nt_tavaqof_v1:'توقف شیفت',nt_outsrc_v1:'برون‌سپاری'};
 /* شناسه ردیف در لیست‌هایی که هر ردیف باید یکتا باشد */
 const IDF={nt_daftar_v1:e=>(e && typeof e==='object' && e.dev && e.date)?e.dev+'|'+e.date:null};
+/* درخواست خرید: شناسه ردیف = id، یا برای ردیف قدیمی بدون id، اثر متن آن (مثل kHash در درخواست خرید). ردیف یکسان: #۲، #۳ … */
+function ntRowHash(x){ let h=0x811c9dc5; for(let i=0;i<x.length;i++){ h^=x.charCodeAt(i); h=Math.imul(h,16777619); } return 'h'+(h>>>0).toString(36)+x.length.toString(36); }
+IDF.nt_kharid9_v1=e=>(e && typeof e==='object' && !Array.isArray(e))?((typeof e.id==='string'&&e.id)?e.id:{h:ntRowHash(JSON.stringify(e))}):null;
 /* زمان‌ها (میلی‌ثانیه) — gap: کم‌ترین فاصله دو ارسال (محدودیت GitHub) */
 const T={pinIdle:1800000,deb:3000,gap:40000,maxWait:60000,tick:3000,poll:180000,pollW:20000,busy:20000,maxDefer:180000,refocus:30000,retry:60000,squash:30,seen:900000,seenMin:60000};
 if(TEST.T) Object.assign(T,TEST.T);
@@ -175,8 +178,10 @@ function merge3(b,l,r){
   clash(); return l;
 }
 function idsOf(arr,f){
-  const m=new Map();
-  for(const e of arr){ const id=f(e); if(id===null || id===undefined || m.has(id)) return null; m.set(id,e); }
+  const m=new Map(), seen={};
+  for(const e of arr){ let id=f(e);
+    if(id && typeof id==='object'){ const h=id.h; seen[h]=(seen[h]||0)+1; id=seen[h]>1?h+'#'+seen[h]:h; }   // ردیف بدون id: اثر متن
+    if(id===null || id===undefined || m.has(id)) return null; m.set(id,e); }
   return m;
 }
 function mergeArr(b,l,r){
@@ -184,11 +189,11 @@ function mergeArr(b,l,r){
   const f=IDF[mKey] || (e=>(isObj(e) && (typeof e.id==='string' || typeof e.id==='number'))?e.id:null);
   const L=idsOf(l,f), R=idsOf(r,f), B=idsOf(b,f);
   if(L && R && B && (l.length || r.length)){
-    const out=[];
-    l.forEach(e=>{ const id=f(e);
+    const out=[], li=new Map(), ri=new Map(); L.forEach((e,id)=>li.set(e,id)); R.forEach((e,id)=>ri.set(e,id));
+    l.forEach(e=>{ const id=li.get(e);
       if(R.has(id)) out.push(merge3(B.get(id),e,R.get(id)));
       else if(!B.has(id) || J(e)!==J(B.get(id))) out.push(e); });
-    r.forEach(e=>{ const id=f(e);
+    r.forEach(e=>{ const id=ri.get(e);
       if(L.has(id)) return;
       if(!B.has(id) || J(e)!==J(B.get(id))) out.push(e); });
     return out;
