@@ -60,6 +60,12 @@ tr.bad td{background:var(--badbg)}
 tr.wa td{background:var(--wabg)}
 tr.ok td{color:var(--dim)}
 tr.off td{color:#8A96A1}
+tr.dn td{background:var(--okbg);color:#4E6B57}
+tr.dn td .rq{text-decoration:line-through;font-weight:400}
+label.dk{display:flex;gap:6px;align-items:center;margin-top:6px;font-size:.8rem;font-weight:700;color:var(--ok);min-height:36px}
+label.dk input{width:22px;height:22px}
+.fx{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.fx .in{width:96px;min-height:40px;margin:0}
 td .rq{font-weight:800}
 .hb{min-height:32px;padding:0 8px;font-size:.74rem;border-radius:8px;border:1px solid var(--line);background:#fff;margin-top:4px}
 .tw{overflow-x:auto}
@@ -217,8 +223,9 @@ const ents=()=>{ const a=LS(EK,[]); return Array.isArray(a)?a.filter(e=>e&&e.id&
 function setK(k){ fk=k; $('fK').querySelectorAll('.cp').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.k===k))); fillFP();
   $('fDurBox').hidden=!(k==='az'||k==='ms'); $('fPlBox').hidden=!(k==='mm'||k==='ms'); }
 $('fK').querySelectorAll('.cp').forEach(b=>b.addEventListener('click',()=>setK(b.dataset.k)));
-$('fPlC').querySelectorAll('.cp').forEach(b=>b.addEventListener('click',()=>{ $('fPl').value=b.dataset.v; $('fPlC').querySelectorAll('.cp').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); }));
-$('fPl').addEventListener('input',()=>$('fPlC').querySelectorAll('.cp').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===$('fPl').value.trim()))));
+function plRule(){ if(fk==='mm' && $('fPl').value.trim()==='نهبندان'){ setK('ms'); say('fMsg','مأموریت نهبندان همیشه ساعتی است — مدت را بنویسید',''); } }
+$('fPlC').querySelectorAll('.cp').forEach(b=>b.addEventListener('click',()=>{ $('fPl').value=b.dataset.v; $('fPlC').querySelectorAll('.cp').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); plRule(); }));
+$('fPl').addEventListener('input',()=>{ $('fPlC').querySelectorAll('.cp').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===$('fPl').value.trim()))); plRule(); });
 $('fDate').value=TODAY; $('fDate').addEventListener('input',()=>maskDate($('fDate')));
 $('fDur').addEventListener('input',e=>{ if(e.inputType&&/^delete/.test(e.inputType)) return; const g=lat($('fDur').value).replace(/\D/g,'').slice(0,4); const v=g.length>=3?g.slice(0,-2)+':'+g.slice(-2):g; if(v!==$('fDur').value) $('fDur').value=v; });
 try{ ((parent.ntQr&&parent.ntQr.DEVS)||[]).forEach(d=>{ const o=document.createElement('option'); o.value=o.textContent=String(d.name||''); $('fDev').appendChild(o); }); }catch(e){}
@@ -230,6 +237,7 @@ $('fSave').addEventListener('click',()=>{
   let m=0; if(fk==='nh') m=30; else if(fk==='az'||fk==='ms'){ m=hm2m($('fDur').value); if(!m){ say('fMsg','مدت را بنویسید — مثل 2:00','bad'); return; } }
   const pl=(fk==='mm'||fk==='ms')?clean($('fPl').value,40):'';
   if((fk==='mm'||fk==='ms')&&!pl){ say('fMsg','محل مأموریت را بنویسید','bad'); return; }
+  if(fk==='mm' && pl==='نهبندان'){ setK('ms'); say('fMsg','مأموریت نهبندان همیشه ساعتی است — مدت را بنویسید','bad'); return; }
   const desc=clean($('fDesc').value,120), dev=clean($('fDev').value,80);
   if(fk!=='mm' && !desc){ say('fMsg','شرح را بنویسید','bad'); return; }
   let by=''; try{ by=(parent.ntSync&&parent.ntSync.myName&&parent.ntSync.myName())||''; }catch(e){}
@@ -264,6 +272,10 @@ function plan(g,wd,shiftThu){
   return [420,900];
 }
 const LATE=5, EARLY=5, OVER=10;
+/* علامت «در ets ثبت شد» و ساعت‌های نگهبانی (همگام): {done:{'pid|date':1}, fix:{'pid|date':'16:00'}} */
+const TK='nt_tarad_v1'; let TS={done:{},fix:{}};
+function tsLoad(){ const o=LS(TK,{}); return (o&&typeof o==='object'&&!Array.isArray(o))?{done:o.done&&typeof o.done==='object'?o.done:{},fix:o.fix&&typeof o.fix==='object'?o.fix:{}}:{done:{},fix:{}}; }
+function tsSave(){ put(TK,TS); }
 let CK=null, thu=new Set(), hol=new Set();
 function parseAoa(A){
   let hi=A.findIndex(r=>Array.isArray(r)&&r.some(c=>String(c||'').trim()==='تاریخ'));
@@ -279,6 +291,7 @@ function parseAoa(A){
 function covers(ev,re){ return re.test(ev||''); }
 function analyze(){
   if(!CK) return;
+  TS=tsLoad();
   const pid=$('cP').value, P=staff().find(x=>x.id===pid), g=P?P.g:'s';
   const E=ents().filter(e=>e.p===pid), byD={}; E.forEach(e=>(byD[e.date]=byD[e.date]||[]).push(e));
   const rows=[], need=[]; let tot={late:0,early:0,ot:0,nh:0,abs:0,inc:0};
@@ -287,47 +300,57 @@ function analyze(){
     const L=byD[x.d]||[], nh=L.filter(e=>e.k==='nh'), az=L.filter(e=>e.k==='az'), mm=L.filter(e=>e.k==='mm'), ms=L.filter(e=>e.k==='ms');
     const azM=az.reduce((a,e)=>a+e.m,0), msM=ms.reduce((a,e)=>a+e.m,0);
     const pl=hol.has(x.d)?null:plan(g,x.w,thu.has(x.d));
-    const tr=x.T.map(m2hm).join(' ، ');
+    const key=pid+'|'+x.d, fxS=String((TS.fix||{})[key]||''), fxT=fxS.split(/\s+/).map(hm2m).filter(v=>v!=null);
+    const T=x.T.concat(fxT).sort((p,q)=>p-q), odd0=x.T.length%2===1;
+    const tr=x.T.map(m2hm).join(' ، ')+(fxT.length?' + '+fxT.map(m2hm).join(' ، ')+' (نگهبانی)':'');
     const res=[], req=[]; let cls='ok';
     const add=(t,q,c)=>{ res.push(t); if(q) req.push(q); if(c==='bad'||(c==='wa'&&cls!=='bad')) cls=c; };
-    nh.forEach(e=>add('نهاری ثبت‌شده: '+e.desc,'اضافه‌کار نهاری ۰:۳۰ — '+e.desc,'wa'));
+    nh.forEach(e=>add('نهاری ثبت‌شده: '+e.desc,'اضافه‌کار ساعتی ۰:۳۰ (نهاری) — '+e.desc,'wa'));
+    if(odd0 && fxT.length && T.length%2===0) add('ساعت از نگهبانی: '+fa(fxT.map(m2hm).join(' ، ')),'فراموشی ورود و خروج — '+fa(fxT.map(m2hm).join(' ، ')),'wa');
     if(!pl){
-      if(x.T.length>=2){ const ot=x.T[x.T.length-1]-x.T[0]; add((hol.has(x.d)?'تعطیل':x.wt)+' — حضور '+faHM(ot),'اضافه‌کار '+faHM(ot)+(az.length?' — '+az.map(e=>e.desc).join('، '):' (شرح ثبت نشده)'),'wa'); tot.ot+=ot; }
-      else if(x.T.length===1) add('تردد ناقص در روز غیرکاری','ورود و خروج','bad');
+      if(T.length>=2){ const ot=T[T.length-1]-T[0]; add((hol.has(x.d)?'تعطیل':x.wt)+' — حضور '+faHM(ot),(ot>=480?'اضافه‌کار روزانه (':'اضافه‌کار ساعتی (')+faHM(ot)+')'+(az.length?' — '+az.map(e=>e.desc).join('، '):' (شرح ثبت نشده)'),'wa'); tot.ot+=ot; }
+      else if(T.length===1) add('تردد ناقص در روز غیرکاری','فراموشی ورود و خروج','bad');
       if(!res.length){ rows.push({x,tr,res:['روز کاری نیست'],req:[],cls:'off'}); return; }
     } else {
       const dayCov=mm.length||covers(x.ev,/مرخصی\s*روزانه|ماموریت\s*روزانه|مأموریت\s*روزانه/);
       if(mm.length) add('مأموریت روزانه ثبت‌شده'+(mm[0].pl?' — '+mm[0].pl:''),'مأموریت روزانه — '+(mm[0].pl||'')+(mm[0].desc?' — '+mm[0].desc:''),'wa');   /* روز مأموریت: تأخیر و تعجیل حساب نمی‌شود */
-      else if(dayCov && !x.T.length) add(mm.length?'مأموریت روزانه ثبت‌شده'+(mm[0].pl?' — '+mm[0].pl:''):'رویداد: '+x.ev, mm.length?'مأموریت روزانه — '+(mm[0].pl||'')+(mm[0].desc?' — '+mm[0].desc:''):'', mm.length?'wa':'ok');
-      else if(!x.T.length){ add('هیچ ترددی نیست','مرخصی روزانه یا مأموریت روزانه','bad'); tot.abs++; }
-      else if(x.T.length%2===1){ add('تردد ناقص ('+fa(x.T.length)+' تردد)','ورود و خروج','bad'); tot.inc++; }
-      if(x.T.length>=2 && !mm.length){
-        const a=x.T[0], b=x.T[x.T.length-1], hourCov=covers(x.ev,/مرخصی|ماموریت|مأموریت/);
-        let late=a-pl[0], early=pl[1]-b, gap=0; for(let i=1;i+1<x.T.length;i+=2) gap+=Math.max(0,x.T[i+1]-x.T[i]);
+      else if(dayCov && !T.length) add(mm.length?'مأموریت روزانه ثبت‌شده'+(mm[0].pl?' — '+mm[0].pl:''):'رویداد: '+x.ev, mm.length?'مأموریت روزانه — '+(mm[0].pl||'')+(mm[0].desc?' — '+mm[0].desc:''):'', mm.length?'wa':'ok');
+      else if(!T.length){ add('هیچ ترددی نیست','مرخصی استحقاقی روزانه، استعلاجی (با پیوست) یا مأموریت روزانه','bad'); tot.abs++; }
+      else if(T.length%2===1){ add('تردد ناقص ('+fa(T.length)+' تردد)','فراموشی ورود و خروج — ساعت را از نگهبانی بپرسید','bad'); tot.inc++; }
+      if(T.length>=2 && !mm.length){
+        const a=T[0], b=T[T.length-1], hourCov=covers(x.ev,/مرخصی|ماموریت|مأموریت/);
+        let late=a-pl[0], early=pl[1]-b, gap=0; for(let i=1;i+1<T.length;i+=2) gap+=Math.max(0,T[i+1]-T[i]);
         let short=(late>LATE?late:0)+(early>EARLY?early:0)+gap, msLeft=msM;
-        if(late>LATE){ const c=Math.min(msLeft,late); msLeft-=c; add('ورود '+fa(m2hm(a))+' — '+faHM(late)+' تأخیر', c>=late?'مأموریت ساعتی '+faHM(late)+' — '+ms.map(e=>e.pl).join('، '):(hourCov?'':'مرخصی ساعتی '+faHM(late-c)), hourCov||c>=late?'wa':'bad'); tot.late+=late; }
-        if(gap>0){ const c=Math.min(msLeft,gap); msLeft-=c; add('خروج میانی '+faHM(gap), c>=gap?'مأموریت ساعتی '+faHM(gap):(hourCov?'':'مرخصی ساعتی یا مأموریت ساعتی '+faHM(gap-c)), hourCov||c>=gap?'wa':'bad'); }
-        if(early>EARLY){ const c=Math.min(msLeft,early); msLeft-=c; add('خروج '+fa(m2hm(b))+' — '+faHM(early)+' تعجیل', c>=early?'مأموریت ساعتی '+faHM(early)+' — '+ms.map(e=>e.pl).join('، '):(hourCov?'':'مرخصی ساعتی '+faHM(early-c)), hourCov||c>=early?'wa':'bad'); tot.early+=early; }
+        if(late>LATE){ const c=Math.min(msLeft,late); msLeft-=c; add('ورود '+fa(m2hm(a))+' — '+faHM(late)+' تأخیر', c>=late?'مأموریت ساعتی '+faHM(late)+' — '+ms.map(e=>e.pl).join('، '):(hourCov?'':'مرخصی استحقاقی ساعتی '+faHM(late-c)), hourCov||c>=late?'wa':'bad'); tot.late+=late; }
+        if(gap>0){ const c=Math.min(msLeft,gap); msLeft-=c; add('خروج میانی '+faHM(gap), c>=gap?'مأموریت ساعتی '+faHM(gap):(hourCov?'':'مرخصی استحقاقی ساعتی یا مأموریت ساعتی '+faHM(gap-c)), hourCov||c>=gap?'wa':'bad'); }
+        if(early>EARLY){ const c=Math.min(msLeft,early); msLeft-=c; add('خروج '+fa(m2hm(b))+' — '+faHM(early)+' تعجیل', c>=early?'مأموریت ساعتی '+faHM(early)+' — '+ms.map(e=>e.pl).join('، '):(hourCov?'':'مرخصی استحقاقی ساعتی '+faHM(early-c)), hourCov||c>=early?'wa':'bad'); tot.early+=early; }
         const ot=b-pl[1];
         if(ot>OVER){ tot.ot+=ot;
-          if(azM) add('خروج '+fa(m2hm(b))+' — '+faHM(ot)+' اضافه؛ ثبت‌شده '+faHM(azM),'اضافه‌کار '+faHM(Math.min(ot,azM))+' — '+az.map(e=>e.desc).join('، ')+(ot-azM>OVER?' ('+faHM(ot-azM)+' بیشتر از ثبت؛ بررسی کنید)':''),'wa');
-          else add('خروج '+fa(m2hm(b))+' — '+faHM(ot)+' اضافه، ثبت نشده','اضافه‌کار '+faHM(ot)+' (شرح ثبت نشده)','bad'); }
+          if(azM) add('خروج '+fa(m2hm(b))+' — '+faHM(ot)+' اضافه؛ ثبت‌شده '+faHM(azM),'اضافه‌کار بعدازظهر '+faHM(Math.min(ot,azM))+' — '+az.map(e=>e.desc).join('، ')+(ot-azM>OVER?' ('+faHM(ot-azM)+' بیشتر از ثبت؛ بررسی کنید)':''),'wa');
+          else add('خروج '+fa(m2hm(b))+' — '+faHM(ot)+' اضافه، ثبت نشده','اضافه‌کار بعدازظهر '+faHM(ot)+' (شرح ثبت نشده)','bad'); }
         else if(azM) add('اضافه‌کار ثبت شده ('+faHM(azM)+') ولی خروج '+fa(m2hm(b))+' است','بررسی کنید','bad');
         if(hourCov && (late>LATE||early>EARLY||gap)) res.push('رویداد: '+x.ev);
       }
     }
     tot.nh+=nh.length;
     if(!res.length) res.push('درست');
-    rows.push({x,tr,res,req,cls:res[0]==='درست'?'ok':cls});
-    if(req.length) need.push(fa(x.d)+' '+x.wt+': '+req.join('؛ '));
+    const dn=!!(req.length && (TS.done||{})[key]), inc=odd0 && T.length%2===1;
+    rows.push({x,tr,res,req,cls:res[0]==='درست'?'ok':cls,key,dn,inc,odd0,fxS});
+    if(req.length && !dn) need.push(fa(x.d)+' '+x.wt+': '+req.join('؛ '));
   });
   $('cOut').hidden=false;
-  const nb=rows.filter(r=>r.cls==='bad').length;
+  const nb=rows.filter(r=>r.cls==='bad'&&!r.dn).length, nq=rows.filter(r=>r.req.length).length, nd=rows.filter(r=>r.dn).length;
   $('cSum').innerHTML=`<h2>${esc(pName(pid))} — ${P&&P.g==='m'?'مدیر':'۸ ساعت'}</h2><div class="sum">
-    <div><b>${fa(nb)}</b><span>روز مشکل‌دار</span></div><div><b>${fa(tot.abs)}</b><span>روز بدون تردد</span></div>
+    <div><b>${fa(nd)} از ${fa(nq)}</b><span>درخواست ثبت‌شده در ets</span></div><div><b>${fa(nb)}</b><span>روز مشکل‌دار مانده</span></div><div><b>${fa(tot.abs)}</b><span>روز بدون تردد</span></div>
     <div><b>${faHM(tot.late)}</b><span>جمع تأخیر</span></div><div><b>${faHM(tot.early)}</b><span>جمع تعجیل</span></div>
     <div><b>${faHM(tot.ot)}</b><span>جمع حضور اضافه</span></div><div><b>${fa(tot.nh)} × ۰:۳۰</b><span>اضافه‌کار نهاری</span></div></div>`;
-  $('cRows').innerHTML=rows.filter(r=>!$('cOnly').checked||(r.cls!=='ok'&&r.cls!=='off')||hol.has(r.x.d)).map(r=>`<tr class="${r.cls}"><td>${esc(fa(r.x.d.slice(5)))}<br><small>${esc(r.x.wt)}</small>${r.cls==='bad'&&!hol.has(r.x.d)?`<br><button type="button" class="hb" data-h="${esc(r.x.d)}">تعطیل بود</button>`:(hol.has(r.x.d)?`<br><button type="button" class="hb" data-h="${esc(r.x.d)}">تعطیل نبود</button>`:'')}</td><td class="t">${esc(fa(r.tr))||'—'}</td><td>${r.res.map(esc).join('<br>')}</td><td>${r.req.map(q=>`<span class="rq">${esc(q)}</span>`).join('<br>')||(r.cls==='off'?'':'—')}</td></tr>`).join('');
+  $('cRows').innerHTML=rows.filter(r=>!$('cOnly').checked||(r.cls!=='ok'&&r.cls!=='off')||hol.has(r.x.d)||r.odd0).map(r=>`<tr class="${r.dn?'dn':r.cls}"><td>${esc(fa(r.x.d.slice(5)))}<br><small>${esc(r.x.wt)}</small>${r.cls==='bad'&&!hol.has(r.x.d)?`<br><button type="button" class="hb" data-h="${esc(r.x.d)}">تعطیل بود</button>`:(hol.has(r.x.d)?`<br><button type="button" class="hb" data-h="${esc(r.x.d)}">تعطیل نبود</button>`:'')}</td><td class="t">${esc(fa(r.tr))||'—'}</td><td>${r.res.map(esc).join('<br>')}${r.odd0?`<div class="fx"><input class="in mono fxi" data-k="${esc(r.key)}" inputmode="numeric" placeholder="16:00" value="${esc(r.fxS)}" aria-label="ساعت از نگهبانی"><button type="button" class="hb fxb" data-k="${esc(r.key)}">${r.fxS?'اصلاح ساعت':'ثبت ساعت نگهبانی'}</button></div>`:''}</td><td>${r.req.map(q=>`<span class="rq">${esc(q)}</span>`).join('<br>')||(r.cls==='off'?'':'—')}${r.req.length?`<label class="dk"><input type="checkbox" data-k="${esc(r.key)}"${r.dn?' checked':''}> در ets ثبت شد</label>`:''}</td></tr>`).join('');
+  $('cRows').querySelectorAll('.dk input').forEach(c=>c.addEventListener('change',()=>{ TS.done=TS.done||{}; if(c.checked) TS.done[c.dataset.k]=1; else delete TS.done[c.dataset.k]; tsSave(); analyze(); }));
+  $('cRows').querySelectorAll('.fxi').forEach(i=>i.addEventListener('input',e=>{ if(e.inputType&&/^delete/.test(e.inputType)) return; const g=lat(i.value).replace(/[^\d ]/g,'').replace(/\s+/g,' '); const v=g.split(' ').map(x=>x.length>=3?x.slice(0,-2)+':'+x.slice(-2):x).join(' '); if(v!==i.value) i.value=v; }));
+  $('cRows').querySelectorAll('.fxb').forEach(b=>b.addEventListener('click',()=>{ const i=b.parentNode.querySelector('.fxi'), raw=lat(i.value).trim(); TS.fix=TS.fix||{};
+    if(!raw){ delete TS.fix[b.dataset.k]; tsSave(); analyze(); return; }
+    const L=raw.split(/\s+/).map(hm2m); if(L.some(v=>v==null||v>=1440)){ say('cMsg','ساعت درست نیست — مثل 16:00','bad'); return; }
+    TS.fix[b.dataset.k]=L.map(m2hm).join(' '); tsSave(); say('cMsg','ساعت نگهبانی ثبت شد','ok'); analyze(); }));
   $('cRows').querySelectorAll('.hb').forEach(b=>b.addEventListener('click',()=>{ const d=b.dataset.h; hol.has(d)?hol.delete(d):hol.add(d); analyze(); }));
   analyze.text=need.length?pName(pid)+' — درخواست‌های لازم:\n'+need.join('\n'):'';
   drawThu(g);
@@ -360,7 +383,7 @@ $('cCopy').addEventListener('click',async()=>{ const t=analyze.text||''; if(!t){
 document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
   $('pAdd').hidden=b.dataset.p!=='add'; $('pChk').hidden=b.dataset.p!=='chk'; $('pPpl').hidden=b.dataset.p!=='ppl'; }));
-window.addEventListener('storage',e=>{ if(e.key===SK||e.key===EK){ fillPeople(); drawList(); if(CK) analyze(); } });
+window.addEventListener('storage',e=>{ if(e.key===SK||e.key===EK||e.key===TK){ fillPeople(); drawList(); if(CK) analyze(); } });
 fillPeople(); setK('nh'); drawList();
 if(!staff().length) document.querySelector('.seg button[data-p="ppl"]').click();
 </script>

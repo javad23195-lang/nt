@@ -67,30 +67,44 @@ const ws=XLSX.utils.aoa_to_sheet(A), wb=XLSX.utils.book_new(); XLSX.utils.book_a
   const T=await fr.evaluate(()=>[...document.querySelectorAll('#cRows tr')].map(r=>({c:r.className,t:r.innerText.replace(/\s+/g,' ')})));
   const row=d=>T.find(r=>r.t.startsWith(d))||{c:'',t:''};
   ok(row('۰۷/۰۵').c==='ok','۰۷/۰۵ درست');
-  ok(row('۰۷/۰۶').c==='bad' && /۰:۴۰ تأخیر/.test(row('۰۷/۰۶').t) && /مرخصی ساعتی ۰:۴۰/.test(row('۰۷/۰۶').t),'تأخیر ۴۰ → مرخصی ساعتی');
+  ok(row('۰۷/۰۶').c==='bad' && /۰:۴۰ تأخیر/.test(row('۰۷/۰۶').t) && /مرخصی استحقاقی ساعتی ۰:۴۰/.test(row('۰۷/۰۶').t),'تأخیر ۴۰ → مرخصی ساعتی');
   ok(row('۰۷/۰۷').c==='bad' && /هیچ ترددی/.test(row('۰۷/۰۷').t),'غیبت');
   ok(row('۰۷/۰۸').c==='bad' && /ورود و خروج/.test(row('۰۷/۰۸').t),'تردد ناقص → ورود و خروج');
   ok(row('۰۷/۰۹').c==='ok','چهارشنبه مدیر تا ۱۵:۰۰ درست');
   ok(row('۰۷/۱۰').c==='ok','پنجشنبه اول با تردد = شیفت، درست');
-  ok(/اضافه‌کار ۱:۰۰ — بازدید معدن/.test(row('۰۷/۱۲').t) && /بیشتر از ثبت/.test(row('۰۷/۱۲').t),'اضافه ۱:۲۲، ثبت ۱:۰۰ → هشدار');
+  ok(/اضافه‌کار بعدازظهر ۱:۰۰ — بازدید معدن/.test(row('۰۷/۱۲').t) && /بیشتر از ثبت/.test(row('۰۷/۱۲').t),'اضافه ۱:۲۲، ثبت ۱:۰۰ → هشدار');
   ok(row('۰۷/۱۳').c==='bad' && /شرح ثبت نشده/.test(row('۰۷/۱۳').t),'اضافه ثبت‌نشده');
   ok(row('۰۷/۱۴').c==='bad' && /تعجیل/.test(row('۰۷/۱۴').t),'تعجیل ۱۶');
   ok(row('۰۷/۱۵').c==='ok','تأخیر ۳ و اضافه ۵ دقیقه: مجاز');
   ok(row('۰۷/۱۶').c==='ok','مرخصی روزانه در رویدادها: پوشش داده شده');
-  ok(/اضافه‌کار ۴:۰۰/.test(row('۰۷/۱۷').t),'پنجشنبه دوم مدیر: کل حضور اضافه‌کار');
-  ok(/اضافه‌کار نهاری ۰:۳۰ — تعمیر لودر ZL50/.test(row('۰۷/۱۹').t),'نهاری ثبت‌شده در فهرست درخواست');
+  ok(/اضافه‌کار ساعتی \(۴:۰۰\)/.test(row('۰۷/۱۷').t),'پنجشنبه دوم مدیر: کل حضور اضافه‌کار');
+  ok(/اضافه‌کار ساعتی ۰:۳۰ \(نهاری\) — تعمیر لودر ZL50/.test(row('۰۷/۱۹').t),'نهاری ثبت‌شده در فهرست درخواست');
+  // ساعت نگهبانی برای تردد ناقص ۰۷/۰۸ (فقط ۰۶:۵۹)
+  await fr.fill('#cRows .fxi[data-k$="|1404/07/08"]','1600'); await fr.click('#cRows .fxb[data-k$="|1404/07/08"]'); await sleep(300);
+  const r8=await fr.evaluate(()=>{ const r=[...document.querySelectorAll('#cRows tr')].find(r=>r.innerText.startsWith('۰۷/۰۸')); return {c:r.className,t:r.innerText.replace(/\s+/g,' ')}; });
+  ok(/فراموشی ورود و خروج — ۱۶:۰۰/.test(r8.t) && r8.c!=='bad','ساعت نگهبانی ۱۶:۰۰: «فراموشی ورود و خروج — ۱۶:۰۰»، بدون خطای دیگر — '+r8.t);
+  const TSv=JSON.parse(await p.evaluate(()=>localStorage.getItem('nt_tarad_v1')));
+  ok(Object.values(TSv.fix).includes('16:00'),'ساعت نگهبانی ذخیره شد (همگام)');
+  // تیک «در ets ثبت شد»
+  await fr.click('#cRows tr:has-text("۰۷/۰۶") .dk input'); await sleep(300);
+  ok(await fr.evaluate(()=>[...document.querySelectorAll('#cRows tr')].find(r=>r.innerText.startsWith('۰۷/۰۶')).className)==='dn','تیک: ردیف سبز و خط‌خورده');
+  ok(!/۱۴۰۴\/۰۷\/۰۶/.test(await fr.evaluate(()=>analyze.text)),'ردیف تیک‌خورده در فهرست کپی نیست');
+  ok(Object.keys(JSON.parse(await p.evaluate(()=>localStorage.getItem('nt_tarad_v1'))).done).length===1,'تیک ذخیره شد');
   // کارمند ۸ ساعته: همان فایل
   await fr.selectOption('#cP',sid); await sleep(300);
   const T2=await fr.evaluate(()=>[...document.querySelectorAll('#cRows tr')].map(r=>({c:r.className,t:r.innerText.replace(/\s+/g,' ')})));
   const r2=d=>T2.find(r=>r.t.startsWith(d))||{c:'',t:''};
-  ok(/اضافه‌کار ۱:۰۲/.test(r2('۰۷/۰۵').t),'۸ ساعته: خروج ۱۶:۰۲ → اضافه ۱:۰۲');
+  ok(/اضافه‌کار بعدازظهر ۱:۰۲/.test(r2('۰۷/۰۵').t),'۸ ساعته: خروج ۱۶:۰۲ → اضافه ۱:۰۲');
   ok(r2('۰۷/۱۰').c==='ok','۸ ساعته: پنجشنبه روز کاری عادی');
   ok(/مأموریت روزانه — بیرجند/.test(r2('۰۷/۱۲').t) && !/اضافه‌کار/.test(r2('۰۷/۱۲').t),'روز مأموریت: درخواست مأموریت بیرجند، بدون اضافه‌کار');
   // تعطیل بود
   await fr.selectOption('#cP',mid); await sleep(300);
   await fr.click('#cRows button.hb[data-h="1404/07/07"]'); await sleep(200);
   ok(await fr.evaluate(()=>[...document.querySelectorAll('#cRows tr')].find(r=>r.innerText.startsWith('۰۷/۰۷')).className)==='off','«تعطیل بود» → روز کاری نیست');
-  ok(await p.evaluate(()=>!Object.keys(localStorage).some(k=>/tarad|grid/.test(k))) && !(await p.evaluate(()=>JSON.stringify(localStorage))).includes('15:44'),'فایل تردد ذخیره نشد');
+  ok(await p.evaluate(()=>!Object.keys(localStorage).some(k=>/grid|ets/.test(k))) && !(await p.evaluate(()=>JSON.stringify(localStorage))).includes('15:44'),'فایل تردد ذخیره نشد');
+  // مأموریت نهبندان → ساعتی
+  await fr.click('.seg [data-p="add"]'); await fr.click('#fK [data-k="mm"]'); await fr.click('#fPlC [data-v="نهبندان"]');
+  ok(await fr.evaluate(()=>document.querySelector('#fK [data-k="ms"]').getAttribute('aria-pressed')==='true'),'مأموریت نهبندان خودکار «ساعتی» شد');
   ok(errs.length===0,'بدون خطا '+errs.join('|'));
   console.log(fails?fails+' شکست':'همه موفق'); await br.close(); web.close(); process.exit(fails?1:0);
 })();
