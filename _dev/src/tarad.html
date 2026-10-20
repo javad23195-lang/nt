@@ -141,7 +141,7 @@ td .rq{font-weight:800}
     <h2>افراد و برنامه کاری</h2>
     <div id="pList"></div>
     <div class="needw">
-      <label class="f" for="pName">نام تازه</label><input id="pName" class="in" maxlength="40" autocomplete="off">
+      <label class="f" for="pName">نام تازه <small style="font-weight:400">(هر خط یک نام؛ می‌شود چند نام را یک‌جا چسباند)</small></label><textarea id="pName" class="in" rows="3" maxlength="1200" autocomplete="off" style="padding:10px 12px;line-height:1.8"></textarea>
       <label class="f">برنامه کاری</label>
       <div class="chips" id="pG"><button type="button" class="cp" data-g="s" aria-pressed="true">۸ ساعت — شنبه تا پنجشنبه ۰۷:۰۰ تا ۱۵:۰۰</button>
         <button type="button" class="cp" data-g="m" aria-pressed="false">مدیر — شنبه تا سه‌شنبه ۰۷:۰۰ تا ۱۶:۰۰، چهارشنبه تا ۱۵:۰۰، یک پنجشنبه در ماه</button></div>
@@ -191,9 +191,13 @@ function fillPeople(){ const S=staff().slice().sort((a,b)=>a.name.localeCompare(
 }
 let newG='s';
 $('pG').querySelectorAll('.cp').forEach(b=>b.addEventListener('click',()=>{ newG=b.dataset.g; $('pG').querySelectorAll('.cp').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); }));
-$('pAddB').addEventListener('click',()=>{ const n=clean($('pName').value,40); if(!n){ say('pMsg','نام را بنویسید','bad'); return; }
-  const A=staff(); if(A.some(p=>p.name===n)){ say('pMsg','این نام هست','bad'); return; }
-  A.push({id:uid(),name:n,g:newG}); put(SK,A); $('pName').value=''; say('pMsg','«'+n+'» اضافه شد','ok'); fillPeople(); });
+$('pAddB').addEventListener('click',()=>{
+  const L=[...new Set(String($('pName').value).split(/[\n\r،,]+/).map(x=>clean(x.replace(/\(?[0-9۰-۹]{4,}\)?/g,''),40)).filter(Boolean))];   /* کد پرسنلی (عدد) ذخیره نمی‌شود */
+  if(!L.length){ say('pMsg','نام را بنویسید','bad'); return; }
+  const A=staff(), add=L.filter(n=>!A.some(p=>p.name===n));
+  if(!add.length){ say('pMsg','این نام‌ها قبلاً ثبت شده‌اند','bad'); return; }
+  add.forEach(n=>A.push({id:uid(),name:n,g:newG})); put(SK,A); $('pName').value='';
+  say('pMsg',fa(add.length)+' نام اضافه شد'+(add.length<L.length?' ('+fa(L.length-add.length)+' نام تکراری بود)':''),'ok'); fillPeople(); });
 
 /* ---------- ثبت ---------- */
 let fk='nh', vy=0, vm=0;

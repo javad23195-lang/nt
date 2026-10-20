@@ -35,9 +35,10 @@ const ws=XLSX.utils.aoa_to_sheet(A), wb=XLSX.utils.book_new(); XLSX.utils.book_a
   fr.on&&0;
   ok(await fr.evaluate(()=>!document.getElementById('pPpl').hidden),'بدون فرد: بخش «افراد» باز می‌شود');
   await fr.fill('#pName','مدیر آزمایشی'); await fr.click('#pG [data-g="m"]'); await fr.click('#pAddB');
-  await fr.fill('#pName','<b>کارمند الف'); await fr.click('#pG [data-g="s"]'); await fr.click('#pAddB'); await sleep(200);
+  await fr.fill('#pName','<b>کارمند الف (۴۰۱۲۳۴)\nمدیر آزمایشی'); await fr.click('#pG [data-g="s"]'); await fr.click('#pAddB'); await sleep(200);
+  ok(/۱ نام اضافه شد \(۱ نام تکراری بود\)/.test(await fr.evaluate(()=>document.getElementById('pMsg').textContent)),'چند نام یک‌جا؛ نام تکراری اضافه نمی‌شود');
   const S=JSON.parse(await p.evaluate(()=>localStorage.getItem('nt_staff_v1')));
-  ok(S.length===2 && S.some(x=>x.name==='مدیر آزمایشی'&&x.g==='m') && S.some(x=>x.name==='bکارمند الف'),'افراد ذخیره شد (< > پاک)');
+  ok(S.length===2 && S.some(x=>x.name==='مدیر آزمایشی'&&x.g==='m') && S.some(x=>x.name==='bکارمند الف'),'افراد ذخیره شد (< > و کد پرسنلی پاک)');
   const mid=S.find(x=>x.g==='m').id, sid=S.find(x=>x.g==='s').id;
   // ثبت‌ها
   await fr.click('.seg [data-p="add"]');
