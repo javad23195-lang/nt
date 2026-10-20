@@ -25,7 +25,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   ok(await P.evaluate(()=>document.querySelector('#ntNav [data-n="برنامه روزانه"]').classList.contains('on')),'دکمه فعال نشان داده می‌شود');
   await P.click('#ntNav [data-more]'); await sleep(250);
   ok(await vis(P,'#ntNavSh.on'),'«بیشتر» باز می‌شود');
-  ok(await P.evaluate(()=>[...document.querySelectorAll('#ntNavSh .ntmr[data-n]')].map(b=>b.dataset.n).join('|'))==='دفترچه قرائت|ثبت مشکلات|شناسنامه|خدمات|انبار|درخواست خرید|توقف شیفت|برون‌سپاری|عکس‌ها','نُه زبانه دیگر (انبار هم) در «بیشتر»');
+  ok(await P.evaluate(()=>[...document.querySelectorAll('#ntNavSh .ntmr[data-n]')].map(b=>b.dataset.n).join('|'))==='دفترچه قرائت|ثبت مشکلات|شناسنامه|خدمات|انبار|درخواست خرید|توقف شیفت|برون‌سپاری|عکس‌ها|تردد و اضافه‌کار','ده زبانه دیگر (انبار و تردد هم) در «بیشتر»');
   await P.keyboard.press('Escape'); await sleep(150);
   ok(!(await vis(P,'#ntNavSh.on')),'Escape منو را می‌بندد');
   await P.click('#ntNav [data-more]'); await P.click('#ntNavSh [data-n="خدمات"]'); await sleep(500);

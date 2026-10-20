@@ -248,5 +248,7 @@ async function finance(aoa,name){
   document.body.appendChild(el); el.click(); setTimeout(()=>{ try{ el.remove(); URL.revokeObjectURL(url); }catch(e){} },8000);
   return el.download;
 }
-window.ntReport={open,collect,sheets,workbook,finance};
+/* خواندن اکسل (فقط برای «بررسی تردد»): برگه اول → آرایه ردیف‌ها (متن نمایش‌داده‌شده، مثل 09:13). چیزی ذخیره نمی‌شود. */
+async function readAoa(buf){ await loadLib(); const X=window.XLSX, wb=X.read(new Uint8Array(buf),{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]]; return X.utils.sheet_to_json(ws,{header:1,raw:false,defval:null}); }
+window.ntReport={open,collect,sheets,workbook,finance,readAoa};
 })();

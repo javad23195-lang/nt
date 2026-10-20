@@ -39,7 +39,8 @@ const TABKEYS={
   'درخواست خرید':['nt_kharid9_v1','nt_kharid9_hist_v1','nt_kharid_cat_v1','nt_kr_unit_v1','nt_anbar_in_v1'],
   'توقف شیفت':['nt_tavaqof_v1'],
   'برون‌سپاری':['nt_outsrc_v1'],
-  'مدیریت':[]
+  'مدیریت':[],
+  'تردد و اضافه‌کار':['nt_staff_v1','nt_ezafe_v1']
 };
 /* پیش‌فرض دسترسی محدود: واحد استخراج */
 const PRESET={'توقف شیفت':'w','دفترچه قرائت':'w'};
@@ -47,7 +48,7 @@ const PRESET={'توقف شیفت':'w','دفترچه قرائت':'w'};
 const DRIVER={'توقف شیفت':'w','دفترچه قرائت':'w','ثبت مشکلات':'w'};
 const devList=()=>{ try{ return (window.ntQr && ntQr.DEVS || []).map(d=>d.name); }catch(e){ return []; } };
 /* نام بخش‌ها برای پیام‌ها */
-const LABEL={nt_anbar_out_v1:'خروج انبار',nt_anbar_in_v1:'ورود انبار',nt_kharid9_v1:'درخواست خرید',nt_moshkel_v1:'مشکلات',nt_sh8_v1:'شناسنامه',
+const LABEL={nt_staff_v1:'افراد (تردد)',nt_ezafe_v1:'اضافه‌کار و مأموریت',nt_anbar_out_v1:'خروج انبار',nt_anbar_in_v1:'ورود انبار',nt_kharid9_v1:'درخواست خرید',nt_moshkel_v1:'مشکلات',nt_sh8_v1:'شناسنامه',
   nt_khadamat_v1:'خدمات',nt_daftar_v1:'قرائت',nt_prog_v1:'برنامه روزانه',nt_today_todo_v1:'یادداشت',nt_tavaqof_v1:'توقف شیفت',nt_outsrc_v1:'برون‌سپاری'};
 /* شناسه ردیف در لیست‌هایی که هر ردیف باید یکتا باشد */
 const IDF={nt_daftar_v1:e=>(e && typeof e==='object' && e.dev && e.date)?e.dev+'|'+e.date:null};

@@ -27,7 +27,7 @@ const ICON={
 };
 /* آیکون‌های تازه (سرمه‌ای + کهربایی) از uicons.js؛ ICON بالا فقط پشتیبان است */
 const svg=k=>(window.NTI && NTI.P[k||'doc'])?NTI.svg(k||'doc'):`<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]||ICON.doc}</svg>`;
-const TABICON={'امروز':'today','مدیریت':'mgmt','برنامه روزانه':'plan','انبار':'box','دفترچه قرائت':'read','ثبت مشکلات':'warn','شناسنامه':'id','خدمات':'wr','درخواست خرید':'cart','توقف شیفت':'stop','برون‌سپاری':'out','عکس‌ها':'photo'};
+const TABICON={'امروز':'today','مدیریت':'mgmt','برنامه روزانه':'plan','انبار':'box','دفترچه قرائت':'read','ثبت مشکلات':'warn','شناسنامه':'id','خدمات':'wr','درخواست خرید':'cart','توقف شیفت':'stop','برون‌سپاری':'out','عکس‌ها':'photo','تردد و اضافه‌کار':'clock'};
 const MAIN=['امروز','مدیریت','برنامه روزانه'];
 /* کارهای دکمه «+»: [نام زبانه، دکمه افزودن داخل آن، عنوان، توضیح، آیکون، رنگ] */
 const ACTS=[
@@ -215,7 +215,7 @@ function paint(){
   if(document.body.classList.contains('ntsolo')) document.body.classList.remove('ntsolo'); delete fab.dataset.b;
   const act=activeName(), main=barTabs(), more=others();
   const mk=(n,label,icon,on,badge,extra)=>`<button type="button" class="ntnb${on?' on':''}" data-n="${n}" ${on?'aria-current="page"':''}>${svg(icon)}${label}<span class="b${badge?' show':''}">${cap99(badge)}</span></button>`;
-  let h=''; const lab={'امروز':'امروز','مدیریت':'مدیریت','برنامه روزانه':'برنامه','انبار':'انبار','دفترچه قرائت':'دفترچه','توقف شیفت':'توقف','ثبت مشکلات':'مشکلات','درخواست خرید':'خرید','برون‌سپاری':'برون‌سپاری','شناسنامه':'شناسنامه','خدمات':'خدمات','عکس‌ها':'عکس‌ها'};
+  let h=''; const lab={'امروز':'امروز','مدیریت':'مدیریت','برنامه روزانه':'برنامه','انبار':'انبار','دفترچه قرائت':'دفترچه','توقف شیفت':'توقف','ثبت مشکلات':'مشکلات','درخواست خرید':'خرید','برون‌سپاری':'برون‌سپاری','شناسنامه':'شناسنامه','خدمات':'خدمات','عکس‌ها':'عکس‌ها','تردد و اضافه‌کار':'تردد'};
   const first=main.slice(0,2), last=main.slice(2);
   first.forEach(n=>h+=mk(n,lab[n]||n,TABICON[n],act===n,badgeOf(n)));
   h+='<span class="ntsp" aria-hidden="true"></span>';

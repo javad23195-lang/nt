@@ -190,7 +190,7 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   await A.click('#syBack'); await A.click('#syBack'); await A.click('#syClose'); await waitFor(()=>synced(A));
   let Z=await ctx(null,null,null,uZ.link);
   await waitFor(async()=>(await dlgText(Z)).includes('رمز ۶ رقمی')); await Z.fill('#syPin',uZ.pin); await Z.click('#syJoin'); await settle(Z);
-  ok((await visTabs(Z)).split(',').length===12 && await has(Z,'nt_anbar_out_v1','WA470'),'کاربر کامل: ۱۲ زبانه و همه اطلاعات');
+  ok((await visTabs(Z)).split(',').length===13 && await has(Z,'nt_anbar_out_v1','WA470'),'کاربر کامل: ۱۳ زبانه و همه اطلاعات');
   await addNote(Z,'یادداشت مهندس دوم');
   ok(await waitFor(()=>has(A,'nt_today_todo_v1','یادداشت مهندس دوم'),15000),'نوشته کاربر کامل به مدیر رسید');
   await Z.click('#ntSyBtn'); ok(!(await dlgText(Z)).includes('کاربران'),'کاربر کامل هم مدیریت کاربران ندارد'); await Z.click('#syClose');

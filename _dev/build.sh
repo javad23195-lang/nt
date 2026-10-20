@@ -58,7 +58,8 @@ python3 add_hm_mask.py "$T/b48y.html" "$T/b48w.html"
 python3 add_out_unit.py "$T/b48w.html" "$T/b48.html"
 python3 add_layout.py "$T/b48.html" "$T/b48b.html"
 python3 add_dept_filter.py "$T/b48b.html" "$T/b48c.html"
-python3 add_mgmt.py "$T/b48c.html" "$T/b49.html"
+python3 add_mgmt.py "$T/b48c.html" "$T/b49a.html"
+python3 add_tarad.py "$T/b49a.html" "$T/b49.html"
 python3 build.py "$T/b49.html" ../out.html
 python3 fix_hover.py ../out.html
 python3 stamp.py ../out.html

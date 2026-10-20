@@ -39,7 +39,7 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   cur=NEW;
   await A.reload(); await A.waitForFunction(()=>window.ntSync && ntBooted); await sleep(1500);
   ok(await A.evaluate(()=>document.getElementById('ntSyDlg').hidden),'سیستم اصلی بعد از به‌روزرسانی: بدون پرسش');
-  ok(await A.evaluate(()=>DOCS.length===12),"۱۲ زبانه (با «مدیریت»)");
+  ok(await A.evaluate(()=>DOCS.length===13),"۱۳ زبانه (با «مدیریت» و «تردد و اضافه‌کار»)");
   ok(await waitFor(async()=>S.tags['nt-data']!==shaOld && JSON.parse(S.file()).v===2),'تغییر عقب‌مانده با نسخه جدید ارسال شد');
   ok(await waitFor(()=>A.evaluate(()=>!!ntSync.baseGet() && ntSync.hashOf(ntSync.collect())===ntSync.st().hash)),'سیستم اصلی همگام است');
   ok(((await ls(A,'nt_anbar_out_v1'))||'').includes('WA470') && ((await ls(A,'nt_today_todo_v1'))||'').includes('قبل از به‌روزرسانی'),'اطلاعات سیستم اصلی کامل است');
