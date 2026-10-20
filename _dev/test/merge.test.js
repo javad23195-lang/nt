@@ -96,4 +96,9 @@ eq(bad,0,'۳۰۰ ترکیب تصادفی افزودن/حذف: نتیجه دقی�
   // دو ردیف کاملاً یکسان قدیمی: سیستم دیگر یکی را حذف کرد
   r=m({nt_kharid9_v1:{rows:[a,a,b]}},{nt_kharid9_v1:{rows:[a,a,b]}},{nt_kharid9_v1:{rows:[a,b]}});
   eq(r.nt_kharid9_v1.rows,[a,b],'خرید: حذف یکی از دو ردیف یکسان در سیستم دیگر'); }
+// شماره ترتیب __i: تغییر آن در دو سیستم، ردیف را تکراری نمی‌کند (خطای «دو بار ثبت شده» در خروج انبار)
+{ const X=(n,i,x)=>Object.assign({date:'1405/07/2'+n,dev:'ZL50',item:'روغن H68',qty:160,__i:i},x||{});
+  const r=m({nt_anbar_out_v1:{rows:[X(1,0),X(2,1)]}},{nt_anbar_out_v1:{rows:[X(0,0,{item:'فیلتر'}),X(1,1,{doc:'55'}),X(2,2)]}},{nt_anbar_out_v1:{rows:[X(1,5,{doc:'55'}),X(2,6)]}});
+  eq(r.nt_anbar_out_v1.rows.length,3,'__i متفاوت در دو سیستم: ردیف‌ها تکراری نمی‌شوند');
+  eq(r.nt_anbar_out_v1.rows.some(x=>'__i' in x),false,'__i در نتیجه ادغام نیست'); }
 console.log(fails?`\n${fails} مورد ناموفق`:'\nهمه موارد موفق'); process.exit(fails?1:0);

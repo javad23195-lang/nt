@@ -225,6 +225,8 @@ function mergeArr(b,l,r){
     out.push({s,v:r[j]}); });
   return out.map(x=>x.v);
 }
+/** __i (شماره ترتیب که بعضی زبانه‌ها در ردیف می‌نوشتند) از ردیف‌ها برداشته می‌شود */
+function stripI(v){ if(Array.isArray(v)) v.forEach(stripI); else if(v && typeof v==='object'){ if('__i' in v) delete v.__i; for(const k in v){ const x=v[k]; if(x && typeof x==='object') stripI(x); } } return v; }
 function mergeKey(k,b,l,r){
   if(l===r) return l;
   if(l===b) return r;
@@ -234,6 +236,7 @@ function mergeKey(k,b,l,r){
   if(l===undefined || r===undefined){ return l===undefined?r:l; }   // یک طرف کل بخش را پاک کرده و طرف دیگر تغییر داده: تغییر می‌ماند
   let bv,lv,rv;
   try{ lv=JSON.parse(l); rv=JSON.parse(r); bv=b===undefined?undefined:JSON.parse(b); }catch(e){ return l; }
+  stripI(lv); stripI(rv); stripI(bv);                 // __i = شماره ترتیب مرتب‌سازی صفحه؛ تغییرش «اصلاح» نیست (وگرنه ردیف تکراری می‌شد)
   mKey=k;
   return J(merge3(bv,lv,rv));
 }
