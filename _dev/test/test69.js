@@ -40,6 +40,14 @@ const ws=XLSX.utils.aoa_to_sheet(A), wb=XLSX.utils.book_new(); XLSX.utils.book_a
   const S=JSON.parse(await p.evaluate(()=>localStorage.getItem('nt_staff_v1')));
   ok(S.length===2 && S.some(x=>x.name==='مدیر آزمایشی'&&x.g==='m') && S.some(x=>x.name==='bکارمند الف'),'افراد ذخیره شد (< > و کد پرسنلی پاک)');
   const mid=S.find(x=>x.g==='m').id, sid=S.find(x=>x.g==='s').id;
+  // نهاری ندارد: مدیر آزمایشی
+  await fr.click(`#pList .px[data-id="${mid}"][data-x="nh"]`); await sleep(150);
+  ok(JSON.parse(await p.evaluate(()=>localStorage.getItem('nt_staff_v1'))).find(x=>x.id===mid).nh===0,'افراد: «نهاری ✗» ذخیره شد');
+  await fr.click('.seg [data-p="add"]'); await fr.click('#fK [data-k="nh"]');
+  ok(!(await fr.evaluate(id=>[...document.querySelectorAll('#fP option')].some(o=>o.value===id),mid)),'نهاری: کسی که نهاری ندارد در فهرست نیست');
+  await fr.click('#fK [data-k="az"]');
+  ok(await fr.evaluate(id=>[...document.querySelectorAll('#fP option')].some(o=>o.value===id),mid),'بعدازظهر: در فهرست هست');
+  await fr.click('.seg [data-p="ppl"]'); await fr.click(`#pList .px[data-id="${mid}"][data-x="nh"]`); await sleep(150);
   // ثبت‌ها
   await fr.click('.seg [data-p="add"]');
   const add=async(d,pid,k,dur,desc,pl)=>{ await fr.fill('#fDate',d); await fr.selectOption('#fP',pid); await fr.click(`#fK [data-k="${k}"]`); if(dur) await fr.fill('#fDur',dur); if(pl) await fr.fill('#fPl',pl); await fr.fill('#fDesc',desc||''); await fr.click('#fSave'); await sleep(100); };

@@ -65,7 +65,8 @@ td .rq{font-weight:800}
 .tw{overflow-x:auto}
 .pl{display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px solid #EEF1F4}
 .pl:first-child{border-top:0}
-.pl b{flex:1}
+.pl{flex-wrap:wrap}.pl b{flex:1}
+.btn.px[aria-pressed="false"]{color:#8A96A1;text-decoration:line-through}
 .pl small{color:var(--dim)}
 .empty{color:var(--dim);font-size:.9rem;padding:8px 0}
 .ro .needw{display:none!important}
@@ -145,6 +146,8 @@ td .rq{font-weight:800}
       <label class="f">برنامه کاری</label>
       <div class="chips" id="pG"><button type="button" class="cp" data-g="s" aria-pressed="true">۸ ساعت — شنبه تا پنجشنبه ۰۷:۰۰ تا ۱۵:۰۰</button>
         <button type="button" class="cp" data-g="m" aria-pressed="false">مدیر — شنبه تا سه‌شنبه ۰۷:۰۰ تا ۱۶:۰۰، چهارشنبه تا ۱۵:۰۰، یک پنجشنبه در ماه</button></div>
+      <label class="f">اضافه‌کار</label>
+      <div class="chips" id="pX"><button type="button" class="cp" data-x="nh" aria-pressed="true">اضافه‌کار نهاری دارد</button><button type="button" class="cp" data-x="az" aria-pressed="true">اضافه‌کار بعدازظهر دارد</button></div>
       <button type="button" class="btn p w" id="pAddB">افزودن</button>
       <div class="msg" id="pMsg" role="status"></div>
     </div>
@@ -182,27 +185,36 @@ function armButton(btn,a,b,action,ms){ let on=false,tm=null; const off=()=>{ on=
 /* ---------- افراد ---------- */
 const staff=()=>{ const a=LS(SK,[]); return Array.isArray(a)?a.filter(p=>p&&p.id&&p.name):[]; };
 const pName=id=>{ const p=staff().find(x=>x.id===id); return p?p.name:'—'; };
+function fillFP(){ const e=$('fP'), v=e.value, k=(typeof fk!=='undefined'?fk:'nh');
+  const S=staff().filter(p=>(k!=='nh'&&k!=='az')||hasX(p,k)).sort((a,b)=>a.name.localeCompare(b.name,'fa'));
+  e.innerHTML=S.length?S.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join(''):(staff().length?'<option value="">— کسی این نوع اضافه‌کار ندارد —</option>':'<option value="">— اول در «افراد» نام بنویسید —</option>');
+  if([...e.options].some(o=>o.value===v)) e.value=v; }
 function fillPeople(){ const S=staff().slice().sort((a,b)=>a.name.localeCompare(b.name,'fa'));
   const opt=S.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
-  ['fP','cP'].forEach(id=>{ const e=$(id), v=e.value; e.innerHTML=S.length?opt:'<option value="">— اول در «افراد» نام بنویسید —</option>'; if([...e.options].some(o=>o.value===v)) e.value=v; });
-  $('pList').innerHTML=S.length?S.map(p=>`<div class="pl"><b>${esc(p.name)}</b><small>${p.g==='m'?'مدیر (۹ ساعت)':'۸ ساعت'}</small>${canW?`<button type="button" class="btn s pg" data-id="${esc(p.id)}">${p.g==='m'?'← ۸ ساعت':'← مدیر'}</button><button type="button" class="btn s d pd" data-id="${esc(p.id)}">حذف</button>`:''}</div>`).join(''):'<div class="empty">هنوز کسی ثبت نشده است.</div>';
+  { const e=$('cP'), v=e.value; e.innerHTML=S.length?opt:'<option value="">— اول در «افراد» نام بنویسید —</option>'; if([...e.options].some(o=>o.value===v)) e.value=v; }
+  fillFP();
+  $('pList').innerHTML=S.length?S.map(p=>`<div class="pl"><b>${esc(p.name)}</b><small>${p.g==='m'?'مدیر (۹ ساعت)':'۸ ساعت'}</small>${canW?`<button type="button" class="btn s px" data-id="${esc(p.id)}" data-x="nh" aria-pressed="${hasX(p,'nh')}">نهاری ${hasX(p,'nh')?'✓':'✗'}</button><button type="button" class="btn s px" data-id="${esc(p.id)}" data-x="az" aria-pressed="${hasX(p,'az')}">بعدازظهر ${hasX(p,'az')?'✓':'✗'}</button>`:`<small>${hasX(p,'nh')?'نهاری':''} ${hasX(p,'az')?'بعدازظهر':''}</small>`}${canW?`<button type="button" class="btn s pg" data-id="${esc(p.id)}">${p.g==='m'?'← ۸ ساعت':'← مدیر'}</button><button type="button" class="btn s d pd" data-id="${esc(p.id)}">حذف</button>`:''}</div>`).join(''):'<div class="empty">هنوز کسی ثبت نشده است.</div>';
+  $('pList').querySelectorAll('.px').forEach(b=>b.addEventListener('click',()=>{ const A=staff(), p=A.find(x=>x.id===b.dataset.id); if(!p) return; const k=b.dataset.x; p[k]=hasX(p,k)?0:1; put(SK,A); fillPeople(); }));
   $('pList').querySelectorAll('.pg').forEach(b=>b.addEventListener('click',()=>{ const A=staff(), p=A.find(x=>x.id===b.dataset.id); if(!p) return; p.g=p.g==='m'?'s':'m'; put(SK,A); fillPeople(); }));
   $('pList').querySelectorAll('.pd').forEach(b=>armButton(b,'حذف','حذف؟',()=>{ put(SK,staff().filter(x=>x.id!==b.dataset.id)); fillPeople(); },4000));
 }
-let newG='s';
+let newG='s'; const newX={nh:1,az:1};
+$('pX').querySelectorAll('.cp').forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.x; newX[k]=newX[k]?0:1; b.setAttribute('aria-pressed',String(!!newX[k])); }));
+/* اضافه‌کار نهاری/بعدازظهر دارد؟ (نبودِ فیلد = دارد؛ برای افراد قدیمی) */
+const hasX=(p,k)=>!p || p[k]!==0;
 $('pG').querySelectorAll('.cp').forEach(b=>b.addEventListener('click',()=>{ newG=b.dataset.g; $('pG').querySelectorAll('.cp').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); }));
 $('pAddB').addEventListener('click',()=>{
   const L=[...new Set(String($('pName').value).split(/[\n\r،,]+/).map(x=>clean(x.replace(/\(?[0-9۰-۹]{4,}\)?/g,''),40)).filter(Boolean))];   /* کد پرسنلی (عدد) ذخیره نمی‌شود */
   if(!L.length){ say('pMsg','نام را بنویسید','bad'); return; }
   const A=staff(), add=L.filter(n=>!A.some(p=>p.name===n));
   if(!add.length){ say('pMsg','این نام‌ها قبلاً ثبت شده‌اند','bad'); return; }
-  add.forEach(n=>A.push({id:uid(),name:n,g:newG})); put(SK,A); $('pName').value='';
+  add.forEach(n=>A.push({id:uid(),name:n,g:newG,nh:newX.nh?1:0,az:newX.az?1:0})); put(SK,A); $('pName').value='';
   say('pMsg',fa(add.length)+' نام اضافه شد'+(add.length<L.length?' ('+fa(L.length-add.length)+' نام تکراری بود)':''),'ok'); fillPeople(); });
 
 /* ---------- ثبت ---------- */
 let fk='nh', vy=0, vm=0;
 const ents=()=>{ const a=LS(EK,[]); return Array.isArray(a)?a.filter(e=>e&&e.id&&e.date):[]; };
-function setK(k){ fk=k; $('fK').querySelectorAll('.cp').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.k===k)));
+function setK(k){ fk=k; $('fK').querySelectorAll('.cp').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.k===k))); fillFP();
   $('fDurBox').hidden=!(k==='az'||k==='ms'); $('fPlBox').hidden=!(k==='mm'||k==='ms'); }
 $('fK').querySelectorAll('.cp').forEach(b=>b.addEventListener('click',()=>setK(b.dataset.k)));
 $('fPlC').querySelectorAll('.cp').forEach(b=>b.addEventListener('click',()=>{ $('fPl').value=b.dataset.v; $('fPlC').querySelectorAll('.cp').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); }));
