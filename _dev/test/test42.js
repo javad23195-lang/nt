@@ -28,9 +28,9 @@ const J=ago=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZo
     ok(K.length===4,'چهار کارت');
     if(K.length===4){
       ok(/توقف این ماه ۱ ساعت ▼[۰-۹]+٪/.test(K[0].t),'توقف: ۱ ساعت، کمتر از ماه قبل (استراحت کم شده) — '+K[0].t);
-      ok(/سرویس گذشته ۱ ۱ سرویس نزدیک/.test(K[1].t),'سرویس: ۱ گذشته، ۱ نزدیک — '+K[1].t);
+      ok(/سرویس گذشته ۱ دستگاه ZL50 · ۱ سرویس نزدیک/.test(K[1].t),'سرویس: ۱ گذشته، ۱ نزدیک — '+K[1].t);
       ok(/هزینه تعمیر این ماه ۱۰ میلیون ▼۵۰٪/.test(K[2].t),'هزینه: ۱۰ میلیون، ▼۵۰٪ — '+K[2].t);
-      ok(/خرابی باز ۲ ۱ در حال اقدام/.test(K[3].t),'خرابی باز: ۲، ۱ در حال اقدام — '+K[3].t);
+      ok(/خرابی باز ۲ مورد ۱ در حال اقدام/.test(K[3].t),'خرابی باز: ۲، ۱ در حال اقدام — '+K[3].t);
       ok(new Set(K.map(x=>Math.round(x.r))).size===(w>=700?1:2),w>=700?'چهار کارت در یک ردیف':'دو کارت در هر ردیف');
     }
     if(w===1920){ const top=await fr.evaluate(()=>[document.getElementById('kpis'),document.getElementById('atCard')].map(e=>Math.round(e.getBoundingClientRect().top)));

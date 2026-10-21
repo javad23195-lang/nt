@@ -18,7 +18,7 @@ const J=ago=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZo
     await p.addStyleTag({content:'.sydlg,.sybd,#ntPin{display:none!important}'}); await p.evaluate(()=>{ window.ntLocked=false; document.body.classList.remove('ntlocked','ntpin'); try{ ntBoot(); }catch(e){} }); await sleep(1200);
     await p.evaluate(()=>window.postMessage({nt:'go',tab:'مدیریت'},'*')); await sleep(1800);
     const i=await p.evaluate(()=>DOCS.findIndex(d=>d.name==='مدیریت')); const fr=await (await p.$$('iframe'))[i].contentFrame();
-    const r=await fr.evaluate(()=>({fl:[...document.querySelectorAll('#flGrid .fld')].map(b=>b.dataset.dev),tl:[...document.querySelectorAll('#tlRows .tlr .tt b')].map(b=>b.textContent),at:document.getElementById('atList').innerText,kp:[...document.querySelectorAll('#kpis .kp')].map(b=>b.innerText.replace(/\s+/g,' ')),dpt:(document.querySelector('header .dpt')||{}).textContent||''}));
+    const r=await fr.evaluate(()=>({fl:[...document.querySelectorAll('#fl2 .fr2 [data-dev]')].map(b=>b.dataset.dev),tl:[...document.querySelectorAll('#tlRows .tlr .tt b')].map(b=>b.textContent),at:document.getElementById('atList').innerText,kp:[...document.querySelectorAll('#kpis .kp')].map(b=>b.innerText.replace(/\s+/g,' ')),dpt:(document.querySelector('header .dpt')||{}).textContent||''}));
     await p.evaluate(()=>window.postMessage({nt:'go',tab:'دفترچه قرائت'},'*')); await sleep(1500);
     const i2=await p.evaluate(()=>DOCS.findIndex(d=>d.name==='دفترچه قرائت')); const f2=await (await p.$$('iframe'))[i2].contentFrame();
     r.df=await f2.evaluate(()=>({devs:[...document.querySelectorAll('#list input.rv')].map(e=>e.dataset.dev),dpt:(document.querySelector('.nh2 .dpt')||{}).textContent||''}));
