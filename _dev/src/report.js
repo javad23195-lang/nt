@@ -248,7 +248,28 @@ async function finance(aoa,name){
   document.body.appendChild(el); el.click(); setTimeout(()=>{ try{ el.remove(); URL.revokeObjectURL(url); }catch(e){} },8000);
   return el.download;
 }
+/* فایل اکسل از یک طرح (گزارش مالی «فاکتور خرید»): sheets=[{name, cells:{A1:{v}|{f}|{v:عدد,z}}, merges:['A1:C1'], cols:{A:4.6}}].
+   روی گوشی اگر ممکن باشد منوی اشتراک (فرستادن در پیام‌رسان)، وگرنه دانلود. نام فایل لاتین. */
+async function book(sheets,name,opt){
+  opt=opt||{}; await loadLib();
+  const X=window.XLSX, wb=X.utils.book_new();
+  (sheets||[]).forEach(sh=>{ const ws={}; let mr=0, mc=0;
+    Object.keys(sh.cells||{}).forEach(a=>{ const c=sh.cells[a], d=X.utils.decode_cell(a); if(d.r>mr) mr=d.r; if(d.c>mc) mc=d.c;
+      if(c.f) ws[a]={t:'n',f:String(c.f).replace(/^=/,'')}; else if(typeof c.v==='number') ws[a]={t:'n',v:c.v,z:c.z||'#,##0'}; else ws[a]={t:'s',v:String(c.v==null?'':c.v)}; });
+    ws['!ref']=X.utils.encode_range({s:{r:0,c:0},e:{r:Math.max(mr,0),c:Math.max(mc,0)}});
+    ws['!merges']=(sh.merges||[]).map(m=>X.utils.decode_range(m));
+    const cols=[]; Object.keys(sh.cols||{}).forEach(k=>{ cols[X.utils.decode_col(k)]={wch:+sh.cols[k]||10}; }); for(let i=0;i<cols.length;i++) if(!cols[i]) cols[i]={wch:10}; ws['!cols']=cols;
+    X.utils.book_append_sheet(wb,ws,String(sh.name||'Sheet').replace(/[\\\/?*\[\]:]/g,' ').slice(0,31)); });
+  wb.Workbook={Views:[{RTL:true}]};
+  const buf=X.write(wb,{bookType:'xlsx',type:'array',compression:true});
+  const fname=String(name||'NT-report.xlsx').replace(/[^\w.\-]/g,'_'), type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  if(opt.share){ try{ const f=new File([buf],fname,{type}); if(navigator.canShare && navigator.canShare({files:[f]})){ await navigator.share({files:[f],title:opt.title||fname}); return 'share'; } }catch(e){ if(e && e.name==='AbortError') return 'cancel'; } }
+  const url=URL.createObjectURL(new Blob([buf],{type}));
+  const el=document.createElement('a'); el.href=url; el.download=fname; el.rel='noopener'; el.style.display='none';
+  document.body.appendChild(el); el.click(); setTimeout(()=>{ try{ el.remove(); URL.revokeObjectURL(url); }catch(e){} },8000);
+  return fname;
+}
 /* خواندن اکسل (فقط برای «بررسی تردد»): برگه اول → آرایه ردیف‌ها (متن نمایش‌داده‌شده، مثل 09:13). چیزی ذخیره نمی‌شود. */
 async function readAoa(buf){ await loadLib(); const X=window.XLSX, wb=X.read(new Uint8Array(buf),{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]]; return X.utils.sheet_to_json(ws,{header:1,raw:false,defval:null}); }
-window.ntReport={open,collect,sheets,workbook,finance,readAoa};
+window.ntReport={open,collect,sheets,workbook,finance,readAoa,book};
 })();

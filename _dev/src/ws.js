@@ -73,7 +73,7 @@ const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
 function counts(){ let att=0, req=0, xl=0;
   try{ const a=num('nt_alerts_v1'); att=+(a&&a.n)||0; }catch(e){}
   try{ const o=num('nt_kharid9_v1'); (o&&Array.isArray(o.rows)?o.rows:[]).forEach(r=>{ if(r && r.over==='در انتظار خرید' && String(r.bought||'').trim()==='') req++; }); }catch(e){}
-  try{ const f=num('nt_factor_v1'); (Array.isArray(f)?f:[]).forEach(r=>{ if(r && r.id && !r.xl) xl++; }); }catch(e){}
+  try{ const f=num('nt_factor_v1'); (Array.isArray(f)?f:[]).forEach(r=>{ if(r && r.id && !r.rep) xl++; }); }catch(e){}
   return {att,req,xl}; }
 function chooser(){
   let el=$('ntWs'); if(!el){ el=document.createElement('div'); el.id='ntWs'; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); el.setAttribute('aria-labelledby','ntWsT'); document.body.appendChild(el);
@@ -84,7 +84,7 @@ function chooser(){
   el.innerHTML=`<div class="wh">${lg?`<img src="${esc(lg.getAttribute('src')||'')}" alt="">`:''}<small>${esc(co?co.textContent:'')}</small><b>${esc(un?un.textContent:'')}</b><span id="ntWsT">کدام بخش را باز می‌کنید؟</span></div>
     <div class="wc">
       <button type="button" class="wb${last==='nt'?' last':''}" data-ws="nt"><span class="ic">${ico('wr')}</span><span class="tx"><b>نت</b><span class="d">تعمیرات، توقف، قرائت، انبار و درخواست خرید</span>${c.att?`<span class="n">${fa(c.att)} مورد نیاز به توجه</span>`:''}</span></button>
-      <button type="button" class="wb${last==='kh'?' last':''}" data-ws="kh"><span class="ic">${ico('rcpt')}</span><span class="tx"><b>خرید</b><span class="d">ثبت فاکتور، دفتر طرف حساب‌ها، خروجی اکسل</span>${(c.req||c.xl)?`<span class="n">${[c.req?fa(c.req)+' درخواست در انتظار خرید':'',c.xl?fa(c.xl)+' فاکتور هنوز در اکسل نیست':''].filter(Boolean).join('، ')}</span>`:''}</span></button>
+      <button type="button" class="wb${last==='kh'?' last':''}" data-ws="kh"><span class="ic">${ico('rcpt')}</span><span class="tx"><b>خرید</b><span class="d">ثبت فاکتور، دفتر طرف حساب‌ها، خروجی اکسل</span>${(c.req||c.xl)?`<span class="n">${[c.req?fa(c.req)+' درخواست در انتظار خرید':'',c.xl?fa(c.xl)+' فاکتور هنوز در گزارش مالی نیست':''].filter(Boolean).join('، ')}</span>`:''}</span></button>
     </div>`;
   el.hidden=false; try{ el.querySelector('.wb.last').focus(); }catch(e){}
 }
