@@ -8,7 +8,7 @@ const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ic=(k,s)=>{ try{ return NTI.svg(k,s||22); }catch(e){ return ''; } };
 const MOON='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M20.5 14.2A8.6 8.6 0 0 1 9.8 3.5a8.6 8.6 0 1 0 10.7 10.7z" fill="#E6A52E"/></svg>';
-const TABICON={'امروز':'today','مدیریت':'mgmt','برنامه روزانه':'plan','انبار':'box','دفترچه قرائت':'read','ثبت مشکلات':'warn','شناسنامه':'id','خدمات':'wr','درخواست خرید':'cart','توقف شیفت':'stop','برون‌سپاری':'out','عکس‌ها':'photo','تردد و اضافه‌کار':'clock'};
+const TABICON={'امروز':'today','مدیریت':'mgmt','برنامه روزانه':'plan','انبار':'box','دفترچه قرائت':'read','ثبت مشکلات':'warn','شناسنامه':'id','خدمات':'wr','درخواست خرید':'cart','توقف شیفت':'stop','برون‌سپاری':'out','عکس‌ها':'photo','تردد و اضافه‌کار':'clock','فاکتور خرید':'rcpt'};
 const CSS=`
 #ntHam,#ntMoon,#ntHT,#ntDrw,#ntDrwBd{display:none}
 @media (max-width:899px){
@@ -101,13 +101,15 @@ function fill(){
   let who=''; try{ who=(window.ntSync&&ntSync.myName&&ntSync.myName())||''; }catch(e){}
   let h=`<div class="dh">${lg?`<img src="${esc(lg.getAttribute('src')||'')}" alt="">`:''}<div><small>${esc(co?co.textContent:'')}</small><b>${esc(un?un.textContent:'')}</b>${who?`<span>${esc(who)}</span>`:''}</div>
     <button type="button" class="dx" data-a="close" aria-label="بستن منو">${ic('close',22)}</button></div><h4>بخش‌ها</h4>`;
+  try{ if(window.ntWs) h+=ntWs.drw(); }catch(e){}
   DOCS.forEach((doc,k)=>{ if(!vis(k)) return; const bg=badge(doc.name);
     h+=`<button type="button" class="di${k===i?' on':''}" data-t="${k}"${k===i?' aria-current="page"':''}>${ic(TABICON[doc.name]||'doc',24)}<span>${esc(doc.name)}</span>${bg?`<span class="b">${esc(fa(bg))}</span>`:''}</button>`; });
   const th=$('ntThBtn'), thx=th&&th.querySelector('.tx')?th.querySelector('.tx').textContent:'';
   const sy=$('ntSyBtn'), syx=sy&&sy.querySelector('.tx')?sy.querySelector('.tx').textContent:'';
   h+='<h4>ابزارها</h4>';
-  if($('ntDevBtn')) h+=`<button type="button" class="di" data-a="ntDevBtn">${ic('files',24)}<span>پرونده دستگاه‌ها</span></button>`;
-  if($('ntQrScan')) h+=`<button type="button" class="di" data-a="ntQrScan">${ic('scan',24)}<span>اسکن QR دستگاه</span></button>`;
+  const khW=!!(window.ntWs && ntWs.cur==='kh');
+  if($('ntDevBtn') && !khW) h+=`<button type="button" class="di" data-a="ntDevBtn">${ic('files',24)}<span>پرونده دستگاه‌ها</span></button>`;
+  if($('ntQrScan') && !khW) h+=`<button type="button" class="di" data-a="ntQrScan">${ic('scan',24)}<span>اسکن QR دستگاه</span></button>`;
   if(th) h+=`<button type="button" class="di" data-a="ntThBtn" data-keep="1">${ic('theme',24)}<span>ظاهر</span><span class="v">${esc(thx)}</span></button>`;
   if(sy) h+=`<button type="button" class="di" data-a="ntSyBtn">${ic('sync',24)}<span>اطلاعات مشترک</span><span class="v">${esc(syx)}</span></button>`;
   if($('ntExitBtn')) h+=`<button type="button" class="di x" data-a="ntExitBtn">${ic('exit',24)}<span>خروج (بستن سامانه)</span></button>`;
@@ -115,6 +117,7 @@ function fill(){
 }
 function onDrw(e){ const b=e.target.closest('button'); if(!b) return;
   if(b.dataset.a==='close'){ close(); return; }
+  if(b.dataset.a==='ws'){ close(); try{ ntWs.toggle(); }catch(x){} return; }
   if(b.dataset.t!==undefined){ close(); try{ show(+b.dataset.t); }catch(x){} return; }
   if(b.dataset.a){ const t=$(b.dataset.a); if(b.dataset.keep){ if(t) t.click(); setTimeout(fill,60); return; } close(); if(t) setTimeout(()=>t.click(),30); } }
 let last=null;

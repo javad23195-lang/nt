@@ -26,7 +26,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   ok(await P.evaluate(()=>document.getElementById('ntHT').textContent==='دفترچه قرائت'),'سربرگ: نام زبانه باز');
   await P.click('#ntHam'); await sleep(250);
   ok(await vis(P,'#ntDrw'),'منوی ☰ باز می‌شود');
-  ok(await P.evaluate(()=>[...document.querySelectorAll('#ntDrw .di[data-t]')].length===DOCS.length),'همه زبانه‌ها در منوی ☰');
+  ok(await P.evaluate(()=>[...document.querySelectorAll('#ntDrw .di[data-t]')].length===DOCS.filter(d=>ntWs.wsOf(d.name)==='nt').length),'همه زبانه‌های بخش نت در منوی ☰');
   ok(await P.evaluate(()=>['ntDevBtn','ntQrScan','ntThBtn','ntSyBtn','ntExitBtn'].every(a=>document.querySelector('#ntDrw [data-a="'+a+'"]'))),'ابزارها در منو: پرونده، اسکن، ظاهر، اطلاعات مشترک، خروج');
   await P.keyboard.press('Escape'); await sleep(150);
   ok(!(await vis(P,'#ntDrw')),'Escape منو را می‌بندد');

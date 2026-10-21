@@ -32,7 +32,7 @@ const J=ago=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZo
   const order=await fr.evaluate(()=>['kpis','flCard','atCard'].map(id=>document.getElementById(id).getBoundingClientRect().top));
   ok(order[0]<order[1] && order[1]<order[2],'ترتیب گوشی: خلاصه، ناوگان، نیاز به توجه');
   const seg=await fr.evaluate(()=>[...document.querySelectorAll('#fl2 .fsg button')].map(b=>b.textContent+(b.getAttribute('aria-pressed')==='true'?'*':'')));
-  ok(seg.length===3 && /^همه · ۸\*$/.test(seg[0]) && seg.some(s=>/تولید · ۳/.test(s)) && seg.some(s=>/استخراج · ۵/.test(s)),'انتخاب بخش: همه ۸، تولید ۳، استخراج ۵ — '+seg.join('|'));
+  ok(seg.length===3 && /^همه \(۸\)\*$/.test(seg[0]) && seg.some(s=>/تولید \(۳\)/.test(s)) && seg.some(s=>/استخراج \(۵\)/.test(s)),'انتخاب بخش: همه ۸، تولید ۳، استخراج ۵ — '+seg.join('|'));
   const rd=()=>fr.evaluate(()=>({p:document.querySelector('#fl2 .frh b').textContent,l:document.querySelector('#fl2 .frl').innerText.replace(/\s+/g,' '),n:document.querySelectorAll('#fl2 .frb i').length,rows:[...document.querySelectorAll('#fl2 .fr2')].map(r=>r.className.match(/fl-(\w+)/)[1]+'|'+r.querySelector('.frw').innerText.replace(/\s+/g,' '))}));
   let R=await rd();
   ok(R.p==='۶۳٪' && /خراب \/ تعمیر ۲/.test(R.l) && /منتظر \/ سرویس ۱/.test(R.l) && R.n>=3,'آماده به کار ۶۳٪ (۵ از ۸) و راهنما — '+R.p+' '+R.l);
@@ -49,7 +49,7 @@ const J=ago=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZo
   const h=await fr.evaluate(()=>[...document.querySelectorAll('#fl2 button')].filter(b=>b.getClientRects().length).every(b=>b.getBoundingClientRect().height>=44));
   ok(h,'همه دکمه‌های ناوگان دست‌کم ۴۴ پیکسل');
   ok(await fr.evaluate(()=>{ flRender(); return document.querySelector('#fl2 .fr2').classList.contains('on'); }),'باز بودن ردیف بعد از تازه‌سازی می‌ماند');
-  ok(/اجرت و قطعه|از (فروردین|اردیبهشت|خرداد|تیر|مرداد|شهریور|مهر|آبان|آذر|دی|بهمن|اسفند)/.test(kp.cost||''),'هزینه: «اجرت و قطعه · ماه» یا مقایسه با نام ماه قبل — '+kp.cost);
+  ok(/اجرت و قطعه،|از (فروردین|اردیبهشت|خرداد|تیر|مرداد|شهریور|مهر|آبان|آذر|دی|بهمن|اسفند)/.test(kp.cost||''),'هزینه: «اجرت و قطعه · ماه» یا مقایسه با نام ماه قبل — '+kp.cost);
   ok(errs.length===0,'بدون خطا '+errs.join('|'));
   await c.close();
 

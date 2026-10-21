@@ -56,6 +56,8 @@ I['menu']=f"<path d='M3.5 6h17M3.5 12h17' stroke='currentColor' stroke-width='2.
 I['close']=f"<path d='M6 6l12 12M18 6L6 18' stroke='currentColor' stroke-width='2.4'/>"
 I['mgmt']=f"<rect x='3' y='3' width='18' height='18' rx='3.2' stroke-width='2.2'/><path d='M7.5 17.2v-3.4M12 17.2v-5.6M16.5 17.2v-7.6' stroke-width='2.4'/><path d='M6.6 10.4l3.6-3.1 2.9 2 4.3-3.9' {AS} stroke-width='2'/><circle cx='17.4' cy='5.4' r='1.4' {AF}/>"
 I['pump']=I['fuel']
+I['rcpt']=f"<path d='M5 2.8h11.5a1.5 1.5 0 0 1 1.5 1.5V21l-2.4-1.5-2.3 1.5-2.3-1.5-2.3 1.5L6.4 19.5 4 21V3.8a1 1 0 0 1 1-1z' stroke-width='2.2'/><path d='M7.8 7.5h6.6M7.8 11h4.4' stroke-width='2'/><circle cx='15.6' cy='14.8' r='3.6' {AF}/><path d='M15.6 13v3.6' stroke='#fff' stroke-width='1.6'/>"
+I['swap']=f"<path d='M4 8h14l-3.5-3.5M20 16H6l3.5 3.5' stroke-width='2.3'/><circle cx='12' cy='12' r='2.2' {AF}/>"
 js="""/* آیکون‌های رابط سامانه (ساخته‌شده از mk_uicons.py — دستی ویرایش نشود).
    سبک: سرمه‌ای = currentColor (رنگ متن)، کهربایی #E6A52E، جزئیات سفید. هر آیکون رنگ خودش را دارد، پس در قاب‌ها هم درست است.
    NTI.svg('read',24) → <svg …>  */

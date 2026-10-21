@@ -13,7 +13,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms)); const SHOT=process.env.SHOT;
     const p=await c.newPage(); const errs=[]; p.on('pageerror',e=>{ if(!/Unexpected token '<'/.test(String(e))) errs.push(String(e)); });
     await p.goto(`http://localhost:${web.address().port}/nt/s.html`); await p.waitForFunction(()=>window.ntQr&&window.ntNav,null,{timeout:15000});
     await p.addStyleTag({content:'.sydlg:not(#ntQrDlg),.sybd{display:none!important}'}); await p.evaluate(()=>{ window.ntLocked=false; document.body.classList.remove('ntlocked'); try{ ntBoot(); }catch(e){} }); await sleep(1000);
-    ok(await p.evaluate(()=>DOCS[DOCS.length-2].name==='مدیریت' && DOCS[DOCS.length-1].name==='تردد و اضافه‌کار' && DOCS[3].name!=='مدیریت' && localStorage.nt_lasttab==='3'),tag+'«مدیریت» و «تردد» آخر DOCS هستند؛ شماره زبانه‌های قبلی عوض نشد');
+    ok(await p.evaluate(()=>DOCS[DOCS.length-3].name==='مدیریت' && DOCS[DOCS.length-2].name==='تردد و اضافه‌کار' && DOCS[DOCS.length-1].name==='فاکتور خرید' && DOCS[3].name!=='مدیریت' && localStorage.nt_lasttab==='3'),tag+'«مدیریت» و «تردد» آخر DOCS هستند؛ شماره زبانه‌های قبلی عوض نشد');
     if(mob){
       const nb=await p.evaluate(()=>[...document.querySelectorAll('#ntNav .ntnb')].map(b=>b.dataset.n||'بیشتر'));
       ok(JSON.stringify(nb)===JSON.stringify(['امروز','توقف شیفت','دفترچه قرائت','مدیریت']),tag+'نوار پایین: امروز، توقف، قرائت، مدیریت — '+nb.join('،'));
@@ -21,7 +21,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms)); const SHOT=process.env.SHOT;
       ok(await p.evaluate(()=>[...document.querySelectorAll('#ntDrw .di[data-t]')].some(b=>b.textContent.includes('انبار'))),tag+'«انبار» در منوی ☰ است');
       await p.keyboard.press('Escape'); await sleep(300);
     } else {
-      const ord=await p.evaluate(()=>{ const t=[...document.querySelectorAll('.tab')]; return t.map(x=>({n:x.textContent.trim(),y:x.getBoundingClientRect().top})).sort((a,b)=>a.y-b.y).slice(0,3).map(x=>x.n); });
+      const ord=await p.evaluate(()=>{ const t=[...document.querySelectorAll('.tab')].filter(x=>!x.hidden); return t.map(x=>({n:x.textContent.trim(),y:x.getBoundingClientRect().top})).sort((a,b)=>a.y-b.y).slice(0,3).map(x=>x.n); });
       ok(/امروز/.test(ord[0]) && /مدیریت/.test(ord[1]),tag+'کنار صفحه: «مدیریت» زیر «امروز» — '+ord.join(' | '));
     }
     const go=async n=>{ await p.evaluate(n=>window.postMessage({nt:'go',tab:n},'*'),n); await sleep(1600); };

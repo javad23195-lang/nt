@@ -1,0 +1,136 @@
+// بخش «خرید»: صفحه انتخاب نت/خرید، زبانه «فاکتور خرید» (ثبت، تکراری، دفتر، بدهی، اکسل)، اتصال به «درخواست خرید»، فهرست پیشنهاد از فرم قدیمی، دسترسی و امنیت
+const {chromium}=require('playwright'); const http=require('http'), fs=require('fs'), path=require('path');
+const HTML=fs.readFileSync(path.join(__dirname,'..','out.html'));
+let fails=0; const ok=(c,m)=>{ console.log((c?'  ok  ':'  FAIL ')+m); if(!c) fails++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+(async()=>{
+  const web=http.createServer((q,r)=>{ r.writeHead(200,{'Content-Type':'text/html; charset=utf-8'}); r.end(HTML); }); await new Promise(r=>web.listen(0,r));
+  const br=await chromium.launch({executablePath:process.env.CHROMIUM||undefined});
+  const R=(item,unit,qty,x)=>Object.assign({date:'1405/07/20',unit,item,u:'عدد',qty,bought:'',desc:'',d1:'10',d2:'702',pri:'مهم',buy:'',req:'',apr:'تایید شده',over:'در انتظار خرید',note:''},x||{});
+  const KH={row:5,rows:[R('فیلتر روغن WA470','لودر کوماتسو WA470',2),R('تسمه دینام','لودر ZL50',1),R('جک 2 تن','بیل مکانیکی کوماتسو PC290',1)]};
+  const run=async(cfg,extra)=>{ const c=await br.newContext({locale:'fa-IR',viewport:{width:390,height:844}});
+    await c.grantPermissions(['clipboard-read','clipboard-write'],{origin:`http://localhost:${web.address().port}`});
+    await c.addInitScript(([kh,cfg,extra])=>{ if(localStorage.getItem('__s')) return; localStorage.setItem('__s','1'); localStorage.setItem('ntws_test','1');
+      localStorage.setItem('nt_kharid9_v1',JSON.stringify(kh)); if(cfg) localStorage.setItem('ntsync_cfg_v1',JSON.stringify(cfg));
+      Object.keys(extra||{}).forEach(k=>localStorage.setItem(k,JSON.stringify(extra[k]))); },[KH,cfg,extra]);
+    const p=await c.newPage(); const errs=[]; p.on('pageerror',e=>{ if(!/Unexpected token '<'/.test(String(e))) errs.push(String(e)); });
+    await p.goto(`http://localhost:${web.address().port}/nt/s.html`); await p.waitForFunction(()=>window.ntSync&&window.ntNav&&window.ntWs,null,{timeout:15000});
+    await p.addStyleTag({content:'.sydlg,.sybd,#ntPin{display:none!important}'}); await p.evaluate(()=>{ window.ntLocked=false; document.body.classList.remove('ntlocked','ntpin'); try{ ntBoot(); }catch(e){} }); await sleep(1500);
+    return {c,p,errs}; };
+  const frameOf=async(p,n)=>{ const i=await p.evaluate(n=>DOCS.findIndex(d=>d.name===n),n); return (await p.$$('iframe'))[i].contentFrame(); };
+  const visTabs=p=>p.evaluate(()=>DOCS.filter((d,i)=>!tabs[i].hidden).map(d=>d.name));
+
+  console.log('۱) صفحه انتخاب و دو بخش');
+  let {c,p,errs}=await run();
+  ok(await p.evaluate(()=>{ const e=document.getElementById('ntWs'); return !!e && !e.hidden && e.querySelectorAll('[data-ws]').length===2; }),'مدیر: صفحه انتخاب «نت / خرید» نمایش داده می‌شود');
+  ok(/۳ درخواست در انتظار خرید/.test(await p.evaluate(()=>document.getElementById('ntWs').innerText)),'کارت خرید: «۳ درخواست در انتظار خرید»');
+  await p.click('#ntWs [data-ws="kh"]'); await sleep(1500);
+  let V=await visTabs(p);
+  ok(V.length===1 && V[0]==='فاکتور خرید' && await p.evaluate(()=>document.body.classList.contains('ws-kh') && getComputedStyle(document.getElementById('ntNav')).display==='none'),'بخش خرید: فقط «فاکتور خرید»؛ نوار پایین پنهان');
+  ok(await p.evaluate(()=>DOCS[tabs.findIndex(t=>t.classList.contains('on'))].name==='فاکتور خرید' && document.getElementById('ntHT').textContent==='فاکتور خرید'),'زبانه باز و عنوان سربرگ: فاکتور خرید');
+  await p.click('#ntHam'); await sleep(400);
+  const drw=await p.evaluate(()=>document.getElementById('ntDrw').innerText);
+  ok(/رفتن به بخش «نت»/.test(drw) && !/پرونده دستگاه‌ها/.test(drw) && !/درخواست خرید/.test(drw),'منوی ☰: «رفتن به بخش نت»؛ بدون ابزار دستگاه و زبانه‌های نت');
+  await p.click('#ntDrw [data-a="ws"]'); await sleep(1200);
+  V=await visTabs(p);
+  ok(V.includes('امروز') && V.includes('درخواست خرید') && !V.includes('فاکتور خرید') && await p.evaluate(()=>ntWs.cur==='nt'),'برگشت به نت: زبانه‌های نت، بدون فاکتور خرید');
+  await p.evaluate(()=>window.postMessage({nt:'go',tab:'فاکتور خرید'},'*')); await sleep(1200);
+  ok(await p.evaluate(()=>ntWs.cur==='kh'),'رفتن به زبانه فاکتور (پیام go): بخش هم عوض می‌شود');
+
+  console.log('۲) ثبت فاکتور');
+  let f=await frameOf(p,'فاکتور خرید');
+  await f.click('#bSave'); await sleep(200);
+  ok(await f.evaluate(()=>!document.getElementById('eTitle').hidden && !document.getElementById('eAmt').hidden && !document.getElementById('eSup').hidden),'فرم خالی: خطای شرح، مبلغ، تامین کننده');
+  await f.fill('#fTitle','فیلتر روغن موتور کوماتسو');
+  await f.click('#lnOpen'); await sleep(200);
+  const L=await f.evaluate(()=>[...document.querySelectorAll('#lnList .lrow')].map(b=>b.innerText.replace(/\s+/g,' ')));
+  ok(L.length===3 && /فیلتر روغن WA470/.test(L[0]) && /شبیه/.test(L[0]),'انتخاب درخواست: ۳ ردیف در انتظار خرید، شبیه‌ترین اول — '+L[0]);
+  await f.click('#lnList .lrow'); await sleep(200);
+  ok(await f.evaluate(()=>document.getElementById('fQty').value==='2' && /فیلتر روغن WA470/.test(document.getElementById('lnSel').innerText)),'بعد از انتخاب: تعداد ۲ و «برای: فیلتر روغن WA470»');
+  await f.click('#fKind [data-v="اعتباری"]'); await f.fill('#fAmt','4500000'); await f.fill('#fSup','فروشگاه نمونه الف');
+  ok(/چهار میلیون و پانصد هزار ریال/.test(await f.evaluate(()=>document.getElementById('dAmt').innerText)),'مبلغ به حروف');
+  ok(/B42/.test(await f.evaluate(()=>document.getElementById('tgt').innerText)),'جای اکسل: کالای اعتباری ← B42');
+  await f.click('#bSave'); await sleep(400);
+  let F=await p.evaluate(()=>JSON.parse(localStorage.getItem('nt_factor_v1')||'[]'));
+  ok(F.length===1 && F[0].amt===4500000 && F[0].kind==='اعتباری' && F[0].cat==='kala' && F[0].qty===2 && F[0].req && F[0].req.item==='فیلتر روغن WA470' && F[0].d,'ذخیره: مبلغ عددی، اعتباری، تعداد، اتصال به درخواست — '+JSON.stringify(F[0]).slice(0,160));
+  ok(await p.evaluate(()=>{ const n=JSON.parse(localStorage.getItem('nt_factor_learn_v1')||'{}'); return Object.values(n).includes('فیلتر روغن WA470'); }),'یاد گرفت: متن فاکتور ← فیلتر روغن WA470');
+  ok(await p.evaluate(()=>(JSON.parse(localStorage.getItem('nt_factor_lex_v1')||'{}').sup||[]).includes('فروشگاه نمونه الف')),'تامین کننده به فهرست پیشنهاد اضافه شد');
+  // تکراری
+  await f.click('#fKind [data-v="اعتباری"]'); await f.fill('#fTitle','فیلتر روغن موتور کوماتسو'); await f.fill('#fAmt','4500000'); await f.fill('#fSup','فروشگاه نمونه الف'); await sleep(100);
+  ok(await f.evaluate(()=>!document.getElementById('dup').hidden),'فاکتور تکراری: هشدار');
+  await f.click('#bSave'); await sleep(200);
+  ok((await p.evaluate(()=>JSON.parse(localStorage.getItem('nt_factor_v1')).length))===1,'ضربه اول روی تکراری: ثبت نمی‌شود');
+  await f.click('#edCancel').catch(()=>{}); await f.evaluate(()=>{ ['fTitle','fAmt','fSup'].forEach(id=>document.getElementById(id).value=''); });
+  // نقدی، خدمات و XSS
+  await f.click('#fCat [data-c="khat"]'); await f.click('#fKind [data-v="نقدی"]'); await f.fill('#fTitle','<img src=x onerror="window.__x=1">جوشکاری'); await f.fill('#fAmt','1200000'); await f.fill('#fSup','تعمیرگاه ب'); await f.click('#bSave'); await sleep(300);
+  F=await p.evaluate(()=>JSON.parse(localStorage.getItem('nt_factor_v1')));
+  ok(F.length===2 && !F.some(r=>/[<>"]/.test(r.title)) && !F[1].req,'خدمات خط نقدی ثبت شد؛ < > " پاک شد؛ بدون اتصال (خدمات خط)');
+
+  console.log('۳) دفتر و بدهی');
+  await f.click('#seg [data-p="book"]'); await sleep(200);
+  let S=await f.evaluate(()=>document.getElementById('bSum').innerText.replace(/\s+/g,' '));
+  ok(/۵٬۷۰۰٬۰۰۰/.test(S) && /۴٬۵۰۰٬۰۰۰ بدهی پرداخت‌نشده/.test(S),'جمع ۵٬۷۰۰٬۰۰۰، بدهی ۴٬۵۰۰٬۰۰۰ — '+S);
+  await f.click('#bList .pt>button'); await sleep(150);
+  await f.click('#bList [data-pay]'); await sleep(200);
+  ok(await p.evaluate(()=>!!JSON.parse(localStorage.getItem('nt_factor_v1')).find(r=>r.kind==='اعتباری').paid),'«پرداخت شد»: تاریخ پرداخت ذخیره شد');
+  S=await f.evaluate(()=>document.getElementById('bSum').innerText.replace(/\s+/g,' '));
+  ok(/۰ بدهی پرداخت‌نشده/.test(S),'بعد از پرداخت: بدهی صفر');
+  ok(await f.evaluate(()=>!window.__x && !document.querySelector('#bList img')),'XSS: هیچ کدی اجرا نشد');
+
+  console.log('۴) اکسل');
+  await f.click('#seg [data-p="xl"]'); await sleep(200);
+  const B=await f.evaluate(()=>[...document.querySelectorAll('#xList .blk .bh')].map(b=>b.innerText.replace(/\s+/g,' ')));
+  ok(B.length===2 && B.some(b=>/کالای خریداری شده — اعتباری/.test(b)&&/B42/.test(b)) && B.some(b=>/خدمات خط — نقدی/.test(b)&&/G83/.test(b)),'دو بلوک: کالای اعتباری B42، خدمات خط نقدی G83');
+  await f.selectOption('#xSheet','12'); await sleep(150);
+  ok(/G95/.test(await f.evaluate(()=>document.getElementById('xList').innerText)) && /B42/.test(await f.evaluate(()=>document.getElementById('xList').innerText)),'شیت ۲۰۴ ردیفه: خدمات خط G95 (۱۲ ردیف پایین‌تر)، کالا همان B42');
+  await f.evaluate(()=>{ window.__cp=''; copyText=async t=>{ window.__cp=t; return true; }; }); await f.click('#xList .blk [data-cp]'); await sleep(300);
+  const clip=await f.evaluate(()=>window.__cp||'');
+  ok(clip.split('\t')[0]==='فیلتر روغن موتور کوماتسو' && clip.split('\t')[1]==='4500000' && clip.split('\t')[3]==='فروشگاه نمونه الف' && clip.split('\t').length===8,'کپی بلوک: ستون‌ها مثل فرم قدیمی (شرح، مبلغ، تاریخ، تامین کننده، …) — '+clip.replace(/\t/g,' | '));
+  const xd=await f.$('#xList [data-xd]'); await xd.click(); await sleep(100); await xd.click(); await sleep(300);
+  ok(await p.evaluate(()=>JSON.parse(localStorage.getItem('nt_factor_v1')).every(r=>r.xl)) && /همه فاکتورها در اکسل ثبت شده‌اند/.test(await f.evaluate(()=>document.getElementById('xList').innerText)),'«در اکسل ثبت شد» (دو ضربه): فهرست اکسل خالی');
+
+  console.log('۵) «درخواست خرید»: برچسب فاکتور و تیک از قبل');
+  await p.evaluate(()=>ntWs.set('nt')); await sleep(400);
+  await p.evaluate(()=>window.postMessage({nt:'go',tab:'درخواست خرید'},'*')); await sleep(1800);
+  const k=await frameOf(p,'درخواست خرید'); await k.evaluate(()=>{ try{ kPaneSet('flow'); }catch(e){} }); await sleep(400);
+  const fr=await k.evaluate(()=>[...document.querySelectorAll('#flowList .fr')].map(r=>({t:r.innerText.replace(/\s+/g,' '),c:r.querySelector('.fck').checked,v:(r.querySelector('.fqr')||{}).value})));
+  const a=fr.find(x=>/فیلتر روغن WA470/.test(x.t)), b=fr.find(x=>/تسمه دینام/.test(x.t));
+  ok(a && a.c && a.v==='2' && /فاکتور رسید: فیلتر روغن موتور کوماتسو/.test(a.t) && /فروشگاه نمونه الف/.test(a.t),'ردیف وصل‌شده: «فاکتور رسید …»، تیک‌خورده، تعداد ۲');
+  ok(b && !b.c && !/فاکتور رسید/.test(b.t),'ردیف دیگر: بدون برچسب و بدون تیک');
+  ok(errs.length===0,'بدون خطا '+errs.join('|'));
+  await c.close();
+
+  console.log('۶) فهرست پیشنهاد از فرم قدیمی');
+  ({c,p,errs}=await run());
+  await p.click('#ntWs [data-ws="kh"]'); await sleep(1200); f=await frameOf(p,'فاکتور خرید');
+  await f.click('#seg [data-p="set"]'); await sleep(200);
+  const old='<html><script>\nconst DATA = {"sup":["فروشنده آزمایشی","فروشنده <b>دو</b>"],"items":["کالای آزمایشی"],"svcline":[],"pay":["نقد"]};\nconst X=1;</script></html>';
+  await f.setInputFiles('#sFile',{name:'old.html',mimeType:'text/html',buffer:Buffer.from(old,'utf-8')}); await sleep(500);
+  const lx=await p.evaluate(()=>JSON.parse(localStorage.getItem('nt_factor_lex_v1')||'{}'));
+  ok((lx.sup||[]).includes('فروشنده آزمایشی') && (lx.sup||[]).includes('فروشنده bدو/b') && (lx.items||[]).includes('کالای آزمایشی') && /۳ مورد تازه/.test(await f.evaluate(()=>document.getElementById('sMsg').textContent)),'۳ مورد وارد شد (بدون < >) — '+JSON.stringify(lx));
+  await f.click('#seg [data-p="add"]'); await sleep(200);
+  ok(await f.evaluate(()=>[...document.querySelectorAll('#dlSup option')].some(o=>o.value==='فروشنده آزمایشی') && [...document.querySelectorAll('#dlTitle option')].some(o=>o.value==='کالای آزمایشی')),'پیشنهاد در فرم: فروشنده و کالا');
+  await f.setInputFiles('#sFile',{name:'x.html',mimeType:'text/html',buffer:Buffer.from('<html>nothing</html>')}).catch(()=>{});
+  ok(errs.length===0,'بدون خطا '+errs.join('|'));
+  await c.close();
+
+  console.log('۷) دسترسی');
+  ({c,p,errs}=await run({uid:'u1',mode:'w',acl:{'فاکتور خرید':'w'}}));
+  V=await visTabs(p);
+  ok(await p.evaluate(()=>{ const e=document.getElementById('ntWs'); return !e || e.hidden; }) && V.length===1 && V[0]==='فاکتور خرید' && await p.evaluate(()=>ntWs.cur==='kh'),'کاربر فقط خرید: بدون صفحه انتخاب، مستقیم «فاکتور خرید»');
+  ok(await p.evaluate(()=>!ntSync.canSee('درخواست خرید')),'کاربر فقط خرید: «درخواست خرید» را نمی‌بیند');
+  await c.close();
+  ({c,p,errs}=await run({uid:'u2',mode:'w',acl:{'امروز':'r','توقف شیفت':'w'}}));
+  V=await visTabs(p);
+  ok(await p.evaluate(()=>{ const e=document.getElementById('ntWs'); return !e || e.hidden; }) && !V.includes('فاکتور خرید') && await p.evaluate(()=>!ntSync.canSee('فاکتور خرید')),'کاربر قدیمی بدون تنظیم خرید: فاکتور خرید پنهان، بدون صفحه انتخاب');
+  await c.close();
+  ({c,p,errs}=await run({uid:'u3',mode:'w',acl:{'فاکتور خرید':'r'}},{nt_factor_v1:[{id:'f1',cat:'kala',kind:'نقدی',title:'کالا',amt:1000,date:'1405/07/01',sup:'الف',d:'1405/07/01'}]}));
+  f=await frameOf(p,'فاکتور خرید');
+  ok(await f.evaluate(()=>document.body.classList.contains('ro') && getComputedStyle(document.getElementById('fCard')).display==='none' && !document.getElementById('roCard').hidden && !document.querySelector('[data-ed]')),'فقط مشاهده: فرم و دکمه‌های اصلاح پنهان');
+  await c.close();
+
+  console.log('۸) هیچ فهرست فروشنده در کد');
+  const H=HTML.toString('utf-8');
+  ok(!/"sup"\s*:\s*\[\s*"/.test(H) && !/"items"\s*:\s*\[\s*"/.test(H),'کد سامانه فهرست فروشنده یا کالا ندارد (فقط در اطلاعات رمزدار)');
+  console.log(fails?fails+' شکست':'همه موفق'); await br.close(); web.close(); process.exit(fails?1:0);
+})();

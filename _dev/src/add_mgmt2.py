@@ -1,6 +1,6 @@
 # طرح تازه — مرحله ۵: «مدیریت»
 # ۱) کارت‌های خلاصه: چهار کارت جدا (۲×۲ در گوشی)؛ سرویس گذشته = تعداد دستگاه + نام آن‌ها؛ خرابی باز = «مورد» + «N دستگاه خراب در توقف»؛
-#    مقایسه با نام ماه قبل («۱۲٪ بیشتر از شهریور»)؛ هزینه بدون مقایسه = «اجرت و قطعه · مهر». نمودار کوچک فقط در رایانه.
+#    مقایسه با نام ماه قبل («۱۲٪ بیشتر از شهریور»)؛ هزینه بدون مقایسه = «اجرت و قطعه، مهر». نمودار کوچک فقط در رایانه.
 # ۲) ناوگان: انتخاب بخش (همه / تولید / استخراج) + کارت «آماده به کار ٪» با نوار رنگی و راهنما؛
 #    فهرست دستگاه‌ها (آیکون، نام، وضعیت، کارکرد و توقف ماه)؛ ضربه = جزئیات (علت و مدت توقف، کار مانده، «پرونده دستگاه»، «توقف شیفت»).
 # ۳) گوشی: ناوگان درست زیر کارت‌های خلاصه، بعد «نیاز به توجه».
@@ -24,12 +24,12 @@ rep("function kpDelta(cur,prev){ if(!prev) return ''; const p=Math.round((cur-pr
 rep("<small>نسبت به ماه قبل</small>","<small>${p<0?'کمتر':'بیشتر'} از ${kpMon(1)}</small>")
 rep("""    C.push({k:'oil',t:'سرویس گذشته',v:fa(r),d:o?`<span class="kpd warn">${fa(o)} سرویس نزدیک</span>`:'<span class="kpd eq">موردی نزدیک نیست</span>',cls:r?'hot':'',go:'دفترچه قرائت'});""",
     """    const rd=[...new Set(A.filter(x=>x.st==='r').map(x=>x.it.dev))], rn=rd.map(n=>String(n).split(' ').filter(w=>/[A-Za-z0-9]/.test(w)).join(' ')||n);
-    C.push({k:'oil',t:'سرویس گذشته',v:fa(rd.length)+' <small>دستگاه</small>',d:rd.length?`<span class="kpd warn">${esc(rn.slice(0,3).join('، '))}${rn.length>3?' و '+fa(rn.length-3)+' دیگر':''}${o?' · '+fa(o)+' سرویس نزدیک':''}</span>`:(o?`<span class="kpd warn">${fa(o)} سرویس نزدیک</span>`:'<span class="kpd eq">موردی نزدیک نیست</span>'),cls:rd.length?'hot':'',go:'دفترچه قرائت'});""")
+    C.push({k:'oil',t:'سرویس گذشته',v:fa(rd.length)+' <small>دستگاه</small>',d:rd.length?`<span class="kpd warn">${esc(rn.slice(0,3).join('، '))}${rn.length>3?' و '+fa(rn.length-3)+' دیگر':''}${o?'، '+fa(o)+' سرویس نزدیک':''}</span>`:(o?`<span class="kpd warn">${fa(o)} سرویس نزدیک</span>`:'<span class="kpd eq">موردی نزدیک نیست</span>'),cls:rd.length?'hot':'',go:'دفترچه قرائت'});""")
 rep("C.push({k:'cost',t:'هزینه تعمیر این ماه',v:M,d:kpDelta(cur,prev),",
-    "C.push({k:'cost',t:'هزینه تعمیر این ماه',v:M,d:kpDelta(cur,prev)||`<span class=\"kpd eq\">اجرت و قطعه · ${kpMon(0)}</span>`,")
+    "C.push({k:'cost',t:'هزینه تعمیر این ماه',v:M,d:kpDelta(cur,prev)||`<span class=\"kpd eq\">اجرت و قطعه، ${kpMon(0)}</span>`,")
 rep("""    C.push({k:'fix',t:'خرابی باز',v:fa(open.length),d:`<span class="kpd eq">${[act?fa(act)+' در حال اقدام':'',wp?fa(wp)+' منتظر قطعه':''].filter(Boolean).join(' · ')||'هیچ‌کدام در حال اقدام نیست'}</span>`,""",
     """    let nbs=0; try{ const F=flBuild(); if(F) nbs=F.list.filter(x=>x.st==='bad').length; }catch(e){}
-    C.push({k:'fix',t:'خرابی باز',v:fa(open.length)+' <small>مورد</small>',d:`<span class="kpd eq">${[nbs?fa(nbs)+' دستگاه خراب در توقف':'',act?fa(act)+' در حال اقدام':'',wp?fa(wp)+' منتظر قطعه':''].filter(Boolean).join(' · ')||'هیچ‌کدام در حال اقدام نیست'}</span>`,""")
+    C.push({k:'fix',t:'خرابی باز',v:fa(open.length)+' <small>مورد</small>',d:`<span class="kpd eq">${[nbs?fa(nbs)+' دستگاه خراب در توقف':'',act?fa(act)+' در حال اقدام':'',wp?fa(wp)+' منتظر قطعه':''].filter(Boolean).join('، ')||'هیچ‌کدام در حال اقدام نیست'}</span>`,""")
 
 # --- عنوان ناوگان ---
 rep('<h2 style="color:#1B2430">ناوگان <small id="flSub"></small></h2>','<h2 style="color:#1B2430">ناوگان دستگاه‌ها <small id="flSub"></small></h2>')
@@ -61,15 +61,15 @@ JS=r"""
     const c=k=>L.filter(x=>k.includes(x.st)).length, nb=c(['bad']), nw=c(['wa','svc']), no=c(['ok']), nf=c(['off']);
     const pct=L.length?Math.round((no+nf)/L.length*100):0;
     $('flSub').textContent=fa(no+nf)+' از '+fa(L.length)+' دستگاه آماده';
-    const seg=G.length>1?`<div class="fsg" role="group" aria-label="بخش">${[['*','همه',D.list.length]].concat(G.map(g=>[g,g,D.list.filter(x=>gOf(x.n)===g).length])).map(a=>`<button type="button" data-seg="${esc(a[0])}" aria-pressed="${a[0]===sel}">${esc(a[1])} · ${fa(a[2])}</button>`).join('')}</div>`:'';
+    const seg=G.length>1?`<div class="fsg" role="group" aria-label="بخش">${[['*','همه',D.list.length]].concat(G.map(g=>[g,g,D.list.filter(x=>gOf(x.n)===g).length])).map(a=>`<button type="button" data-seg="${esc(a[0])}" aria-pressed="${a[0]===sel}">${esc(a[1])} (${fa(a[2])})</button>`).join('')}</div>`:'';
     const bar=[[no,'g'],[nf,'f'],[nw,'a'],[nb,'r']].filter(a=>a[0]).map(a=>`<i class="${a[1]}" style="flex:${a[0]}"></i>`).join('');
     const rd=`<div class="frd ${pct<50?'lo':(pct<80?'mid':'hi')}"><div class="frh"><span>آماده به کار</span><b class="num">${fa(pct)}٪</b></div>
       <div class="frb" aria-hidden="true">${bar}</div>
       <div class="frl"><span><i class="g"></i>در کار ${fa(no)}</span>${nf?`<span><i class="f"></i>پایان کار ${fa(nf)}</span>`:''}<span><i class="a"></i>منتظر / سرویس ${fa(nw)}</span><span><i class="r"></i>خراب / تعمیر ${fa(nb)}</span></div></div>`;
     const MS=monStop(), U=useOf(), showG=sel==='*' && G.length>1;
     const rows=L.map(x=>{ const op=OPEN2.has(x.dk), u=U[x.dk], ms=(MS[x.dk]||0)+(x.o&&x.o.el?x.o.el:0);
-      const sub=[showG?esc(gOf(x.n)):'', u!=null?'کارکرد '+num(u)+(/کامیون/.test(x.n)?' کیلومتر':' ساعت'):'', ms?'توقف ماه '+flHM(ms)+' ساعت':'بدون توقف در ماه'].filter(Boolean).join(' · ');
-      const now=x.o?`${esc(x.o.cause)}${x.o.el!==null?' · '+flDur(x.o.el)+(x.o.from?' (از ساعت '+fa(x.o.from)+')':''):''}`:(x.st==='off'?'خارج از ساعت کاری':(x.ow!==undefined?'اضافه‌کار از '+fa(x.ow):(x.cm>0?'توقف امروز: '+flHM(x.cm)+' ساعت':'امروز بدون توقف')));
+      const sub=[showG?esc(gOf(x.n)):'', u!=null?'کارکرد '+num(u)+(/کامیون/.test(x.n)?' کیلومتر':' ساعت'):'', ms?'توقف ماه '+flHM(ms)+' ساعت':'بدون توقف در ماه'].filter(Boolean).join('، ');
+      const now=x.o?`${esc(x.o.cause)}${x.o.el!==null?'، '+flDur(x.o.el)+(x.o.from?' (از ساعت '+fa(x.o.from)+')':''):''}`:(x.st==='off'?'خارج از ساعت کاری':(x.ow!==undefined?'اضافه‌کار از '+fa(x.ow):(x.cm>0?'توقف امروز: '+flHM(x.cm)+' ساعت':'امروز بدون توقف')));
       return `<div class="fr2 fl-${x.st}${op?' on':''}" data-k="${esc(x.dk)}">
         <button type="button" class="frw" aria-expanded="${op}"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">${FL_I[x.st]}</svg></span>
           <span class="tx"><b><bdi>${esc(x.n)}</bdi></b><small>${sub}</small></span><em>${W2[x.st]}</em><span class="cv">${CV}</span></button>
