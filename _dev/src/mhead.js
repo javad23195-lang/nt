@@ -30,9 +30,11 @@ body.ntnav .topbar #ntQrScan .tx{display:none}
 #ntMoon{background:transparent!important;border:0!important;cursor:pointer}
 body.ntnav .topbar #ntSyBtn{display:inline-flex;align-items:center;gap:6px;height:36px;min-height:0;padding:0 12px;border-radius:18px!important;background:rgba(255,255,255,.1)!important;border:1px solid rgba(255,255,255,.16)!important;color:#fff!important;font-size:.78rem;font-weight:700;white-space:nowrap}
 body.ntnav .topbar #ntSyBtn svg{display:none}
-body.ntnav .topbar #ntSyBtn .tx{display:inline!important;max-width:84px;overflow:hidden;text-overflow:ellipsis}
+body.ntnav .topbar #ntSyBtn .tx{display:none!important}
+body.ntnav .topbar #ntSyBtn .l{display:inline;max-width:76px;overflow:hidden;text-overflow:ellipsis}
+#ntSyBtn .l{display:none}
 body.ntnav .topbar #ntSyBtn .d{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none}
-@media (max-width:370px){ body.ntnav .topbar #ntSyBtn .tx{max-width:58px} }
+@media (max-width:370px){ body.ntnav .topbar #ntSyBtn .l{max-width:52px} }
 #ntDrwBd{position:fixed;inset:0;background:rgba(18,25,33,.55);z-index:90}
 #ntDrw{position:fixed;top:0;bottom:0;right:0;width:min(86vw,340px);background:#fff;z-index:91;overflow-y:auto;box-shadow:-8px 0 24px rgba(0,0,0,.25);
   padding:calc(14px + env(safe-area-inset-top)) 14px calc(20px + env(safe-area-inset-bottom));direction:rtl}
@@ -82,6 +84,10 @@ function paint(){
   if(!build()) return;
   const i=activeIdx(), name=i>-1&&DOCS[i]?DOCS[i].name:'';
   const h=$('ntHT'); if(h && h.textContent!==name) h.textContent=name;
+  /* قرص همگام: فقط ساعت آخرین همگام‌سازی (کوتاه، تا نام زبانه جا شود) */
+  const sb=$('ntSyBtn'); if(sb){ const tx=sb.querySelector('.tx'); let l=sb.querySelector('.l'); if(!l){ l=document.createElement('span'); l.className='l'; sb.appendChild(l); }
+    const raw=tx?tx.textContent.trim():'', m=/^همگام\s+(.+)$/.exec(raw), lab=m?m[1]:(raw==='اطلاعات مشترک'?'همگام نیست':raw);
+    if(l.textContent!==lab) l.textContent=lab; }
   /* شمارنده ☰: زبانه‌هایی که در نوار پایین نیستند */
   let bar=[]; try{ bar=(window.ntNav&&ntNav.barTabs)?ntNav.barTabs():[]; }catch(e){}
   const solo=document.body.classList.contains('ntsolo');
@@ -119,6 +125,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') close(); });
 let q=0; const sched=()=>{ if(q) return; q=setTimeout(()=>{ q=0; paint(); },60); };
 try{ new MutationObserver(sched).observe($('tabs'),{subtree:true,childList:true,attributes:true,characterData:true,attributeFilter:['class','hidden']}); }catch(e){}
 setInterval(paint,2000);
+try{ const sb=$('ntSyBtn'); if(sb) new MutationObserver(sched).observe(sb,{subtree:true,characterData:true,childList:true}); }catch(e){}
 paint();
 window.ntMHead={open,close,paint};
 })();

@@ -61,7 +61,8 @@ python3 add_dept_filter.py "$T/b48b.html" "$T/b48c.html"
 python3 add_today2.py "$T/b48c.html" "$T/b48d.html"
 python3 add_mgmt.py "$T/b48d.html" "$T/b49a.html"
 python3 add_tarad.py "$T/b49a.html" "$T/b49b.html"
-python3 fix_sort_i.py "$T/b49b.html" "$T/b49.html"
+python3 fix_sort_i.py "$T/b49b.html" "$T/b49c.html"
+python3 add_stop2.py "$T/b49c.html" "$T/b49.html"
 python3 build.py "$T/b49.html" ../out.html
 python3 fix_hover.py ../out.html
 python3 stamp.py ../out.html

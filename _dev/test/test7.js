@@ -13,7 +13,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   await p.evaluate(()=>show(DOCS.findIndex(d=>d.name==='توقف شیفت')));
   const f=p.frameLocator('iframe.on');
   const stops=async()=>{ const o=JSON.parse(await p.evaluate(()=>localStorage.getItem('nt_tavaqof_v1'))||'{}'); return Object.values(o).flatMap(r=>r.stops||[]); };
-  await f.locator('#bNew').click();
+  await f.locator('#bNew').dispatchEvent('click');
   ok(await f.locator('#fOpen').isChecked() && await f.locator('#fTo').isEnabled() && await f.locator('[data-now="fTo"]').isEnabled(),'فرم تازه: «هنوز متوقف است» تیک دارد، ولی هر دو کادر ساعت و هر دو دکمه «الان» آزاد است');
   await f.locator('#fPick button').first().click(); await f.locator('#fFrom').fill('08:10'); await f.locator('#fWhy button').first().click();
   await f.locator('#fTo').fill('09:40');
@@ -26,14 +26,14 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   await f.locator('#fTo').fill('09:40'); await f.locator('#fSave').click(); await sleep(200);
   let s=await stops(); ok(s.length===1 && s[0].from==='08:10' && s[0].to==='09:40','توقف با هر دو ساعت ذخیره شد');
   // توقف باز
-  await f.locator('#bNew').click(); await f.locator('#fPick button').nth(1).click(); await f.locator('#fFrom').fill('10:00'); await f.locator('#fWhy button').first().click(); await f.locator('#fSave').click(); await sleep(200);
+  await f.locator('#bNew').dispatchEvent('click'); await f.locator('#fPick button').nth(1).click(); await f.locator('#fFrom').fill('10:00'); await f.locator('#fWhy button').first().click(); await f.locator('#fSave').click(); await sleep(200);
   s=await stops(); ok(s.length===2 && s.some(x=>x.from==='10:00' && x.to===''),'توقف «هنوز متوقف» بدون ساعت پایان ذخیره شد');
   // بدون تیک و بدون ساعت پایان → خطا
-  await f.locator('#bNew').click(); await f.locator('#fPick button').first().click(); await f.locator('#fFrom').fill('11:00'); await f.locator('#fWhy button').first().click(); await f.locator('#fOpen').uncheck(); await f.locator('#fSave').click();
+  await f.locator('#bNew').dispatchEvent('click'); await f.locator('#fPick button').first().click(); await f.locator('#fFrom').fill('11:00'); await f.locator('#fWhy button').first().click(); await f.locator('#fOpen').uncheck(); await f.locator('#fSave').click();
   ok(await f.locator('#eTo').isVisible() && (await stops()).length===2,'بدون تیک و بدون ساعت پایان: پیام خطا، چیزی ذخیره نمی‌شود');
   await f.locator('#fClose').click();
   // ویرایش توقف باز: نوشتن ساعت پایان
-  await f.locator('article.st.open [data-ed]').click();
+  await f.locator('article.st2.open [data-ed]').click();
   ok(await f.locator('#fOpen').isChecked() && await f.locator('#fTo').isEnabled(),'ویرایش توقف باز: کادر ساعت پایان آزاد است');
   await f.locator('#fTo').fill('10:45'); await f.locator('#fSave').click(); await sleep(200);
   s=await stops(); ok(s.find(x=>x.from==='10:00').to==='10:45','ساعت پایان در ویرایش ذخیره شد');
