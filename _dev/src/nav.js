@@ -28,7 +28,7 @@ const ICON={
 /* آیکون‌های تازه (سرمه‌ای + کهربایی) از uicons.js؛ ICON بالا فقط پشتیبان است */
 const svg=k=>(window.NTI && NTI.P[k||'doc'])?NTI.svg(k||'doc'):`<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]||ICON.doc}</svg>`;
 const TABICON={'امروز':'today','مدیریت':'mgmt','برنامه روزانه':'plan','انبار':'box','دفترچه قرائت':'read','ثبت مشکلات':'warn','شناسنامه':'id','خدمات':'wr','درخواست خرید':'cart','توقف شیفت':'stop','برون‌سپاری':'out','عکس‌ها':'photo','تردد و اضافه‌کار':'clock'};
-const MAIN=['امروز','مدیریت','برنامه روزانه'];
+const MAIN=['امروز','توقف شیفت','دفترچه قرائت','مدیریت'];   /* مثل طرح تازه؛ بقیه در منوی ☰ سربرگ (mhead.js) */
 /* کارهای دکمه «+»: [نام زبانه، دکمه افزودن داخل آن، عنوان، توضیح، آیکون، رنگ] */
 const ACTS=[
   ['توقف شیفت','bNew','ثبت توقف','دستگاه ایستاد','stop','y'],
@@ -62,14 +62,14 @@ body.ntnav:not(.ntlocked):not(.ntdriver) #ntFab.has{display:grid}
   background:none;border:0;font:inherit;font-size:.7rem;font-weight:700;color:#5B6874;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .ntnb svg,.ntfab svg,.ntac .ic svg,.ntmr svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ntnb svg{width:26px;height:26px;color:#2B3846}
-.ntnb.on svg{color:#0B5C7A}
+.ntnb.on svg{color:#1B2430}
 .ntnbw{display:contents}
-#ntNavBub{position:absolute;left:0;top:8px;width:52px;height:32px;border-radius:16px;background:#E2EEF3;box-shadow:inset 0 0 0 1px #CFE1E9;opacity:0;pointer-events:none;z-index:0;transition:opacity .2s}
+#ntNavBub{position:absolute;left:0;top:8px;width:56px;height:32px;border-radius:16px;background:#E6A52E;box-shadow:0 2px 6px rgba(185,126,16,.35);opacity:0;pointer-events:none;z-index:0;transition:opacity .2s}
 .ntnb{z-index:1}
 .ntnb svg{transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
-.ntnb.on{color:#0B5C7A}
+.ntnb.on{color:#1B2430;font-weight:800}
 .ntnb.on svg{transform:translateY(-1px) scale(1.08)}
-.ntnb.on::after{content:"";position:absolute;bottom:-6px;width:5px;height:5px;border-radius:50%;background:#E6A52E}
+.ntnb.on::after{content:none}
 .ntnb .b{position:absolute;top:-5px;left:auto;right:calc(50% + 5px);inset-inline-end:auto;min-width:17px;height:17px;padding:0 3px;border-radius:9px;background:#C0392B;color:#fff;font-size:.7rem;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid #fff;box-sizing:content-box}
 .ntnb .b.show{display:flex}
 .ntnb:focus-visible,.ntfab:focus-visible,.ntac:focus-visible,.ntmr:focus-visible{outline:3px solid #1B2430;outline-offset:2px}
@@ -201,7 +201,7 @@ const cap99=v=>{ const n=+String(v||'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷�
 function activeName(){ const i=tabs.findIndex(t=>t.classList.contains('on')); return i>-1?DOCS[i].name:''; }
 function rest0(){ return DOCS.map(d=>d.name).filter(n=>MAIN.indexOf(n)<0 && vis(n)); }
 /* نوار پایین: زبانه‌های اصلی؛ اگر کاربر آن‌ها را ندارد، جای خالی (تا ۴ دکمه) با زبانه‌های دیگرش پر می‌شود و همان‌ها در «بیشتر» تکرار نمی‌شوند */
-function barTabs(){ const m=MAIN.filter(vis), r=rest0(); while(r.length && m.length<(r.length>4-m.length?3:4)) m.push(r.shift()); return m; }
+function barTabs(){ const m=MAIN.filter(vis), r=rest0(); while(r.length && m.length<4) m.push(r.shift()); return m; }   /* «بیشتر» نیست: همه زبانه‌ها در منوی ☰ */
 function others(){ const b=barTabs(); return rest0().filter(n=>b.indexOf(n)<0); }
 /* کاربر محدود (بدون «امروز» و «برنامه روزانه»): نوار پایین فقط دکمه وسط؛ همه زبانه‌ها یک بار در برگه همان دکمه */
 const solo=()=>!vis('امروز') && !vis('برنامه روزانه');
@@ -215,12 +215,12 @@ function paint(){
   if(document.body.classList.contains('ntsolo')) document.body.classList.remove('ntsolo'); delete fab.dataset.b;
   const act=activeName(), main=barTabs(), more=others();
   const mk=(n,label,icon,on,badge,extra)=>`<button type="button" class="ntnb${on?' on':''}" data-n="${n}" ${on?'aria-current="page"':''}>${svg(icon)}${label}<span class="b${badge?' show':''}">${cap99(badge)}</span></button>`;
-  let h=''; const lab={'امروز':'امروز','مدیریت':'مدیریت','برنامه روزانه':'برنامه','انبار':'انبار','دفترچه قرائت':'دفترچه','توقف شیفت':'توقف','ثبت مشکلات':'مشکلات','درخواست خرید':'خرید','برون‌سپاری':'برون‌سپاری','شناسنامه':'شناسنامه','خدمات':'خدمات','عکس‌ها':'عکس‌ها','تردد و اضافه‌کار':'تردد'};
+  let h=''; const lab={'امروز':'امروز','مدیریت':'مدیریت','برنامه روزانه':'برنامه','انبار':'انبار','دفترچه قرائت':'قرائت','توقف شیفت':'توقف','ثبت مشکلات':'مشکلات','درخواست خرید':'خرید','برون‌سپاری':'برون‌سپاری','شناسنامه':'شناسنامه','خدمات':'خدمات','عکس‌ها':'عکس‌ها','تردد و اضافه‌کار':'تردد'};
   const first=main.slice(0,2), last=main.slice(2);
   first.forEach(n=>h+=mk(n,lab[n]||n,TABICON[n],act===n,badgeOf(n)));
   h+='<span class="ntsp" aria-hidden="true"></span>';
   last.forEach(n=>h+=mk(n,lab[n]||n,TABICON[n],act===n,badgeOf(n)));
-  if(more.length){ const faN=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]); const mb=more.reduce((s,n)=>s+(+badgeOf(n).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d))||0),0);
+  if(false && more.length){ const faN=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]); const mb=more.reduce((s,n)=>s+(+badgeOf(n).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d))||0),0);
     h+=`<button type="button" class="ntnb${more.indexOf(act)>-1?' on':''}" data-more="1">${svg('more')}بیشتر<span class="b${mb?' show':''}">${mb?(mb>99?'۹۹+':faN(mb)):''}</span></button>`; }
   navIn.innerHTML=h;
   requestAnimationFrame(()=>{ moveBub(); moveInd(); });
@@ -275,5 +275,5 @@ const mo=new MutationObserver(sched);
 mo.observe($('tabs'),{subtree:true,childList:true,attributes:true,characterData:true,attributeFilter:['class','hidden']});
 mo.observe(document.body,{attributes:true,attributeFilter:['class']});
 paint();
-window.ntNav={paint,openSheet,closeSheet};
+window.ntNav={paint,openSheet,closeSheet,badgeOf,barTabs,vis};
 })();

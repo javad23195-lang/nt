@@ -16,9 +16,9 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms)); const SHOT=process.env.SHOT;
     ok(await p.evaluate(()=>DOCS[DOCS.length-2].name==='مدیریت' && DOCS[DOCS.length-1].name==='تردد و اضافه‌کار' && DOCS[3].name!=='مدیریت' && localStorage.nt_lasttab==='3'),tag+'«مدیریت» و «تردد» آخر DOCS هستند؛ شماره زبانه‌های قبلی عوض نشد');
     if(mob){
       const nb=await p.evaluate(()=>[...document.querySelectorAll('#ntNav .ntnb')].map(b=>b.dataset.n||'بیشتر'));
-      ok(JSON.stringify(nb)===JSON.stringify(['امروز','مدیریت','برنامه روزانه','بیشتر']),tag+'نوار پایین: امروز، مدیریت، برنامه، بیشتر — '+nb.join('،'));
-      await p.click('#ntNav [data-more]'); await sleep(500);
-      ok(await p.evaluate(()=>[...document.querySelectorAll('.ntmr')].some(b=>b.dataset.n==='انبار')),tag+'«انبار» در «بیشتر» است');
+      ok(JSON.stringify(nb)===JSON.stringify(['امروز','توقف شیفت','دفترچه قرائت','مدیریت']),tag+'نوار پایین: امروز، توقف، قرائت، مدیریت — '+nb.join('،'));
+      await p.click('#ntHam'); await sleep(500);
+      ok(await p.evaluate(()=>[...document.querySelectorAll('#ntDrw .di[data-t]')].some(b=>b.textContent.includes('انبار'))),tag+'«انبار» در منوی ☰ است');
       await p.keyboard.press('Escape'); await sleep(300);
     } else {
       const ord=await p.evaluate(()=>{ const t=[...document.querySelectorAll('.tab')]; return t.map(x=>({n:x.textContent.trim(),y:x.getBoundingClientRect().top})).sort((a,b)=>a.y-b.y).slice(0,3).map(x=>x.n); });

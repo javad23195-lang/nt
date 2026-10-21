@@ -25,7 +25,7 @@ const D=d=>`${Y}/${p2(M)}/${p2(Math.min(d,DD))}`, d1=D(1), d2=D(2);
   await p.evaluate(()=>{ window.ntLocked=false; document.body.classList.remove('ntlocked'); try{ ntBoot(); }catch(e){} }); await sleep(800);
 
   ok(await p.evaluate(()=>!!document.getElementById('ntDevBtn')),'دکمه «دستگاه‌ها» بالای صفحه هست');
-  await p.click('#ntDevBtn'); await sleep(300);
+  await p.click('#ntHam'); await sleep(200); await p.click('#ntDrw [data-a="ntDevBtn"]'); await sleep(300);
   const L=await p.evaluate(()=>[...document.querySelectorAll('#ntDevL button')].map(b=>b.innerText.replace(/\s+/g,' ')));
   ok(L.length===17,'فهرست ۱۷ دستگاه: '+L.length);
   const z=L.find(x=>/ZL50/.test(x))||'';
