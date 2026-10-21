@@ -3,7 +3,7 @@
    - کتابخانه‌ها و آیکن‌ها: از نسخه ذخیره‌شده، و پشت صحنه تازه می‌شوند.
    - درخواست‌های GitHub (اطلاعات مشترک) و سایت‌های دیگر دست نمی‌خورند.
    منبع: همین فایل در ریشه مخزن (_dev/NOTES.md را ببینید). */
-const V='nt-v2';
+const V='nt-v3';
 const PAGE='سامانه-نت.html';
 const CORE=[PAGE,'manifest.webmanifest','lib/icon-192.png','lib/icon-512.png','lib/icon-mask-192.png','lib/icon-mask-512.png','lib/icon-180.png',
   'lib/qrcode.js','lib/html5-qrcode.min.js','lib/chart.umd.js','lib/xlsx.mini.min.js'];
