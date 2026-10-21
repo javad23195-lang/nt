@@ -860,6 +860,7 @@ function viewUserEdit(id){
     <div class="sycard" id="syAccCard"><h3>دسترسی</h3>
       <label class="chk"><input type="radio" name="syAcc" value="lim" ${lim?'checked':''}>محدود — فقط زبانه‌های انتخاب‌شده</label>
       <label class="chk"><input type="radio" name="syAcc" value="full" ${lim?'':'checked'}>کامل — همه زبانه‌ها (ثبت در همه)</label>
+      <div class="syrow"><span>نمونه آماده</span><button type="button" id="syUBuy">مأمور خرید — فقط بخش خرید</button></div>
       <div id="syAclList" ${lim?'':'hidden'}>
         ${DOCS.map((d,i)=>`<div class="syrow"><span>${esc(d.name)}</span><select data-tab="${i}" aria-label="دسترسی ${esc(d.name)}">
           ${[['w','ثبت'],['r','فقط مشاهده'],['h','پنهان']].map(o=>`<option value="${o[0]}" ${(a[d.name]||(d.name==='مدیریت'&&a['امروز'])||'h')===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></div>`).join('')}
@@ -870,6 +871,9 @@ function viewUserEdit(id){
     <button type="button" class="go" id="syUSave">${u?'ذخیره':'ساخت کاربر و کد اتصال'}</button>
     <button type="button" id="syBack">انصراف</button>`);
   document.querySelectorAll('input[name="syAcc"]').forEach(r=>r.addEventListener('change',()=>{ $('syAclList').hidden=document.querySelector('input[name="syAcc"]:checked').value!=='lim'; }));
+  /* مأمور خرید: فقط «فاکتور خرید» = ثبت؛ بقیه پنهان → هنگام باز شدن فقط بخش خرید (ws.js) */
+  on('syUBuy',()=>{ const r=document.querySelector('input[name="syAcc"][value="lim"]'); if(r) r.checked=true; $('syAclList').hidden=false;
+    document.querySelectorAll('#syAclList select').forEach(x=>{ x.value=DOCS[+x.dataset.tab].name==='فاکتور خرید'?'w':'h'; }); msg('فقط «فاکتور خرید» = ثبت؛ بقیه پنهان. «ذخیره» را بزنید.'); });
   const dvSync=()=>{ $('syAccCard').hidden=!!$('syUDev').value; $('syDeptCard').hidden=!!$('syUDev').value; }; $('syUDev').addEventListener('change',dvSync); dvSync();
   on('syUSave',()=>{
     const name=$('syUName').value.trim().replace(/\s+/g,' ');

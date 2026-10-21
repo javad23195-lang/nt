@@ -185,6 +185,15 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   await settle(X);
   ok(await visTabs(X)==='دفترچه قرائت,انبار,توقف شیفت' && await has(X,'nt_daftar_v1','15200'),'با کد تازه دوباره وصل شد');
 
+  console.log('8-ب) مأمور خرید: فقط بخش خرید');
+  const uB=await newUser(A,'مأمور خرید',async p=>{ await p.click('#syUBuy'); });
+  ok(await A.evaluate(()=>{ const u=Object.values(JSON.parse(localStorage.getItem('nt_users_v1')).users).find(x=>x.name==='مأمور خرید'); return !!u && u.acl['فاکتور خرید']==='w' && Object.keys(u.acl).filter(k=>u.acl[k]!=='h').length===1; }),'دکمه «مأمور خرید»: فقط «فاکتور خرید» = ثبت');
+  await A.click('#syBack'); await A.click('#syBack'); await A.click('#syClose'); await waitFor(()=>synced(A));
+  let Bq=await ctx(null,null,null,uB.link);
+  await waitFor(async()=>(await dlgText(Bq)).includes('رمز ۶ رقمی')); await Bq.fill('#syPin',uB.pin); await Bq.click('#syJoin'); await settle(Bq);
+  ok(await visTabs(Bq)==='فاکتور خرید' && await Bq.evaluate(()=>window.ntWs && ntWs.cur==='kh' && !ntWs.both()),'سیستم مأمور خرید: فقط «فاکتور خرید»، بدون بخش نت');
+  await Bq.context().close();
+
   console.log('9) کاربر با دسترسی کامل، و حذف کاربر');
   const uZ=await newUser(A,'مهندس دوم',async p=>{ await p.check('input[name="syAcc"][value="full"]'); });
   await A.click('#syBack'); await A.click('#syBack'); await A.click('#syClose'); await waitFor(()=>synced(A));
@@ -223,7 +232,7 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   ok(await waitFor(async()=>(await dlgText(C)).includes('با اطلاعات این سیستم چه کنم')),'سیستم دوم مدیر با اطلاعات خودش: پرسید');
   await C.click('#syMerge'); await settle(C);
   ok(await has(C,'nt_moshkel_v1','مشکل C') && await has(C,'nt_anbar_out_v1','WA470') && await waitFor(()=>has(A,'nt_moshkel_v1','مشکل C'),15000),'ادغام: هر دو طرف کامل');
-  await C.click('#ntSyBtn'); ok((await dlgText(C)).includes('کاربران (۱)'),'سیستم دوم مدیر هم کاربران را می‌بیند'); await C.click('#syClose');
+  await C.click('#ntSyBtn'); ok((await dlgText(C)).includes('کاربران (۲)'),'سیستم دوم مدیر هم کاربران را می‌بیند'); await C.click('#syClose');
 
   console.log('11) خطا و ادامه خودکار');
   const good=S.goodToken; S.goodToken='github_pat_TEMP';
