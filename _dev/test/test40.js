@@ -67,7 +67,7 @@ const J=ago=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZo
   await p.evaluate(()=>show(0)); await sleep(800);
   const fr0=(await (await p.$$('iframe'))[0].contentFrame());
   const A=await fr0.evaluate(()=>{ try{ atRender(); }catch(e){} return document.getElementById('atList').innerText; });
-  ok(/سرویس گذشته است/.test(A) && /لودر کوماتسو WA470 — روغن دیفرانسیل/.test(A),'امروز: «سرویس گذشته است» با نام دستگاه و سرویس');
+  ok(/لودر کوماتسو WA470/.test(A) && /سرویس گذشته/.test(A) && /روغن دیفرانسیل/.test(A),'امروز: کارت دستگاه «سرویس گذشته» با نام سرویس');
   ok(errs.length===0,'بدون خطا '+errs.join('|'));
   console.log(fails?fails+' شکست':'همه موفق'); await br.close(); web.close(); process.exit(fails?1:0);
 })();

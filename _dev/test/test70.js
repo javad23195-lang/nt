@@ -1,0 +1,38 @@
+// طرح تازه «امروز»: چهار کاشی (خراب، متوقف، سرویس گذشته، عقب‌افتاده) و فیلتر «نیاز به توجه»؛ کارت دستگاه با وضعیت و زمان
+const {chromium}=require('playwright'); const http=require('http'), fs=require('fs'), path=require('path');
+const HTML=fs.readFileSync(path.join(__dirname,'..','out.html'));
+let fails=0; const ok=(c,m)=>{ console.log((c?'  ok  ':'  FAIL ')+m); if(!c) fails++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const J=ago=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZone:'Asia/Tehran',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(Date.now()-ago*864e5)); const g=t=>p.find(x=>x.type===t).value; return `${g('year')}/${g('month')}/${g('day')}`; };
+(async()=>{
+  const web=http.createServer((q,r)=>{ r.writeHead(200,{'Content-Type':'text/html; charset=utf-8'}); r.end(HTML); }); await new Promise(r=>web.listen(0,r));
+  const br=await chromium.launch({executablePath:process.env.CHROMIUM||undefined});
+  const c=await br.newContext({locale:'fa-IR',viewport:{width:390,height:844}}); const p=await c.newPage(); const errs=[]; p.on('pageerror',e=>errs.push(String(e)));
+  await c.addInitScript(([a,b])=>{ if(localStorage.getItem('__s')) return; localStorage.setItem('__s','1');
+    localStorage.setItem('nt_tavaqof_v1',JSON.stringify({[a+'|صبح']:{stops:[{id:'a',dev:'بیل مکانیکی کوماتسو PC290',from:'06:30',to:'',cause:'خرابی هیدرولیک'},{id:'b',dev:'لودر ZL50',from:'08:00',to:'',cause:'نبود راننده'},{id:'c',dev:'کامیون TRS03',from:'07:10',to:'',cause:'خرابی لاستیک'}]}}));
+    localStorage.setItem('nt_svc_v1',JSON.stringify([{id:'s1',dev:'کامیون TRS01',name:'روغن موتور',last:'',ld:'1404/01/01',every:250,months:1},{id:'s2',dev:'کامیون TRS01',name:'فیلتر',last:'',ld:'1404/01/01',every:250,months:1},{id:'s3',dev:'لودر کوماتسو WA470',name:'روغن هیدرولیک',last:'',ld:'1404/03/01',every:2000,months:12}])); },[J(0),J(1)]);
+  await p.goto(`http://localhost:${web.address().port}/nt/s.html`); await p.waitForFunction(()=>window.ntSync&&window.ntNav,null,{timeout:15000});
+  await p.addStyleTag({content:'.sydlg,.sybd,#ntPin{display:none!important}'}); await p.evaluate(()=>{ window.ntLocked=false; document.body.classList.remove('ntlocked','ntpin'); try{ ntBoot(); }catch(e){} }); await sleep(1800);
+  const fr=await (await p.$$('iframe'))[0].contentFrame();
+  const T=()=>fr.evaluate(()=>Object.fromEntries([...document.querySelectorAll('#tiBox .ti')].map(b=>[b.dataset.k,b.querySelector('b').textContent])));
+  const t=await T();
+  ok(t.bad==='۲' && t.stop==='۳' && t.svc==='۳','کاشی‌ها: خراب ۲، متوقف ۳، سرویس گذشته ۳ — '+JSON.stringify(t));
+  const rows=()=>fr.evaluate(()=>[...document.querySelectorAll('#atList .ar')].map(b=>b.className+'|'+b.innerText.replace(/\s+/g,' ')));
+  let R=await rows();
+  ok(R.some(r=>/k-bad/.test(r) && /PC290/.test(r) && /خراب/.test(r) && /از ساعت ۰۶:۳۰/.test(r)),'کارت دستگاه: نام، «خراب»، «از ساعت ۰۶:۳۰ · … توقف»');
+  ok(R.filter(r=>/k-svc/.test(r)).length===2 && R.some(r=>/TRS01/.test(r)&&/روغن موتور، فیلتر/.test(r)),'سرویس گذشته: یک کارت برای هر دستگاه (TRS01 با دو سرویس)');
+  await fr.click('#tiBox .ti-bad'); await sleep(300); R=await rows();
+  ok(R.length===2 && R.every(r=>/k-bad/.test(r)),'کاشی «خراب»: فقط ۲ دستگاه خراب');
+  ok(/فقط «خراب»/.test(await fr.evaluate(()=>document.querySelector('.atf').innerText)),'نوار «فقط خراب — نمایش همه»');
+  await fr.click('#tiBox .ti-stop'); await sleep(300); R=await rows();
+  ok(R.length===3 && R.every(r=>/k-bad|k-stop/.test(r)),'کاشی «متوقف»: ۳ دستگاه (خراب و منتظر)');
+  await fr.click('#tiBox .ti-stop'); await sleep(300);
+  ok(!(await fr.evaluate(()=>!!document.querySelector('.atf'))) && (await rows()).length>3,'ضربه دوم: همه موارد');
+  await fr.click('#tiBox .ti-svc'); await sleep(300); await fr.click('#atFx'); await sleep(300);
+  ok(!(await fr.evaluate(()=>!!document.querySelector('.atf'))),'«نمایش همه» فیلتر را برمی‌دارد');
+  const mi=await p.evaluate(()=>DOCS.findIndex(d=>d.name==='مدیریت')); await p.evaluate(i=>show(i),mi); await sleep(1500);
+  const fm=await (await p.$$('iframe'))[mi].contentFrame();
+  ok(await fm.evaluate(()=>!document.getElementById('tiBox') && document.querySelectorAll('#atList .ar').length>0),'مدیریت: کاشی‌ها نیست، کارت‌های تازه هست');
+  ok(errs.length===0,'بدون خطا '+errs.join('|'));
+  console.log(fails?fails+' شکست':'همه موفق'); await br.close(); web.close(); process.exit(fails?1:0);
+})();
