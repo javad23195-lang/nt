@@ -296,7 +296,13 @@ const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
 function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 const clean=(s,n)=>String(s??'').replace(/[<>"]/g,'').replace(/[\t\r\n]+/g,' ').replace(/\s+/g,' ').trim().slice(0,n||120);
 const lat=s=>String(s??'').replace(/[۰-۹]/g,c=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(c)).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c));
-const norm=s=>lat(s).replace(/[يى]/g,'ی').replace(/ك/g,'ک').replace(/[‌ً-ٟ]/g,'').replace(/[^\p{L}\p{N}]+/gu,' ').trim().toLowerCase();
+/* یکسان‌سازی نوشتار: ي/ى→ی، ك→ک، آ/أ/إ→ا، ؤ→و، ئ→ی، ة/ۀ→ه؛ اعراب، ء، ـ و نیم‌فاصله حذف («پارس آهن» = «پارس اهن») */
+const norm=s=>lat(s).replace(/[يى]/g,'ی').replace(/ك/g,'ک').replace(/[آأإٱ]/g,'ا').replace(/ؤ/g,'و').replace(/ئ/g,'ی').replace(/[ةۀ]/g,'ه').replace(/[‌ً-ٟـء]/g,'').replace(/[^\p{L}\p{N}]+/gu,' ').trim().toLowerCase();
+const nkey=s=>norm(s).replace(/\s+/g,'');
+/** نام‌ها با یک حرف اختلاف (اشتباه تایپی) یکی‌اند؛ رقم فرق مهم است (TRS01 ≠ TRS02) و نام کوتاه‌تر از ۶ حرف نه */
+function near1(a,b){ if(a===b) return true; const la=a.length, lb=b.length; if(Math.min(la,lb)<6 || Math.abs(la-lb)>1) return false;
+  let i=0; while(i<la && i<lb && a[i]===b[i]) i++; if(la===lb){ if(/\d/.test(a[i]+b[i])) return false; return a.slice(i+1)===b.slice(i+1); }
+  const [x,y]=la>lb?[a,b]:[b,a]; if(/\d/.test(x[i])) return false; return x.slice(i+1)===y.slice(i); }
 const FK='nt_factor_v1', LK='nt_factor_lex_v1', NK='nt_factor_learn_v1', CK='nt_factor_cfg_v1', PK='nt_factor_rep_v1', RK='nt_kharid9_v1';
 function LS(k,d){ try{ const v=JSON.parse(localStorage.getItem(k)||'null'); return v==null?d:v; }catch(e){ return d; } }
 function put(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } }
@@ -384,16 +390,28 @@ const dayOf=r=>r.d||r.date||'';
 const miss=r=>!CAT[r.cat].noTitle && !String(r.title||'').trim();
 const needSp=r=>CAT[r.cat].sp && !r.sp;
 function sortRows(a){ return a.slice().sort((x,y)=>String(dayOf(y)).localeCompare(String(dayOf(x)))||String(y.at||'').localeCompare(String(x.at||''))); }
-/** فهرست کشویی: پرکاربردترین (در فاکتورها) اول، بعد بقیه فهرست پیشنهاد. n = تعداد استفاده */
-function sugg(src,withN){ const L=lex(), out=new Map(); const add=(v,c)=>{ v=clean(v,160); const k=norm(v); if(!k) return; const o=out.get(k); if(o){ o.n+=c; } else out.set(k,{v,n:c}); };
+/** فهرست کشویی: نوشتارهای یک نام یک ردیف (پرکاربردترین نوشتار نمایش داده می‌شود)؛ پرکاربردترین‌ها اول. n = تعداد استفاده */
+const NAMES={sup:1,payer:1};
+const GCACHE={};
+function groups(src){ const sig=lsl(FK,'').length+'|'+lsl(LK,'').length+'|'+lsl(FK,'').slice(-40)+'|'+lsl(LK,'').slice(-40); const c=GCACHE[src]; if(c && c.sig===sig) return c.A;
+  const A=groups0(src); GCACHE[src]={sig,A}; return A; }
+function groups0(src){ const L=lex(), G=new Map(); const add=(v,c)=>{ v=clean(v,160); const k=nkey(v); if(!k) return; let g=G.get(k); if(!g){ g={k,vs:new Map(),n:0}; G.set(k,g); } g.vs.set(v,(g.vs.get(v)||0)+c); g.n+=c; };
   sortRows(rowsAll()).forEach(r=>{ if(src==='sup'||src==='payer'){ if(r.cat==='haml'?src==='payer':src==='sup') add(r.sup,1); } else if(src==='note') add(r.note,1); else if(CAT[r.cat].s===src) add(r.title,1); });
   (Array.isArray(L[src])?L[src]:[]).forEach(v=>add(v,0));
-  const a=[...out.values()].sort((x,y)=>y.n-x.n).slice(0,3000); return withN?a:a.map(x=>x.v); }
+  let A=[...G.values()];
+  if(NAMES[src]){ const out=[]; A.sort((x,y)=>y.n-x.n).forEach(g=>{ const h=out.find(o=>o.ks.some(k=>near1(k,g.k))); if(h){ g.vs.forEach((c,v)=>h.vs.set(v,(h.vs.get(v)||0)+c)); h.n+=g.n; h.ks.push(g.k); } else out.push({k:g.k,ks:[g.k],vs:g.vs,n:g.n}); }); A=out; }
+  else A.forEach(g=>{ g.ks=[g.k]; });
+  A.forEach(g=>{ g.v=[...g.vs.entries()].sort((x,y)=>y[1]-x[1]||(/آ/.test(y[0])?1:0)-(/آ/.test(x[0])?1:0)||y[0].length-x[0].length)[0][0]; g.s=[...g.vs.keys()].map(norm).join(' | '); });
+  return A.sort((x,y)=>y.n-x.n).slice(0,3000); }
+function sugg(src,withN){ const A=groups(src); return withN?A:A.map(x=>x.v); }
+/** نوشتار اصلی یک نام (اگر همان نام با نوشتار دیگری هست) */
+function canon(src,v){ v=clean(v,160); const k=nkey(v); if(!k) return v; const g=groups(src).find(x=>x.ks.some(q=>NAMES[src]?near1(q,k):q===k)); return g?g.v:v; }
+const sameName=(a,b)=>{ const x=nkey(a), y=nkey(b); return !!x && !!y && near1(x,y); };
 function fillDL(){}
-function lexAdd(r){ const L=lex(); const add=(k,v)=>{ v=clean(v,160); if(!v) return; const a=Array.isArray(L[k])?L[k]:(L[k]=[]); if(!a.some(x=>norm(x)===norm(v))) a.push(v); };
+function lexAdd(r){ const L=lex(); const add=(k,v)=>{ v=clean(v,160); if(!v) return; const a=Array.isArray(L[k])?L[k]:(L[k]=[]); if(!a.some(x=>nkey(x)===nkey(v))) a.push(v); };
   if(r.title && CAT[r.cat].s) add(CAT[r.cat].s,r.title); if(r.sup) add(r.cat==='haml'?'payer':'sup',r.sup); if(r.note) add('note',r.note); put(LK,L); }
 /** دسته و نوع خرید قبلی همین تامین‌کننده */
-function supMemory(sup){ const k=norm(sup); if(!k) return null; const r=sortRows(rowsAll()).find(x=>norm(x.sup)===k); return r?{cat:r.cat,kind:r.kind}:null; }
+function supMemory(sup){ if(!nkey(sup)) return null; const r=sortRows(rowsAll()).find(x=>x.sup && sameName(x.sup,sup)); return r?{cat:r.cat,kind:r.kind}:null; }
 
 /* ============ عکس فاکتور: فقط روی همین گوشی (IndexedDB ntfactor) ============ */
 let phDB=null;
@@ -458,12 +476,12 @@ function supAuto(){ const m=supMemory($('fSup').value), a=$('supAuto');
   if(m && CAT[m.cat] && !catTouched && !editId){ cat=m.cat; if(m.kind) setKind(m.kind); applyCat(); a.hidden=false; a.textContent='مثل خرید قبلی: '+catName(m.cat)+(m.kind?'، '+m.kind:''); } else a.hidden=true; checkDup(); }
 $('fSup').addEventListener('change',supAuto);
 /** تکراری: (۱) همان شماره فاکتور از همان تامین‌کننده — جدی؛ (۲) همان دسته، شرح، مبلغ و تاریخ */
-const sigOf=r=>[r.cat,norm(r.title||''),r.amt,r.date||''].join('|');
-function checkDup(){ const box=$('dup'), no=noNo?'':noN($('fNo').value), sup=norm($('fSup').value), A=rowsAll().filter(r=>r.id!==editId);
-  const hard=no && A.find(r=>noN(r.no)===no && (!sup || norm(r.sup)===sup));
+const sigOf=r=>[r.cat,nkey(r.title||''),r.amt,r.date||''].join('|');
+function checkDup(){ const box=$('dup'), no=noNo?'':noN($('fNo').value), sup=$('fSup').value, A=rowsAll().filter(r=>r.id!==editId);
+  const hard=no && A.find(r=>noN(r.no)===no && (!nkey(sup) || sameName(r.sup,sup)));
   if(hard){ box.hidden=false; box.className='dup hard'; box.textContent=`فاکتور شماره ${fa(hard.no)}${hard.sup?' از '+hard.sup:''} قبلاً ثبت شده (${fa(hard.date||dayOf(hard))}، ${faN(hard.amt||0)} ریال). اگر واقعاً فاکتور دیگری است، ثبت را دو بار بزنید.`; return true; }
   const amt=parseAmt($('fAmt').value); if(amt===null || !$('fTitle').value.trim()){ box.hidden=true; return false; }
-  const s=[cat,norm($('fTitle').value),amt,normDate($('fDate').value)||TODAY].join('|');
+  const s=[cat,nkey($('fTitle').value),amt,normDate($('fDate').value)||TODAY].join('|');
   const hit=A.find(r=>sigOf(r)===s);
   box.hidden=!hit; box.className='dup'; if(hit) box.textContent=`فاکتور مشابهی قبلاً ثبت شده (${hit.title}، ${fa(hit.date||dayOf(hit))}). اگر تکراری نیست، ثبت را دو بار بزنید.`;
   return !!hit; }
@@ -524,7 +542,7 @@ $('bSave').addEventListener('click',async()=>{
   dupArmed=false;
   const all=rowsAll(), old=editId?all.find(r=>r.id===editId):null;
   const rec={id:editId||uid(),cat,kind:c.noKind?'':kind,no:noNo?'':no,nono:noNo?1:'',title:F.has('title')?title:'',qty:F.has('qty')?qty:'',unit:F.has('qty')&&qr!==''?clean($('fUnit').value,20):'',amt,date,
-    sup:F.has('sup')?sup:'',note:F.has('note')?clean($('fNote').value,120):'',
+    sup:F.has('sup')?canon(c.ss||'sup',sup):'',note:F.has('note')?clean($('fNote').value,120):'',
     rasid:F.has('rasid')?clean(lat($('fRasid').value),20):'',rasidDate:F.has('rasid')&&rd?normDate(rd):'',pay:F.has('rasid')?clean($('fPay').value,40):'',
     deliver:F.has('deliver')&&dv?normDate(dv):'',back:F.has('back')&&bk?normDate(bk):'',
     d:old?old.d:TODAY,at:old?old.at:new Date().toISOString(),by:old?old.by:myName()};
@@ -561,7 +579,7 @@ function wireActs(box){
 let bF='all', bMon='';
 const monOf=r=>{ const m=/^(\d{4})\/(\d{2})/.exec(r.date||dayOf(r)); return m?m[1]+'/'+m[2]:''; };
 const monName=k=>{ const m=/^(\d{4})\/(\d{2})$/.exec(k); return m?MONTHS[+m[2]-1]+' '+fa(m[1]):k; };
-const partyOf=r=>r.sup||r.note||catName(r.cat);
+const partyOf=r=>r.sup?canon(r.cat==='haml'?'payer':'sup',r.sup):(r.note||catName(r.cat));
 const bOpen=new Set();
 function setBF(f){ bF=f; $('bF').querySelectorAll('.cp').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.f===f))); }
 function drawBook(){ const A=rowsAll(), q=norm($('bQ').value).split(' ').filter(Boolean);
@@ -576,7 +594,7 @@ function drawBook(){ const A=rowsAll(), q=norm($('bQ').value).split(' ').filter(
   if(bF==='debt') L=debt; else if(bF==='miss') L=L.filter(miss); else if(bF==='link') L=L.filter(r=>r.req);
   if(q.length) L=L.filter(r=>{ const h=norm([r.no,r.title,r.sup,r.note,r.req&&r.req.item,r.amt,catName(r.cat)].join(' ')); return q.every(w=>h.indexOf(w)>-1); });
   if(bF==='miss'){ $('bPN').textContent=fa(L.length)+' فاکتور ناقص'; $('bList').innerHTML=L.length?sortRows(L).map(r=>rowHTML(r)).join(''):'<div class="empty">فاکتور ناقصی نیست.</div>'; wireActs($('bList')); return; }
-  const G=new Map(); L.forEach(r=>{ const p=partyOf(r); if(!G.has(p)) G.set(p,[]); G.get(p).push(r); });
+  const G=new Map(), PC=new Map(); L.forEach(r=>{ const raw=r.sup||r.note||''; let p=PC.get(raw); if(p===undefined){ p=partyOf(r); PC.set(raw,p); } if(!G.has(p)) G.set(p,[]); G.get(p).push(r); });
   const P=[...G.entries()].map(([p,rs])=>({p,rs:sortRows(rs),sum:rs.reduce((a,r)=>a+(r.amt||0),0),debt:rs.filter(r=>r.kind==='اعتباری'&&!r.paid).reduce((a,r)=>a+(r.amt||0),0),last:rs.map(dayOf).sort().pop()||''}))
     .sort((a,b)=>b.debt-a.debt||String(b.last).localeCompare(String(a.last)));
   $('bPN').textContent=fa(P.length)+' طرف حساب';
@@ -689,8 +707,8 @@ $('sFile').addEventListener('change',()=>{ const f=$('sFile').files&&$('sFile').
       const st=s.indexOf('{',i); let dep=0,j=st,inS=false;
       for(;j<s.length;j++){ const c=s[j]; if(inS){ if(c==='\\'){ j++; continue; } if(c==='"') inS=false; continue; } if(c==='"'){ inS=true; continue; } if(c==='{') dep++; else if(c==='}'){ dep--; if(!dep) break; } }
       const D=JSON.parse(s.slice(st,j+1)); const L=lex(); let n=0;
-      Object.keys(LEXN).forEach(k=>{ const src=Array.isArray(D[k])?D[k]:[]; const a=Array.isArray(L[k])?L[k]:(L[k]=[]); const have=new Set(a.map(norm));
-        src.slice(0,3000).forEach(v=>{ if(typeof v!=='string') return; v=clean(v,160); const nk=norm(v); if(v && nk && !have.has(nk)){ have.add(nk); a.push(v); n++; } }); });
+      Object.keys(LEXN).forEach(k=>{ const src=Array.isArray(D[k])?D[k]:[]; const a=Array.isArray(L[k])?L[k]:(L[k]=[]); const have=new Set(a.map(nkey));
+        src.slice(0,3000).forEach(v=>{ if(typeof v!=='string') return; v=clean(v,160); const nk=nkey(v); if(v && nk && !have.has(nk)){ have.add(nk); a.push(v); n++; } }); });
       if(!put(LK,L)) throw 1; say('sMsg',fa(n)+' مورد تازه به فهرست پیشنهادها اضافه شد','ok'); drawSet(); applyCat();
     }catch(e){ say('sMsg','این فایل فرم «ثبت فاکتور واحد خرید» نیست یا خوانده نشد','bad'); } $('sFile').value=''; };
   rd.readAsText(f,'utf-8'); });
@@ -713,12 +731,13 @@ $('fUnit').innerHTML=UNITS.map(u=>`<option>${esc(u)}</option>`).join('');
 const PICK={fSup:()=>({t:$('lSup').textContent,L:sugg(CAT[cat].ss||'sup',1)}),fTitle:()=>({t:$('lTitle').textContent,L:CAT[cat].s?sugg(CAT[cat].s,1):[]}),
   fNote:()=>({t:'توضیحات',L:sugg('note',1)}),fPay:()=>({t:'وضعیت پرداخت',L:PAYS.map(v=>({v,n:0}))})};
 let pkFor=null, pkAll=[];
+const PSRC={fSup:'sup',fTitle:'items',fNote:'note',fPay:'pay'};
 function pkOpen(id){ const o=PICK[id](); pkFor=id; pkAll=o.L; $('pkT').textContent=o.t; $('pkQ').value=''; $('pk').hidden=false; pkDraw(); setTimeout(()=>{ try{ $('pkQ').focus(); }catch(e){} },30); }
 function pkClose(){ $('pk').hidden=true; const f=pkFor; pkFor=null; if(f) try{ $(f).focus({preventScroll:true}); }catch(e){} }
 function pkHi(v,toks){ let h=esc(v); toks.forEach(t=>{ if(!t) return; const i=h.toLowerCase().indexOf(esc(t).toLowerCase()); if(i>-1) h=h.slice(0,i)+'<mark>'+h.slice(i,i+esc(t).length)+'</mark>'+h.slice(i+esc(t).length); }); return h; }
 function pkDraw(){ const raw=clean($('pkQ').value,160), q=norm(raw), toks=q.split(' ').filter(Boolean), cur=$(pkFor).value;
-  const L=toks.length?pkAll.filter(x=>{ const k=norm(x.v); return toks.every(t=>k.indexOf(t)>-1); }):pkAll;
-  const exact=raw && pkAll.some(x=>norm(x.v)===q);
+  const L=toks.length?pkAll.filter(x=>{ const k=x.s||norm(x.v); return toks.every(t=>k.indexOf(t)>-1); }):pkAll;
+  const rk=nkey(raw), exact=raw && pkAll.some(x=>(x.ks||[nkey(x.v)]).some(k=>NAMES[PSRC[pkFor]]?near1(k,rk):k===rk));
   let h=(raw && !exact)?`<button type="button" class="nw" data-v="${esc(raw)}">+ «${esc(raw)}» (نام تازه)</button>`:'';
   h+=L.slice(0,200).map(x=>`<button type="button" data-v="${esc(x.v)}" class="${x.v===cur?'on':''}">${pkHi(x.v,raw?[raw]:[])}${x.n?`<small>${fa(x.n)} بار</small>`:''}</button>`).join('');
   if(cur) h+=`<button type="button" class="nw" data-v="">پاک کردن این خانه</button>`;

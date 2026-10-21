@@ -154,6 +154,29 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   ok(errs.length===0,'بدون خطا '+errs.join('|'));
   await c.close();
 
+  console.log('۷-ب) نوشتارهای مختلف یک نام');
+  ({c,p,errs}=await run(null,{nt_factor_lex_v1:{sup:['آهن‌آلات نمونه','اهن الات نمونه','لوازم یدکی نمونه','لوازم یدکی نمنه','فروشگاه الف'],items:['قطعه TRS01','قطعه TRS02']},
+    nt_factor_v1:[{id:'v1',cat:'kala',kind:'نقدی',no:'1',title:'میلگرد',amt:1000,date:'1405/07/01',sup:'اهن الات نمونه',d:'1405/07/01'},{id:'v2',cat:'kala',kind:'نقدی',no:'2',title:'تیرآهن',amt:2000,date:'1405/07/02',sup:'آهن‌آلات نمونه',d:'1405/07/02'}]}));
+  await p.click('#ntWs [data-ws="kh"]'); await sleep(1200); f=await frameOf(p,'فاکتور خرید');
+  await f.evaluate(()=>setPane('add')); await f.click('#fSup'); await sleep(150);
+  const sl=await f.evaluate(()=>[...document.querySelectorAll('#pkList button')].map(b=>b.textContent.replace(/\d+ بار|[۰-۹]+ بار/g,'').trim()));
+  ok(sl.filter(x=>/آهن|اهن/.test(x)).length===1 && sl.filter(x=>/لوازم یدکی/.test(x)).length===1 && sl.length===3,'آهن‌آلات/اهن الات و یک حرف اشتباه: هر کدام یک ردیف — '+sl.join('|'));
+  await f.fill('#pkQ','اهن آلات نمونه'); await sleep(100);
+  ok(!/نام تازه/.test(await f.evaluate(()=>document.getElementById('pkList').innerText)),'نوشتن «اهن آلات نمونه»: «نام تازه» پیشنهاد نمی‌شود (همان نام هست)');
+  await f.click('#pkX'); await f.click('#fTitle'); await sleep(100);
+  const it=await f.evaluate(()=>[...document.querySelectorAll('#pkList button')].map(b=>b.textContent));
+  ok(it.some(x=>/TRS01/.test(x)) && it.some(x=>/TRS02/.test(x)),'کالاها با رقم متفاوت یکی نمی‌شوند (TRS01 و TRS02)');
+  await f.click('#pkX');
+  await f.fill('#fNo','9'); await f.fill('#fAmt','5000'); await f.evaluate(()=>{ const e=document.getElementById('fSup'); e.value='آهن الات نمونه'; });
+  await f.click('#bSave'); await sleep(300);
+  const sv=await p.evaluate(()=>JSON.parse(localStorage.getItem('nt_factor_v1')).find(r=>r.no==='9').sup);
+  ok(/نمونه/.test(sv) && ['آهن‌آلات نمونه','اهن الات نمونه'].includes(sv),'ذخیره با نوشتار اصلی همان تامین‌کننده — '+sv);
+  await f.evaluate(()=>setPane('book')); await sleep(200);
+  const pts=await f.evaluate(()=>[...document.querySelectorAll('#bList .pt>button b')].map(b=>b.textContent));
+  ok(pts.filter(x=>/نمونه/.test(x)).length===1 && /۳ فاکتور/.test(await f.evaluate(()=>document.getElementById('bList').innerText)),'دفتر: هر سه فاکتور زیر یک طرف حساب — '+pts.join('|'));
+  ok(errs.length===0,'بدون خطا '+errs.join('|'));
+  await c.close();
+
   console.log('۸) دسترسی');
   ({c,p,errs}=await run({uid:'u1',mode:'w',acl:{'فاکتور خرید':'w'}}));
   V=await visTabs(p);
