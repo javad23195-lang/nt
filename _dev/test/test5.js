@@ -186,7 +186,7 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   ok(await visTabs(X)==='دفترچه قرائت,انبار,توقف شیفت' && await has(X,'nt_daftar_v1','15200'),'با کد تازه دوباره وصل شد');
 
   console.log('8-ب) مأمور خرید: فقط بخش خرید');
-  const uB=await newUser(A,'مأمور خرید',async p=>{ await p.click('#syUBuy'); });
+  const uB=await newUser(A,'مأمور خرید',async p=>{ await p.click('#syUBuy'); if(process.env.SHOTU){ await p.evaluate(()=>document.getElementById('syUBuy').scrollIntoView({block:'center'})); await p.screenshot({path:process.env.SHOTU}); } });
   ok(await A.evaluate(()=>{ const u=Object.values(JSON.parse(localStorage.getItem('nt_users_v1')).users).find(x=>x.name==='مأمور خرید'); return !!u && u.acl['فاکتور خرید']==='w' && Object.keys(u.acl).filter(k=>u.acl[k]!=='h').length===1; }),'دکمه «مأمور خرید»: فقط «فاکتور خرید» = ثبت');
   await A.click('#syBack'); await A.click('#syBack'); await A.click('#syClose'); await waitFor(()=>synced(A));
   let Bq=await ctx(null,null,null,uB.link);
