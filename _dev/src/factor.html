@@ -123,6 +123,20 @@ details.more summary{min-height:44px;display:flex;align-items:center;font-weight
 .spc .r1 span{display:block;font-size:.8rem;color:var(--dim)}
 .spc .r2{display:flex;gap:8px;margin-top:8px;align-items:center}
 .spc .r2 .in{margin-top:0;flex:1;min-height:44px}
+/* کشویی با جستجو */
+.in.pk{cursor:pointer;padding-inline-end:40px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='20' height='20'%3E%3Cpath d='M6 9l6 6 6-6' fill='none' stroke='%231B2430' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat left 12px center;text-overflow:ellipsis}
+.in.pk:placeholder-shown{color:#7A8792}
+#pk{position:fixed;inset:0;z-index:40;background:rgba(17,24,32,.45);display:flex;align-items:flex-end;justify-content:center}
+#pk .pkb{width:100%;max-width:640px;max-height:88vh;display:flex;flex-direction:column;background:#fff;border-radius:18px 18px 0 0;padding:12px 14px calc(12px + env(safe-area-inset-bottom))}
+#pk .pkh{display:flex;align-items:center;gap:8px}
+#pk .pkh b{flex:1;font-size:1rem}
+#pkList{overflow:auto;margin-top:8px;flex:1;min-height:120px}
+#pkList button{display:flex;align-items:center;gap:8px;width:100%;min-height:50px;padding:6px 12px;border:0;border-bottom:1px solid #EEF1F4;background:none;text-align:start;font-size:.95rem}
+#pkList button.on{background:#FFF4DF;font-weight:800}
+#pkList button.nw{color:var(--acc);font-weight:800}
+#pkList button small{margin-inline-start:auto;color:var(--dim);font-size:.74rem}
+#pkList mark{background:#FFE3A6;color:inherit;border-radius:3px}
+@media (min-width:700px){ #pk{align-items:center} #pk .pkb{border-radius:18px;max-height:80vh} }
 .empty{padding:18px 6px;text-align:center;color:var(--dim);font-size:.9rem}
 body.ro .w-only{display:none!important}
 @media (min-width:760px){ .cats{grid-template-columns:repeat(4,1fr)} }
@@ -159,13 +173,13 @@ body.ro .w-only{display:none!important}
     <input class="in mono big" id="fAmt" inputmode="numeric" autocomplete="off">
     <div class="der" id="dAmt"></div><div class="err" id="eAmt" hidden>مبلغ را بنویسید.</div>
     <div id="wSup"><label class="f" for="fSup"><span id="lSup">تامین کننده</span> <span class="req">*</span></label>
-      <input class="in" id="fSup" list="dlSup" autocomplete="off" maxlength="120"><datalist id="dlSup"></datalist>
+      <input class="in pk" id="fSup" readonly autocomplete="off" maxlength="120" placeholder="انتخاب کنید">
       <div class="auto" id="supAuto" hidden></div><div class="err" id="eSup" hidden>این خانه را پر کنید.</div></div>
     <label class="f">دسته</label>
     <div class="cats" id="fCat" role="group" aria-label="دسته فاکتور"></div>
     <div id="wKind"><div class="chips" id="fKind" role="group" aria-label="نوع خرید"><button type="button" class="cp" data-v="نقدی" aria-pressed="true">نقدی</button><button type="button" class="cp" data-v="اعتباری" aria-pressed="false">اعتباری</button></div></div>
     <div id="wTitle"><label class="f" for="fTitle"><span id="lTitle">شرح کالا</span> <span class="opt">(اگر الان وقت ندارید، بعداً)</span></label>
-      <input class="in" id="fTitle" list="dlTitle" autocomplete="off" maxlength="160"><datalist id="dlTitle"></datalist></div>
+      <input class="in pk" id="fTitle" readonly autocomplete="off" maxlength="160" placeholder="انتخاب کنید"></div>
     <div class="dup" id="dup" hidden></div>
     <button type="button" class="btn p w" id="bSave">ثبت فاکتور</button>
     <div class="msg" id="fMsg" role="status"></div>
@@ -182,12 +196,12 @@ body.ro .w-only{display:none!important}
       </div>
       <div id="wDate"><label class="f" for="fDate"><span id="lDate">تاریخ خرید</span></label>
         <input class="in mono dt" id="fDate" inputmode="numeric" autocomplete="off"><div class="err" id="eDate" hidden>تاریخ درست نیست. مثال: 1405/07/29</div></div>
-      <div id="wNote"><label class="f" for="fNote">توضیحات</label><input class="in" id="fNote" list="dlNote" autocomplete="off" maxlength="120"><datalist id="dlNote"></datalist></div>
+      <div id="wNote"><label class="f" for="fNote">توضیحات</label><input class="in pk" id="fNote" readonly autocomplete="off" maxlength="120" placeholder="انتخاب کنید"></div>
       <div class="row2" id="wRasid">
         <div><label class="f" for="fRasid">شماره رسید انبار</label><input class="in mono" id="fRasid" inputmode="numeric" autocomplete="off"></div>
         <div><label class="f" for="fRasidDate">تاریخ رسید انبار</label><input class="in mono dt" id="fRasidDate" inputmode="numeric" autocomplete="off"></div>
       </div>
-      <div id="wPay"><label class="f" for="fPay">وضعیت پرداخت</label><input class="in" id="fPay" list="dlPay" autocomplete="off" maxlength="40"><datalist id="dlPay"></datalist></div>
+      <div id="wPay"><label class="f" for="fPay">وضعیت پرداخت</label><input class="in pk" id="fPay" readonly autocomplete="off" maxlength="40" placeholder="انتخاب کنید"></div>
       <div class="row2">
         <div id="wDeliver"><label class="f" for="fDeliver" id="lDeliver">تاریخ تحویل</label><input class="in mono dt" id="fDeliver" inputmode="numeric" autocomplete="off"></div>
         <div id="wBack"><label class="f" for="fBack">تاریخ برگشت فاکتور</label><input class="in mono dt" id="fBack" inputmode="numeric" autocomplete="off"></div>
@@ -270,6 +284,10 @@ body.ro .w-only{display:none!important}
   </div>
 </section>
 </div>
+<div id="pk" hidden role="dialog" aria-modal="true" aria-labelledby="pkT"><div class="pkb">
+  <div class="pkh"><b id="pkT"></b><button type="button" class="btn s" id="pkX">بستن</button></div>
+  <input class="in" id="pkQ" placeholder="جستجو یا نوشتن نام تازه" autocomplete="off" maxlength="160">
+  <div id="pkList"></div></div></div>
 <div id="phView" hidden><img alt="عکس فاکتور"><button type="button" class="btn s" id="phClose">بستن</button></div>
 
 <script>
@@ -366,10 +384,12 @@ const dayOf=r=>r.d||r.date||'';
 const miss=r=>!CAT[r.cat].noTitle && !String(r.title||'').trim();
 const needSp=r=>CAT[r.cat].sp && !r.sp;
 function sortRows(a){ return a.slice().sort((x,y)=>String(dayOf(y)).localeCompare(String(dayOf(x)))||String(y.at||'').localeCompare(String(x.at||''))); }
-function sugg(src){ const L=lex(), out=new Map(); const add=v=>{ v=clean(v,160); const k=norm(v); if(k && !out.has(k)) out.set(k,v); };
-  sortRows(rowsAll()).forEach(r=>{ if(src==='sup'||src==='payer'){ if(r.cat==='haml'?src==='payer':src==='sup') add(r.sup); } else if(src==='note') add(r.note); else if(CAT[r.cat].s===src) add(r.title); });
-  (Array.isArray(L[src])?L[src]:[]).forEach(add); return [...out.values()].slice(0,1500); }
-function fillDL(id,list){ const e=$(id); e.innerHTML=list.map(v=>`<option value="${esc(v)}"></option>`).join(''); }
+/** فهرست کشویی: پرکاربردترین (در فاکتورها) اول، بعد بقیه فهرست پیشنهاد. n = تعداد استفاده */
+function sugg(src,withN){ const L=lex(), out=new Map(); const add=(v,c)=>{ v=clean(v,160); const k=norm(v); if(!k) return; const o=out.get(k); if(o){ o.n+=c; } else out.set(k,{v,n:c}); };
+  sortRows(rowsAll()).forEach(r=>{ if(src==='sup'||src==='payer'){ if(r.cat==='haml'?src==='payer':src==='sup') add(r.sup,1); } else if(src==='note') add(r.note,1); else if(CAT[r.cat].s===src) add(r.title,1); });
+  (Array.isArray(L[src])?L[src]:[]).forEach(v=>add(v,0));
+  const a=[...out.values()].sort((x,y)=>y.n-x.n).slice(0,3000); return withN?a:a.map(x=>x.v); }
+function fillDL(){}
 function lexAdd(r){ const L=lex(); const add=(k,v)=>{ v=clean(v,160); if(!v) return; const a=Array.isArray(L[k])?L[k]:(L[k]=[]); if(!a.some(x=>norm(x)===norm(v))) a.push(v); };
   if(r.title && CAT[r.cat].s) add(CAT[r.cat].s,r.title); if(r.sup) add(r.cat==='haml'?'payer':'sup',r.sup); if(r.note) add('note',r.note); put(LK,L); }
 /** دسته و نوع خرید قبلی همین تامین‌کننده */
@@ -436,7 +456,7 @@ $('fTitle').addEventListener('input',()=>{ checkDup(); if(!$('lnBox').hidden) dr
 /* تامین‌کننده آشنا: دسته و نوع خرید قبلی خودش انتخاب می‌شود (اگر کاربر خودش دسته را عوض نکرده) */
 function supAuto(){ const m=supMemory($('fSup').value), a=$('supAuto');
   if(m && CAT[m.cat] && !catTouched && !editId){ cat=m.cat; if(m.kind) setKind(m.kind); applyCat(); a.hidden=false; a.textContent='مثل خرید قبلی: '+catName(m.cat)+(m.kind?'، '+m.kind:''); } else a.hidden=true; checkDup(); }
-$('fSup').addEventListener('change',supAuto); $('fSup').addEventListener('blur',supAuto);
+$('fSup').addEventListener('change',supAuto);
 /** تکراری: (۱) همان شماره فاکتور از همان تامین‌کننده — جدی؛ (۲) همان دسته، شرح، مبلغ و تاریخ */
 const sigOf=r=>[r.cat,norm(r.title||''),r.amt,r.date||''].join('|');
 function checkDup(){ const box=$('dup'), no=noNo?'':noN($('fNo').value), sup=norm($('fSup').value), A=rowsAll().filter(r=>r.id!==editId);
@@ -688,7 +708,29 @@ function render(){ const A=rowsAll(), T=A.filter(r=>dayOf(r)===TODAY);
   if(pane==='add'){ const L=sortRows(T); $('lastN').textContent=fa(T.length)+' فاکتور'; $('lastList').innerHTML=L.length?L.map(r=>rowHTML(r)).join(''):'<div class="empty">امروز هنوز فاکتوری ثبت نشده است.</div>'; wireActs($('lastList')); drawLink(); }
   if(pane==='book') drawBook(); if(pane==='rep') drawRep(); if(pane==='sp') drawSp(); if(pane==='set') drawSet(); }
 
-$('fUnit').innerHTML=UNITS.map(u=>`<option>${esc(u)}</option>`).join(''); fillDL('dlPay',PAYS); fillDL('dlNote',sugg('note'));
+$('fUnit').innerHTML=UNITS.map(u=>`<option>${esc(u)}</option>`).join('');
+/* ============ کشویی با جستجو (تامین‌کننده، شرح، توضیحات، وضعیت پرداخت) ============ */
+const PICK={fSup:()=>({t:$('lSup').textContent,L:sugg(CAT[cat].ss||'sup',1)}),fTitle:()=>({t:$('lTitle').textContent,L:CAT[cat].s?sugg(CAT[cat].s,1):[]}),
+  fNote:()=>({t:'توضیحات',L:sugg('note',1)}),fPay:()=>({t:'وضعیت پرداخت',L:PAYS.map(v=>({v,n:0}))})};
+let pkFor=null, pkAll=[];
+function pkOpen(id){ const o=PICK[id](); pkFor=id; pkAll=o.L; $('pkT').textContent=o.t; $('pkQ').value=''; $('pk').hidden=false; pkDraw(); setTimeout(()=>{ try{ $('pkQ').focus(); }catch(e){} },30); }
+function pkClose(){ $('pk').hidden=true; const f=pkFor; pkFor=null; if(f) try{ $(f).focus({preventScroll:true}); }catch(e){} }
+function pkHi(v,toks){ let h=esc(v); toks.forEach(t=>{ if(!t) return; const i=h.toLowerCase().indexOf(esc(t).toLowerCase()); if(i>-1) h=h.slice(0,i)+'<mark>'+h.slice(i,i+esc(t).length)+'</mark>'+h.slice(i+esc(t).length); }); return h; }
+function pkDraw(){ const raw=clean($('pkQ').value,160), q=norm(raw), toks=q.split(' ').filter(Boolean), cur=$(pkFor).value;
+  const L=toks.length?pkAll.filter(x=>{ const k=norm(x.v); return toks.every(t=>k.indexOf(t)>-1); }):pkAll;
+  const exact=raw && pkAll.some(x=>norm(x.v)===q);
+  let h=(raw && !exact)?`<button type="button" class="nw" data-v="${esc(raw)}">+ «${esc(raw)}» (نام تازه)</button>`:'';
+  h+=L.slice(0,200).map(x=>`<button type="button" data-v="${esc(x.v)}" class="${x.v===cur?'on':''}">${pkHi(x.v,raw?[raw]:[])}${x.n?`<small>${fa(x.n)} بار</small>`:''}</button>`).join('');
+  if(cur) h+=`<button type="button" class="nw" data-v="">پاک کردن این خانه</button>`;
+  $('pkList').innerHTML=h||'<div class="empty">فهرستی نیست؛ نام را بالا بنویسید.</div>'; }
+function pkSet(id,v){ const e=$(id); e.value=v; e.dispatchEvent(new Event('input',{bubbles:true})); e.dispatchEvent(new Event('change',{bubbles:true})); }
+Object.keys(PICK).forEach(id=>{ const e=$(id); e.addEventListener('click',()=>pkOpen(id)); e.addEventListener('keydown',ev=>{ if(ev.key==='Enter'||ev.key===' '||ev.key==='ArrowDown'){ ev.preventDefault(); pkOpen(id); } }); });
+$('pkQ').addEventListener('input',pkDraw);
+$('pkQ').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); const b=$('pkList').querySelector('button'); if(b) b.click(); } });
+$('pkList').addEventListener('click',e=>{ const b=e.target.closest('[data-v]'); if(!b||!pkFor) return; const id=pkFor; pkSet(id,b.dataset.v); pkClose(); });
+$('pkX').addEventListener('click',pkClose);
+$('pk').addEventListener('click',e=>{ if(e.target.id==='pk') pkClose(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !$('pk').hidden) pkClose(); });
 $('roCard').hidden=canW; $('fDate').value=TODAY; $('rDate').value=TODAY;
 { const r=sortRows(rowsAll())[0]; if(r && CAT[r.cat]){ cat=r.cat; if(r.kind) setKind(r.kind); } }
 drawCats(); applyCat();

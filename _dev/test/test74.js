@@ -17,6 +17,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
     await p.goto(`http://localhost:${web.address().port}/nt/s.html`); await p.waitForFunction(()=>window.ntSync&&window.ntNav&&window.ntWs,null,{timeout:15000});
     await p.addStyleTag({content:'.sydlg,.sybd,#ntPin{display:none!important}'}); await p.evaluate(()=>{ window.ntLocked=false; document.body.classList.remove('ntlocked','ntpin'); try{ ntBoot(); }catch(e){} }); await sleep(1500);
     return {c,p,errs}; };
+  const pick=async(f,id,v)=>{ await f.click('#'+id); await f.fill('#pkQ',v); await f.click('#pkList button'); await sleep(80); };
   const frameOf=async(p,n)=>{ const i=await p.evaluate(n=>DOCS.findIndex(d=>d.name===n),n); return (await p.$$('iframe'))[i].contentFrame(); };
   const visTabs=p=>p.evaluate(()=>DOCS.filter((d,i)=>!tabs[i].hidden).map(d=>d.name));
 
@@ -46,7 +47,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   // ۱) فاکتور سریع بدون شرح (فقط شماره، مبلغ، فروشنده) + عکس
   const JPG=Buffer.from('/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=','base64');
   await f.setInputFiles('#phIn',{name:'f.jpg',mimeType:'image/jpeg',buffer:JPG}); await sleep(500);
-  await f.fill('#fNo','۴۵۲'); await f.fill('#fAmt','4500000'); await f.fill('#fSup','فروشگاه نمونه الف'); await f.click('#fKind [data-v="اعتباری"]');
+  await f.fill('#fNo','۴۵۲'); await f.fill('#fAmt','4500000'); await pick(f,'fSup','فروشگاه نمونه الف'); await f.click('#fKind [data-v="اعتباری"]');
   ok(/چهار میلیون و پانصد هزار ریال/.test(await f.evaluate(()=>document.getElementById('dAmt').innerText)),'مبلغ به حروف');
   await f.click('#bSave'); await sleep(500);
   let F=await p.evaluate(()=>JSON.parse(localStorage.getItem('nt_factor_v1')||'[]'));
@@ -54,13 +55,13 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   ok(F[0].ph===1 && await f.evaluate(async id=>!!(await phGet(id)),F[0].id),'عکس فاکتور روی همین گوشی ذخیره شد (IndexedDB)');
   ok(/ناقص/.test(await f.evaluate(()=>document.getElementById('fMsg').textContent)) && /ناقص: شرح ندارد/.test(await f.evaluate(()=>document.getElementById('lastList').innerText)),'پیام و برچسب «ناقص: شرح ندارد»');
   // ۲) همان شماره از همان فروشنده: هشدار جدی
-  await f.fill('#fNo','452'); await f.fill('#fSup','فروشگاه نمونه الف'); await f.fill('#fAmt','100'); await sleep(100);
+  await f.fill('#fNo','452'); await pick(f,'fSup','فروشگاه نمونه الف'); await f.fill('#fAmt','100'); await sleep(100);
   ok(await f.evaluate(()=>{ const d=document.getElementById('dup'); return !d.hidden && d.classList.contains('hard') && /شماره ۴۵۲/.test(d.textContent); }),'شماره تکراری از همان فروشنده: هشدار قرمز');
   await f.click('#bSave'); await sleep(200);
   ok((await p.evaluate(()=>JSON.parse(localStorage.getItem('nt_factor_v1')).length))===1,'ضربه اول روی تکراری: ثبت نمی‌شود');
   // ۳) فروشنده آشنا: دسته و نوع خودکار
   await f.evaluate(()=>{ endEdit(); }); await f.click('#fCat [data-c="khat"]'); await f.evaluate(()=>{ catTouched=false; });
-  await f.fill('#fSup','فروشگاه نمونه الف'); await f.evaluate(()=>document.getElementById('fSup').dispatchEvent(new Event('change'))); await sleep(100);
+  await pick(f,'fSup','فروشگاه نمونه الف'); await f.evaluate(()=>document.getElementById('fSup').dispatchEvent(new Event('change'))); await sleep(100);
   ok(await f.evaluate(()=>cat==='kala' && kind==='اعتباری' && /مثل خرید قبلی/.test(document.getElementById('supAuto').textContent)),'فروشنده آشنا: «کالا — با رسید، اعتباری» خودکار');
   await f.evaluate(()=>{ endEdit(); });
   // ۴) نوشتن شرح بعداً + اتصال به درخواست
@@ -68,7 +69,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   ok((await f.evaluate(()=>document.querySelectorAll('#bList .it').length))===1,'دفتر ← ناقص: ۱ فاکتور');
   await f.click('#bList [data-ed]'); await sleep(400);
   ok(await f.evaluate(()=>!document.getElementById('pAdd').hidden && document.getElementById('fNo').value==='452' && !document.getElementById('phPrev').hidden),'«نوشتن شرح»: فرم با همان فاکتور و عکس باز شد');
-  await f.fill('#fTitle','فیلتر روغن موتور کوماتسو');
+  await pick(f,'fTitle','فیلتر روغن موتور کوماتسو');
   await f.evaluate(()=>{ document.getElementById('wMore').open=true; }); await f.click('#lnOpen'); await sleep(200);
   const L=await f.evaluate(()=>[...document.querySelectorAll('#lnList .lrow')].map(b=>b.innerText.replace(/\s+/g,' ')));
   ok(L.length===3 && /فیلتر روغن WA470/.test(L[0]) && /شبیه/.test(L[0]),'انتخاب درخواست: ۳ ردیف در انتظار خرید، شبیه‌ترین اول — '+L[0]);
@@ -80,7 +81,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   ok(await p.evaluate(()=>Object.values(JSON.parse(localStorage.getItem('nt_factor_learn_v1')||'{}')).includes('فیلتر روغن WA470')),'یاد گرفت: متن فاکتور ← فیلتر روغن WA470');
   // ۵) خدمات خط نقدی، بدون شماره، XSS
   await f.click('#fCat [data-c="khat"]'); await f.click('#fKind [data-v="نقدی"]'); await f.click('#fNoNo');
-  await f.fill('#fTitle','<img src=x onerror="window.__x=1">جوشکاری'); await f.fill('#fAmt','1200000'); await f.fill('#fSup','تعمیرگاه ب'); await f.click('#bSave'); await sleep(300);
+  await pick(f,'fTitle','<img src=x onerror="window.__x=1">جوشکاری'); await f.fill('#fAmt','1200000'); await pick(f,'fSup','تعمیرگاه ب'); await f.click('#bSave'); await sleep(300);
   F=await p.evaluate(()=>JSON.parse(localStorage.getItem('nt_factor_v1')));
   ok(F.length===2 && !F.some(r=>/[<>"]/.test(r.title||'')) && F[1].nono===1 && !F[1].no,'خدمات خط نقدی «بدون شماره» ثبت شد؛ < > " پاک شد');
 
@@ -141,7 +142,14 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   const lx=await p.evaluate(()=>JSON.parse(localStorage.getItem('nt_factor_lex_v1')||'{}'));
   ok((lx.sup||[]).includes('فروشنده آزمایشی') && (lx.sup||[]).includes('فروشنده bدو/b') && (lx.items||[]).includes('کالای آزمایشی') && /۳ مورد تازه/.test(await f.evaluate(()=>document.getElementById('sMsg').textContent)),'۳ مورد وارد شد (بدون < >) — '+JSON.stringify(lx));
   await f.click('#seg [data-p="add"]'); await sleep(200);
-  ok(await f.evaluate(()=>[...document.querySelectorAll('#dlSup option')].some(o=>o.value==='فروشنده آزمایشی') && [...document.querySelectorAll('#dlTitle option')].some(o=>o.value==='کالای آزمایشی')),'پیشنهاد در فرم: فروشنده و کالا');
+  await f.click('#fCat [data-c="kala"]'); await f.click('#fSup'); await sleep(150);
+  const ps=await f.evaluate(()=>[...document.querySelectorAll('#pkList button')].map(b=>b.textContent));
+  await f.click('#pkX'); await f.click('#fTitle'); await sleep(150);
+  const pt=await f.evaluate(()=>[...document.querySelectorAll('#pkList button')].map(b=>b.textContent));
+  await f.fill('#pkQ','کالای تازه ج'); await sleep(100);
+  const nw=await f.evaluate(()=>document.querySelector('#pkList button').textContent);
+  await f.click('#pkList button'); await sleep(100);
+  ok(ps.includes('فروشنده آزمایشی') && pt.includes('کالای آزمایشی') && /نام تازه/.test(nw) && await f.evaluate(()=>document.getElementById('fTitle').value==='کالای تازه ج' && document.getElementById('pk').hidden),'کشویی: فهرست فروشنده و کالا؛ نوشتن نام تازه — '+ps.join('|'));
   await f.setInputFiles('#sFile',{name:'x.html',mimeType:'text/html',buffer:Buffer.from('<html>nothing</html>')}).catch(()=>{});
   ok(errs.length===0,'بدون خطا '+errs.join('|'));
   await c.close();
