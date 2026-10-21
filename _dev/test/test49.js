@@ -38,7 +38,7 @@ for(let n=150;n>=0;n-=10){ daf.push({dev:'لودر ZL50',unit:'ساعت',val:h,d
   ok(await fr.evaluate(it=>!kLowList().some(x=>x.o.d===it),it),'ورود انبار ثبت شد: دیگر زیر حداقل نیست');
 
   console.log('— سوخت و روغن');
-  fr=await open('دفترچه قرائت');
+  fr=await open('دفترچه قرائت'); await fr.evaluate(()=>{ try{ ntDz.openAll(); }catch(e){} }); await sleep(200);   /* جزئیات کارت باز */
   const card=()=>fr.evaluate(()=>{ const el=[...document.querySelectorAll('#list input.rv')].find(x=>x.dataset.dev==='لودر ZL50'); return el.closest('.dev').querySelector('.flw').innerText.replace(/\s+/g,' '); });
   let tx=await card();
   ok(/سوخت 20 لیتر در ساعت|سوخت ۲۰ لیتر در ساعت/.test(tx) && /معمول ۱۵/.test(tx) && /▲ ۳۳٪/.test(tx),'نرخ ۳۰ روز ۲۰، معمول ۱۵ → هشدار ۳۳٪: '+tx);

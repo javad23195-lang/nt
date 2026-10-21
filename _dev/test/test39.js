@@ -16,6 +16,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
     await p.evaluate(()=>{ window.ntLocked=false; document.body.classList.remove('ntlocked'); try{ ntBoot(); }catch(e){} });
     const IDX=await p.evaluate(()=>DOCS.findIndex(d=>d.name==='دفترچه قرائت')); await p.evaluate(i=>show(i),IDX); await sleep(1500);
     const fr=(await (await p.$$('iframe'))[IDX].contentFrame());
+    await fr.evaluate(()=>{ try{ ntDz.openAll(); }catch(e){} }); await sleep(200);   /* جزئیات کارت (طرح تازه) باز */
     await fr.evaluate(()=>{ const d=[...document.querySelectorAll('details')].find(x=>/تاریخچه این دستگاه/.test(x.innerText)); d.open=true; d.scrollIntoView(); }); await sleep(300);
     const R=await fr.evaluate(()=>[...document.querySelectorAll('.hrow .hdate')].map(e=>({sw:e.scrollWidth,cw:e.clientWidth,v:e.value})));
     ok(R.length>=5 && R.every(x=>x.sw<=x.cw+1),w+'px: همه تاریخ‌ها کامل دیده می‌شوند ('+R.map(x=>x.cw+'/'+x.sw).slice(0,2).join(' ')+')');

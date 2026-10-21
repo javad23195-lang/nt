@@ -16,6 +16,7 @@ const J=ago=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZo
   await p.evaluate(()=>{ window.ntLocked=false; document.body.classList.remove('ntlocked'); try{ ntBoot(); }catch(e){} });
   const IDX=await p.evaluate(()=>DOCS.findIndex(d=>d.name==='دفترچه قرائت')); await p.evaluate(i=>show(i),IDX); await sleep(1500);
   const fr=(await (await p.$$('iframe'))[IDX].contentFrame());
+  await fr.evaluate(()=>{ try{ ntDz.openAll(); }catch(e){} }); await sleep(200);   /* جزئیات کارت (طرح تازه) باز */
   const card=()=>fr.evaluate(D=>{ const c=[...document.querySelectorAll('.dev')].find(x=>x.querySelector('.rv').dataset.dev===D); return c.querySelector('.svc')?c.querySelector('.svc').innerText:''; },D);
   const SV=()=>p.evaluate(()=>JSON.parse(localStorage.nt_svc_v1||'[]'));
   console.log('1) چسباندن');
