@@ -722,7 +722,9 @@ function pkDraw(){ const raw=clean($('pkQ').value,160), q=norm(raw), toks=q.spli
   let h=(raw && !exact)?`<button type="button" class="nw" data-v="${esc(raw)}">+ «${esc(raw)}» (نام تازه)</button>`:'';
   h+=L.slice(0,200).map(x=>`<button type="button" data-v="${esc(x.v)}" class="${x.v===cur?'on':''}">${pkHi(x.v,raw?[raw]:[])}${x.n?`<small>${fa(x.n)} بار</small>`:''}</button>`).join('');
   if(cur) h+=`<button type="button" class="nw" data-v="">پاک کردن این خانه</button>`;
-  $('pkList').innerHTML=h||'<div class="empty">فهرستی نیست؛ نام را بالا بنویسید.</div>'; }
+  if(!pkAll.length && !raw) h=`<div class="empty">این فهرست هنوز خالی است.<br>نام را بالا بنویسید، یا یک بار در «تنظیم» فایل فهرست را انتخاب کنید.${canW?'<br><button type="button" class="btn s" id="pkSet" style="margin-top:8px">رفتن به تنظیم</button>':''}</div>`;
+  $('pkList').innerHTML=h||'<div class="empty">موردی پیدا نشد؛ نام را بالا بنویسید.</div>';
+  const g=$('pkSet'); if(g) g.addEventListener('click',()=>{ pkClose(); setPane('set'); }); }
 function pkSet(id,v){ const e=$(id); e.value=v; e.dispatchEvent(new Event('input',{bubbles:true})); e.dispatchEvent(new Event('change',{bubbles:true})); }
 Object.keys(PICK).forEach(id=>{ const e=$(id); e.addEventListener('click',()=>pkOpen(id)); e.addEventListener('keydown',ev=>{ if(ev.key==='Enter'||ev.key===' '||ev.key==='ArrowDown'){ ev.preventDefault(); pkOpen(id); } }); });
 $('pkQ').addEventListener('input',pkDraw);

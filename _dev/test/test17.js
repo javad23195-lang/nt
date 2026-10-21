@@ -3,6 +3,8 @@ const {chromium}=require('playwright'); const http=require('http'), fs=require('
 const HTML=fs.readFileSync(path.join(__dirname,'..','out.html'));
 let fails=0; const ok=(c,m)=>{ console.log((c?'  ok  ':'  FAIL ')+m); if(!c) fails++; };
 const sleep=ms=>new Promise(r=>setTimeout(r,ms)); const pad=n=>String(n).padStart(2,'0');
+/* توقف بسته ۳۰ دقیقه‌ای پیش از این لحظه که با استراحت‌ها (۹:۰۰–۹:۱۵، ۱۲:۰۰–۱۲:۴۵) هم‌پوشانی ندارد (وگرنه آزمایش به ساعت اجرا بستگی داشت) */
+const safe=nm=>{ for(const k of [300,240,360,200,420,150,480,100]){ const a=nm-k, b=a+30; if(a<0) continue; if(!(a<555&&b>540) && !(a<765&&b>720)) return a; } return Math.max(0,nm-300); };
 const hm=m=>{ m=((m%1440)+1440)%1440; return pad(Math.floor(m/60))+':'+pad(m%60); };
 (async()=>{
   const web=http.createServer((q,r)=>{ r.writeHead(200,{'Content-Type':'text/html; charset=utf-8'}); r.end(HTML); }); await new Promise(r=>web.listen(0,r));
@@ -28,7 +30,7 @@ const hm=m=>{ m=((m%1440)+1440)%1440; return pad(Math.floor(m/60))+':'+pad(m%60)
       {id:'a',dev:'لودر کوماتسو WA470',from:hm(nm-160),to:'',cause:'خرابی هیدرولیک'},
       {id:'b',dev:'کامیون TRS02',from:hm(nm-70),to:'',cause:'نبود راننده'},
       {id:'c',dev:'بیل مکانیکی کوماتسو PC400',from:hm(nm-45),to:'',cause:'سرویس دوره‌ای'},
-      {id:'d',dev:'کامیون TRS01',from:hm(nm-300),to:hm(nm-270),cause:'نبود راننده'},
+      {id:'d',dev:'کامیون TRS01',from:hm(safe(nm)),to:hm(safe(nm)+30),cause:'نبود راننده'},
       {id:'e',dev:'ژنراتور 1',from:hm(nm-100),to:'',cause:'خرابی موتور'}]}},
     nt_prog_v1:{[jk]:{tasks:[{id:'1',dev:'لودر کوماتسو WA470',prog:'تعویض روغن',done:false},{id:'2',dev:'لودر کوماتسو WA470',prog:'گریس',done:true},{id:'3',dev:'نیسان',prog:'سرویس',done:false}]}}}));
   let r=await F(P);
