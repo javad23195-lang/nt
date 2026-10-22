@@ -145,7 +145,7 @@ function iqHTML(iq){ const on=OPEN.has(iq.id), F=files();
     ${on?`<div class="bd">${cmpHTML(iq)}
       ${iq.quotes.length?`<div>${iq.quotes.map(q=>`${q.fid&&F[q.fid]?`<button type="button" class="fl" data-fv="${esc(q.fid)}">📎 ${esc(q.sup)} (${F[q.fid].t==='application/pdf'?'PDF':'عکس'})</button>`:''}${canW&&!iq.st?`<button type="button" class="fl" data-dq="${esc(iq.id)}|${esc(q.id)}">✕ حذف ${esc(q.sup)}</button>`:''}`).join('')}</div>`:''}
       ${!iq.st&&canW?itemsEdit(iq)+quoteForm(iq):''}${decHTML(iq)}
-      ${canW&&(iq.st===''||iq.st==='no')?`<button type="button" class="btn s d" data-del="${esc(iq.id)}" style="margin-top:10px">حذف استعلام</button>`:''}</div>`:''}</div>`; }
+      ${canW?`<button type="button" class="btn s d" data-del="${esc(iq.id)}" style="margin-top:10px">حذف استعلام</button>`:''}</div>`:''}</div>`; }
 function drawAll(){ const A=all().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   const O=A.filter(x=>!x.st||x.st==='wait'||(x.st==='ok'&&!x.inList&&daysSince(x.dec&&x.dec.at||x.date)<15)), C=A.filter(x=>!O.includes(x));
   O.sort((a,b)=>(b.st==='wait'?1:0)-(a.st==='wait'?1:0));
@@ -208,7 +208,7 @@ document.addEventListener('click',e=>{ const td=e.target.closest('.cmp td'); if(
 function say_q(id,t,bad){ const m=document.querySelector(`[data-qm="${CSS.escape(id)}"]`); if(m){ m.textContent=t; m.className='msg'+(bad?' bad':' ok'); } }
 const armed=new Map();
 function armDel(b,id){ if(armed.get(id)){ armed.delete(id); const iq=all().find(x=>x.id===id); const F=files(); (iq?iq.quotes:[]).forEach(q=>{ if(q.fid) delete F[q.fid]; }); put(FK,F); save(A=>{ const i=A.findIndex(x=>x.id===id); if(i>-1) A.splice(i,1); }); return; }
-  armed.set(id,1); b.textContent='حذف؟ دوباره بزنید'; b.classList.add('armed'); setTimeout(()=>{ armed.delete(id); },5000); }
+  armed.set(id,1); const t0=b.textContent; b.textContent='حذف؟ دوباره بزنید'; b.classList.add('armed'); setTimeout(()=>{ armed.delete(id); if(b.isConnected){ b.textContent=t0; b.classList.remove('armed'); } },5000); }
 $('fvX').addEventListener('click',()=>{ $('fv').hidden=true; });
 document.addEventListener('input',e=>{ if(e.target.classList&&e.target.classList.contains('dt')) maskDate(e.target); });
 /* پاک‌سازی: پیوست استعلام‌هایی که ۶۰ روز پیش تصمیم گرفته شده‌اند */

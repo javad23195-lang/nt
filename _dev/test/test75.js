@@ -118,6 +118,9 @@ const AOA2=[HEAD,row('101','1','1001','کالای نمونه الف','2','عدد
   await f.click('[data-tolist]'); await sleep(400);
   W=(await LSg(p,'nt_kweek_v1')).find(w=>!w.arch);
   ok(W.items.some(i=>/قلم الف 10 کیسه — از فروشنده نمونه دو/.test(i.t)) && (await LSg(p,'nt_kpre_v1'))[0].inList,'افزودن اقلام تایید‌شده به لیست هفتگی');
+  await f.click('#seg [data-p="old"]'); await sleep(200); if(!(await f.$('#p_old .iq .bd'))){ await f.click('#p_old .iq > button.h'); await sleep(200); }
+  await f.click('#p_old [data-del]'); await sleep(100); await f.click('#p_old [data-del]'); await sleep(400);
+  ok((await LSg(p,'nt_kpre_v1')).length===0 && !Object.keys(await LSg(p,'nt_kpre_files_v1')||{}).length,'استعلام تایید‌شده (بسته‌شده) با دو بار زدن حذف شد؛ پیوست‌ها هم پاک شد');
   ok(!errs.length,'بدون خطای صفحه '+errs.join(' | ').slice(0,300)); await c.close();
 
   console.log('۷) دسترسی: کاربر بدون حق تایید و فقط‌خواندنی');
