@@ -140,6 +140,34 @@ const AOA2=[HEAD,row('101','1','1001','کالای نمونه الف','2','عدد
   ok(await f.evaluate(()=>document.getElementById('dFac').hidden),'میز: بخش فاکتور برای کسی که «فاکتور خرید» را نمی‌بیند پنهان است');
   await c.close();
 
+  console.log('۷-ب) پیش‌فاکتور از باکس سندپرداز');
+  ({c,p,errs}=await run({mode:'w'},{nt_kbox_v1:[{id:'b1',name:'کالای باکس یک',qty:'4',unit:'عدد',code:'7001',seen:'1405/07/01'},{id:'b2',name:'کالای باکس دو',qty:'2',unit:'عدد',code:'7002',seen:'1405/07/01'},{id:'b3',name:'کالای باکس سه',qty:'1',unit:'دست',seen:'1405/07/01'}]}));
+  await p.click('#ntWs [data-ws="kh"]'); await sleep(1200);
+  await go(p,'لیست خرید'); f=await frameOf(p,'لیست خرید'); await f.click('#bF [data-f="open"]'); await sleep(200);
+  await f.click('.bx[data-id="b1"] [data-sel]'); await f.click('.bx[data-id="b2"] [data-sel]'); await sleep(200);
+  ok(await f.evaluate(()=>!document.getElementById('bSel').hidden && /۲ قلم/.test(document.getElementById('bSelN').textContent)),'انتخاب دو قلم از باکس: نوار «ساخت استعلام»');
+  await f.click('#bSelGo'); await sleep(1200);
+  let Q=await LSg(p,'nt_kpre_v1');
+  ok(Q.length===1 && Q[0].items.length===2 && Q[0].items[0].bx==='b1' && Q[0].items[0].q===4 && Q[0].items[0].code==='7001','استعلام با نام، تعداد، واحد و کد کالای باکس ساخته شد');
+  ok(await p.evaluate(()=>DOCS[tabs.findIndex(t=>t.classList.contains('on'))].name==='پیش‌فاکتور'),'بعد از ساخت: رفتن به زبانه پیش‌فاکتور');
+  f=await frameOf(p,'پیش‌فاکتور'); await sleep(300);
+  ok(await f.evaluate(()=>document.querySelectorAll('.iq .bd [data-ie]').length===2),'استعلام تازه باز است و اقلام قابل تغییر');
+  await f.fill('[data-ie] [data-eu] >> nth=0','کارتن'); await f.dispatchEvent('[data-ie] [data-eu] >> nth=0','change'); await sleep(200);
+  await f.fill('[data-ie] [data-eq] >> nth=0','6'); await f.dispatchEvent('[data-ie] [data-eq] >> nth=0','change'); await sleep(300);
+  Q=await LSg(p,'nt_kpre_v1');
+  ok(Q[0].items[0].u==='کارتن' && Q[0].items[0].q===6,'واحد و تعداد عوض شد');
+  await f.click('#seg [data-p="new"]'); await sleep(200);
+  ok(await f.evaluate(()=>!document.getElementById('nBoxW').hidden && document.querySelectorAll('#nBox [data-nb]').length===1),'«افزودن از باکس»: فقط قلم آزاد (سه) نشان داده می‌شود');
+  await f.evaluate(()=>{ document.getElementById('nBoxW').open=true; }); await f.check('#nBox [data-nb]'); await f.click('#nSave'); await sleep(400);
+  Q=await LSg(p,'nt_kpre_v1');
+  ok(Q.length===2 && Q.some(x=>x.items.length===1 && x.items[0].bx==='b3'),'استعلام از فرم با قلم باکس');
+  await f.click('.iq[data-iq="'+Q[0].id+'"] > button.h').catch(()=>{}); 
+  await p.evaluate(id=>{ const A=JSON.parse(localStorage.getItem('nt_kpre_v1')); const x=A.find(y=>y.id===id); x.quotes=[{id:'q1',sup:'فروشنده آزمایشی',prices:{[x.items[0].id]:5,[x.items[1].id]:6}}]; x.st='ok'; x.dec={mode:'sup',sup:'q1',by:'م',at:'1405/07/01'}; localStorage.setItem('nt_kpre_v1',JSON.stringify(A)); },Q[0].id);
+  await go(p,'لیست خرید'); f=await frameOf(p,'لیست خرید'); await f.evaluate(()=>drawBox()); await sleep(200);
+  const tg=await f.evaluate(()=>[document.querySelector('.bx[data-id="b1"]').innerText,document.querySelector('.bx[data-id="b3"]').innerText]);
+  ok(/پیش‌فاکتور تایید شد: از فروشنده آزمایشی/.test(tg[0]) && /در استعلام پیش‌فاکتور/.test(tg[1]) && await f.evaluate(()=>!document.querySelector('.bx[data-id="b1"] [data-sel]')),'باکس: برچسب «تایید شد: از فروشنده» و «در استعلام»؛ قلم باز می‌ماند');
+  ok(!errs.length,'بدون خطای صفحه '+errs.join(' | ').slice(0,300)); await c.close();
+
   console.log('۸) امنیت: متن خطرناک در فایل باکس و نام فروشنده');
   ({c,p,errs}=await run({mode:'w'}));
   await p.click('#ntWs [data-ws="kh"]'); await sleep(1200);

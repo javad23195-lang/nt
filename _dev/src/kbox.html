@@ -12,6 +12,11 @@
 .bx.dn{opacity:.62}
 .bx.dn .bn{text-decoration:line-through}
 .bx .r1{display:flex;gap:10px;align-items:flex-start}
+.bx.sel{outline:3px solid var(--acc);outline-offset:-1px}
+#bSel{position:sticky;bottom:8px;z-index:6;display:flex;gap:8px;align-items:center;padding:10px 12px;margin-top:10px;border-radius:14px;background:var(--nv);color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+#bSel b{flex:1;font-size:.9rem}
+#bSel .btn{min-height:44px;color:var(--ink)}
+#bSel #bSelGo{background:var(--am);border-color:var(--am);color:var(--nv);font-weight:900}
 .bx .st{flex:none;width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:1.3rem;line-height:1;color:#9AA8B5}
 .bx .st[aria-pressed="true"]{background:var(--am);border-color:var(--am);color:var(--nv)}
 .bx .tx{flex:1;min-width:0}
@@ -70,6 +75,7 @@
     <div class="msg" id="bMsg2" role="status"></div>
   </div>
   <div id="bList"></div>
+  <div id="bSel" hidden><b id="bSelN"></b><button type="button" class="btn s" id="bSelX">لغو</button><button type="button" class="btn s p" id="bSelGo">ساخت استعلام پیش‌فاکتور</button></div>
 </section>
 
 <!-- ============ هفتگی ============ -->
@@ -167,7 +173,12 @@ $('bFile').addEventListener('change',async()=>{ const f=$('bFile').files&&$('bFi
 let bF=lsl('ntk_bf','imp'), bOpen=new Set();
 const ST={me:'خریدم (فاکتور خودم)',teh:'مأمور خرید تهران',x:'لازم نیست / لغو'};
 const isOpen=x=>!x.st && !x.gone;
-function drawBox(){ const A=box(), q=norm($('bQ').value).split(' ').filter(Boolean);
+/* پیوند با «پیش‌فاکتور»: قلم‌هایی که در استعلام جاری یا تاییدشده هستند (استعلام ردشده قلم را آزاد می‌کند) */
+const canPre=canW && canWT('پیش‌فاکتور'), sel=new Set();
+function preMap(){ const P=LS('nt_kpre_v1',[]), m=new Map(); (Array.isArray(P)?P:[]).forEach(iq=>{ if(!iq||!Array.isArray(iq.items)||iq.st==='no') return; const d=iq.dec||{};
+  iq.items.forEach(it=>{ if(!it||!it.bx) return; let sup=''; if(iq.st==='ok'){ const qid=d.mode==='sup'?d.sup:(d.per&&d.per[it.id]); const Q=(iq.quotes||[]).find(q=>q.id===qid); if(!qid) return; sup=Q?Q.sup:''; } m.set(it.bx,{iq:iq.id,st:iq.st||'',sup,title:iq.title}); }); }); return m; }
+let PM=new Map();
+function drawBox(){ const A=box(), q=norm($('bQ').value).split(' ').filter(Boolean); PM=preMap();
   const c={imp:A.filter(x=>x.imp&&isOpen(x)).length,open:A.filter(isOpen).length,teh:A.filter(x=>x.st==='teh').length,done:A.filter(x=>x.st&&x.st!=='teh').length,gone:A.filter(x=>x.gone&&!x.st).length};
   const F=[['imp','ضروری'],['open','همه باز'],['teh','تهران'],['done','انجام‌شده'],['gone','رفته از باکس']];
   if(!F.some(f=>f[0]===bF)) bF='imp';
@@ -177,18 +188,26 @@ function drawBox(){ const A=box(), q=norm($('bQ').value).split(' ').filter(Boole
   let L=A.filter(x=>bF==='imp'?(x.imp&&isOpen(x)):bF==='open'?isOpen(x):bF==='teh'?x.st==='teh':bF==='done'?(x.st&&x.st!=='teh'):(x.gone&&!x.st));
   if(q.length) L=L.filter(x=>{ const h=norm([x.name,x.code,x.why,x.note,x.desc,x.req,x.memo].join(' ')); return q.every(w=>h.indexOf(w)>-1); });
   L.sort((a,b)=>(b.imp?1:0)-(a.imp?1:0)||String(a.need||a.date).localeCompare(String(b.need||b.date)));
-  $('bList').innerHTML=L.length?L.slice(0,300).map(bxHTML).join(''):`<div class="card"><div class="empty">${bF==='imp'?'هنوز قلمی «ضروری» نشده است. در «همه باز» با ستاره ★ ضروری‌ها را جدا کنید.':'موردی نیست.'}</div></div>`; }
+  $('bList').innerHTML=L.length?L.slice(0,300).map(bxHTML).join(''):`<div class="card"><div class="empty">${bF==='imp'?'هنوز قلمی «ضروری» نشده است. در «همه باز» با ستاره ★ ضروری‌ها را جدا کنید.':'موردی نیست.'}</div></div>`; drawSel(); }
+function drawSel(){ [...sel].forEach(id=>{ const x=box().find(y=>y.id===id); if(!x||!isOpen(x)||PM.has(id)) sel.delete(id); }); $('bSel').hidden=!sel.size; $('bSelN').textContent=fa(sel.size)+' قلم انتخاب شد'; }
+$('bSelX').addEventListener('click',()=>{ sel.clear(); drawBox(); });
+$('bSelGo').addEventListener('click',()=>{ const A=box().filter(x=>sel.has(x.id)); if(!A.length) return; const P=LS('nt_kpre_v1',[]), L=Array.isArray(P)?P:[];
+  const id=uid('p'); L.push({id,title:'استعلام '+fa(TODAY)+(A.length===1?' — '+A[0].name:''),date:TODAY,by:myName(),quotes:[],st:'',
+    items:A.slice(0,60).map(x=>({id:uid('i'),t:clean(x.name,120),q:parseAmt(x.qty)??'',u:clean(x.unit,15),code:clean(x.code,30),bx:x.id}))});
+  if(!put('nt_kpre_v1',L)){ say('bMsg2','ذخیره نشد','bad'); return; } sel.clear(); drawBox(); lss('ntp_open',id); goTab('پیش‌فاکتور','ntp_pane','open'); });
 function bxHTML(x){ const d=daysSince(x.need||x.date), texts=[...new Set([x.why,x.note,x.desc].map(t=>clean(t,200)).filter(Boolean))];
-  const stTag=x.st?`<span class="tag ${x.st==='teh'?'sp':'pd'}">${esc(ST[x.st])}${x.stAt?' '+fa(x.stAt):''}</span>`:(x.gone?`<span class="tag">از باکس رفته ${fa(x.gone)}</span>`:'');
-  return `<div class="bx${x.imp?' imp':''}${x.st&&x.st!=='teh'?' dn':''}" data-id="${esc(x.id)}">
+  const pm=PM.get(x.id), preTag=pm?(pm.st==='ok'?`<span class="tag sp">پیش‌فاکتور تایید شد${pm.sup?': از '+esc(pm.sup):''}</span>`:`<span class="tag">${pm.st==='wait'?'پیش‌فاکتور: منتظر تایید':'در استعلام پیش‌فاکتور'}</span>`):'';
+  const stTag=(x.st?`<span class="tag ${x.st==='teh'?'sp':'pd'}">${esc(ST[x.st])}${x.stAt?' '+fa(x.stAt):''}</span>`:(x.gone?`<span class="tag">از باکس رفته ${fa(x.gone)}</span>`:''))+preTag;
+  return `<div class="bx${x.imp?' imp':''}${x.st&&x.st!=='teh'?' dn':''}${sel.has(x.id)?' sel':''}" data-id="${esc(x.id)}">
     <div class="r1">${canW?`<button type="button" class="st" data-imp aria-pressed="${!!x.imp}" aria-label="ضروری">★</button>`:''}
       <div class="tx"><span class="bn">${esc(x.name)}</span><span class="mt">${x.code?'کد '+esc(fa(x.code))+'، ':''}${x.need?'نیاز '+fa(x.need):''}${d!=null&&d>0?` <span class="${d>30?'old':''}">(${fa(d)} روز)</span>`:''}${x.req?'، '+esc(x.req):''}</span>
         ${texts.length?`<div class="why">${texts.map(esc).join(' — ')}</div>`:''}<div>${stTag}</div></div>
       <div class="q">${esc(fa(x.qty||''))}<small>${esc(x.unit||'')}</small></div></div>
     ${x.imp&&canW&&!x.st?`<div class="memo"><input class="in" data-memo value="${esc(x.memo||'')}" maxlength="160" placeholder="توضیح مهم برای خرید (مثلاً حتماً اصل، فوری)" aria-label="توضیح مهم"></div>`:(x.memo?`<div class="why"><b>توضیح:</b> ${esc(x.memo)}</div>`:'')}
-    ${canW?`<div class="ac">${x.st?`<button type="button" class="btn s" data-st="">برگرداندن</button>`:`<button type="button" class="btn s g" data-st="me">خریدم</button><button type="button" class="btn s" data-st="teh">مأمور تهران</button><button type="button" class="btn s d" data-st="x">لازم نیست</button>`}</div>`:''}</div>`; }
+    ${canW?`<div class="ac">${x.st?`<button type="button" class="btn s" data-st="">برگرداندن</button>`:`<button type="button" class="btn s g" data-st="me">خریدم</button><button type="button" class="btn s" data-st="teh">مأمور تهران</button><button type="button" class="btn s d" data-st="x">لازم نیست</button>${canPre&&isOpen(x)&&!pm?`<button type="button" class="btn s" data-sel aria-pressed="${sel.has(x.id)}">${sel.has(x.id)?'☑':'☐'} پیش‌فاکتور</button>`:''}`}</div>`:''}</div>`; }
 function setItem(id,fn){ const A=box(), x=A.find(y=>y.id===id); if(!x) return; fn(x); put(BK,A); drawBox(); }
 $('bList').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||!canW) return; const id=b.closest('.bx').dataset.id;
+  if(b.hasAttribute('data-sel')){ if(sel.has(id)) sel.delete(id); else sel.add(id); drawBox(); return; }
   if(b.hasAttribute('data-imp')) setItem(id,x=>{ x.imp=x.imp?0:1; if(!x.imp) delete x.imp; });
   else if(b.dataset.st!==undefined) setItem(id,x=>{ if(b.dataset.st){ x.st=b.dataset.st; x.stAt=TODAY; x.stBy=myName(); } else { delete x.st; delete x.stAt; delete x.stBy; } }); });
 /* توضیح: ذخیره بدون ساختن دوباره فهرست (ساختن دوباره هنگام blur خطا می‌دهد) */
@@ -266,7 +285,7 @@ const S=segInit('seg','ntk_pane',['box','week','water','svc'],p=>{ if(p==='box')
 window.addEventListener('message',e=>{ if(e.source===parent && e.data && e.data.nt==='show'){ const f=lsl('ntk_bf',bF); if(f!==bF){ bF=f; if(S.cur==='box') drawBox(); } } });
 $('goImp').addEventListener('click',()=>{ bF='imp'; lss('ntk_bf','imp'); S.set('box'); });
 $('goWater').addEventListener('click',()=>{ S.set('water'); try{ $('aNote').focus(); }catch(e){} });
-window.addEventListener('storage',e=>{ if(!e.key||[BK,WK,AK,SK,'nt_khadamat_v1'].includes(e.key)){ if(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return; S.set(S.cur); } });
+window.addEventListener('storage',e=>{ if(!e.key||[BK,WK,AK,SK,'nt_khadamat_v1','nt_kpre_v1'].includes(e.key)){ if(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return; S.set(S.cur); } });
 </script>
 </body>
 </html>

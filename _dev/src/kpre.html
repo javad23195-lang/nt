@@ -31,6 +31,12 @@
 .qt .pr .in{margin:0;min-height:42px}
 .dec{margin-top:10px;padding:10px 12px;border-radius:12px;background:#F5F7F9}
 .dec h3{margin:0 0 6px;font-size:.92rem}
+.ie{display:grid;grid-template-columns:1fr 78px 92px 40px;gap:6px;align-items:center;margin-top:6px}
+.ie span{font-size:.88rem;overflow-wrap:anywhere}.ie small{display:block;color:var(--dim);font-size:.74rem}
+.ie .in{margin:0;min-height:42px;padding:0 8px}
+.ie .x{min-height:40px;border:1px solid var(--line);border-radius:10px;background:#fff;font-weight:800;color:var(--bad)}
+.bxp{display:flex;gap:10px;align-items:center;padding:8px 2px;border-top:1px solid #EEF1F4;font-size:.88rem}
+.bxp input{width:24px;height:24px;flex:none;accent-color:var(--acc)}
 .fl{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 10px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:.82rem;font-weight:700;margin:4px 0 0 6px}
 #fv{position:fixed;inset:0;z-index:50;background:rgba(10,14,20,.92);display:flex;align-items:center;justify-content:center;padding:12px}
 #fv img{max-width:100%;max-height:100%;border-radius:8px}
@@ -54,6 +60,8 @@
     <input class="in" id="nT" maxlength="80" autocomplete="off">
     <label class="f" for="nI">اقلام — هر خط یک قلم: نام، بعد تعداد و واحد (اختیاری)</label>
     <textarea class="in" id="nI" rows="5" placeholder="برنج ۱۰ کیسه&#10;روغن ۵ حلب&#10;رب گوجه ۲۰ قوطی"></textarea>
+    <details id="nBoxW" hidden style="margin-top:10px"><summary class="f" style="cursor:pointer">افزودن از باکس سندپرداز <small id="nBoxN"></small></summary>
+      <input class="in" id="nBoxQ" placeholder="جستجو در اقلام باز باکس" autocomplete="off"><div id="nBox"></div></details>
     <button type="button" class="btn p w" id="nSave">ساخت استعلام</button>
     <div class="msg" id="nMsg" role="status"></div>
   </div>
@@ -75,10 +83,20 @@ const ST={'':'پیش‌نویس',wait:'منتظر تایید',ok:'تایید ش�
 const UNITS=['عدد','کیسه','حلب','قوطی','کیلوگرم','لیتر','بسته','کارتن','متر','دست','شاخه','گالن'];
 /** «برنج ۱۰ کیسه» → {t:'برنج',q:10,u:'کیسه'} */
 function parseLine(l){ l=clean(l,120); const m=/^(.*?)[\s\-:]+([\d۰-۹٠-٩.,/]+)\s*([^\d\s]*)$/.exec(l); if(m && m[1].trim()) return {t:m[1].trim(),q:+lat(m[2]).replace(/,/g,'')||'',u:clean(m[3],15)}; return {t:l,q:'',u:''}; }
-$('nSave').addEventListener('click',()=>{ const T=clean($('nT').value,80)||('استعلام '+TODAY), L=String($('nI').value).split(/\r?\n/).map(parseLine).filter(x=>x.t);
-  if(!L.length){ say('nMsg','اقلام را بنویسید','bad'); return; }
-  const id=uid('p'); save(A=>A.push({id,title:T,date:TODAY,by:myName(),items:L.slice(0,60).map(x=>Object.assign({id:uid('i')},x)),quotes:[],st:''}));
-  $('nT').value=''; $('nI').value=''; OPEN.add(id); S.set('open'); });
+$('nSave').addEventListener('click',()=>{ const T=clean($('nT').value,80)||('استعلام '+fa(TODAY)), L=String($('nI').value).split(/\r?\n/).map(parseLine).filter(x=>x.t);
+  const BX=freeBox().filter(x=>nSel.has(x.id)).map(x=>({t:clean(x.name,120),q:parseAmt(x.qty)??'',u:clean(x.unit,15),code:clean(x.code,30),bx:x.id}));
+  if(!L.length && !BX.length){ say('nMsg','اقلام را بنویسید یا از باکس انتخاب کنید','bad'); return; }
+  const id=uid('p'); save(A=>A.push({id,title:T,date:TODAY,by:myName(),items:BX.concat(L).slice(0,60).map(x=>Object.assign({id:uid('i')},x)),quotes:[],st:''}));
+  $('nT').value=''; $('nI').value=''; nSel.clear(); OPEN.add(id); S.set('open'); });
+/* اقلام باز باکس سندپرداز که در استعلام جاری یا تاییدشده‌ای نیستند */
+const nSel=new Set();
+function freeBox(){ const B=LS('nt_kbox_v1',[]), used=new Set(); all().forEach(iq=>{ if(iq.st!=='no') iq.items.forEach(it=>{ if(it.bx) used.add(it.bx); }); });
+  return (Array.isArray(B)?B:[]).filter(x=>x&&x.id&&x.name&&!x.st&&!x.gone&&!used.has(x.id)).sort((a,b)=>(b.imp?1:0)-(a.imp?1:0)); }
+function drawNBox(){ const F=freeBox(), q=norm($('nBoxQ').value).split(' ').filter(Boolean); $('nBoxW').hidden=!F.length||!canW; $('nBoxN').textContent='('+fa(F.length)+' قلم باز'+(nSel.size?'، '+fa(nSel.size)+' انتخاب':'')+')';
+  const L=q.length?F.filter(x=>{ const h=norm([x.name,x.code,x.memo].join(' ')); return q.every(w=>h.indexOf(w)>-1); }):F;
+  $('nBox').innerHTML=L.slice(0,200).map(x=>`<label class="bxp"><input type="checkbox" data-nb="${esc(x.id)}" ${nSel.has(x.id)?'checked':''}><span>${x.imp?'★ ':''}${esc(x.name)} — ${esc(fa(x.qty||''))} ${esc(x.unit||'')}${x.code?' <small>(کد '+esc(fa(x.code))+')</small>':''}</span></label>`).join('')||'<div class="empty">—</div>'; }
+$('nBox').addEventListener('change',e=>{ const c=e.target.closest('[data-nb]'); if(!c) return; if(c.checked) nSel.add(c.dataset.nb); else nSel.delete(c.dataset.nb); $('nBoxN').textContent='('+fa(freeBox().length)+' قلم باز'+(nSel.size?'، '+fa(nSel.size)+' انتخاب':'')+')'; });
+$('nBoxQ').addEventListener('input',drawNBox);
 const OPEN=new Set();
 /** قیمت کل یک قلم در یک پیش‌فاکتور (قیمت واحد × تعداد) */
 const lineTot=(it,q)=>{ const p=q.prices&&q.prices[it.id]; if(p==null||p==='') return null; return (+p)*((+it.q)||1); };
@@ -115,19 +133,30 @@ function decHTML(iq){ const dec=iq.dec||{};
       <div class="row2" style="margin-top:8px"><button type="button" class="btn g" data-apok="${esc(iq.id)}">تایید انتخاب</button><button type="button" class="btn d" data-apno="${esc(iq.id)}">رد استعلام</button></div><div class="msg" data-am="${esc(iq.id)}"></div></div>`;
   if(iq.st==='wait') return '<div class="dec"><h3>منتظر تایید مدیر</h3><div class="hint">مهندس تایید‌کننده در همین صفحه تصمیم می‌گیرد.</div></div>';
   return canW?`<button type="button" class="btn p w" data-send="${esc(iq.id)}" ${iq.quotes.length?'':'disabled'}>فرستادن برای تایید مدیر</button>`:''; }
+/** پیش‌نویس: تعداد و واحد هر قلم قابل تغییر است؛ حذف قلم */
+function itemsEdit(iq){ return `<div class="qt w-only"><b>اقلام (تعداد و واحد را می‌توانید عوض کنید)</b>
+    ${iq.items.map(it=>`<div class="ie" data-ie="${esc(it.id)}"><span>${esc(it.t)}${it.code?`<small>کد ${esc(fa(it.code))}${it.bx?'، از باکس':''}</small>`:''}</span>
+      <input class="in mono" data-eq value="${esc(it.q===''||it.q==null?'':String(it.q))}" inputmode="decimal" aria-label="تعداد ${esc(it.t)}">
+      <input class="in" data-eu value="${esc(it.u||'')}" list="unitL" maxlength="15" aria-label="واحد ${esc(it.t)}">
+      ${iq.items.length>1?`<button type="button" class="x" data-ix aria-label="حذف ${esc(it.t)}">✕</button>`:'<span></span>'}</div>`).join('')}</div>`; }
 let pick={};   /* انتخاب مدیر در حال تصمیم: {iqId:{mode,sup,per}} */
 function iqHTML(iq){ const on=OPEN.has(iq.id), F=files();
   return `<div class="iq" data-iq="${esc(iq.id)}"><button type="button" class="h" aria-expanded="${on}"><span class="tx"><b>${esc(iq.title)}</b><span>${fa(iq.items.length)} قلم، ${fa(iq.quotes.length)} پیش‌فاکتور، ${fa(iq.date)}${iq.by?'، '+esc(iq.by):''}</span></span><span class="stt ${esc(iq.st||'')}">${ST[iq.st||'']}</span></button>
     ${on?`<div class="bd">${cmpHTML(iq)}
       ${iq.quotes.length?`<div>${iq.quotes.map(q=>`${q.fid&&F[q.fid]?`<button type="button" class="fl" data-fv="${esc(q.fid)}">📎 ${esc(q.sup)} (${F[q.fid].t==='application/pdf'?'PDF':'عکس'})</button>`:''}${canW&&!iq.st?`<button type="button" class="fl" data-dq="${esc(iq.id)}|${esc(q.id)}">✕ حذف ${esc(q.sup)}</button>`:''}`).join('')}</div>`:''}
-      ${!iq.st&&canW?quoteForm(iq):''}${decHTML(iq)}
+      ${!iq.st&&canW?itemsEdit(iq)+quoteForm(iq):''}${decHTML(iq)}
       ${canW&&(iq.st===''||iq.st==='no')?`<button type="button" class="btn s d" data-del="${esc(iq.id)}" style="margin-top:10px">حذف استعلام</button>`:''}</div>`:''}</div>`; }
 function drawAll(){ const A=all().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   const O=A.filter(x=>!x.st||x.st==='wait'||(x.st==='ok'&&!x.inList&&daysSince(x.dec&&x.dec.at||x.date)<15)), C=A.filter(x=>!O.includes(x));
   O.sort((a,b)=>(b.st==='wait'?1:0)-(a.st==='wait'?1:0));
-  $('oList').innerHTML=(O.length?O.map(iqHTML).join(''):'<div class="card"><div class="empty">استعلام جاری نیست. «استعلام تازه» را بزنید.</div></div>')+`<datalist id="supL">${supList().map(s=>`<option value="${esc(s)}"></option>`).join('')}</datalist>`;
+  $('oList').innerHTML=(O.length?O.map(iqHTML).join(''):'<div class="card"><div class="empty">استعلام جاری نیست. «استعلام تازه» را بزنید.</div></div>')+`<datalist id="unitL">${UNITS.map(u=>`<option value="${esc(u)}"></option>`).join('')}</datalist><datalist id="supL">${supList().map(s=>`<option value="${esc(s)}"></option>`).join('')}</datalist>`;
   $('cList').innerHTML=C.length?C.slice(0,60).map(iqHTML).join(''):'<div class="card"><div class="empty">—</div></div>';
-  $('nRo').hidden=canW; markPicks(); }
+  $('nRo').hidden=canW; markPicks(); drawNBox(); }
+/* تغییر تعداد/واحد قلم پیش‌نویس (بعد از change؛ ساختن دوباره با setTimeout تا blur خطا ندهد) */
+document.addEventListener('change',e=>{ const i=e.target.closest('[data-eq],[data-eu]'); if(!i) return; const row=i.closest('[data-ie]'), id=i.closest('.iq').dataset.iq;
+  const A=all(), iq=A.find(x=>x.id===id), it=iq&&iq.items.find(x=>x.id===row.dataset.ie); if(!it||iq.st) return;
+  if(i.hasAttribute('data-eq')){ const v=parseAmt(i.value); it.q=v===null?'':v; } else it.u=clean(i.value,15);
+  if(put(PK,A)) setTimeout(drawAll,0); });
 function supList(){ const L=LS('nt_factor_lex_v1',{}), s=new Map(); const add=v=>{ v=clean(v,80); const k=nkey(v); if(k&&!s.has(k)) s.set(k,v); };
   all().forEach(x=>x.quotes.forEach(q=>add(q.sup))); (Array.isArray(L.sup)?L.sup:[]).forEach(add); return [...s.values()].slice(0,800); }
 function markPicks(){ Object.keys(pick).forEach(id=>{ const P=pick[id], el=document.querySelector(`.iq[data-iq="${CSS.escape(id)}"]`); if(!el) return; const iq=all().find(x=>x.id===id); if(!iq) return;
@@ -144,6 +173,7 @@ async function packFile(f){ if(!f) return null;
 document.addEventListener('click',async e=>{ const b=e.target.closest('button'); if(!b) return;
   const card=b.closest('.iq'), id=card&&card.dataset.iq;
   if(b.classList.contains('h')){ if(OPEN.has(id)) OPEN.delete(id); else OPEN.add(id); drawAll(); return; }
+  if(b.hasAttribute('data-ix')){ const iid=b.closest('[data-ie]').dataset.ie; save(A=>{ const iq=A.find(x=>x.id===id); if(!iq||iq.st||iq.items.length<2) return; iq.items=iq.items.filter(x=>x.id!==iid); iq.quotes.forEach(q=>{ if(q.prices) delete q.prices[iid]; }); }); return; }
   if(b.dataset.addq){ const f=b.closest('.qt'), sup=clean(f.querySelector('[data-k=sup]').value,80); if(!sup){ say_q(id,'نام فروشنده را بنویسید',1); return; }
     const prices={}; f.querySelectorAll('[data-it]').forEach(i=>{ const v=parseAmt(i.value); if(v!==null) prices[i.dataset.it]=v; });
     if(!Object.keys(prices).length){ say_q(id,'دست‌کم قیمت یک قلم را بنویسید',1); return; }
@@ -184,9 +214,12 @@ document.addEventListener('input',e=>{ if(e.target.classList&&e.target.classList
 /* پاک‌سازی: پیوست استعلام‌هایی که ۶۰ روز پیش تصمیم گرفته شده‌اند */
 (function(){ if(!canW) return; const A=all(), F=files(); let n=0; A.forEach(iq=>{ if((iq.st==='ok'||iq.st==='no') && iq.dec && daysSince(iq.dec.at)>60) iq.quotes.forEach(q=>{ if(q.fid && F[q.fid]){ delete F[q.fid]; n++; } }); });
   Object.keys(F).forEach(k=>{ if(!A.some(iq=>iq.quotes.some(q=>q.fid===k))){ delete F[k]; n++; } }); if(n) put(FK,F); })();
-const S=segInit('seg','ntp_pane',['open','new','old'],p=>{ if(p!=='new') drawAll(); });
+const takeOpen=()=>{ const o=lsl('ntp_open',''); if(o){ OPEN.add(o); lss('ntp_open',''); return true; } return false; };
+takeOpen();
+const S=segInit('seg','ntp_pane',['open','new','old'],p=>{ drawAll(); });
+window.addEventListener('message',e=>{ if(e.source===parent && e.data && e.data.nt==='show' && takeOpen()) drawAll(); });
 $('goNew').addEventListener('click',()=>{ S.set('new'); try{ $('nT').focus(); }catch(e){} });
-window.addEventListener('storage',e=>{ if(!e.key||[PK,FK].includes(e.key)){ if(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return; drawAll(); } });
+window.addEventListener('storage',e=>{ if(!e.key||[PK,FK,'nt_kbox_v1'].includes(e.key)){ if(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return; drawAll(); } });
 </script>
 </body>
 </html>
