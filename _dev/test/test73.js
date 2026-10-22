@@ -13,7 +13,11 @@ const J=ago=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZo
     nt_daftar_v1:[{dev:'لودر کوماتسو WA470',unit:'ساعت',val:12486,date:J(1)}],
     nt_sh8_v1:{rows:[{dev:'لودر ZL50',st:J(0),costA:'12000000',costK:'45000000'}]}};
   const run=async(vp,cfg)=>{ const c=await br.newContext({locale:'fa-IR',viewport:vp});
-    await c.addInitScript(([s,cfg])=>{ if(!localStorage.getItem('__s')){ localStorage.setItem('__s','1'); Object.keys(s).forEach(k=>localStorage.setItem(k,JSON.stringify(s[k]))); if(cfg) localStorage.setItem('ntsync_cfg_v1',JSON.stringify(cfg)); } },[seed,cfg]);
+    await c.addInitScript(([s,cfg])=>{ if(!localStorage.getItem('__s')){ localStorage.setItem('__s','1'); /* ساعت توقف‌های باز نسبت به همین لحظه (وگرنه صبح زود پیش از ۰۶:۳۰ آزمایش شکست می‌خورد) */
+      const n=new Date(), nm=n.getHours()*60+n.getMinutes(), hm=m=>{ m=Math.max(1,m); return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'); };
+      const MAP={'06:30':hm(nm-90),'07:10':hm(nm-60),'08:00':hm(nm-30)};
+      const t=JSON.parse(JSON.stringify(s)); Object.values(t.nt_tavaqof_v1||{}).forEach(r=>(r.stops||[]).forEach(x=>{ if(MAP[x.from]) x.from=MAP[x.from]; }));
+      Object.keys(t).forEach(k=>localStorage.setItem(k,JSON.stringify(t[k]))); if(cfg) localStorage.setItem('ntsync_cfg_v1',JSON.stringify(cfg)); } },[seed,cfg]);
     const p=await c.newPage(); const errs=[]; p.on('pageerror',e=>{ if(!/Unexpected token '<'/.test(String(e))) errs.push(String(e)); });
     await p.goto(`http://localhost:${web.address().port}/nt/s.html`); await p.waitForFunction(()=>window.ntNav&&window.ntDept,null,{timeout:15000});
     await p.addStyleTag({content:'.sydlg,.sybd,#ntPin{display:none!important}'}); await p.evaluate(()=>{ window.ntLocked=false; document.body.classList.remove('ntlocked','ntpin'); try{ ntBoot(); }catch(e){} }); await sleep(1200);
