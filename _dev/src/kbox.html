@@ -197,7 +197,7 @@ $('bSelGo').addEventListener('click',()=>{ const A=box().filter(x=>sel.has(x.id)
   if(!put('nt_kpre_v1',L)){ say('bMsg2','ذخیره نشد','bad'); return; } sel.clear(); drawBox(); lss('ntp_open',id); goTab('پیش‌فاکتور','ntp_pane','open'); });
 function bxHTML(x){ const d=daysSince(x.need||x.date), texts=[...new Set([x.why,x.note,x.desc].map(t=>clean(t,200)).filter(Boolean))];
   const pm=PM.get(x.id), preTag=pm?(pm.st==='ok'?`<span class="tag sp">پیش‌فاکتور تایید شد${pm.sup?': از '+esc(pm.sup):''}</span>`:`<span class="tag">${pm.st==='wait'?'پیش‌فاکتور: منتظر تایید':'در استعلام پیش‌فاکتور'}</span>`):'';
-  const stTag=(x.st?`<span class="tag ${x.st==='teh'?'sp':'pd'}">${esc(ST[x.st])}${x.stAt?' '+fa(x.stAt):''}</span>`:(x.gone?`<span class="tag">از باکس رفته ${fa(x.gone)}</span>`:''))+preTag;
+  const stTag=(x.st?`<span class="tag ${x.st==='teh'?'sp':'pd'}">${esc(ST[x.st])}${x.st==='me'&&x.fac?(x.fac.no?' — فاکتور '+esc(fa(x.fac.no)):' — با فاکتور'):''}${x.stAt?' '+fa(x.stAt):''}</span>`:(x.gone?`<span class="tag">از باکس رفته ${fa(x.gone)}</span>`:''))+preTag;
   return `<div class="bx${x.imp?' imp':''}${x.st&&x.st!=='teh'?' dn':''}${sel.has(x.id)?' sel':''}" data-id="${esc(x.id)}">
     <div class="r1">${canW?`<button type="button" class="st" data-imp aria-pressed="${!!x.imp}" aria-label="ضروری">★</button>`:''}
       <div class="tx"><span class="bn">${esc(x.name)}</span><span class="mt">${x.code?'کد '+esc(fa(x.code))+'، ':''}${x.need?'نیاز '+fa(x.need):''}${d!=null&&d>0?` <span class="${d>30?'old':''}">(${fa(d)} روز)</span>`:''}${x.req?'، '+esc(x.req):''}</span>

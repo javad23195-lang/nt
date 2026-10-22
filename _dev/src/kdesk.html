@@ -46,8 +46,8 @@ function stats(){
   const A=obj('nt_kwater_v1'), T=(Array.isArray(A.trips)?A.trips:[]).filter(t=>t&&t.d).map(t=>t.d).sort(), last=T[T.length-1]||'', m=+String(TODAY).slice(5,7)||1, gap=m<=6?(+A.a||2):(+A.b||3), ds=last?daysSince(last):null, left=ds==null?0:gap-ds;
   const S=arr('nt_ksvc_v1').filter(s=>s&&s.id&&!s.done), Sn=S.filter(s=>!s.no);
   const P=arr('nt_kpre_v1').filter(x=>x&&x.id&&Array.isArray(x.items)), Pw=P.filter(x=>x.st==='wait'), Pd=P.filter(x=>!x.st), Po=P.filter(x=>x.st==='ok'&&!x.inList);
-  const F=arr('nt_factor_v1').filter(r=>r&&r.id), miss=F.filter(r=>r.cat!=='sookht'&&!String(r.title||'').trim()), sp=F.filter(r=>r.cat==='kala'&&!r.sp), un=F.filter(r=>!r.rep), debt=F.filter(r=>r.kind==='اعتباری'&&!r.paid);
-  return {B,Bo,imp,teh,boxAge,W,wN,wD,last,ds,gap,left,S,Sn,P,Pw,Pd,Po,F,miss,sp,un,debt,debtSum:debt.reduce((a,r)=>a+(+r.amt||0),0)}; }
+  const F=arr('nt_factor_v1').filter(r=>r&&r.id), miss=F.filter(r=>r.cat!=='sookht'&&!String(r.title||'').trim()), sp=F.filter(r=>r.cat==='kala'&&!r.sp), dl=F.filter(r=>r.cat==='kala'&&r.sp&&!r.deliver), un=F.filter(r=>!r.rep), debt=F.filter(r=>r.kind==='اعتباری'&&!r.paid);
+  return {dl,B,Bo,imp,teh,boxAge,W,wN,wD,last,ds,gap,left,S,Sn,P,Pw,Pd,Po,F,miss,sp,un,debt,debtSum:debt.reduce((a,r)=>a+(+r.amt||0),0)}; }
 function draw(){ const s=stats(), L='لیست خرید', PF='پیش‌فاکتور', FC='فاکتور خرید', AP=canAppr();
   const al=[];
   if(AP && s.Pw.length) al.push(`<button type="button" class="al" data-go="${PF}|ntp_pane|open|">✋ ${fa(s.Pw.length)} پیش‌فاکتور منتظر تایید شماست</button>`);
@@ -70,6 +70,7 @@ function draw(){ const s=stats(), L='لیست خرید', PF='پیش‌فاکتو
   $('dFac').innerHTML=[
     card({tab:FC,key:'ntf_pane',pane:'book',bf:'miss',n:fa(s.miss.length),t:'ناقص (بدون شرح)',c:s.miss.length?'bad':''}),
     card({tab:FC,key:'ntf_pane',pane:'sp',n:fa(s.sp.length),t:'منتظر ثبت در سندپرداز',c:s.sp.length?'wa':''}),
+    card({tab:FC,key:'ntf_pane',pane:'sp',n:fa(s.dl.length),t:'تحویل مالی نشده',s:'ثبت سندپرداز شده',c:s.dl.length?'wa':''}),
     card({tab:FC,key:'ntf_pane',pane:'rep',n:fa(s.un.length),t:'در گزارش مالی نیامده'}),
     card({tab:FC,key:'ntf_pane',pane:'book',bf:'debt',n:fa(s.debt.length),t:'بدهی پرداخت‌نشده',s:s.debt.length?faN(s.debtSum)+' ریال':'',c:s.debt.length?'wa':''})
   ].join('');
