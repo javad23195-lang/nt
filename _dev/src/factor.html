@@ -151,9 +151,10 @@ body.ro .w-only{display:none!important}
 </header>
 <div class="seg" id="seg" role="group" aria-label="بخش">
   <button type="button" data-p="add" aria-pressed="true">ثبت</button>
-  <button type="button" data-p="book" aria-pressed="false">دفتر<span class="n" id="miN" hidden></span></button>
-  <button type="button" data-p="rep" aria-pressed="false">مالی<span class="n" id="rpN" hidden></span></button>
-  <button type="button" data-p="sp" aria-pressed="false">سندپرداز<span class="n" id="spN" hidden></span></button>
+  <button type="button" data-p="book" aria-pressed="false">دفتر</button>
+  <button type="button" data-p="rep" aria-pressed="false">مالی</button>
+  <button type="button" data-p="sp" aria-pressed="false">سندپرداز</button>
+  <button type="button" id="goAdd" hidden></button>
   <button type="button" data-p="set" aria-pressed="false">تنظیم</button>
 </div>
 
@@ -722,7 +723,7 @@ const badge=(id,n)=>{ $(id).hidden=!n; $(id).textContent=fa(n); };
 function render(){ const A=rowsAll(), T=A.filter(r=>dayOf(r)===TODAY);
   $('mN').textContent=fa(T.length); $('mS').textContent=faN(T.reduce((a,r)=>a+(r.amt||0),0));
   const m=/^(\d{4})\/(\d{2})\/(\d{2})$/.exec(TODAY); $('hSub').textContent=m?('امروز '+fa(+m[3])+' '+MONTHS[+m[2]-1]+' '+fa(m[1])):'';
-  badge('miN',A.filter(miss).length); badge('rpN',A.filter(r=>!r.rep&&!miss(r)).length); badge('spN',A.filter(needSp).length);
+  /* شمارنده‌ها فقط در «میز خرید» (تکرار نشود) */
   if(pane==='add'){ const L=sortRows(T); $('lastN').textContent=fa(T.length)+' فاکتور'; $('lastList').innerHTML=L.length?L.map(r=>rowHTML(r)).join(''):'<div class="empty">امروز هنوز فاکتوری ثبت نشده است.</div>'; wireActs($('lastList')); drawLink(); }
   if(pane==='book') drawBook(); if(pane==='rep') drawRep(); if(pane==='sp') drawSp(); if(pane==='set') drawSet(); }
 
@@ -756,6 +757,9 @@ $('roCard').hidden=canW; $('fDate').value=TODAY; $('rDate').value=TODAY;
 { const r=sortRows(rowsAll())[0]; if(r && CAT[r.cat]){ cat=r.cat; if(r.kind) setKind(r.kind); } }
 drawCats(); applyCat();
 { const p=lsl('ntf_pane','add'); setPane(['add','book','rep','sp','set'].includes(p)?p:'add'); }
+$('goAdd').addEventListener('click',()=>{ setPane('add'); try{ $('fNo').focus(); }catch(e){} });
+/* رفتن به این زبانه از «میز خرید»: قسمت خواسته‌شده (ntf_pane) */
+window.addEventListener('message',e=>{ if(e.source!==parent || !e.data || e.data.nt!=='show') return; const p=lsl('ntf_pane',pane), f=p==='book'?lsl('ntf_bf',''):''; if(f){ setBF(f); lss('ntf_bf',''); } if(['add','book','rep','sp','set'].includes(p) && (p!==pane||f)) setPane(p); });
 window.addEventListener('storage',e=>{ if(!e.key||[FK,LK,NK,CK,PK,RK].includes(e.key)){ if(document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && pane==='add') return; render(); } });
 </script>
 </body>

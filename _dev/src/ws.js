@@ -7,7 +7,7 @@
 'use strict';
 if(typeof DOCS==='undefined' || typeof tabs==='undefined') return;
 const $=id=>document.getElementById(id);
-const KH=['فاکتور خرید'];
+const KH=['میز خرید','لیست خرید','پیش‌فاکتور','فاکتور خرید'];
 const wsOf=n=>KH.indexOf(n)>-1?'kh':'nt';
 const NAME={nt:'نت',kh:'خرید'};
 const can=n=>{ try{ return !window.ntSync || ntSync.canSee(n); }catch(e){ return true; } };
@@ -67,7 +67,7 @@ const CSS=`
 #ntWs .wb .d{display:block;font-size:.84rem;color:#51606E;margin-top:2px}
 #ntWs .wb .n{display:block;font-size:.8rem;font-weight:800;color:#8A5300;margin-top:4px}
 #ntWs .wb.last::after{content:"آخرین بار";position:absolute;top:10px;inset-inline-end:12px;font-size:.7rem;font-weight:800;color:#1E6B3A;background:#E4F3E8;padding:1px 8px;border-radius:9px}
-body.ws-kh #ntNav,body.ws-kh #ntFab,body.ws-kh #ntQrScan,body.ws-kh #ntDevBtn{display:none!important}
+body.ws-kh #ntQrScan,body.ws-kh #ntDevBtn{display:none!important}
 #ntDrw .di.ws{border:1px dashed #9AA8B5;margin:2px 0 6px;color:#0B5C7A}
 #ntWsBtn{display:none}
 @media (min-width:1000px){ #ntWsBtn:not([hidden]){display:flex;align-items:center;gap:8px;width:100%;min-height:44px;margin:0 0 8px;padding:0 12px;border:1px dashed #9AA8B5;border-radius:12px;background:transparent;font:inherit;font-weight:800;font-size:.86rem;color:#1B2430;cursor:pointer} }

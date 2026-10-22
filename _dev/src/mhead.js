@@ -8,7 +8,7 @@ const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ic=(k,s)=>{ try{ return NTI.svg(k,s||22); }catch(e){ return ''; } };
 const MOON='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M20.5 14.2A8.6 8.6 0 0 1 9.8 3.5a8.6 8.6 0 1 0 10.7 10.7z" fill="#E6A52E"/></svg>';
-const TABICON={'امروز':'today','مدیریت':'mgmt','برنامه روزانه':'plan','انبار':'box','دفترچه قرائت':'read','ثبت مشکلات':'warn','شناسنامه':'id','خدمات':'wr','درخواست خرید':'cart','توقف شیفت':'stop','برون‌سپاری':'out','عکس‌ها':'photo','تردد و اضافه‌کار':'clock','فاکتور خرید':'rcpt'};
+const TABICON={'امروز':'today','مدیریت':'mgmt','برنامه روزانه':'plan','انبار':'box','دفترچه قرائت':'read','ثبت مشکلات':'warn','شناسنامه':'id','خدمات':'wr','درخواست خرید':'cart','توقف شیفت':'stop','برون‌سپاری':'out','عکس‌ها':'photo','تردد و اضافه‌کار':'clock','فاکتور خرید':'rcpt','میز خرید':'mgmt','لیست خرید':'plan','پیش‌فاکتور':'doc'};
 const CSS=`
 #ntHam,#ntMoon,#ntHT,#ntDrw,#ntDrwBd{display:none}
 @media (max-width:899px){

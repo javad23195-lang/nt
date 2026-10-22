@@ -187,11 +187,11 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
 
   console.log('8-ب) مأمور خرید: فقط بخش خرید');
   const uB=await newUser(A,'مأمور خرید',async p=>{ await p.click('#syUBuy'); if(process.env.SHOTU){ await p.evaluate(()=>document.getElementById('syUBuy').scrollIntoView({block:'center'})); await p.screenshot({path:process.env.SHOTU}); } });
-  ok(await A.evaluate(()=>{ const u=Object.values(JSON.parse(localStorage.getItem('nt_users_v1')).users).find(x=>x.name==='مأمور خرید'); return !!u && u.acl['فاکتور خرید']==='w' && Object.keys(u.acl).filter(k=>u.acl[k]!=='h').length===1; }),'دکمه «مأمور خرید»: فقط «فاکتور خرید» = ثبت');
+  ok(await A.evaluate(()=>{ const u=Object.values(JSON.parse(localStorage.getItem('nt_users_v1')).users).find(x=>x.name==='مأمور خرید'); const K=['فاکتور خرید','میز خرید','لیست خرید','پیش‌فاکتور']; return !!u && K.every(k=>u.acl[k]==='w') && Object.keys(u.acl).filter(k=>u.acl[k]!=='h').length===4; }),'دکمه «مأمور خرید»: فقط چهار زبانه خرید = ثبت');
   await A.click('#syBack'); await A.click('#syBack'); await A.click('#syClose'); await waitFor(()=>synced(A));
   let Bq=await ctx(null,null,null,uB.link);
   await waitFor(async()=>(await dlgText(Bq)).includes('رمز ۶ رقمی')); await Bq.fill('#syPin',uB.pin); await Bq.click('#syJoin'); await settle(Bq);
-  ok(await visTabs(Bq)==='فاکتور خرید' && await Bq.evaluate(()=>window.ntWs && ntWs.cur==='kh' && !ntWs.both()),'سیستم مأمور خرید: فقط «فاکتور خرید»، بدون بخش نت');
+  ok((await visTabs(Bq)).split(',').sort().join(',')===['فاکتور خرید','میز خرید','لیست خرید','پیش‌فاکتور'].sort().join(',') && await Bq.evaluate(()=>window.ntWs && ntWs.cur==='kh' && !ntWs.both()),'سیستم مأمور خرید: فقط چهار زبانه خرید، بدون بخش نت');
   await Bq.context().close();
 
   console.log('9) کاربر با دسترسی کامل، و حذف کاربر');

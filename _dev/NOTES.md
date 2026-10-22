@@ -681,3 +681,11 @@ NT_READINGS=لیست.txt node test/test2.js   # ورود لیست قرائت
 - آیکن برنامه (lib/icon-192/512 «any» با گوشه گرد، icon-mask-192/512 محتوا ۸۰٪ روی #034B68، icon-180) = تصویر مربعی کاربر «NT — واحد نگهداری و تعمیرات (تدارکات)».
 - صفحه شروع (`#ntSplash` در base-user-1047.html): تصویر گرد کاربر (webp ۴۴۸px، بیرون دایره شفاف؛ ~۲۷KB)؛ کاشی، درخشش و موج‌ها گرد (border-radius:50%).
 - sw.js `V='nt-v3'` تا آیکن‌ها و صفحه تازه در گوشی‌ها جایگزین شوند. آیکن برنامه نصب‌شده اندروید (WebAPK) را خود مرورگر با تأخیر (چند روز) عوض می‌کند؛ برای دیدن فوری: حذف و نصب دوباره.
+
+## بخش «خرید» — میز، لیست خرید، پیش‌فاکتور (add_kharid2.py بعد از add_factor_link) — test75
+- چهار زبانه در بخش kh (ws.js KH): «میز خرید» (kdesk.html)، «لیست خرید» (kbox.html)، «پیش‌فاکتور» (kpre.html)، «فاکتور خرید». نوار پایین در kh هم هست (nav.js KMAIN/KACTS).
+- ابزار مشترک: src/kh_common.css و kh_common.js؛ add_kharid2.py به جای `/*KH_COMMON_CSS*/` و `/*KH_COMMON_JS*/` می‌گذارد. goTab(tab,paneKey,pane) + segInit (پیام show فقط از parent).
+- «لیست خرید»: باکس سندپرداز `nt_kbox_v1` (خواندن ستون با نام، ي/ك با nkey؛ id = sp-سال-شماره-ردیف-کد؛ imp/memo/st[me|teh|x] می‌ماند؛ قلم نبود = gone)، هفتگی `nt_kweek_v1`، آب شیرین `nt_kwater_v1` (a: ماه ۱–۶ هر ۲ روز، b: ماه ۷–۱۲ هر ۳ روز؛ قابل تغییر)، خدمات `nt_ksvc_v1` (بی‌شماره = قرمز) + دیدن خدمات باز `nt_khadamat_v1`.
+- «پیش‌فاکتور»: `nt_kpre_v1` (items، quotes با prices{itemId:قیمت واحد}، st: ''|wait|ok|no، dec{mode sup|item}). تایید فقط `ntSync.canApprove()` (مدیر یا کاربر با تیک «تایید پیش‌فاکتور» = cfg.appr). پیوست `nt_kpre_files_v1` (عکس webp ≤۱۵۰KB، PDF ≤۵۰۰KB؛ ۶۰ روز بعد از تصمیم پاک). بعد از تایید: «افزودن به لیست هفتگی».
+- «میز خرید»: فقط شمارش و هشدار از همه کلیدها؛ کارت = رفتن به زبانه و قسمت (ntk_pane/ntk_bf، ntp_pane، ntf_pane/ntf_bf). کارت زبانه‌ای که دیده نمی‌شود پنهان است. شمارش‌های فاکتور فقط اینجاست (برچسب‌های seg در factor.html برداشته شد).
+- نکته: بعد از change یک input، innerHTML همان فهرست را همزمان عوض نکن (خطای blur)؛ setTimeout یا بدون ساختن دوباره.

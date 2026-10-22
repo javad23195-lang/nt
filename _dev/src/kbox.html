@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FFFFFF">
+<title>لیست خرید</title>
+<style>
+/*KH_COMMON_CSS*/
+.bx{border:1px solid var(--rule);border-radius:14px;padding:10px 12px;margin-top:8px;background:#fff}
+.bx.imp{border-color:#E3B66A;box-shadow:inset 4px 0 0 var(--am)}
+.bx.dn{opacity:.62}
+.bx.dn .bn{text-decoration:line-through}
+.bx .r1{display:flex;gap:10px;align-items:flex-start}
+.bx .st{flex:none;width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:1.3rem;line-height:1;color:#9AA8B5}
+.bx .st[aria-pressed="true"]{background:var(--am);border-color:var(--am);color:var(--nv)}
+.bx .tx{flex:1;min-width:0}
+.bx .bn{display:block;font-weight:800;font-size:.95rem;overflow-wrap:anywhere}
+.bx .mt{display:block;font-size:.78rem;color:var(--dim)}
+.bx .why{font-size:.82rem;color:#2B3846;margin-top:4px}
+.bx .old{color:var(--bad);font-weight:700}
+.bx .q{flex:none;font-weight:900;white-space:nowrap;text-align:end}
+.bx .q small{display:block;font-size:.72rem;color:var(--dim);font-weight:600}
+.bx .memo{margin-top:6px}
+.bx .memo .in{min-height:42px}
+.bx .ac{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.bx .ac .btn{flex:1;min-width:80px}
+.wk{display:flex;align-items:center;gap:10px;min-height:52px;border-top:1px solid #EEF1F4}
+.wk:first-child{border-top:0}
+.wk input[type=checkbox]{width:26px;height:26px;accent-color:var(--ok);flex:none}
+.wk .tx{flex:1;min-width:0;font-size:.95rem}
+.wk.dn .tx{text-decoration:line-through;color:var(--dim)}
+.wk .btn{min-height:40px}
+.prog{height:10px;border-radius:6px;background:#EEF1F4;overflow:hidden;margin-top:8px}
+.prog i{display:block;height:100%;background:var(--ok)}
+.wt{display:flex;align-items:center;gap:14px}
+.wt .big{font-size:2.2rem;font-weight:900;line-height:1.1}
+.wt.due .big{color:var(--bad)}.wt.soon .big{color:var(--wa)}.wt.ok .big{color:var(--ok)}
+.svc{border:1px solid var(--rule);border-radius:14px;padding:10px 12px;margin-top:8px;background:#fff}
+.svc.nr{border-color:#E8A9A9;box-shadow:inset 4px 0 0 var(--bad)}
+.svc .r1{display:flex;gap:8px;align-items:flex-start}
+.svc .tx{flex:1;min-width:0}
+.svc .tx b{display:block}
+.svc .tx span{font-size:.8rem;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div class="tt"><h1>لیست خرید</h1><p class="sub" id="hSub"></p></div></header>
+<div class="seg" id="seg" role="group" aria-label="بخش">
+  <button type="button" data-p="box" aria-pressed="true">باکس سندپرداز</button>
+  <button type="button" data-p="week" aria-pressed="false">هفتگی</button>
+  <button type="button" data-p="water" aria-pressed="false">آب</button>
+  <button type="button" data-p="svc" aria-pressed="false">خدمات</button>
+</div>
+<button type="button" id="goImp" hidden></button><button type="button" id="goWater" hidden></button>
+
+<!-- ============ باکس سندپرداز ============ -->
+<section id="p_box">
+  <div class="card w-only">
+    <h2>بارگذاری فایل باکس <small id="bLast"></small></h2>
+    <p class="hint">خروجی اکسل باکس خرید از سندپرداز را انتخاب کنید. اقلام تازه اضافه می‌شوند؛ علامت‌ها و توضیح‌های قبلی می‌مانند؛ قلمی که دیگر در باکس نیست «رفته از باکس» می‌شود.</p>
+    <input class="in" id="bFile" type="file" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="padding-top:10px">
+    <div class="msg" id="bMsg" role="status"></div>
+  </div>
+  <div class="card">
+    <input class="in" id="bQ" placeholder="جستجو: نام کالا، کد، دلیل نیاز، درخواست‌کننده" autocomplete="off">
+    <div class="chips" id="bF" role="group" aria-label="فیلتر"></div>
+    <div class="chips"><button type="button" class="cp sm" id="bCopy">کپی لیست ضروری‌ها</button></div>
+    <div class="msg" id="bMsg2" role="status"></div>
+  </div>
+  <div id="bList"></div>
+</section>
+
+<!-- ============ هفتگی ============ -->
+<section id="p_week" hidden>
+  <div class="card">
+    <h2 id="wTitle">خرید هفتگی</h2>
+    <div class="prog"><i id="wProg" style="width:0"></i></div>
+    <p class="hint" id="wSub"></p>
+    <div id="wList"></div>
+    <div class="w-only">
+      <label class="f" for="wAdd">افزودن قلم (هر خط یک قلم؛ می‌توانید لیست را بچسبانید)</label>
+      <textarea class="in" id="wAdd" rows="3" placeholder="برنج ۲ کیسه&#10;روغن ۳ حلب"></textarea>
+      <button type="button" class="btn p w" id="wAddB">افزودن</button>
+      <div class="row2" style="margin-top:10px"><button type="button" class="btn" id="wNew">لیست تازه هفته</button><button type="button" class="btn" id="wCopy">کپی متن لیست</button></div>
+      <div class="msg" id="wMsg" role="status"></div>
+    </div>
+  </div>
+  <div class="card"><h2>هفته‌های قبل <small id="wOldN"></small></h2><div id="wOld"></div></div>
+</section>
+
+<!-- ============ آب شیرین ============ -->
+<section id="p_water" hidden>
+  <div class="card">
+    <h2>آب شیرین</h2>
+    <div class="wt" id="aState"></div>
+    <div class="w-only">
+      <label class="f" for="aNote">توضیح (اختیاری، مثلاً تعداد گالن)</label>
+      <input class="in" id="aNote" maxlength="60" autocomplete="off">
+      <button type="button" class="btn g w" id="aAdd">امروز آب آورده شد</button>
+      <div class="msg" id="aMsg" role="status"></div>
+    </div>
+  </div>
+  <div class="card"><h2>دفعه‌های قبل</h2><div id="aList"></div></div>
+  <div class="card w-only">
+    <h2>فاصله یادآوری</h2>
+    <div class="row2">
+      <div><label class="f" for="aA">۶ ماه اول سال: هر چند روز</label><input class="in mono" id="aA" inputmode="numeric"></div>
+      <div><label class="f" for="aB">۶ ماه دوم سال: هر چند روز</label><input class="in mono" id="aB" inputmode="numeric"></div>
+    </div>
+    <button type="button" class="btn s" id="aSave" style="margin-top:8px">ذخیره</button>
+  </div>
+</section>
+
+<!-- ============ خدمات ============ -->
+<section id="p_svc" hidden>
+  <div class="card w-only">
+    <h2>خدمات تازه</h2>
+    <p class="hint">کاری که واحدی خواسته (با برگه خدمات). مهم: کار بدون «شماره خدمات» انجام نشود.</p>
+    <div class="row2">
+      <div><label class="f" for="sUnit">واحد درخواست‌کننده</label><input class="in" id="sUnit" list="sUnits" maxlength="60" autocomplete="off"><datalist id="sUnits"></datalist></div>
+      <div><label class="f" for="sNo">شماره خدمات</label><input class="in mono" id="sNo" inputmode="numeric" maxlength="20" autocomplete="off"></div>
+    </div>
+    <label class="f" for="sTitle">شرح کار</label><input class="in" id="sTitle" maxlength="120" autocomplete="off">
+    <button type="button" class="btn p w" id="sAdd">ثبت</button>
+    <div class="msg" id="sMsg" role="status"></div>
+  </div>
+  <div class="card"><h2>منتظر انجام <small id="sOpenN"></small></h2><div id="sOpen"></div></div>
+  <div class="card" id="sKhCard"><h2>خدمات باز زبانه «خدمات» (نت) <small id="sKhN"></small></h2><p class="hint">فقط دیدن؛ انجام را واحد نت در زبانه «خدمات» ثبت می‌کند.</p><div id="sKh"></div></div>
+  <div class="card"><h2>انجام‌شده <small id="sDoneN"></small></h2><div id="sDone"></div></div>
+</section>
+</div>
+<script>
+/*KH_COMMON_JS*/
+const BK='nt_kbox_v1', WK='nt_kweek_v1', AK='nt_kwater_v1', SK='nt_ksvc_v1';
+const TAB='لیست خرید', canW=canWT(TAB);
+if(!canW) document.body.classList.add('ro');
+
+/* ============ باکس سندپرداز ============ */
+const box=()=>{ const a=LS(BK,[]); return Array.isArray(a)?a.filter(x=>x&&x.id&&x.name):[]; };
+/* ستون‌های خروجی سندپرداز (نام ستون، نه شماره، تا جابه‌جایی ستون مهم نباشد) */
+const COLS={y:'سال مالی',no:'شماره',row:'ردیف',code:'کد کالا',name:'شرح کالا',qty:'مقدار',unit:'واحد',need:'تاریخ نیاز',why:'دلیل نیاز',note:'ملاحظات',date:'تاریخ',desc:'توضیحات',req:'درخواست کننده'};
+const colKey=s=>nkey(s);
+async function importBox(file){
+  if(!parent.ntReport||!parent.ntReport.readAoa) throw new Error('lib');
+  const buf=await file.arrayBuffer(); const A=await parent.ntReport.readAoa(buf);
+  const hi=A.findIndex(r=>Array.isArray(r) && r.some(c=>colKey(c)===colKey(COLS.name)) && r.some(c=>colKey(c)===colKey(COLS.qty)));
+  if(hi<0) throw new Error('head');
+  const H=A[hi].map(colKey), ix={}; Object.keys(COLS).forEach(k=>{ ix[k]=H.indexOf(colKey(COLS[k])); });
+  if(ix.name<0) throw new Error('head');
+  const v=(r,k)=>ix[k]<0?'':clean(lat(r[ix[k]]==null?'':r[ix[k]]),k==='name'?160:200);
+  const rows=A.slice(hi+1).filter(r=>Array.isArray(r) && v(r,'name'));
+  if(rows.length>3000) throw new Error('big');
+  const cur=box(), map=new Map(cur.map(x=>[x.id,x])), seen=new Set(); let nw=0, back=0;
+  rows.forEach((r,i)=>{ const id=['sp',v(r,'y')||'0',v(r,'no')||'0',v(r,'row')||String(i+1),v(r,'code')].join('-'); if(seen.has(id)) return; seen.add(id);
+    const f={code:v(r,'code'),name:v(r,'name'),qty:v(r,'qty'),unit:v(r,'unit'),need:normDate(v(r,'need'))||v(r,'need'),why:v(r,'why'),note:v(r,'note'),date:normDate(v(r,'date'))||v(r,'date'),desc:v(r,'desc'),req:v(r,'req'),no:v(r,'no')};
+    const o=map.get(id); if(o){ Object.assign(o,f); if(o.gone){ delete o.gone; back++; } o.seen=TODAY; } else { map.set(id,Object.assign({id,add:TODAY,seen:TODAY},f)); nw++; } });
+  let gone=0; map.forEach(o=>{ if(!seen.has(o.id) && !o.gone && !o.st){ o.gone=TODAY; gone++; } });
+  const out=[...map.values()]; if(!put(BK,out)) throw new Error('save');
+  return {n:seen.size,nw,gone,back}; }
+$('bFile').addEventListener('change',async()=>{ const f=$('bFile').files&&$('bFile').files[0]; $('bFile').value=''; if(!f) return;
+  if(f.size>8e6){ say('bMsg','فایل خیلی بزرگ است','bad'); return; }
+  say('bMsg','در حال خواندن…');
+  try{ const r=await importBox(f); say('bMsg',`${fa(r.n)} قلم در فایل: ${fa(r.nw)} تازه${r.gone?'، '+fa(r.gone)+' قلم دیگر در باکس نیست':''}${r.back?'، '+fa(r.back)+' قلم دوباره برگشت':''}`,'ok'); bF='open'; drawBox(); }
+  catch(e){ say('bMsg',e&&e.message==='lib'?'برای بار اول اینترنت لازم است (کتابخانه اکسل)':'این فایل خروجی باکس سندپرداز نیست (ستون «شرح کالا» و «مقدار» پیدا نشد)','bad'); } });
+let bF=lsl('ntk_bf','imp'), bOpen=new Set();
+const ST={me:'خریدم (فاکتور خودم)',teh:'مأمور خرید تهران',x:'لازم نیست / لغو'};
+const isOpen=x=>!x.st && !x.gone;
+function drawBox(){ const A=box(), q=norm($('bQ').value).split(' ').filter(Boolean);
+  const c={imp:A.filter(x=>x.imp&&isOpen(x)).length,open:A.filter(isOpen).length,teh:A.filter(x=>x.st==='teh').length,done:A.filter(x=>x.st&&x.st!=='teh').length,gone:A.filter(x=>x.gone&&!x.st).length};
+  const F=[['imp','ضروری'],['open','همه باز'],['teh','تهران'],['done','انجام‌شده'],['gone','رفته از باکس']];
+  if(!F.some(f=>f[0]===bF)) bF='imp';
+  $('bF').innerHTML=F.map(([k,n])=>`<button type="button" class="cp sm" data-f="${k}" aria-pressed="${k===bF}">${n} (${fa(c[k])})</button>`).join('');
+  const last=A.map(x=>x.seen||'').sort().pop(); const ds=last?daysSince(last):null;
+  $('bLast').textContent=last?('آخرین فایل: '+fa(last)+(ds?' ('+fa(ds)+' روز پیش)':' (امروز)')):'هنوز فایلی نخوانده‌اید';
+  let L=A.filter(x=>bF==='imp'?(x.imp&&isOpen(x)):bF==='open'?isOpen(x):bF==='teh'?x.st==='teh':bF==='done'?(x.st&&x.st!=='teh'):(x.gone&&!x.st));
+  if(q.length) L=L.filter(x=>{ const h=norm([x.name,x.code,x.why,x.note,x.desc,x.req,x.memo].join(' ')); return q.every(w=>h.indexOf(w)>-1); });
+  L.sort((a,b)=>(b.imp?1:0)-(a.imp?1:0)||String(a.need||a.date).localeCompare(String(b.need||b.date)));
+  $('bList').innerHTML=L.length?L.slice(0,300).map(bxHTML).join(''):`<div class="card"><div class="empty">${bF==='imp'?'هنوز قلمی «ضروری» نشده است. در «همه باز» با ستاره ★ ضروری‌ها را جدا کنید.':'موردی نیست.'}</div></div>`; }
+function bxHTML(x){ const d=daysSince(x.need||x.date), texts=[...new Set([x.why,x.note,x.desc].map(t=>clean(t,200)).filter(Boolean))];
+  const stTag=x.st?`<span class="tag ${x.st==='teh'?'sp':'pd'}">${esc(ST[x.st])}${x.stAt?' '+fa(x.stAt):''}</span>`:(x.gone?`<span class="tag">از باکس رفته ${fa(x.gone)}</span>`:'');
+  return `<div class="bx${x.imp?' imp':''}${x.st&&x.st!=='teh'?' dn':''}" data-id="${esc(x.id)}">
+    <div class="r1">${canW?`<button type="button" class="st" data-imp aria-pressed="${!!x.imp}" aria-label="ضروری">★</button>`:''}
+      <div class="tx"><span class="bn">${esc(x.name)}</span><span class="mt">${x.code?'کد '+esc(fa(x.code))+'، ':''}${x.need?'نیاز '+fa(x.need):''}${d!=null&&d>0?` <span class="${d>30?'old':''}">(${fa(d)} روز)</span>`:''}${x.req?'، '+esc(x.req):''}</span>
+        ${texts.length?`<div class="why">${texts.map(esc).join(' — ')}</div>`:''}<div>${stTag}</div></div>
+      <div class="q">${esc(fa(x.qty||''))}<small>${esc(x.unit||'')}</small></div></div>
+    ${x.imp&&canW&&!x.st?`<div class="memo"><input class="in" data-memo value="${esc(x.memo||'')}" maxlength="160" placeholder="توضیح مهم برای خرید (مثلاً حتماً اصل، فوری)" aria-label="توضیح مهم"></div>`:(x.memo?`<div class="why"><b>توضیح:</b> ${esc(x.memo)}</div>`:'')}
+    ${canW?`<div class="ac">${x.st?`<button type="button" class="btn s" data-st="">برگرداندن</button>`:`<button type="button" class="btn s g" data-st="me">خریدم</button><button type="button" class="btn s" data-st="teh">مأمور تهران</button><button type="button" class="btn s d" data-st="x">لازم نیست</button>`}</div>`:''}</div>`; }
+function setItem(id,fn){ const A=box(), x=A.find(y=>y.id===id); if(!x) return; fn(x); put(BK,A); drawBox(); }
+$('bList').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||!canW) return; const id=b.closest('.bx').dataset.id;
+  if(b.hasAttribute('data-imp')) setItem(id,x=>{ x.imp=x.imp?0:1; if(!x.imp) delete x.imp; });
+  else if(b.dataset.st!==undefined) setItem(id,x=>{ if(b.dataset.st){ x.st=b.dataset.st; x.stAt=TODAY; x.stBy=myName(); } else { delete x.st; delete x.stAt; delete x.stBy; } }); });
+/* توضیح: ذخیره بدون ساختن دوباره فهرست (ساختن دوباره هنگام blur خطا می‌دهد) */
+$('bList').addEventListener('change',e=>{ const i=e.target.closest('[data-memo]'); if(!i) return; const id=i.closest('.bx').dataset.id, v=clean(i.value,160), A=box(), x=A.find(y=>y.id===id); if(!x || (x.memo||'')===v) return; if(v) x.memo=v; else delete x.memo; put(BK,A); });
+$('bF').addEventListener('click',e=>{ const b=e.target.closest('[data-f]'); if(!b) return; bF=b.dataset.f; lss('ntk_bf',bF); drawBox(); });
+$('bQ').addEventListener('input',drawBox);
+$('bCopy').addEventListener('click',async()=>{ const L=box().filter(x=>x.imp&&isOpen(x)); if(!L.length){ say('bMsg2','قلم ضروری بازی نیست','bad'); return; }
+  const t='لیست خرید ضروری '+TODAY+'\n'+L.map((x,i)=>`${i+1}. ${x.name} — ${x.qty||''} ${x.unit||''}${x.memo?' ('+x.memo+')':''}`).join('\n');
+  const ok=await copyText(t); say('bMsg2',ok?fa(L.length)+' قلم کپی شد؛ در پیام‌رسان بچسبانید':'کپی نشد',ok?'ok':'bad'); });
+
+/* ============ هفتگی ============ */
+const weeks=()=>{ const a=LS(WK,[]); return Array.isArray(a)?a.filter(w=>w&&w.id&&Array.isArray(w.items)):[]; };
+const curWeek=()=>weeks().filter(w=>!w.arch).sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0]||null;
+function saveWeeks(fn){ const A=weeks(); fn(A); put(WK,A); drawWeek(); }
+function newWeek(copy){ saveWeeks(A=>{ const c=A.filter(w=>!w.arch).sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0];
+  A.forEach(w=>{ if(!w.arch) w.arch=TODAY; }); const items=copy&&c?c.items.filter(i=>!i.done).map(i=>({id:uid('w'),t:i.t})):[];
+  A.push({id:uid('W'),title:'خرید هفتگی '+TODAY,date:TODAY,by:myName(),items}); }); }
+function drawWeek(){ const w=curWeek();
+  if(!w){ $('wTitle').textContent='خرید هفتگی'; $('wSub').textContent=canW?'هنوز لیستی نیست؛ اقلام را بنویسید یا بچسبانید.':'لیستی نیست.'; $('wList').innerHTML=''; $('wProg').style.width='0'; }
+  else { const d=w.items.filter(i=>i.done).length; $('wTitle').textContent=w.title; $('wSub').textContent=fa(d)+' از '+fa(w.items.length)+' قلم خریده شد';
+    $('wProg').style.width=(w.items.length?Math.round(d/w.items.length*100):0)+'%';
+    $('wList').innerHTML=w.items.map(i=>`<div class="wk${i.done?' dn':''}" data-i="${esc(i.id)}"><input type="checkbox" ${i.done?'checked':''} ${canW?'':'disabled'} aria-label="${esc(i.t)}"><span class="tx">${esc(i.t)}</span>${canW?'<button type="button" class="btn s d" data-del>حذف</button>':''}</div>`).join('')||'<div class="empty">لیست خالی است.</div>'; }
+  const O=weeks().filter(x=>x.arch).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  $('wOldN').textContent=fa(O.length);
+  $('wOld').innerHTML=O.length?O.slice(0,12).map(x=>`<div class="it"><div class="tx"><b>${esc(x.title)}</b><span>${fa(x.items.filter(i=>i.done).length)} از ${fa(x.items.length)} قلم</span></div></div>`).join(''):'<div class="empty">—</div>'; }
+$('wAddB').addEventListener('click',()=>{ const L=String($('wAdd').value).split(/\r?\n/).map(t=>clean(t,120)).filter(Boolean); if(!L.length) return;
+  if(!curWeek()) newWeek(false);
+  saveWeeks(A=>{ const w=A.filter(x=>!x.arch).sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0]; L.slice(0,200).forEach(t=>w.items.push({id:uid('w'),t})); });
+  $('wAdd').value=''; say('wMsg',fa(L.length)+' قلم اضافه شد','ok'); });
+$('wNew').addEventListener('click',()=>{ newWeek(true); say('wMsg','لیست تازه ساخته شد؛ اقلام نخریده هفته قبل آمد','ok'); });
+$('wCopy').addEventListener('click',async()=>{ const w=curWeek(); if(!w) return; const t=w.title+'\n'+w.items.filter(i=>!i.done).map((i,k)=>(k+1)+'. '+i.t).join('\n'); const ok=await copyText(t); say('wMsg',ok?'کپی شد':'کپی نشد',ok?'ok':'bad'); });
+$('wList').addEventListener('change',e=>{ const c=e.target; if(c.type!=='checkbox') return; const id=c.closest('.wk').dataset.i; saveWeeks(A=>{ A.forEach(w=>w.items.forEach(i=>{ if(i.id===id){ if(c.checked){ i.done=TODAY; } else delete i.done; } })); }); });
+$('wList').addEventListener('click',e=>{ const b=e.target.closest('[data-del]'); if(!b) return; const id=b.closest('.wk').dataset.i; saveWeeks(A=>{ A.forEach(w=>{ w.items=w.items.filter(i=>i.id!==id); }); }); });
+
+/* ============ آب شیرین ============ */
+const water=()=>{ const o=LS(AK,{}); return (o&&typeof o==='object'&&!Array.isArray(o))?o:{}; };
+const trips=W=>(Array.isArray(W.trips)?W.trips:[]).filter(t=>t&&t.d).sort((a,b)=>String(b.d).localeCompare(String(a.d)));
+const gapOf=W=>{ const m=+String(TODAY).slice(5,7)||1; return m<=6?(+W.a||2):(+W.b||3); };
+function waterState(){ const W=water(), T=trips(W), last=T[0]?T[0].d:'', ds=last?daysSince(last):null, g=gapOf(W);
+  const left=ds==null?0:g-ds; return {W,T,last,ds,g,left,cls:ds==null||left<=0?'due':(left===1?'soon':'ok')}; }
+function drawWater(){ const s=waterState();
+  $('aState').className='wt '+s.cls;
+  $('aState').innerHTML=`<div class="big">${s.ds==null?'—':fa(s.ds)}</div><div><b>${s.ds==null?'هنوز ثبت نشده':'روز از آخرین بار ('+fa(s.last)+')'}</b><div class="hint">یادآوری هر ${fa(s.g)} روز — ${s.cls==='due'?'<b style="color:var(--bad)">نوبت آوردن آب است</b>':(s.cls==='soon'?'فردا نوبت است':fa(s.left)+' روز دیگر')}</div></div>`;
+  $('aList').innerHTML=s.T.length?s.T.slice(0,20).map(t=>`<div class="it"><div class="tx"><b>${fa(t.d)}</b><span>${esc(t.n||'')}${t.by?' — '+esc(t.by):''}</span></div>${canW?`<button type="button" class="btn s d" data-del="${esc(t.id)}">حذف</button>`:''}</div>`).join(''):'<div class="empty">—</div>';
+  $('aA').value=s.W.a||2; $('aB').value=s.W.b||3; }
+$('aAdd').addEventListener('click',()=>{ const W=water(); W.trips=Array.isArray(W.trips)?W.trips:[]; if(W.trips.some(t=>t.d===TODAY)){ say('aMsg','امروز قبلاً ثبت شده','bad'); return; }
+  W.trips.push({id:uid('a'),d:TODAY,n:clean($('aNote').value,60),by:myName()}); W.trips=trips(W).slice(0,200); put(AK,W); $('aNote').value=''; say('aMsg','ثبت شد','ok'); drawWater(); });
+$('aList').addEventListener('click',e=>{ const b=e.target.closest('[data-del]'); if(!b) return; const W=water(); W.trips=trips(W).filter(t=>t.id!==b.dataset.del); put(AK,W); drawWater(); });
+$('aSave').addEventListener('click',()=>{ const W=water(), a=+lat($('aA').value)||2, b=+lat($('aB').value)||3; W.a=Math.min(30,Math.max(1,a)); W.b=Math.min(30,Math.max(1,b)); put(AK,W); drawWater(); });
+
+/* ============ خدمات ============ */
+const svcs=()=>{ const a=LS(SK,[]); return Array.isArray(a)?a.filter(s=>s&&s.id&&s.title):[]; };
+function khOpen(){ const o=LS('nt_khadamat_v1',{}); const R=(o&&Array.isArray(o.rows))?o.rows:[]; return R.filter(r=>r&&r.dev&&!r.done&&!r.cdate&&!r.reason); }
+function drawSvc(){ const A=svcs(), O=A.filter(s=>!s.done).sort((a,b)=>String(a.date).localeCompare(String(b.date))), D=A.filter(s=>s.done).sort((a,b)=>String(b.done).localeCompare(String(a.done)));
+  $('sUnits').innerHTML=[...new Set(A.map(s=>s.unit).filter(Boolean))].map(u=>`<option value="${esc(u)}"></option>`).join('');
+  const card=s=>`<div class="svc${s.no?'':' nr'}"><div class="r1"><div class="tx"><b>${esc(s.title)}</b><span>${esc(s.unit||'')}${s.date?'، '+fa(s.date):''}${s.done?'، انجام '+fa(s.done):''}</span><div>${s.no?`<span class="tag sp">خدمات ${esc(fa(s.no))}</span>`:'<span class="tag" style="background:var(--badbg);color:var(--bad)">خدمات ثبت نشده</span>'}</div></div></div>
+    ${canW?`<div class="it" style="border:0;padding-top:4px">${!s.no&&!s.done?`<input class="in mono" data-no="${esc(s.id)}" placeholder="شماره خدمات" inputmode="numeric" style="flex:1;min-height:40px;margin:0">`:''}${s.done?`<button type="button" class="btn s" data-un="${esc(s.id)}">برگرداندن</button>`:`<button type="button" class="btn s g" data-dn="${esc(s.id)}">انجام شد</button>`}</div>`:''}</div>`;
+  $('sOpenN').textContent=fa(O.length)+(O.some(s=>!s.no)?'، '+fa(O.filter(s=>!s.no).length)+' بدون شماره':'');
+  $('sOpen').innerHTML=O.length?O.map(card).join(''):'<div class="empty">کاری منتظر نیست.</div>';
+  $('sDoneN').textContent=fa(D.length); $('sDone').innerHTML=D.length?D.slice(0,20).map(card).join(''):'<div class="empty">—</div>';
+  const K=khOpen(); $('sKhCard').hidden=!K.length; $('sKhN').textContent=fa(K.length);
+  $('sKh').innerHTML=K.slice(0,40).map(r=>`<div class="it"><div class="tx"><b>${esc(r.dev)}</b><span>${esc(r.act||'')}${r.open?'، باز شدن '+esc(fa(r.open)):''}</span></div></div>`).join(''); }
+$('sAdd').addEventListener('click',()=>{ const t=clean($('sTitle').value,120); if(!t){ say('sMsg','شرح کار را بنویسید','bad'); return; }
+  const no=clean(lat($('sNo').value),20), A=svcs(); A.push({id:uid('s'),unit:clean($('sUnit').value,60),title:t,no,date:TODAY,by:myName()}); put(SK,A);
+  ['sTitle','sNo'].forEach(id=>$(id).value=''); say('sMsg',no?'ثبت شد':'ثبت شد — شماره خدمات ندارد؛ پیش از انجام کار بگیرید','ok'); drawSvc(); });
+function setSvc(id,fn){ const A=svcs(), s=A.find(x=>x.id===id); if(!s) return; fn(s); put(SK,A); setTimeout(drawSvc,0); }
+$('p_svc').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return;
+  if(b.dataset.dn) setSvc(b.dataset.dn,s=>{ s.done=TODAY; s.doneBy=myName(); });
+  if(b.dataset.un) setSvc(b.dataset.un,s=>{ delete s.done; delete s.doneBy; }); });
+$('p_svc').addEventListener('change',e=>{ const i=e.target.closest('[data-no]'); if(!i) return; const v=clean(lat(i.value),20); if(v) setSvc(i.dataset.no,s=>{ if(s.no===v) return; s.no=v; }); });
+
+/* ============ کلی ============ */
+$('hSub').textContent=TODAY?('امروز '+fa(TODAY)):'';
+const S=segInit('seg','ntk_pane',['box','week','water','svc'],p=>{ if(p==='box') drawBox(); if(p==='week') drawWeek(); if(p==='water') drawWater(); if(p==='svc') drawSvc(); });
+window.addEventListener('message',e=>{ if(e.source===parent && e.data && e.data.nt==='show'){ const f=lsl('ntk_bf',bF); if(f!==bF){ bF=f; if(S.cur==='box') drawBox(); } } });
+$('goImp').addEventListener('click',()=>{ bF='imp'; lss('ntk_bf','imp'); S.set('box'); });
+$('goWater').addEventListener('click',()=>{ S.set('water'); try{ $('aNote').focus(); }catch(e){} });
+window.addEventListener('storage',e=>{ if(!e.key||[BK,WK,AK,SK,'nt_khadamat_v1'].includes(e.key)){ if(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return; S.set(S.cur); } });
+</script>
+</body>
+</html>

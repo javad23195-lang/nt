@@ -27,8 +27,17 @@ const ICON={
 };
 /* آیکون‌های تازه (سرمه‌ای + کهربایی) از uicons.js؛ ICON بالا فقط پشتیبان است */
 const svg=k=>(window.NTI && NTI.P[k||'doc'])?NTI.svg(k||'doc'):`<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]||ICON.doc}</svg>`;
-const TABICON={'امروز':'today','مدیریت':'mgmt','برنامه روزانه':'plan','انبار':'box','دفترچه قرائت':'read','ثبت مشکلات':'warn','شناسنامه':'id','خدمات':'wr','درخواست خرید':'cart','توقف شیفت':'stop','برون‌سپاری':'out','عکس‌ها':'photo','تردد و اضافه‌کار':'clock','فاکتور خرید':'rcpt'};
-const MAIN=['امروز','توقف شیفت','دفترچه قرائت','مدیریت'];   /* مثل طرح تازه؛ بقیه در منوی ☰ سربرگ (mhead.js) */
+const TABICON={'امروز':'today','مدیریت':'mgmt','برنامه روزانه':'plan','انبار':'box','دفترچه قرائت':'read','ثبت مشکلات':'warn','شناسنامه':'id','خدمات':'wr','درخواست خرید':'cart','توقف شیفت':'stop','برون‌سپاری':'out','عکس‌ها':'photo','تردد و اضافه‌کار':'clock','فاکتور خرید':'rcpt','میز خرید':'mgmt','لیست خرید':'plan','پیش‌فاکتور':'doc'};
+const MAIN=['امروز','توقف شیفت','دفترچه قرائت','مدیریت'];
+/* بخش خرید (ws.js): نوار پایین و دکمه «+» خودش */
+const KMAIN=['میز خرید','لیست خرید','پیش‌فاکتور','فاکتور خرید'];
+const KH=()=>!!(window.ntWs && ntWs.cur==='kh');
+const KACTS=[
+  ['فاکتور خرید','goAdd','ثبت فاکتور','فاکتور تازه، همین‌جا','rcpt','y'],
+  ['لیست خرید','goImp','ضروری‌ها','لیست باکس سندپرداز','plan','b'],
+  ['پیش‌فاکتور','goNew','پیش‌فاکتور تازه','استعلام قیمت','doc','g'],
+  ['لیست خرید','goWater','آب شیرین','ثبت آوردن آب','fuel','r']
+];   /* مثل طرح تازه؛ بقیه در منوی ☰ سربرگ (mhead.js) */
 /* کارهای دکمه «+»: [نام زبانه، دکمه افزودن داخل آن، عنوان، توضیح، آیکون، رنگ] */
 const ACTS=[
   ['توقف شیفت','bNew','ثبت توقف','دستگاه ایستاد','stop','y'],
@@ -201,11 +210,12 @@ const cap99=v=>{ const n=+String(v||'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷�
 function activeName(){ const i=tabs.findIndex(t=>t.classList.contains('on')); return i>-1?DOCS[i].name:''; }
 function rest0(){ return DOCS.map(d=>d.name).filter(n=>MAIN.indexOf(n)<0 && vis(n)); }
 /* نوار پایین: زبانه‌های اصلی؛ اگر کاربر آن‌ها را ندارد، جای خالی (تا ۴ دکمه) با زبانه‌های دیگرش پر می‌شود و همان‌ها در «بیشتر» تکرار نمی‌شوند */
-function barTabs(){ const m=MAIN.filter(vis), r=rest0(); while(r.length && m.length<4) m.push(r.shift()); return m; }   /* «بیشتر» نیست: همه زبانه‌ها در منوی ☰ */
+function barTabs(){ if(KH()) return KMAIN.filter(vis); const m=MAIN.filter(vis), r=rest0(); while(r.length && m.length<4) m.push(r.shift()); return m; }   /* «بیشتر» نیست: همه زبانه‌ها در منوی ☰ */
 function others(){ const b=barTabs(); return rest0().filter(n=>b.indexOf(n)<0); }
 /* کاربر محدود (بدون «امروز» و «برنامه روزانه»): نوار پایین فقط دکمه وسط؛ همه زبانه‌ها یک بار در برگه همان دکمه */
-const solo=()=>!vis('امروز') && !vis('برنامه روزانه');
-const soloActs=()=>ACTS.filter(a=>vis(a[0]) && canW(a[0]));
+const solo=()=>!KH() && !vis('امروز') && !vis('برنامه روزانه');
+const curActs=()=>KH()?KACTS:ACTS;
+const soloActs=()=>curActs().filter(a=>vis(a[0]) && canW(a[0]));
 const soloTabs=()=>{ const A=soloActs().map(a=>a[0]); return DOCS.map(d=>d.name).filter(n=>vis(n) && A.indexOf(n)<0); };
 function paint(){
   if(solo()){ navIn.innerHTML=''; if(!document.body.classList.contains('ntsolo')) document.body.classList.add('ntsolo');   /* بدون تغییر بی‌جا: body زیر نظر است */ fab.classList.add('has');
@@ -215,7 +225,7 @@ function paint(){
   if(document.body.classList.contains('ntsolo')) document.body.classList.remove('ntsolo'); delete fab.dataset.b;
   const act=activeName(), main=barTabs(), more=others();
   const mk=(n,label,icon,on,badge,extra)=>`<button type="button" class="ntnb${on?' on':''}" data-n="${n}" ${on?'aria-current="page"':''}>${svg(icon)}${label}<span class="b${badge?' show':''}">${cap99(badge)}</span></button>`;
-  let h=''; const lab={'امروز':'امروز','مدیریت':'مدیریت','برنامه روزانه':'برنامه','انبار':'انبار','دفترچه قرائت':'قرائت','توقف شیفت':'توقف','ثبت مشکلات':'مشکلات','درخواست خرید':'خرید','برون‌سپاری':'برون‌سپاری','شناسنامه':'شناسنامه','خدمات':'خدمات','عکس‌ها':'عکس‌ها','تردد و اضافه‌کار':'تردد'};
+  let h=''; const lab={'امروز':'امروز','مدیریت':'مدیریت','برنامه روزانه':'برنامه','انبار':'انبار','دفترچه قرائت':'قرائت','توقف شیفت':'توقف','ثبت مشکلات':'مشکلات','درخواست خرید':'خرید','برون‌سپاری':'برون‌سپاری','شناسنامه':'شناسنامه','خدمات':'خدمات','عکس‌ها':'عکس‌ها','تردد و اضافه‌کار':'تردد','میز خرید':'میز','لیست خرید':'لیست','پیش‌فاکتور':'پیش‌فاکتور','فاکتور خرید':'فاکتور'};
   const first=main.slice(0,2), last=main.slice(2);
   first.forEach(n=>h+=mk(n,lab[n]||n,TABICON[n],act===n,badgeOf(n)));
   h+='<span class="ntsp" aria-hidden="true"></span>';
@@ -224,7 +234,7 @@ function paint(){
     h+=`<button type="button" class="ntnb${more.indexOf(act)>-1?' on':''}" data-more="1">${svg('more')}بیشتر<span class="b${mb?' show':''}">${mb?(mb>99?'۹۹+':faN(mb)):''}</span></button>`; }
   navIn.innerHTML=h;
   requestAnimationFrame(()=>{ moveBub(); moveInd(); });
-  const canAdd=ACTS.some(a=>vis(a[0]) && canW(a[0]));
+  const canAdd=curActs().some(a=>vis(a[0]) && canW(a[0]));
   fab.classList.toggle('has',canAdd);
 }
 let openKind='';
@@ -241,7 +251,7 @@ function openSheet(kind){
     h+='</div>';
   }else if(kind==='add'){
     h+='<h3>چه چیزی ثبت می‌کنید؟</h3><div class="ntacts">';
-    ACTS.filter(a=>vis(a[0]) && canW(a[0])).forEach(a=>{ h+=`<button type="button" class="ntac ${a[5]}" data-n="${a[0]}" data-b="${a[1]}"><span class="ic">${svg(a[4])}</span><b>${a[2]}</b><span>${a[3]}</span></button>`; });
+    curActs().filter(a=>vis(a[0]) && canW(a[0])).forEach(a=>{ h+=`<button type="button" class="ntac ${a[5]}" data-n="${a[0]}" data-b="${a[1]}"><span class="ic">${svg(a[4])}</span><b>${a[2]}</b><span>${a[3]}</span></button>`; });
     h+='</div>';
   }else{
     h+='<h3>زبانه‌های دیگر</h3><div class="ntmore">';
