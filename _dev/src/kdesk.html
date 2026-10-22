@@ -7,24 +7,27 @@
 <title>میز خرید</title>
 <style>
 /*KH_COMMON_CSS*/
-.dk{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-@media(min-width:720px){.dk{grid-template-columns:repeat(3,1fr)}}
-.dc{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-height:104px;padding:12px 14px;border:1px solid var(--rule);border-radius:16px;background:#fff;text-align:start;font:inherit;color:inherit}
-.dc .n{font-size:1.9rem;font-weight:900;line-height:1.1}
-.dc b{font-size:.92rem}
-.dc span{font-size:.78rem;color:var(--dim)}
-.dc.bad{border-color:#E4A9A2;background:var(--badbg)}.dc.bad .n{color:var(--bad)}
+.dk{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+@media(min-width:720px){.dk{grid-template-columns:repeat(3,1fr)} #alerts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px} #alerts .alr{margin-top:0}}
+@media(min-width:760px){.dk{grid-template-columns:repeat(5,1fr)}}
+.dc{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:112px;padding:14px 16px;border:1px solid var(--rule);border-radius:18px;background:#fff;text-align:start;font:inherit;color:inherit}
+.dc .n{font-size:2rem;font-weight:900;line-height:1.15;margin-bottom:4px}
+.dc .n small{font-size:.9rem;font-weight:800;margin-inline-start:4px}
+.dc b{font-size:.95rem;font-weight:900}
+.dc span.s{font-size:.8rem;color:var(--dim)}
+.dc.bad{border-color:#EDB9B2;background:var(--badbg)}.dc.bad .n{color:var(--bad)}
 .dc.wa{border-color:#EAC98F;background:var(--wabg)}.dc.wa .n{color:var(--wa)}
 .dc.ok .n{color:var(--ok)}
-.dc.big{grid-column:1/-1}
-.sec{margin:16px 2px 0;font-size:.84rem;font-weight:800;color:var(--dim)}
-.al{display:flex;gap:10px;align-items:center;padding:12px 14px;margin-top:10px;border-radius:14px;background:var(--badbg);color:var(--bad);font-weight:800;border:1px solid #E4A9A2;width:100%;text-align:start;font-size:.92rem}
-.al.wa{background:var(--wabg);color:var(--wa);border-color:#EAC98F}
+.sec{margin:20px 2px 0;font-size:.92rem;font-weight:900;color:#3D4852}
+.lead{margin:10px 2px 0;font-size:.9rem;font-weight:700;color:var(--dim)}
+#alerts{margin-top:4px}
+@media(min-width:900px){.mob{display:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
-<header><div class="tt"><h1>میز خرید</h1><p class="sub" id="hSub">کارهای باز بخش خرید در یک نگاه</p></div></header>
+<header><div class="tt"><h1>میز خرید</h1><p class="sub">کارهای باز بخش خرید در یک نگاه</p></div></header>
+<p class="lead mob">کارهای باز بخش خرید در یک نگاه</p>
 <div id="alerts"></div>
 <div class="sec">لیست خرید</div>
 <div class="dk" id="dList"></div>
@@ -32,12 +35,16 @@
 <div class="dk" id="dPre"></div>
 <div class="sec">فاکتور خرید</div>
 <div class="dk" id="dFac"></div>
+<div id="dEmpty"></div>
 </div>
 <script>
 /*KH_COMMON_JS*/
 const arr=k=>{ const a=LS(k,[]); return Array.isArray(a)?a:[]; };
 const obj=k=>{ const o=LS(k,{}); return (o&&typeof o==='object'&&!Array.isArray(o))?o:{}; };
-function card(o){ return `<button type="button" class="dc ${o.c||''}${o.big?' big':''}" data-go="${esc(o.tab)}|${esc(o.key||'')}|${esc(o.pane||'')}|${esc(o.bf||'')}"><span class="n">${o.n}</span><b>${esc(o.t)}</b>${o.s?`<span>${esc(o.s)}</span>`:''}</button>`; }
+/* هر کارت یک فرم دارد (دسترسی جدا): کارت فرمی که این سیستم نمی‌بیند ساخته نمی‌شود */
+const goAttr=o=>`data-go="${esc(o.tab)}|${esc(o.key||'')}|${esc(o.pane||'')}|${esc(o.bf||'')}"`;
+function card(o){ if(!canSeeT(o.form||o.tab)) return ''; return `<button type="button" class="dc ${o.c||''}" ${goAttr(o)}><span class="n">${o.n}${o.u?`<small>${esc(o.u)}</small>`:''}</span><b>${esc(o.t)}</b>${o.s?`<span class="s">${esc(o.s)}</span>`:''}</button>`; }
+function alr(o){ if(!canSeeT(o.form||o.tab)) return ''; return `<button type="button" class="alr${o.wa?' wa':''}" ${goAttr(o)}>${ico(o.ic,24)}<span class="tx">${esc(o.t)}</span>${ico('chev',20)}</button>`; }
 function stats(){
   const B=arr('nt_kbox_v1').filter(x=>x&&x.id&&!x.gone), Bo=B.filter(x=>!x.st), imp=Bo.filter(x=>x.imp), teh=B.filter(x=>x.st==='teh');
   const seen=B.reduce((a,x)=>x.seen&&x.seen>a?x.seen:a,''), boxAge=seen?daysSince(seen):null;
@@ -49,34 +56,34 @@ function stats(){
   const F=arr('nt_factor_v1').filter(r=>r&&r.id), miss=F.filter(r=>r.cat!=='sookht'&&!String(r.title||'').trim()), sp=F.filter(r=>r.cat==='kala'&&!r.sp), dl=F.filter(r=>r.cat==='kala'&&r.sp&&!r.deliver), un=F.filter(r=>!r.rep), debt=F.filter(r=>r.kind==='اعتباری'&&!r.paid);
   return {dl,B,Bo,imp,teh,boxAge,W,wN,wD,last,ds,gap,left,S,Sn,P,Pw,Pd,Po,F,miss,sp,un,debt,debtSum:debt.reduce((a,r)=>a+(+r.amt||0),0)}; }
 function draw(){ const s=stats(), L='لیست خرید', PF='پیش‌فاکتور', FC='فاکتور خرید', AP=canAppr();
-  const al=[];
-  if(AP && s.Pw.length) al.push(`<button type="button" class="al" data-go="${PF}|ntp_pane|open|">✋ ${fa(s.Pw.length)} پیش‌فاکتور منتظر تایید شماست</button>`);
-  if(s.ds==null||s.left<=0) al.push(`<button type="button" class="al" data-go="${L}|ntk_pane|water|">💧 نوبت آوردن آب شیرین است${s.ds!=null?' ('+fa(s.ds)+' روز از آخرین بار)':''}</button>`);
-  if(s.Sn.length) al.push(`<button type="button" class="al" data-go="${L}|ntk_pane|svc|">${fa(s.Sn.length)} خدمات بدون شماره ثبت</button>`);
-  if(s.B.length && s.boxAge!=null && s.boxAge>7) al.push(`<button type="button" class="al wa" data-go="${L}|ntk_pane|box|">فایل کارتابل سندپرداز ${fa(s.boxAge)} روز است تازه نشده؛ خروجی تازه بارگذاری کنید</button>`);
-  $('alerts').innerHTML=al.join('');
+  const BOX='باکس سندپرداز', WK='خرید هفتگی', WT='آب شیرین', SV='خدمات تدارکات', K='ntk_pane';
+  $('alerts').innerHTML=[
+    AP&&s.Pw.length?alr({tab:PF,key:'ntp_pane',pane:'open',ic:'hand',t:fa(s.Pw.length)+' پیش‌فاکتور منتظر تایید شماست'}):'',
+    s.ds==null||s.left<=0?alr({tab:L,form:WT,key:K,pane:'water',ic:'drop',t:'نوبت آوردن آب شیرین است'}):'',
+    s.Sn.length?alr({tab:L,form:SV,key:K,pane:'svc',ic:'toolbox',t:fa(s.Sn.length)+' خدمات بدون شماره ثبت'}):'',
+    s.B.length&&s.boxAge!=null&&s.boxAge>7?alr({tab:L,form:BOX,key:K,pane:'box',ic:'archive',wa:1,t:'فایل باکس سندپرداز '+fa(s.boxAge)+' روز است تازه نشده'}):''
+  ].join('');
   $('dList').innerHTML=[
-    card({tab:L,key:'ntk_pane',pane:'box',n:fa(s.imp.length),t:'ضروری‌های باز',s:`از ${fa(s.Bo.length)} قلم باز کارتابل`,c:s.imp.length?'wa':'',bf:'imp'}),
-    card({tab:L,key:'ntk_pane',pane:'box',n:fa(s.teh.length),t:'با مامور تهران',s:'خرید در تهران',bf:'teh'}),
-    card({tab:L,key:'ntk_pane',pane:'week',n:s.W?fa(s.wD)+'/'+fa(s.wN):'—',t:'خرید هفتگی',s:s.W?s.W.title:'لیست باز نیست',c:s.W&&s.wD<s.wN?'':'ok'}),
-    card({tab:L,key:'ntk_pane',pane:'water',n:s.ds==null?'—':fa(s.ds),t:'آب شیرین',s:s.ds==null?'هنوز ثبت نشده':(s.left<=0?'نوبت آوردن است':(s.left===1?'فردا نوبت است':fa(s.left)+' روز دیگر')),c:s.ds==null||s.left<=0?'bad':(s.left===1?'wa':'ok')}),
-    card({tab:L,key:'ntk_pane',pane:'svc',n:fa(s.S.length),t:'خدمات باز',s:s.Sn.length?fa(s.Sn.length)+' بدون شماره':'همه شماره دارند',c:s.Sn.length?'bad':''})
+    card({tab:L,form:BOX,key:K,pane:'box',bf:'imp',n:fa(s.imp.length),t:'ضروری‌های باز',s:`از ${fa(s.Bo.length)} قلم باز کارتابل`,c:s.imp.length?'bad':''}),
+    card({tab:L,form:BOX,key:K,pane:'box',bf:'teh',n:fa(s.teh.length),t:'با مأمور تهران',s:'خرید در تهران'}),
+    card({tab:L,form:WK,key:K,pane:'week',n:s.W?fa(s.wD)+'/'+fa(s.wN):'—',t:'خرید هفتگی',s:s.W?fa(s.W.title):'لیست باز نیست',c:s.W&&s.wD<s.wN?'wa':(s.W?'ok':'')}),
+    card({tab:L,form:WT,key:K,pane:'water',n:s.ds==null?'—':fa(s.ds),u:s.ds==null?'':'روز',t:'آب شیرین',s:s.ds==null?'هنوز ثبت نشده':(s.left<=0?'از آخرین نوبت؛ نوبت آوردن است':(s.left===1?'فردا نوبت است':fa(s.left)+' روز دیگر')),c:s.ds==null||s.left<=0?'bad':(s.left===1?'wa':'ok')}),
+    card({tab:L,form:SV,key:K,pane:'svc',n:fa(s.S.length),t:'خدمات باز',s:s.Sn.length?fa(s.Sn.length)+' بدون شماره ثبت':'همه شماره دارند',c:s.Sn.length?'bad':''})
   ].join('');
   $('dPre').innerHTML=[
-    card({tab:PF,key:'ntp_pane',pane:'open',n:fa(s.Pw.length),t:'منتظر تایید مدیر',s:AP?'تصمیم با شما':'',c:s.Pw.length?(AP?'bad':'wa'):''}),
-    card({tab:PF,key:'ntp_pane',pane:'open',n:fa(s.Pd.length),t:'در حال استعلام',s:'هنوز فرستاده نشده'}),
-    card({tab:PF,key:'ntp_pane',pane:'open',n:fa(s.Po.length),t:'تایید شده، خرید نشده',s:'به لیست هفتگی بیفزایید',c:s.Po.length?'ok':''})
+    card({tab:PF,key:'ntp_pane',pane:'open',n:fa(s.Pw.length),t:'منتظر تایید',s:AP?'تصمیم با شما':'منتظر مدیر',c:s.Pw.length?(AP?'bad':'wa'):''}),
+    card({tab:PF,key:'ntp_pane',pane:'open',n:fa(s.Pd.length),t:'در حال استعلام',s:'هنوز فرستاده نشده',c:s.Pd.length?'wa':''}),
+    card({tab:PF,key:'ntp_pane',pane:'open',n:fa(s.Po.length),t:'تایید شده',s:'تایید شده، خرید نشده',c:s.Po.length?'ok':''})
   ].join('');
   $('dFac').innerHTML=[
-    card({tab:FC,key:'ntf_pane',pane:'book',bf:'miss',n:fa(s.miss.length),t:'ناقص (بدون شرح)',c:s.miss.length?'bad':''}),
-    card({tab:FC,key:'ntf_pane',pane:'sp',n:fa(s.sp.length),t:'منتظر ثبت در سندپرداز',c:s.sp.length?'wa':''}),
+    card({tab:FC,key:'ntf_pane',pane:'book',bf:'miss',n:fa(s.miss.length),t:'ناقص',s:'بدون شرح',c:s.miss.length?'bad':''}),
+    card({tab:FC,key:'ntf_pane',pane:'sp',n:fa(s.sp.length),t:'منتظر سندپرداز',s:'ثبت نشده در سندپرداز',c:s.sp.length?'wa':''}),
     card({tab:FC,key:'ntf_pane',pane:'sp',n:fa(s.dl.length),t:'تحویل مالی نشده',s:'ثبت سندپرداز شده',c:s.dl.length?'wa':''}),
-    card({tab:FC,key:'ntf_pane',pane:'rep',n:fa(s.un.length),t:'در گزارش مالی نیامده'}),
-    card({tab:FC,key:'ntf_pane',pane:'book',bf:'debt',n:fa(s.debt.length),t:'بدهی پرداخت‌نشده',s:s.debt.length?faN(s.debtSum)+' ریال':'',c:s.debt.length?'wa':''})
+    card({tab:FC,key:'ntf_pane',pane:'rep',n:fa(s.un.length),t:'در گزارش مالی نیامده',c:s.un.length?'wa':''}),
+    card({tab:FC,key:'ntf_pane',pane:'book',bf:'debt',n:fa(s.debt.length),t:'بدهی پرداخت‌نشده',s:s.debt.length?faN(s.debtSum)+' ریال':'',c:s.debt.length?'bad':''})
   ].join('');
-  /* کارت زبانه‌ای که این سیستم نمی‌بیند پنهان شود */
-  document.querySelectorAll('[data-go]').forEach(b=>{ const t=b.dataset.go.split('|')[0]; if(!canSeeT(t)) b.hidden=true; });
-  [['dList',L],['dPre',PF],['dFac',FC]].forEach(([id,t])=>{ const v=canSeeT(t); $(id).hidden=!v; $(id).previousElementSibling.hidden=!v; });
+  let any=false; ['dList','dPre','dFac'].forEach(id=>{ const v=!!$(id).children.length; $(id).hidden=!v; $(id).previousElementSibling.hidden=!v; any=any||v; });
+  $('dEmpty').innerHTML=any?'':emptyState('clipck','کاری برای نمایش نیست','دسترسی این سیستم به فرم‌های بخش خرید را مدیر تنظیم می‌کند.');
 }
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-go]'); if(!b) return; const [tab,key,pane,bf]=b.dataset.go.split('|');
   if(bf) lss(key==='ntf_pane'?'ntf_bf':'ntk_bf',bf); goTab(tab,key,pane); });

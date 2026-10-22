@@ -55,7 +55,7 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
     const link=await p.inputValue('#syLink'), pin=(await p.locator('#syPinOut').innerText()).replace(/\D/g,'');
     return {link,pin,code:link.split('#join=')[1]};
   }
-  const setAcc=(tabName,v)=>async p=>{ const i=await p.evaluate(n=>DOCS.findIndex(d=>d.name===n),tabName); await p.selectOption(`#syAclList select[data-tab="${i}"]`,v); };
+  const setAcc=(tabName,v)=>async p=>{ await p.selectOption(`#syAclList select[data-n="${tabName}"]`,v); };
   const pinVis=p=>p.evaluate(()=>{ const e=document.getElementById('ntPin'); return !!(e && !e.hidden); });
   const pinType=async(p,v0,v1,v2)=>{ for(const [id,v] of [['#pin0',v0],['#pin1',v1],['#pin2',v2]]) if(v!==undefined && await p.locator(id).count()) await p.fill(id,v); await p.click('#pinGo'); await sleep(400); };
   const unlock=async(p,v)=>{ if(await pinVis(p)) await pinType(p,v); };

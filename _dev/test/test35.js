@@ -55,7 +55,7 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
     const link=await p.inputValue('#syLink'), pin=(await p.locator('#syPinOut').innerText()).replace(/\D/g,'');
     return {link,pin,code:link.split('#join=')[1]};
   }
-  const setAcc=(tabName,v)=>async p=>{ const i=await p.evaluate(n=>DOCS.findIndex(d=>d.name===n),tabName); await p.selectOption(`#syAclList select[data-tab="${i}"]`,v); };
+  const setAcc=(tabName,v)=>async p=>{ await p.selectOption(`#syAclList select[data-n="${tabName}"]`,v); };
   const runBot=async()=>{ process.env.NT_API=`http://localhost:${P2}`; process.env.NT_DATA_REPO='javad23195-lang/nt'; process.env.NT_DATA_TOKEN=S.goodToken;
     const m=await import(require('path').join(__dirname,'..','..','bot','backup.mjs')+'?t='+Date.now()); const log=[]; const r=await m.backup(x=>log.push(x)); return Object.assign(r,{log}); };
   const bks=()=>Object.keys(S.tags).filter(n=>n.startsWith('bk-')).sort();

@@ -43,9 +43,19 @@ const TABKEYS={
   'تردد و اضافه‌کار':['nt_staff_v1','nt_ezafe_v1','nt_tarad_v1'],
   'فاکتور خرید':['nt_factor_v1','nt_factor_lex_v1','nt_factor_learn_v1','nt_factor_cfg_v1','nt_factor_rep_v1'],
   'میز خرید':[],
-  'لیست خرید':['nt_kbox_v1','nt_kweek_v1','nt_kwater_v1','nt_ksvc_v1'],
+  'لیست خرید':[],
+  'باکس سندپرداز':['nt_kbox_v1'],
+  'خرید هفتگی':['nt_kweek_v1'],
+  'آب شیرین':['nt_kwater_v1'],
+  'خدمات تدارکات':['nt_ksvc_v1'],
   'پیش‌فاکتور':['nt_kpre_v1','nt_kpre_files_v1']
 };
+/* «لیست خرید» یک زبانه است با چهار فرم که هر کدام دسترسی جدا دارد. کاربر قدیمی (فقط «لیست خرید» تنظیم شده): همان دسترسی برای هر چهار فرم */
+const SUBF={'لیست خرید':['باکس سندپرداز','خرید هفتگی','آب شیرین','خدمات تدارکات']};
+const PARENT={}; Object.keys(SUBF).forEach(p=>SUBF[p].forEach(s=>{ PARENT[s]=p; }));
+/* فرم‌های بخش خرید (برای دسترسی و «فقط یک فرم») */
+const KHFORMS=['باکس سندپرداز','خرید هفتگی','آب شیرین','خدمات تدارکات','پیش‌فاکتور','فاکتور خرید'];
+const FLABEL={'خدمات تدارکات':'خدمات (تدارکات)'};
 /* پیش‌فرض دسترسی محدود: واحد استخراج */
 const PRESET={'توقف شیفت':'w','دفترچه قرائت':'w'};
 /* راننده (کاربر یک دستگاه): هیچ زبانه‌ای نمی‌بیند؛ فقط صفحه دستگاه خودش (qr.js) — قرائت، توقف، مشکل */
@@ -75,14 +85,18 @@ function stSet(p){ lsSet(STK,Object.assign(st(),p)); }
 const mode=()=>cfg.mode||'';
 const acl=()=>(cfg.acl && typeof cfg.acl==='object')?cfg.acl:null;
 /* «مدیریت» اگر جدا تنظیم نشده، همان دسترسی «امروز» را دارد */
-const tabAcc=name=>{ const a=acl(); if(!a) return 'w'; if(name==='مدیریت' && !(name in a)) return a['امروز']||'h'; return a[name]||'h'; };
+const RANK={h:0,r:1,w:2};
+const tabAcc=name=>{ const a=acl(); if(!a) return 'w'; if(name==='مدیریت' && !(name in a)) return a['امروز']||'h';
+  if(SUBF[name] && SUBF[name].some(x=>x in a)) return SUBF[name].map(tabAcc).reduce((x,y)=>RANK[y]>RANK[x]?y:x,'h');
+  if(PARENT[name] && !(name in a)) return SUBF[PARENT[name]].some(x=>x in a)?'h':(a[PARENT[name]]||'h');
+  return a[name]||'h'; };
 /** این سیستم اجازه دارد این کلید را بنویسد؟ */
 function canWrite(k){
   if(mode()!=='w') return false;
   if(k===UKEY) return isAdmin();
   if(k===SKEY || k===LKEY) return true;
   const a=acl(); if(!a) return true;
-  return Object.keys(TABKEYS).some(t=>a[t]==='w' && TABKEYS[t].indexOf(k)>-1);
+  return Object.keys(TABKEYS).some(t=>tabAcc(t)==='w' && TABKEYS[t].indexOf(k)>-1);
 }
 const fullWriter=()=>mode()==='w' && !acl();
 /** سیستم مدیر: با کلید GitHub تنظیم شده، نه با کد اتصال */
@@ -850,6 +864,17 @@ function viewUsers(){
   on('syURef',async()=>{ lock(true); await sync({manual:true}); viewUsers(); });
   on('syBack',viewMain);
 }
+/** ردیف‌های دسترسی: زبانه‌های نت، بعد «بخش خرید» با هر فرم جدا (چهار فرم «لیست خرید» جدا) */
+function aclRows(a){ const KHT=['میز خرید','لیست خرید','پیش‌فاکتور','فاکتور خرید'];
+  const val=n=>a[n]||(n==='مدیریت'&&a['امروز'])||(PARENT[n]&&a[PARENT[n]])||'h';
+  const row=(n,lab,sub)=>`<div class="syrow"${sub?' style="padding-inline-start:14px"':''}><span>${esc(lab||n)}</span><select data-n="${esc(n)}" aria-label="دسترسی ${esc(lab||n)}">
+    ${[['w','ثبت'],['r','فقط مشاهده'],['h','پنهان']].map(o=>`<option value="${o[0]}" ${val(n)===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></div>`;
+  let h=DOCS.filter(d=>KHT.indexOf(d.name)<0).map(d=>row(d.name)).join('');
+  const kh=[]; if(DOCS.some(d=>d.name==='میز خرید')) kh.push(row('میز خرید'));
+  SUBF['لیست خرید'].forEach(n=>kh.push(row(n,'لیست خرید ← '+(FLABEL[n]||n),1)));
+  ['پیش‌فاکتور','فاکتور خرید'].forEach(n=>{ if(DOCS.some(d=>d.name===n)) kh.push(row(n)); });
+  if(kh.length) h+=`<div style="margin:12px 0 4px;font-weight:800;font-size:.9rem">بخش خرید (هر فرم جدا)</div>`+kh.join('');
+  return h; }
 function viewUserEdit(id){
   const U=usersGet()||{}, u=id?U[id]:null, cur=u&&isObj(u.acl)?u.acl:null, lim=u?!!cur:true, a=cur||PRESET;
   dlg(u?'دسترسی کاربر':'کاربر جدید',`
@@ -866,8 +891,7 @@ function viewUserEdit(id){
       <label class="chk"><input type="radio" name="syAcc" value="full" ${lim?'':'checked'}>کامل — همه زبانه‌ها (ثبت در همه)</label>
       <div style="margin:10px 0 4px"><small style="display:block;margin-bottom:4px">نمونه آماده (همه زبانه‌ها را یک‌جا تنظیم می‌کند):</small><button type="button" id="syUBuy" style="display:block;width:100%;margin:0">مأمور خرید — فقط بخش خرید</button></div>
       <div id="syAclList" ${lim?'':'hidden'}>
-        ${DOCS.map((d,i)=>`<div class="syrow"><span>${esc(d.name)}</span><select data-tab="${i}" aria-label="دسترسی ${esc(d.name)}">
-          ${[['w','ثبت'],['r','فقط مشاهده'],['h','پنهان']].map(o=>`<option value="${o[0]}" ${(a[d.name]||(d.name==='مدیریت'&&a['امروز'])||'h')===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></div>`).join('')}
+        ${aclRows(a)}
       </div></div>
     <div class="sycard"><h3>تایید پیش‌فاکتور</h3>
       <label class="chk"><input type="checkbox" id="syUAppr" ${u&&u.appr?'checked':''}>این کاربر پیش‌فاکتورهای بخش خرید را تایید یا رد می‌کند (مدیر)</label>
@@ -880,7 +904,7 @@ function viewUserEdit(id){
   document.querySelectorAll('input[name="syAcc"]').forEach(r=>r.addEventListener('change',()=>{ $('syAclList').hidden=document.querySelector('input[name="syAcc"]:checked').value!=='lim'; }));
   /* مأمور خرید: فقط «فاکتور خرید» = ثبت؛ بقیه پنهان → هنگام باز شدن فقط بخش خرید (ws.js) */
   on('syUBuy',()=>{ const r=document.querySelector('input[name="syAcc"][value="lim"]'); if(r) r.checked=true; $('syAclList').hidden=false;
-    document.querySelectorAll('#syAclList select').forEach(x=>{ x.value=['میز خرید','لیست خرید','پیش‌فاکتور','فاکتور خرید'].includes(DOCS[+x.dataset.tab].name)?'w':'h'; }); msg('بخش خرید (میز خرید، لیست خرید، پیش‌فاکتور، فاکتور خرید) = ثبت؛ بقیه پنهان. پایین صفحه «ساخت کاربر» یا «ذخیره» را بزنید.'); const t=[...document.querySelectorAll('#syAclList select')].find(x=>DOCS[+x.dataset.tab].name==='فاکتور خرید'); if(t) try{ t.scrollIntoView({block:'center'}); }catch(e){} });
+    document.querySelectorAll('#syAclList select').forEach(x=>{ x.value=(x.dataset.n==='میز خرید'||KHFORMS.includes(x.dataset.n))?'w':'h'; }); msg('همه فرم‌های بخش خرید = ثبت؛ بقیه پنهان. هر فرمی را که لازم نیست «پنهان» کنید. پایین صفحه «ساخت کاربر» یا «ذخیره» را بزنید.'); const t=[...document.querySelectorAll('#syAclList select')].find(x=>x.dataset.n==='میز خرید'); if(t) try{ t.scrollIntoView({block:'center'}); }catch(e){} });
   const dvSync=()=>{ $('syAccCard').hidden=!!$('syUDev').value; $('syDeptCard').hidden=!!$('syUDev').value; }; $('syUDev').addEventListener('change',dvSync); dvSync();
   on('syUSave',()=>{
     const name=$('syUName').value.trim().replace(/\s+/g,' ');
@@ -891,7 +915,8 @@ function viewUserEdit(id){
     if(dev) ac=Object.assign({},DRIVER);
     else if(document.querySelector('input[name="syAcc"]:checked').value==='lim'){
       ac={}; let vis=0;
-      document.querySelectorAll('#syAclList select').forEach(s=>{ ac[DOCS[+s.dataset.tab].name]=s.value; if(s.value!=='h') vis++; });
+      document.querySelectorAll('#syAclList select').forEach(s=>{ ac[s.dataset.n]=s.value; if(s.value!=='h') vis++; });
+      ac['لیست خرید']=SUBF['لیست خرید'].map(n=>ac[n]||'h').reduce((x,y)=>RANK[y]>RANK[x]?y:x,'h');
       if(!vis){ msg('حداقل یک زبانه باید «ثبت» یا «فقط مشاهده» باشد',true); return; }
     }
     const nid=id || ('u'+Date.now().toString(36)+Math.random().toString(36).slice(2,6));
@@ -1441,7 +1466,7 @@ function touch(keys){
   try{ frames.forEach((f,i)=>{ if(!f || !f.dataset.loaded) return; const m=keysOfFrame(i); if((keys||[]).some(k=>m[k])) reloadFrame(i,true); }); }catch(e){}
 }
 function myName(){ try{ const u=cfg.uid && usersGet(); return (u && u[cfg.uid] && u[cfg.uid].name)||''; }catch(e){ return ''; } }
-window.ntSync={T,lockNow,canLock:()=>pinNeeded(),get cfg(){ return cfg; },st,sync,collect,hashOf,mergeAll,baseGet,outgoing,usersGet,seenGet,canSee:n=>tabAcc(n)!=='h',
+window.ntSync={khForms:()=>KHFORMS.filter(n=>tabAcc(n)!=='h'),formLabel:n=>FLABEL[n]||n,T,lockNow,canLock:()=>pinNeeded(),get cfg(){ return cfg; },st,sync,collect,hashOf,mergeAll,baseGet,outgoing,usersGet,seenGet,canSee:n=>tabAcc(n)!=='h',
   canWriteTab:n=>mode()!=='v' && tabAcc(n)==='w',touch,myName,myDevs,myDept:()=>(cfg.uid && mode()==='w' && typeof cfg.dept==='string')?cfg.dept:'',canApprove:()=>isAdmin() || (!!cfg.uid && mode()==='w' && !!cfg.appr),get pinLocked(){ return pinLocked; }};
 init();
 })();

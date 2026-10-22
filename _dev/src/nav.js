@@ -33,11 +33,15 @@ const MAIN=['امروز','توقف شیفت','دفترچه قرائت','مدیر
 const KMAIN=['میز خرید','لیست خرید','پیش‌فاکتور','فاکتور خرید'];
 const KH=()=>!!(window.ntWs && ntWs.cur==='kh');
 const KACTS=[
-  ['فاکتور خرید','goAdd','ثبت فاکتور','فاکتور تازه، همین‌جا','rcpt','y'],
-  ['لیست خرید','goImp','ضروری‌ها','لیست باکس سندپرداز','plan','b'],
-  ['پیش‌فاکتور','goNew','پیش‌فاکتور تازه','استعلام قیمت','doc','g'],
-  ['لیست خرید','goWater','آب شیرین','ثبت آوردن آب','fuel','r']
-];   /* مثل طرح تازه؛ بقیه در منوی ☰ سربرگ (mhead.js) */
+  ['فاکتور خرید','goAdd','ثبت فاکتور','فاکتور تازه، همین‌جا','rcpt','y','فاکتور خرید'],
+  ['لیست خرید','goImp','ضروری‌ها','لیست باکس سندپرداز','star','b','باکس سندپرداز'],
+  ['پیش‌فاکتور','goNew','پیش‌فاکتور تازه','استعلام قیمت','doc','g','پیش‌فاکتور'],
+  ['لیست خرید','goWater','آب شیرین','ثبت آوردن آب','drop','r','آب شیرین']
+];   /* مثل طرح تازه؛ [۶] = فرمی که اجازه ثبت آن لازم است؛ بقیه در منوی ☰ سربرگ (mhead.js) */
+const KI={rcpt:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3"/>',star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+  doc:'<path d="M6 3h9l4 4v14H6zM14 3v5h5M12 11v7M14 12.5c-.5-.7-1.2-1-2-1-1.1 0-2 .6-2 1.5s.9 1.3 2 1.5 2 .6 2 1.5-.9 1.5-2 1.5c-.8 0-1.5-.3-2-1"/>',drop:'<path d="M12 3s6 6.5 6 11a6 6 0 01-12 0c0-4.5 6-11 6-11z"/>'};
+const kSvg=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${KI[k]||KI.doc}</svg>`;
+const actOk=a=>vis(a[0]) && canW(a[6]||a[0]);
 /* کارهای دکمه «+»: [نام زبانه، دکمه افزودن داخل آن، عنوان، توضیح، آیکون، رنگ] */
 const ACTS=[
   ['توقف شیفت','bNew','ثبت توقف','دستگاه ایستاد','stop','y'],
@@ -107,6 +111,13 @@ body.ntnav:not(.ntlocked):not(.ntdriver) #ntFab.has{display:grid}
 .ntmr svg{width:26px;height:26px;color:#1B2430}
 .ntmr .b{margin-inline-start:auto;min-width:22px;height:22px;border-radius:11px;background:#C0392B;color:#fff;font-size:.72rem;display:none;align-items:center;justify-content:center;padding:0 6px}
 .ntmr .b.show{display:flex}
+.ntkl{display:flex;flex-direction:column;gap:2px}
+.ntkr{display:flex;align-items:center;gap:14px;min-height:58px;padding:6px 4px;border:0;background:none;font:inherit;color:#17212B;text-align:start;cursor:pointer;border-radius:12px}
+.ntkr .ic{width:44px;height:44px;border-radius:12px;background:#F1F4F7;display:grid;place-items:center;color:#1B2430}
+.ntkr .ic svg,.ntkr .cv{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ntkr b{flex:1;font-size:1rem;font-weight:800}
+.ntkr .cv{color:#51606E;width:20px;height:20px}
+body.ntkh1 #ntNav,body.ntkh1 #ntFab{display:none!important}
 @media (prefers-reduced-motion:no-preference){ #ntNavSh.on{animation:ntUp .2s ease-out} @keyframes ntUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}} }
 }`;
 const st=document.createElement('style'); st.textContent=CSS; document.head.appendChild(st);
@@ -215,7 +226,7 @@ function others(){ const b=barTabs(); return rest0().filter(n=>b.indexOf(n)<0); 
 /* کاربر محدود (بدون «امروز» و «برنامه روزانه»): نوار پایین فقط دکمه وسط؛ همه زبانه‌ها یک بار در برگه همان دکمه */
 const solo=()=>!KH() && !vis('امروز') && !vis('برنامه روزانه');
 const curActs=()=>KH()?KACTS:ACTS;
-const soloActs=()=>curActs().filter(a=>vis(a[0]) && canW(a[0]));
+const soloActs=()=>curActs().filter(actOk);
 const soloTabs=()=>{ const A=soloActs().map(a=>a[0]); return DOCS.map(d=>d.name).filter(n=>vis(n) && A.indexOf(n)<0); };
 function paint(){
   if(solo()){ navIn.innerHTML=''; if(!document.body.classList.contains('ntsolo')) document.body.classList.add('ntsolo');   /* بدون تغییر بی‌جا: body زیر نظر است */ fab.classList.add('has');
@@ -234,7 +245,7 @@ function paint(){
     h+=`<button type="button" class="ntnb${more.indexOf(act)>-1?' on':''}" data-more="1">${svg('more')}بیشتر<span class="b${mb?' show':''}">${mb?(mb>99?'۹۹+':faN(mb)):''}</span></button>`; }
   navIn.innerHTML=h;
   requestAnimationFrame(()=>{ moveBub(); moveInd(); });
-  const canAdd=curActs().some(a=>vis(a[0]) && canW(a[0]));
+  const canAdd=curActs().some(actOk);
   fab.classList.toggle('has',canAdd);
 }
 let openKind='';
@@ -248,6 +259,11 @@ function openSheet(kind){
       h+='</div>'; }
     h+=`<h3${A.length?' style="margin-top:14px"':''}>${A.length?'بخش‌های دیگر':'بخش‌ها'}</h3><div class="ntmore">`;
     T.forEach(n=>{ h+=`<button type="button" class="ntmr${act===n?' cur':''}" data-n="${n}">${svg(TABICON[n])}${n}${bd(n)}</button>`; });
+    h+='</div>';
+  }else if(kind==='add' && KH()){
+    /* بخش خرید (طرح تازه): فهرست با آیکن و فلش */
+    h+='<div class="ntkl">';
+    curActs().filter(actOk).forEach(a=>{ h+=`<button type="button" class="ntkr" data-n="${a[0]}" data-b="${a[1]}"><span class="ic">${kSvg(a[4])}</span><b>${a[2]}</b><svg class="cv" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>`; });
     h+='</div>';
   }else if(kind==='add'){
     h+='<h3>چه چیزی ثبت می‌کنید؟</h3><div class="ntacts">';

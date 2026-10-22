@@ -19,9 +19,15 @@ header{padding:14px 0 4px;padding-top:calc(14px + env(safe-area-inset-top));disp
 header .tt{flex:1;min-width:0}
 h1{margin:0;font-size:1.3rem;font-weight:800;line-height:1.4}
 .sub{margin:0;font-size:.85rem;color:var(--dim)}
-.meter{display:flex;gap:8px}
-.meter div{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:4px 12px;text-align:center}
-.meter b{display:block;font-size:1.05rem;font-variant-numeric:tabular-nums}.meter span{font-size:.72rem;color:var(--dim)}
+.meter{display:grid;grid-template-columns:1fr 1.8fr;gap:10px;margin-top:10px}
+.meter div{background:var(--card);border:1px solid var(--rule);border-radius:16px;padding:10px 14px;text-align:start}
+.meter b{display:block;font-size:1.35rem;font-weight:900;font-variant-numeric:tabular-nums}.meter span{font-size:.78rem;color:var(--dim)}
+.ico{display:inline-flex;flex:none}.ico svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cbl button.rw{flex-direction:row;align-items:center;gap:10px}
+.cbl button.rw .ico{color:#51606E}
+.cbl button.rw span{flex:1}
+.spc .r1 .amt{flex:none;font-weight:900;white-space:nowrap}
+.spc .r2 .btn{display:inline-flex;align-items:center;gap:6px;min-height:46px}
 .seg{display:flex;gap:3px;padding:4px;margin:10px 0;border-radius:14px;background:#DDE3E9;position:sticky;top:0;z-index:5}
 .seg button{flex:1;min-width:0;min-height:44px;padding:0 2px;border:0;border-radius:10px;background:transparent;font-weight:800;color:var(--dim);font-size:.86rem;white-space:nowrap}
 .seg button[aria-pressed="true"]{background:var(--nv);color:#fff}
@@ -151,14 +157,13 @@ details.more summary{min-height:44px;display:flex;align-items:center;font-weight
 .empty{padding:18px 6px;text-align:center;color:var(--dim);font-size:.9rem}
 body.ro .w-only{display:none!important}
 @media (min-width:760px){ .cats{grid-template-columns:repeat(4,1fr)} }
-@media (max-width:899px){ header .tt{display:none} .meter{flex:1} .meter div{flex:1} }
+@media (max-width:899px){ header .tt{display:none} }
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
   <div class="tt"><h1>فاکتور خرید</h1><p class="sub" id="hSub"></p></div>
-  <div class="meter"><div><b id="mN">۰</b><span>فاکتور امروز</span></div><div><b id="mS">۰</b><span>جمع امروز (ریال)</span></div></div>
 </header>
 <div class="seg" id="seg" role="group" aria-label="بخش">
   <button type="button" data-p="add" aria-pressed="true">ثبت</button>
@@ -170,6 +175,7 @@ body.ro .w-only{display:none!important}
 </div>
 
 <section id="pAdd">
+  <div class="meter" id="mtr"><div><b id="mN">۰</b><span>فاکتور امروز</span></div><div><b id="mS">۰</b><span>جمع امروز (ریال)</span></div></div>
   <div class="card w-only" id="fCard">
     <div class="edbar" id="edBar" hidden>در حال اصلاح یک فاکتور<button type="button" class="btn s" id="edCancel">انصراف</button></div>
     <div class="ph">
@@ -580,7 +586,7 @@ $('bSave').addEventListener('click',async()=>{
   lexAdd(rec); boxLink(rec);
   if(rec.req && rec.title){ const N=learn(); N[norm(rec.title)]=rec.req.item; put(NK,N); }
   const wasEdit=!!old; endEdit(); render();
-  say('fMsg',(wasEdit?'فاکتور اصلاح شد':'فاکتور ثبت شد')+(rec.items&&rec.items.some(i=>i.bx)&&canWT('لیست خرید')?'؛ اقلام در باکس «خریدم» شدند':'')+(miss(rec)?'؛ شرح را بعداً در «دفتر ← ناقص» بنویسید':'')+(rec.req?'، وصل به «'+rec.req.item+'»':''),'ok');
+  say('fMsg',(wasEdit?'فاکتور اصلاح شد':'فاکتور ثبت شد')+(rec.items&&rec.items.some(i=>i.bx)&&canWT('باکس سندپرداز')?'؛ اقلام در باکس «خریدم» شدند':'')+(miss(rec)?'؛ شرح را بعداً در «دفتر ← ناقص» بنویسید':'')+(rec.req?'، وصل به «'+rec.req.item+'»':''),'ok');
   scrollTo(0,0);
 });
 
@@ -704,8 +710,8 @@ async function photosOut(rid){ const x=reps().find(r=>r.id===rid); const L=rowsA
 const spText=r=>[`فاکتور ${r.no?'شماره '+r.no:'بدون شماره'}`,r.sup,r.date,(Array.isArray(r.items)&&r.items.length>1?r.items.map(i=>i.t+(i.q?' — '+i.q+' '+(i.u||''):'')+(i.code?' (کد '+i.code+')':'')).join('\n'):(r.title||'')+(r.qty?' — '+r.qty+' '+(r.unit||''):'')),g3(r.amt||0)+' ریال',r.kind,r.rasid?'رسید انبار '+r.rasid:''].filter(Boolean).join('\n');
 function drawSp(){ const A=rowsAll(), P=sortRows(A.filter(needSp)).reverse(), D=sortRows(A.filter(r=>CAT[r.cat].sp&&r.sp)).sort((a,b)=>(a.deliver?1:0)-(b.deliver?1:0)), rc=sugg('rcv')[0]||'';
   $('spSub').textContent=fa(P.length)+' منتظر';
-  $('spList').innerHTML=P.length?P.map(r=>`<div class="spc"><div class="r1">${r.ph?`<img class="thumb" data-ph="${esc(r.id)}" alt="عکس فاکتور">`:''}<div class="tx"><b>${esc(r.title||'(شرح نوشته نشده)')}</b><span>${r.no?'ف '+esc(fa(r.no))+'، ':''}${esc(r.sup||'')}، ${fa(r.date||dayOf(r))}، ${esc(r.kind||'')}${r.qty?'، '+fa(r.qty)+' '+esc(r.unit||''):''}</span></div><b>${esc(faN(r.amt||0))}</b></div>
-      <div class="r2"><button type="button" class="btn s" data-spc="${esc(r.id)}">کپی</button>${canW?`<input class="in mono" data-spn="${esc(r.id)}" inputmode="numeric" placeholder="ش سند سندپرداز" aria-label="شماره سند سندپرداز"><button type="button" class="btn s g" data-spd="${esc(r.id)}">ثبت شد</button>`:''}</div></div>`).join('')
+  $('spList').innerHTML=P.length?P.map(r=>`<div class="spc"><div class="r1">${r.ph?`<img class="thumb" data-ph="${esc(r.id)}" alt="عکس فاکتور">`:''}<div class="tx"><b>${esc(r.sup||'(بدون تامین کننده)')}</b><span>ش فاکتور ${r.no?esc(fa(r.no)):'بدون شماره'}، ${fa(r.date||dayOf(r))}، ${esc(catName(r.cat))}${r.kind?'، '+esc(r.kind):''}</span><span>${esc(r.title||'(شرح نوشته نشده)')}</span></div><b class="amt">${esc(faN(r.amt||0))}</b></div>
+      <div class="r2"><button type="button" class="btn s" data-spc="${esc(r.id)}">${ico('copy')}کپی</button>${canW?`<input class="in mono" data-spn="${esc(r.id)}" inputmode="numeric" placeholder="ش سند سندپرداز" aria-label="شماره سند سندپرداز"><button type="button" class="btn s g" data-spd="${esc(r.id)}">ثبت شد</button>`:''}</div></div>`).join('')
     :'<div class="empty">فاکتوری منتظر سندپرداز نیست.</div>';
   $('spDoneN').textContent=fa(D.length)+(D.some(r=>!r.deliver)?'، '+fa(D.filter(r=>!r.deliver).length)+' تحویل مالی نشده':'');
   $('spDone').innerHTML=D.length?D.slice(0,40).map(r=>`<div class="it"><div class="tx"><b>${esc(r.title||'')}</b><span>${r.no?'ف '+esc(fa(r.no))+'، ':''}${esc(r.sup||'')}، سندپرداز ${r.sp.n?esc(fa(r.sp.n))+'، ':''}${fa(r.sp.d||'')}</span>
@@ -757,6 +763,8 @@ function render(){ const A=rowsAll(), T=A.filter(r=>dayOf(r)===TODAY);
   if(pane==='book') drawBook(); if(pane==='rep') drawRep(); if(pane==='sp') drawSp(); if(pane==='set') drawSet(); }
 
 $('fUnit').value='عدد';
+const ICO={store:'<path d="M3 10l2-6h14l2 6M4 10h16M5 10v10h14V10M10 20v-5h4v5"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 012-2h10"/>'};
+const ico=k=>`<span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24">${ICO[k]||''}</svg></span>`;
 /* ============ تایپ آزاد با فهرست کشویی (همه خانه‌های .cb) ============
    هر نام تازه بعد از ثبت خودکار به فهرست اضافه می‌شود (lexAdd). نوشتارهای یک نام یکی می‌شوند (canon). */
 const BOXK='nt_kbox_v1';
@@ -773,7 +781,9 @@ function cbDraw(){ const inp=cbFor; if(!inp) return; const src=inp.dataset.cb, a
   const L=toks.length?all.filter(x=>{ const k=x.s||norm(x.v); return toks.every(t=>k.indexOf(t)>-1); }):all;
   if(!L.length){ cbL.hidden=true; return; }
   if(L.length===1 && raw && nkey(L[0].v)===nkey(raw) && src!=='box'){ cbL.hidden=true; return; }
-  cbL.innerHTML=L.slice(0,60).map((x,i)=>`<button type="button" data-i="${i}"><span>${x.imp?'★ ':''}${cbHi(x.v,raw)}</span>${x.sub?`<small>${esc(x.sub)}</small>`:(x.n?`<small>${fa(x.n)} بار</small>`:'')}</button>`).join('');
+  const pp=src==='sup'||src==='rcv';
+  cbL.innerHTML=L.slice(0,60).map((x,i)=>x.sub?`<button type="button" data-i="${i}"><span>${x.imp?'★ ':''}${cbHi(x.v,raw)}</span><small>${esc(x.sub)}</small></button>`
+    :`<button type="button" class="rw" data-i="${i}">${pp?ico(src==='sup'?'store':'user'):''}<span>${cbHi(x.v,raw)}</span>${x.n?`<small>${fa(x.n)} ${src==='sup'?'فاکتور':'بار'}</small>`:''}</button>`).join('');
   cbL._L=L; const P=inp.parentElement; if(getComputedStyle(P).position==='static') P.style.position='relative'; if(cbL.parentElement!==P||cbL.previousElementSibling!==inp) inp.after(cbL);
   cbL.style.top=(inp.offsetTop+inp.offsetHeight)+'px'; cbL.style.left=inp.offsetLeft+'px'; cbL.style.width=inp.offsetWidth+'px'; cbL.hidden=false; }
 function cbPick(x){ const inp=cbFor; if(!inp) return; inp.value=x.v; cbL.hidden=true;
@@ -809,7 +819,7 @@ $('itList').addEventListener('click',e=>{ const b=e.target.closest('[data-lx]');
 $('itList').addEventListener('focusout',e=>{ const l=e.target.closest('.itl'); if(l) setTimeout(()=>{ if(l.isConnected) lineCheck(l); },200); });
 $('itList').addEventListener('input',e=>{ const l=e.target.closest('.itl'); if(l && e.target.hasAttribute('data-t')){ lineCheck(l); checkDup(); if(!$('lnBox').hidden) drawLink(); } });
 /** قلم‌های باکس این فاکتور «خریدم» می‌شوند؛ قلمی که از فاکتور برداشته شد (یا فاکتور حذف شد) دوباره باز می‌شود */
-function boxLink(rec){ if(!canWT('لیست خرید')) return; const B=LS(BOXK,[]); if(!Array.isArray(B)||!B.length) return;
+function boxLink(rec){ if(!canWT('باکس سندپرداز')) return; const B=LS(BOXK,[]); if(!Array.isArray(B)||!B.length) return;
   const now=new Set((rec.items||[]).map(i=>i.bx).filter(Boolean)); let ch=false;
   B.forEach(x=>{ if(!x||!x.id) return;
     if(x.fac && x.fac.id===rec.id && !now.has(x.id)){ if(x.st==='me'){ delete x.st; delete x.stAt; delete x.stBy; } delete x.fac; ch=true; }

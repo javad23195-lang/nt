@@ -58,7 +58,7 @@ const AOA2=[HEAD,row('101','1','1001','کالای نمونه الف','2','عدد
 
   console.log('۳) هفتگی، آب، خدمات');
   await f.click('#seg [data-p="week"]'); await f.fill('#wAdd','قلم یک\nقلم دو\n\nقلم سه'); await f.click('#wAddB'); await sleep(300);
-  await f.click('#wList .wk:first-child input'); await sleep(200);
+  await f.click('#wList .wk:first-child .cb'); await sleep(200);
   let W=await LSg(p,'nt_kweek_v1');
   ok(W.length===1 && W[0].items.length===3 && W[0].items[0].done,'هفتگی: ۳ قلم، یکی خریده شد');
   await f.click('#wNew'); await sleep(300);
@@ -89,7 +89,7 @@ const AOA2=[HEAD,row('101','1','1001','کالای نمونه الف','2','عدد
   ok(P[0].quotes.length===2 && P[0].quotes[0].fid && FL[P[0].quotes[0].fid] && /^image\//.test(FL[P[0].quotes[0].fid].t),'دو پیش‌فاکتور؛ عکس فشرده در اطلاعات همگام');
   const best=await f.evaluate(()=>[...document.querySelectorAll('.cmp td.best')].map(t=>t.innerText.split('\n')[0]));
   ok(best.length===3 && /۹۰۰٬۰۰۰/.test(best[0]) && /۱۰۰٬۰۰۰/.test(best[1]),'مقایسه: ارزان‌ترین هر قلم و جمع سبز — '+best.join(' | '));
-  ok(/ترکیب بهترین/.test(await f.evaluate(()=>document.querySelector('.iq .bd').innerText)) && /۱٬۰۰۰٬۰۰۰/.test(await f.evaluate(()=>document.querySelector('.iq .bd .hint').innerText)),'ترکیب بهترین: ۱٬۰۰۰٬۰۰۰');
+  ok(/ترکیب بهترین/.test(await f.evaluate(()=>document.querySelector('.iq .bd').innerText)) && /۱٬۰۰۰٬۰۰۰/.test(await f.evaluate(()=>document.querySelector('.iq .bd .lg').innerText)),'ترکیب بهترین: ۱٬۰۰۰٬۰۰۰');
   await f.click('[data-fv]'); await sleep(300);
   ok(await f.evaluate(()=>!document.getElementById('fv').hidden),'دیدن پیوست عکس'); await f.click('#fvX');
   await f.click('[data-send]'); await sleep(300);
@@ -138,7 +138,7 @@ const AOA2=[HEAD,row('101','1','1001','کالای نمونه الف','2','عدد
   await go(p,'پیش‌فاکتور'); f=await frameOf(p,'پیش‌فاکتور'); await f.click('.iq > button.h'); await sleep(200);
   ok(await f.evaluate(()=>!!document.querySelector('[data-apok]')),'کاربر با «تایید پیش‌فاکتور»: دکمه تایید دارد');
   await go(p,'لیست خرید'); f=await frameOf(p,'لیست خرید');
-  ok(await f.evaluate(()=>document.body.classList.contains('ro') && getComputedStyle(document.querySelector('#p_water .w-only')||document.querySelector('.w-only')).display==='none'),'لیست خرید فقط‌خواندنی: فرم‌ها پنهان');
+  ok(await f.evaluate(()=>['box','week','water','svc'].every(k=>document.getElementById('p_'+k).classList.contains('ro')) && getComputedStyle(document.querySelector('#p_box .w-only')).display==='none'),'لیست خرید فقط‌خواندنی: فرم‌ها پنهان');
   await go(p,'میز خرید'); f=await frameOf(p,'میز خرید');
   ok(await f.evaluate(()=>document.getElementById('dFac').hidden),'میز: بخش فاکتور برای کسی که «فاکتور خرید» را نمی‌بیند پنهان است');
   await c.close();

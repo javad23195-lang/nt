@@ -25,6 +25,22 @@
 .cmp tr.tot td{font-weight:900;background:#F5F7F9}
 .cmp tr.tot td.best{background:var(--okbg)}
 .cmp .na{color:#9AA8B5}
+.cmp th,.cmp td{min-width:104px}
+.cmp td.nm,.cmp th:first-child{position:sticky;inset-inline-start:0;z-index:1;min-width:120px;background:#fff}
+.cmp th:first-child{background:#F5F7F9}
+.cmp tr.tot td.nm{background:#F5F7F9}
+.cmp td small{display:block;font-size:.72rem;font-weight:600;color:var(--dim)}
+.cmp td.best small{color:var(--ok)}
+.lg{display:flex;gap:8px;align-items:flex-start;font-size:.84rem;color:#2B3846;margin-top:10px}
+.lg i{flex:none;width:14px;height:14px;border-radius:4px;background:var(--okbg);border:1.5px solid var(--ok);margin-top:4px}
+details.bxw{margin-top:12px;border:1px solid var(--rule);border-radius:14px;background:#F7F9FA}
+details.bxw summary{list-style:none;display:flex;align-items:center;gap:10px;min-height:54px;padding:0 12px;cursor:pointer;font-weight:900}
+details.bxw summary::-webkit-details-marker{display:none}
+details.bxw summary .t{flex:1}
+details.bxw summary small{font-weight:700;color:var(--dim)}
+details.bxw summary .ico:last-child{transition:transform .2s;transform:rotate(-90deg)}
+details.bxw[open] summary .ico:last-child{transform:rotate(90deg)}
+details.bxw .bd2{padding:0 12px 10px;background:#fff;border-radius:0 0 14px 14px}
 .qt{border:1px dashed #B9C6D2;border-radius:12px;padding:10px 12px;margin-top:10px;background:#FAFBFC}
 .qt .pr{display:grid;grid-template-columns:1fr 130px;gap:8px;align-items:center;margin-top:6px}
 .qt .pr span{font-size:.88rem}
@@ -37,7 +53,7 @@
 .ie .x{min-height:40px;border:1px solid var(--line);border-radius:10px;background:#fff;font-weight:800;color:var(--bad)}
 .bxp{display:flex;gap:10px;align-items:center;padding:8px 2px;border-top:1px solid #EEF1F4;font-size:.88rem}
 .bxp input{width:24px;height:24px;flex:none;accent-color:var(--acc)}
-.fl{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 10px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:.82rem;font-weight:700;margin:4px 0 0 6px}
+.fl{display:inline-flex;align-items:center;gap:6px;min-height:42px;padding:0 14px;border:1px solid var(--line);border-radius:22px;background:#fff;font-size:.84rem;font-weight:800;margin:8px 0 0 6px}
 #fv{position:fixed;inset:0;z-index:50;background:rgba(10,14,20,.92);display:flex;align-items:center;justify-content:center;padding:12px}
 #fv img{max-width:100%;max-height:100%;border-radius:8px}
 #fv button{position:absolute;top:12px;inset-inline-end:12px}
@@ -60,8 +76,8 @@
     <input class="in" id="nT" maxlength="80" autocomplete="off">
     <label class="f" for="nI">اقلام — هر خط یک قلم: نام، بعد تعداد و واحد (اختیاری)</label>
     <textarea class="in" id="nI" rows="5" placeholder="برنج ۱۰ کیسه&#10;روغن ۵ حلب&#10;رب گوجه ۲۰ قوطی"></textarea>
-    <details id="nBoxW" hidden style="margin-top:10px"><summary class="f" style="cursor:pointer">افزودن از باکس سندپرداز <small id="nBoxN"></small></summary>
-      <input class="in" id="nBoxQ" placeholder="جستجو در اقلام باز باکس" autocomplete="off"><div id="nBox"></div></details>
+    <details id="nBoxW" class="bxw" hidden><summary><span id="nBoxI"></span><span class="t">افزودن از باکس سندپرداز</span><small id="nBoxN"></small><span id="nBoxC"></span></summary>
+      <div class="bd2"><input class="in" id="nBoxQ" placeholder="جستجو در اقلام باز باکس" autocomplete="off"><div id="nBox"></div></div></details>
     <button type="button" class="btn p w" id="nSave">ساخت استعلام</button>
     <div class="msg" id="nMsg" role="status"></div>
   </div>
@@ -90,12 +106,12 @@ $('nSave').addEventListener('click',()=>{ const T=clean($('nT').value,80)||('ا�
   $('nT').value=''; $('nI').value=''; nSel.clear(); OPEN.add(id); S.set('open'); });
 /* اقلام باز باکس سندپرداز که در استعلام جاری یا تاییدشده‌ای نیستند */
 const nSel=new Set();
-function freeBox(){ const B=LS('nt_kbox_v1',[]), used=new Set(); all().forEach(iq=>{ if(iq.st!=='no') iq.items.forEach(it=>{ if(it.bx) used.add(it.bx); }); });
+function freeBox(){ if(!canSeeT('باکس سندپرداز')) return []; const B=LS('nt_kbox_v1',[]), used=new Set(); all().forEach(iq=>{ if(iq.st!=='no') iq.items.forEach(it=>{ if(it.bx) used.add(it.bx); }); });
   return (Array.isArray(B)?B:[]).filter(x=>x&&x.id&&x.name&&!x.st&&!x.gone&&!used.has(x.id)).sort((a,b)=>(b.imp?1:0)-(a.imp?1:0)); }
-function drawNBox(){ const F=freeBox(), q=norm($('nBoxQ').value).split(' ').filter(Boolean); $('nBoxW').hidden=!F.length||!canW; $('nBoxN').textContent='('+fa(F.length)+' قلم باز'+(nSel.size?'، '+fa(nSel.size)+' انتخاب':'')+')';
+function drawNBox(){ const F=freeBox(), q=norm($('nBoxQ').value).split(' ').filter(Boolean); $('nBoxW').hidden=!F.length||!canW; $('nBoxN').textContent=nSel.size?fa(nSel.size)+' انتخاب':fa(F.length)+' قلم باز';
   const L=q.length?F.filter(x=>{ const h=norm([x.name,x.code,x.memo].join(' ')); return q.every(w=>h.indexOf(w)>-1); }):F;
   $('nBox').innerHTML=L.slice(0,200).map(x=>`<label class="bxp"><input type="checkbox" data-nb="${esc(x.id)}" ${nSel.has(x.id)?'checked':''}><span>${x.imp?'★ ':''}${esc(x.name)} — ${esc(fa(x.qty||''))} ${esc(x.unit||'')}${x.code?' <small>(کد '+esc(fa(x.code))+')</small>':''}</span></label>`).join('')||'<div class="empty">—</div>'; }
-$('nBox').addEventListener('change',e=>{ const c=e.target.closest('[data-nb]'); if(!c) return; if(c.checked) nSel.add(c.dataset.nb); else nSel.delete(c.dataset.nb); $('nBoxN').textContent='('+fa(freeBox().length)+' قلم باز'+(nSel.size?'، '+fa(nSel.size)+' انتخاب':'')+')'; });
+$('nBox').addEventListener('change',e=>{ const c=e.target.closest('[data-nb]'); if(!c) return; if(c.checked) nSel.add(c.dataset.nb); else nSel.delete(c.dataset.nb); $('nBoxN').textContent=nSel.size?fa(nSel.size)+' انتخاب':fa(freeBox().length)+' قلم باز'; });
 $('nBoxQ').addEventListener('input',drawNBox);
 const OPEN=new Set();
 /** قیمت کل یک قلم در یک پیش‌فاکتور (قیمت واحد × تعداد) */
@@ -108,11 +124,14 @@ function best(iq){ const per={}, tot={}; iq.items.forEach(it=>{ let b=null; iq.q
 function cmpHTML(iq){ if(!iq.quotes.length) return '<div class="empty">هنوز پیش‌فاکتوری اضافه نشده است.</div>';
   const B=best(iq), dec=iq.dec||{};
   const picked=(it,q)=>iq.st==='ok' && (dec.mode==='sup'?dec.sup===q.id:(dec.per&&dec.per[it.id]===q.id));
-  return `<div class="cmpw"><table class="cmp"><thead><tr><th>قلم</th>${iq.quotes.map(q=>`<th>${esc(q.sup)}${q.fid?' 📎':''}</th>`).join('')}</tr></thead><tbody>
+  return `<div class="cmpw"><table class="cmp"><thead><tr><th>قلم</th>${iq.quotes.map(q=>`<th>${esc(q.sup)}</th>`).join('')}</tr></thead><tbody>
     ${iq.items.map(it=>`<tr><td class="nm">${esc(it.t)}${it.q?`<br><small>${fa(it.q)} ${esc(it.u||'')}</small>`:''}</td>${iq.quotes.map(q=>{ const v=lineTot(it,q), p=q.prices&&q.prices[it.id];
       return `<td class="${B.per[it.id]&&B.per[it.id].q===q.id?'best':''}${picked(it,q)?' pick':''}">${v==null?'<span class="na">—</span>':esc(faN(v))+(it.q&&+it.q!==1?`<br><small>واحد ${esc(faN(p))}</small>`:'')}</td>`; }).join('')}</tr>`).join('')}
-    <tr class="tot"><td class="nm">جمع</td>${iq.quotes.map(q=>`<td class="${B.bestSup===q.id?'best':''}">${esc(faN(B.tot[q.id].s))}${B.tot[q.id].full?'':`<br><small>ناقص: ${fa(B.tot[q.id].n)} از ${fa(iq.items.length)} قلم</small>`}</td>`).join('')}</tr>
-    </tbody></table></div><p class="hint">سبز: ارزان‌ترین. ترکیب بهترین (هر قلم از ارزان‌ترین): <b>${esc(faN(B.mix))}</b> ریال${B.bestSup?`؛ ارزان‌ترین فروشنده کامل: <b>${esc((iq.quotes.find(q=>q.id===B.bestSup)||{}).sup||'')}</b>`:''}.</p>`; }
+    <tr class="tot"><td class="nm">جمع</td>${iq.quotes.map(q=>`<td class="${B.bestSup===q.id?'best':''}">${esc(faN(B.tot[q.id].s))}<small>${B.tot[q.id].full?'همه اقلام':fa(B.tot[q.id].n)+' از '+fa(iq.items.length)+' قلم'}</small></td>`).join('')}</tr>
+    </tbody></table></div><p class="lg"><i></i><span>سبز: ارزان‌ترین. ترکیب بهترین: ${mixText(iq,B)}؛ جمع <b>${esc(faN(B.mix))}</b> ریال.${B.bestSup?` ارزان‌ترین فروشنده کامل: <b>${esc((iq.quotes.find(q=>q.id===B.bestSup)||{}).sup||'')}</b>.`:''}</span></p>`; }
+/** «برنج و چای از فروشگاه ب؛ روغن از فروشگاه الف» */
+function mixText(iq,B){ const g=new Map(); iq.items.forEach(it=>{ const b=B.per[it.id]; if(!b) return; if(!g.has(b.q)) g.set(b.q,[]); g.get(b.q).push(it.t); });
+  return [...g.entries()].map(([qid,L])=>{ const n=L.length>3?L.slice(0,3).join('، ')+' و '+fa(L.length-3)+' قلم دیگر':(L.length>1?L.slice(0,-1).join('، ')+' و '+L[L.length-1]:L[0]); return esc(n)+' از '+esc((iq.quotes.find(q=>q.id===qid)||{}).sup||''); }).join('؛ ')||'—'; }
 function quoteForm(iq){ return `<div class="qt w-only" data-qf="${esc(iq.id)}"><b>افزودن پیش‌فاکتور فروشنده</b>
     <div class="row2"><div><label class="f">فروشنده</label><input class="in" data-k="sup" maxlength="80" list="supL" autocomplete="off"></div><div><label class="f">تاریخ</label><input class="in mono dt" data-k="date" value="${esc(TODAY)}" inputmode="numeric"></div></div>
     <label class="f">قیمت واحد هر قلم (ریال؛ خالی = این قلم را ندارد)</label>
@@ -124,7 +143,7 @@ function decHTML(iq){ const dec=iq.dec||{};
   if(iq.st==='ok'){ const q=id=>(iq.quotes.find(x=>x.id===id)||{}).sup||'?';
     const lines=dec.mode==='sup'?[`همه اقلام از <b>${esc(q(dec.sup))}</b>`]:iq.items.map(it=>dec.per&&dec.per[it.id]?`${esc(it.t)}: <b>${esc(q(dec.per[it.id]))}</b>`:`${esc(it.t)}: <span class="na">خرید نشود</span>`);
     return `<div class="dec"><h3>تایید شد — ${esc(dec.by||'')} ${fa(dec.at||'')}</h3>${lines.join('<br>')}${dec.note?`<div class="hint">${esc(dec.note)}</div>`:''}
-      ${canW&&canWT('لیست خرید')&&!iq.inList?`<button type="button" class="btn s g" data-tolist="${esc(iq.id)}" style="margin-top:8px">افزودن به لیست خرید هفتگی</button>`:(iq.inList?'<div class="hint">به لیست خرید هفتگی اضافه شد.</div>':'')}</div>`; }
+      ${canW&&canWT('خرید هفتگی')&&!iq.inList?`<button type="button" class="btn s g" data-tolist="${esc(iq.id)}" style="margin-top:8px">افزودن به لیست خرید هفتگی</button>`:(iq.inList?'<div class="hint">به لیست خرید هفتگی اضافه شد.</div>':'')}</div>`; }
   if(iq.st==='no') return `<div class="dec"><h3>رد شد — ${esc(dec.by||'')} ${fa(dec.at||'')}</h3>${dec.note?esc(dec.note):''}</div>`;
   if(iq.st==='wait' && AP && iq.quotes.length) return `<div class="dec"><h3>تصمیم مدیر</h3><p class="hint">یک فروشنده برای همه اقلام، یا در جدول روی قیمت هر قلم بزنید تا فروشنده همان قلم انتخاب شود.</p>
       <div class="chips">${iq.quotes.map(q=>`<button type="button" class="cp sm" data-apsup="${esc(q.id)}">همه از ${esc(q.sup)}</button>`).join('')}</div>
@@ -143,14 +162,14 @@ let pick={};   /* انتخاب مدیر در حال تصمیم: {iqId:{mode,sup,
 function iqHTML(iq){ const on=OPEN.has(iq.id), F=files();
   return `<div class="iq" data-iq="${esc(iq.id)}"><button type="button" class="h" aria-expanded="${on}"><span class="tx"><b>${esc(iq.title)}</b><span>${fa(iq.items.length)} قلم، ${fa(iq.quotes.length)} پیش‌فاکتور، ${fa(iq.date)}${iq.by?'، '+esc(iq.by):''}</span></span><span class="stt ${esc(iq.st||'')}">${ST[iq.st||'']}</span></button>
     ${on?`<div class="bd">${cmpHTML(iq)}
-      ${iq.quotes.length?`<div>${iq.quotes.map(q=>`${q.fid&&F[q.fid]?`<button type="button" class="fl" data-fv="${esc(q.fid)}">📎 ${esc(q.sup)} (${F[q.fid].t==='application/pdf'?'PDF':'عکس'})</button>`:''}${canW&&!iq.st?`<button type="button" class="fl" data-dq="${esc(iq.id)}|${esc(q.id)}">✕ حذف ${esc(q.sup)}</button>`:''}`).join('')}</div>`:''}
+      ${iq.quotes.length?`<div>${iq.quotes.map(q=>`${q.fid&&F[q.fid]?`<button type="button" class="fl" data-fv="${esc(q.fid)}">${ico('clip',18)}${esc(q.sup)} (${F[q.fid].t==='application/pdf'?'PDF':'عکس'})</button>`:''}${canW&&!iq.st?`<button type="button" class="fl" data-dq="${esc(iq.id)}|${esc(q.id)}" style="color:var(--bad)">${ico('x',16)}حذف ${esc(q.sup)}</button>`:''}`).join('')}</div>`:''}
       ${!iq.st&&canW?itemsEdit(iq)+quoteForm(iq):''}${decHTML(iq)}
       ${canW?`<button type="button" class="btn s d" data-del="${esc(iq.id)}" style="margin-top:10px">حذف استعلام</button>`:''}</div>`:''}</div>`; }
 function drawAll(){ const A=all().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   const O=A.filter(x=>!x.st||x.st==='wait'||(x.st==='ok'&&!x.inList&&daysSince(x.dec&&x.dec.at||x.date)<15)), C=A.filter(x=>!O.includes(x));
   O.sort((a,b)=>(b.st==='wait'?1:0)-(a.st==='wait'?1:0));
-  $('oList').innerHTML=(O.length?O.map(iqHTML).join(''):'<div class="card"><div class="empty">استعلام جاری نیست. «استعلام تازه» را بزنید.</div></div>')+`<datalist id="unitL">${UNITS.map(u=>`<option value="${esc(u)}"></option>`).join('')}</datalist><datalist id="supL">${supList().map(s=>`<option value="${esc(s)}"></option>`).join('')}</datalist>`;
-  $('cList').innerHTML=C.length?C.slice(0,60).map(iqHTML).join(''):'<div class="card"><div class="empty">—</div></div>';
+  $('oList').innerHTML=(O.length?O.map(iqHTML).join(''):emptyState('docm','استعلام جاری نیست','استعلام تازه بسازید یا اقلام را از باکس سندپرداز انتخاب کنید.',canW?'<button type="button" class="btn p" data-gonew>استعلام تازه</button>':''))+`<datalist id="unitL">${UNITS.map(u=>`<option value="${esc(u)}"></option>`).join('')}</datalist><datalist id="supL">${supList().map(s=>`<option value="${esc(s)}"></option>`).join('')}</datalist>`;
+  $('cList').innerHTML=C.length?C.slice(0,60).map(iqHTML).join(''):emptyState('clipck','استعلام بسته‌شده‌ای نیست','استعلام‌هایی که تایید یا رد شوند اینجا بایگانی می‌شوند.',canW?'<button type="button" class="btn p" data-gonew>استعلام تازه</button>':'');
   $('nRo').hidden=canW; markPicks(); drawNBox(); }
 /* تغییر تعداد/واحد قلم پیش‌نویس (بعد از change؛ ساختن دوباره با setTimeout تا blur خطا ندهد) */
 document.addEventListener('change',e=>{ const i=e.target.closest('[data-eq],[data-eu]'); if(!i) return; const row=i.closest('[data-ie]'), id=i.closest('.iq').dataset.iq;
@@ -218,6 +237,8 @@ const takeOpen=()=>{ const o=lsl('ntp_open',''); if(o){ OPEN.add(o); lss('ntp_op
 takeOpen();
 const S=segInit('seg','ntp_pane',['open','new','old'],p=>{ drawAll(); });
 window.addEventListener('message',e=>{ if(e.source===parent && e.data && e.data.nt==='show' && takeOpen()) drawAll(); });
+$('nBoxI').outerHTML=ico('archive'); $('nBoxC').outerHTML=ico('chev',18);
+document.addEventListener('click',e=>{ if(e.target.closest('[data-gonew]')) $('goNew').click(); });
 $('goNew').addEventListener('click',()=>{ S.set('new'); try{ $('nT').focus(); }catch(e){} });
 window.addEventListener('storage',e=>{ if(!e.key||[PK,FK,'nt_kbox_v1'].includes(e.key)){ if(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return; drawAll(); } });
 </script>

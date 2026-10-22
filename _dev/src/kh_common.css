@@ -135,3 +135,24 @@ details.more summary{min-height:44px;display:flex;align-items:center;font-weight
 body.ro .w-only{display:none!important}
 @media (min-width:760px){ .cats{grid-template-columns:repeat(4,1fr)} }
 @media (max-width:899px){ header .tt{display:none} .meter{flex:1} .meter div{flex:1} }
+/* ===== طرح تازه بخش خرید ===== */
+.seg{border-radius:24px;background:#DDE3E9}
+.seg button{border-radius:20px}
+.ico{display:inline-flex;flex:none}
+.ico svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+section.ro .w-only{display:none!important}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin-inline:-16px;padding-inline:16px}
+.chips.scroll::-webkit-scrollbar{display:none}
+.chips.scroll .cp{flex:none}
+.btn.dash{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:1.5px dashed var(--line);background:#F7F9FA;font-weight:800}
+.alr{display:flex;align-items:center;gap:10px;width:100%;min-height:56px;padding:10px 14px;margin-top:10px;border-radius:14px;border:1px solid #EDB9B2;background:var(--badbg);color:var(--bad);font-weight:800;font-size:.95rem;text-align:start}
+.alr .tx{flex:1;min-width:0}
+.alr.wa{border-color:#EAC98F;background:var(--wabg);color:var(--wa)}
+.est{text-align:center;padding:44px 16px 24px}
+.est .eic{width:88px;height:88px;border-radius:24px;background:#fff;border:1px solid var(--rule);display:grid;place-items:center;margin:0 auto 14px;color:#51606E}
+.est .eic svg{width:40px;height:40px}
+.est b{display:block;font-size:1.08rem;font-weight:900}
+.est p{color:var(--dim);font-size:.9rem;margin:6px auto 16px;max-width:300px}
+.srch{position:relative}
+.srch .ico{position:absolute;top:50%;inset-inline-start:14px;transform:translateY(-50%);color:#51606E;pointer-events:none}
+.srch .in{padding-inline-start:44px;margin-top:0}

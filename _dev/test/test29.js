@@ -55,7 +55,7 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
     const link=await p.inputValue('#syLink'), pin=(await p.locator('#syPinOut').innerText()).replace(/\D/g,'');
     return {link,pin,code:link.split('#join=')[1]};
   }
-  const setAcc=(tabName,v)=>async p=>{ const i=await p.evaluate(n=>DOCS.findIndex(d=>d.name===n),tabName); await p.selectOption(`#syAclList select[data-tab="${i}"]`,v); };
+  const setAcc=(tabName,v)=>async p=>{ await p.selectOption(`#syAclList select[data-n="${tabName}"]`,v); };
   const seedA={nt_anbar_out_v1:JSON.stringify({row:720,rows:[{date:JT.s,y:JT.y,m:JT.m,d:JT.d,dev:'WA470',item:'روغن دیزل اتوماتیک 50-20',qty:20,why:'مورد نیاز WA470',cond:''}]}),
                nt_daftar_v1:JSON.stringify([{dev:'لودر ZL50',unit:'ساعت',val:15094,date:'1405/07/13'}])};
 
