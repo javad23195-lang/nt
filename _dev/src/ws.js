@@ -69,14 +69,14 @@ const CSS=`
 #ntWs .wb{border:1px solid #DAD5CC;border-radius:22px;background:#fff;color:#1B2430;overflow:hidden}
 #ntWs .wb.last{border:2px solid #E6A52E}
 #ntWs .wh{display:flex;align-items:flex-start;gap:14px;padding:20px 20px 0}
-#ntWs .wh .tx{flex:1;min-width:0}
+#ntWs .wh .tx{flex:1;min-width:0;text-align:end}
 #ntWs .wh .lt{display:block;color:#8A5A00;font-size:.82rem;font-weight:900;margin-bottom:2px}
 #ntWs .wh b{display:block;font-size:1.22rem;font-weight:900;line-height:1.45}
 #ntWs .wh .d{display:block;font-size:.86rem;color:#4E5864;margin-top:2px}
 #ntWs .wh .ic{flex:none;width:52px;height:52px;border-radius:18px;background:#EDEAE3;display:grid;place-items:center;color:#1B2430}
 #ntWs .wb.last .wh .ic{background:#E6A52E}
 #ntWs .wh .ic svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-#ntWs .wn{display:block;padding:12px 20px 14px;color:#A21F17;font-size:.92rem;font-weight:900}
+#ntWs .wn{display:block;text-align:end;padding:12px 20px 14px;color:#A21F17;font-size:.92rem;font-weight:900}
 #ntWs .wn.z{color:#1C6B3A}
 #ntWs .wr{display:flex;align-items:center;gap:14px;width:100%;min-height:66px;padding:10px 20px;border:0;border-top:1px solid #DAD5CC;background:transparent;font:inherit;color:#1B2430;text-align:start;cursor:pointer}
 #ntWs .wr:hover{background:#F7F5F0}
@@ -163,7 +163,7 @@ function chooser(){
     const N=ntRows(); let K=[]; try{ K=khRows(); }catch(e){} let kn=0; try{ kn=K.length; }catch(e){}
     const rows={}; let i=0;
     const row=(w,o)=>{ const id='r'+(i++); rows[id]=o; return `<button type="button" class="wr" data-wr="${id}" data-w="${w}"><span class="ri"><svg viewBox="0 0 24 24" aria-hidden="true">${RI[o.ic]||''}</svg></span><span class="rt"><b>${esc(o.t)}</b>${o.s?`<span><bdi>${esc(o.s)}</bdi></span>`:''}</span><span class="cv">${CHEV}</span></button>`; };
-    const card=(w,name,desc,n,lab,R)=>`<div class="wb${last===w?' last':''}"><div class="wh"><span class="tx">${last===w?'<span class="lt">آخرین واحدی که باز کردید</span>':''}<b>${esc(name)}</b><span class="d">${esc(desc)}</span></span><span class="ic">${WS_I[w]}</span></div>
+    const card=(w,name,desc,n,lab,R)=>`<div class="wb${last===w?' last':''}"><div class="wh"><span class="ic">${WS_I[w]}</span><span class="tx">${last===w?'<span class="lt">آخرین واحدی که باز کردید</span>':''}<b>${esc(name)}</b><span class="d">${esc(desc)}</span></span></div>
       <span class="wn${n?'':' z'}">${n?fa(n)+' '+lab:'کار فوری نیست'}</span>${R.map(o=>row(w,o)).join('')}<span class="we"><button type="button" data-ws="${w}">ورود به ${esc(name)} ${ARR}</button></span></div>`;
     const html=`<div class="wbody"><div class="wtop"><div class="tt"><b id="ntWsT">سلام${who?'، '+esc(who):''}</b><small>کدام واحد را باز کنیم؟</small></div>${syt?`<span class="wsy${/نشد|نیست/.test(slt)?' bad':''}"><i></i>${esc(syt)}</span>`:''}</div>
       <div class="wc">${card('nt',unN,'توقف، قرائت، سرویس و خرابی دستگاه‌ها',Math.max(N.n,N.R.length),'نیاز به توجه',N.R)}${card('kh','واحد تدارکات','لیست خرید، پیش‌فاکتور و فاکتور خرید',kn,'کار فوری',K)}</div></div>`;
@@ -172,7 +172,7 @@ function chooser(){
   /* خلاصه «امروز» ممکن است کمی بعد برسد: تا وقتی صفحه باز است، هر ۲ ثانیه تازه شود */
   clearInterval(el._t); el._t=setInterval(()=>{ if(el.hidden){ clearInterval(el._t); return; } draw(); },2000);
 }
-const locked=()=>window.ntLocked || document.body.classList.contains('ntlocked') || document.body.classList.contains('ntpin') || document.body.classList.contains('ntdriver');
+const locked=()=>window.ntLocked || document.body.classList.contains('ntlocked') || document.body.classList.contains('ntpin') || document.body.classList.contains('ntdriver') || document.body.classList.contains('ntsplash');
 /* در آزمایش‌های خودکار (webdriver) صفحه انتخاب نمی‌آید، مگر آزمایش آن را بخواهد (ntws_test) */
 const quiet=()=>{ try{ return navigator.webdriver && !localStorage.getItem('ntws_test'); }catch(e){ return false; } };
 let asked=false;

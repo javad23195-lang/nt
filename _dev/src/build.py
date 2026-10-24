@@ -48,7 +48,13 @@ qr=open('qr.js',encoding='utf-8').read()
 ch=open('charts.js',encoding='utf-8').read()
 pw=open('pwa.js',encoding='utf-8').read()
 nv=open('nav.js',encoding='utf-8').read()
-extra=''.join(open(f,encoding='utf-8').read()+'\n' for f in ['icons.js','svc.js','cost.js','repeat.js','fluid.js','ai.js','dev.js','theme.js','exit.js','menu.js','dedup.js','invoice.js','hmmask.js','mhead.js','ws.js'])
+import base64,re as _re
+LOGO_BIG='data:image/png;base64,'+base64.b64encode(open('logo_big.png','rb').read()).decode()
+LOGO_SM='data:image/png;base64,'+base64.b64encode(open('logo_sm.png','rb').read()).decode()
+# لوگوی تازه (طرح ۱۴۰۵/۰۸/۰۲): جای لوگوی قبلی بالای منو + لوگوی بزرگ صفحه آغاز
+_n=len(_re.findall(r'<img class="lg" src="data:image/png;base64,[A-Za-z0-9+/=]+"',s)); assert _n==1,_n
+s=_re.sub(r'<img class="lg" src="data:image/png;base64,[A-Za-z0-9+/=]+"','<img class="lg" src="'+LOGO_SM+'"',s)
+extra='window.NT_LOGO_BIG="'+LOGO_BIG+'";\n'+''.join(open(f,encoding='utf-8').read()+'\n' for f in ['icons.js','svc.js','cost.js','repeat.js','fluid.js','ai.js','dev.js','theme.js','exit.js','menu.js','dedup.js','invoice.js','hmmask.js','mhead.js','ws.js','splash.js'])
 rep("\n</script>\n</body>\n</html>", "\n</script>\n<script>\n"+js+"</script>\n<script>\n"+stp+"</script>\n<script>\n"+rpt+"</script>\n<script>\n"+qr+"</script>\n<script>\n"+ch+"</script>\n<script>\n"+pw+"</script>\n<script>\n"+nv+"</script>\n<script>\n"+extra+"</script>\n</body>\n</html>")
 open(out,'w',encoding='utf-8').write(s)
 print('built',len(s))

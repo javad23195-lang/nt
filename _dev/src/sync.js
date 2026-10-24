@@ -552,7 +552,9 @@ function paint(){
   const btEl=$('ntSyBarT'); if(btEl.textContent!==bt) btEl.textContent=bt;
   const bbEl=$('ntSyBarB'); if(bbEl.hidden!==!bb) bbEl.hidden=!bb; if(bbEl.textContent!==bb) bbEl.textContent=bb; bbEl.onclick=act;
 }
-function setPhase(p,n){ phase=p; note=n||''; paint(); }
+function setPhase(p,n){ phase=p; note=n||''; if(p!=='busy') stage=0; paint(); try{ window.dispatchEvent(new Event('ntsyncphase')); }catch(e){} }
+/** مرحله همگام‌سازی (برای صفحه آغاز): ۱ دریافت، ۲ باز کردن و ادغام، ۳ ارسال */
+let stage=0; function setStage(i){ stage=i; try{ window.dispatchEvent(new Event('ntsyncphase')); }catch(e){} }
 
 /* ---------- همگام‌سازی ---------- */
 /** اطلاعات مشترک را می‌گیرد (اگر تغییر کرده)، با این سیستم ادغام می‌کند، و اگر این سیستم چیز تازه‌ای دارد می‌فرستد. */
@@ -563,7 +565,7 @@ async function sync(opt){
   busy=true; if(!waiting) setPhase('busy');
   let again=false;
   try{
-    lastChk=Date.now();
+    lastChk=Date.now(); setStage(1);
     /* ۱) اطلاعات مشترک فعلی */
     let ref=null, s=st();
     const reuse = waiting && incoming && !opt.manual && Date.now()-incoming.t<30000;   // کاربر مشغول بود: همان که گرفته شده
@@ -588,6 +590,7 @@ async function sync(opt){
       }
     }
     /* ۲) ادغام اطلاعات تازه در این سیستم */
+    setStage(2);
     let base=baseGet(), local=collect();
     if(incoming){
       const first=!s.iv && !s.sha;                       // این سیستم تا حالا همگام نشده است
@@ -615,6 +618,7 @@ async function sync(opt){
       incoming=null; local=collect(); base=baseGet(); s=st();
     }
     /* ۳) ارسال نوشته‌های این سیستم */
+    setStage(3);
     if(m==='w'){
       if(!isAdmin() && base && local[UKEY]!==base[UKEY]){    // لیست کاربران فقط از مدیر می‌آید
         try{ if(base[UKEY]===undefined) localStorage.removeItem(UKEY); else localStorage.setItem(UKEY,base[UKEY]); }catch(e){}
@@ -1468,7 +1472,7 @@ function touch(keys){
   try{ frames.forEach((f,i)=>{ if(!f || !f.dataset.loaded) return; const m=keysOfFrame(i); if((keys||[]).some(k=>m[k])) reloadFrame(i,true); }); }catch(e){}
 }
 function myName(){ try{ const u=cfg.uid && usersGet(); return (u && u[cfg.uid] && u[cfg.uid].name)||''; }catch(e){ return ''; } }
-window.ntSync={khForms:()=>KHFORMS.filter(n=>tabAcc(n)!=='h'),formLabel:n=>FLABEL[n]||n,T,lockNow,canLock:()=>pinNeeded(),get cfg(){ return cfg; },st,sync,collect,hashOf,mergeAll,baseGet,outgoing,usersGet,seenGet,canSee:n=>tabAcc(n)!=='h',
+window.ntSync={state:()=>({phase,note,stage,busy,mode:mode(),at:(st()||{}).at||''}),fmtAt,khForms:()=>KHFORMS.filter(n=>tabAcc(n)!=='h'),formLabel:n=>FLABEL[n]||n,T,lockNow,canLock:()=>pinNeeded(),get cfg(){ return cfg; },st,sync,collect,hashOf,mergeAll,baseGet,outgoing,usersGet,seenGet,canSee:n=>tabAcc(n)!=='h',
   canWriteTab:n=>mode()!=='v' && tabAcc(n)==='w',touch,myName,myDevs,myDept:()=>(cfg.uid && mode()==='w' && typeof cfg.dept==='string')?cfg.dept:'',canApprove:()=>isAdmin() || (!!cfg.uid && mode()==='w' && !!cfg.appr),get pinLocked(){ return pinLocked; }};
 init();
 })();
