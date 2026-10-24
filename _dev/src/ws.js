@@ -64,18 +64,33 @@ const CSS=`
 #ntWs .wsy{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px;border:1px solid #DAD5CC;border-radius:20px;font-size:.86rem;font-weight:800;white-space:nowrap}
 #ntWs .wsy i{width:9px;height:9px;border-radius:50%;background:#1C6B3A}
 #ntWs .wsy.bad i{background:#A21F17}
-#ntWs .wgr{flex:none;width:50px;height:50px;border-radius:14px;border:1px solid #DAD5CC;background:#fff;display:grid;place-items:center;color:#1B2430;cursor:pointer}
-#ntWs .wgr svg{width:24px;height:24px}
-#ntWs .wc{display:grid;grid-template-columns:1fr;gap:14px}
-@media (min-width:700px){ #ntWs .wc{grid-template-columns:1fr 1fr} }
-#ntWs .wb{position:relative;display:flex;flex-direction:column;align-items:flex-start;width:100%;min-height:186px;padding:20px;border:1px solid #DAD5CC;border-radius:20px;background:#fff;color:#1B2430;font:inherit;text-align:start;cursor:pointer}
-#ntWs .wb:focus-visible{outline:3px solid #E6A52E;outline-offset:3px}
-#ntWs .wb .ic{color:#1B2430;line-height:0}
-#ntWs .wb .ic svg{width:36px;height:36px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-#ntWs .wb b{margin-top:auto;font-size:1.4rem;font-weight:900;line-height:1.5}
-#ntWs .wb .d{font-size:.98rem;color:#4E5864;margin-top:4px}
-#ntWs .wb .bd{position:absolute;top:20px;inset-inline-end:20px;font-size:.86rem;font-weight:900;color:#A21F17;background:#FAE3DF;padding:6px 14px;border-radius:16px}
-#ntWs .wb.last{border:1.5px solid #E6A52E}
+#ntWs .wc{display:grid;grid-template-columns:1fr;gap:16px;align-items:start}
+@media (min-width:900px){ #ntWs .wc{grid-template-columns:1fr 1fr} #ntWs .wbody{max-width:1000px} }
+#ntWs .wb{border:1px solid #DAD5CC;border-radius:22px;background:#fff;color:#1B2430;overflow:hidden}
+#ntWs .wb.last{border:2px solid #E6A52E}
+#ntWs .wh{display:flex;align-items:flex-start;gap:14px;padding:20px 20px 0}
+#ntWs .wh .tx{flex:1;min-width:0}
+#ntWs .wh .lt{display:block;color:#8A5A00;font-size:.82rem;font-weight:900;margin-bottom:2px}
+#ntWs .wh b{display:block;font-size:1.22rem;font-weight:900;line-height:1.45}
+#ntWs .wh .d{display:block;font-size:.86rem;color:#4E5864;margin-top:2px}
+#ntWs .wh .ic{flex:none;width:52px;height:52px;border-radius:18px;background:#EDEAE3;display:grid;place-items:center;color:#1B2430}
+#ntWs .wb.last .wh .ic{background:#E6A52E}
+#ntWs .wh .ic svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+#ntWs .wn{display:block;padding:12px 20px 14px;color:#A21F17;font-size:.92rem;font-weight:900}
+#ntWs .wn.z{color:#1C6B3A}
+#ntWs .wr{display:flex;align-items:center;gap:14px;width:100%;min-height:66px;padding:10px 20px;border:0;border-top:1px solid #DAD5CC;background:transparent;font:inherit;color:#1B2430;text-align:start;cursor:pointer}
+#ntWs .wr:hover{background:#F7F5F0}
+#ntWs .wr .ri{flex:none;width:26px;height:26px;display:grid;place-items:center}
+#ntWs .wr .ri svg{width:24px;height:24px}
+#ntWs .wr .rt{flex:1;min-width:0}
+#ntWs .wr .rt b{display:block;font-size:1rem;font-weight:900;line-height:1.5}
+#ntWs .wr .rt span{display:block;font-size:.9rem;color:#4E5864;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#ntWs .wr .cv{flex:none;color:#4E5864;line-height:0}
+#ntWs .wr .cv svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+#ntWs .we{display:block;padding:0 20px 20px;border-top:1px solid #DAD5CC}
+#ntWs .we button{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:56px;margin-top:20px;border:1px solid #DAD5CC;border-radius:16px;background:#fff;font:inherit;font-size:1.05rem;font-weight:900;color:#1B2430;cursor:pointer}
+#ntWs .we button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+#ntWs .wr:focus-visible,#ntWs .we button:focus-visible{outline:3px solid #E6A52E;outline-offset:-3px}
 body.ws-kh #ntQrScan,body.ws-kh #ntDevBtn{display:none!important}
 #ntDrw .di.ws{border:1px dashed #9AA8B5;margin:2px 0 6px;color:#0B5C7A}
 #ntWsBtn{display:none}
@@ -100,22 +115,62 @@ function khUrgent(){ const sees=n=>{ try{ return !window.ntSync || ntSync.canSee
   let ap=false; try{ ap=!window.ntSync || !ntSync.canApprove || ntSync.canApprove(); }catch(e){}
   if(ap && sees('پیش‌فاکتور')){ const p=num('nt_kpre_v1'); (Array.isArray(p)?p:[]).forEach(x=>{ if(x&&x.st==='wait') k++; }); }
   return k; }
-const GRID='<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="19" cy="19" r="2"/></svg>';
+/* صفحه انتخاب (طرح تازه): هر کارت = کارهای فوری آن واحد + دکمه «ورود به ...» */
+const RI={
+  bad:'<circle cx="12" cy="12" r="10" fill="#A21F17"/><path d="M12 7v6M12 16.5h.01" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>',
+  wait:'<path d="M6 2h12v2h-1.2v2.6c0 1.4-.6 2.7-1.7 3.6L13.2 12l1.9 1.8c1.1.9 1.7 2.2 1.7 3.6V20H18v2H6v-2h1.2v-2.6c0-1.4.6-2.7 1.7-3.6l1.9-1.8-1.9-1.8C7.8 9.3 7.2 8 7.2 6.6V4H6z" fill="#8A5A00"/><path d="M9.6 18.4h4.8" stroke="#F3D9A8" stroke-width="1.6" stroke-linecap="round"/>',
+  svc:'<path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z" fill="#8A5A00"/>',
+  hand:'<path d="M13 24c-3.26 0-6.19-1.99-7.4-5.02l-3.03-7.61C2.26 10.58 3 9.79 3.81 10.05l.79.26c.56.18 1.02.61 1.24 1.16L7.25 15H8V3.25C8 2.56 8.56 2 9.25 2s1.25.56 1.25 1.25V12h1V1.25C11.5.56 12.06 0 12.75 0S14 .56 14 1.25V12h1V2.75c0-.69.56-1.25 1.25-1.25s1.25.56 1.25 1.25V12h1V5.75c0-.69.56-1.25 1.25-1.25S21 5.06 21 5.75V16c0 4.42-3.58 8-8 8z" fill="#A21F17"/>',
+  drop:'<path d="M12 2.7S5 10.4 5 15a7 7 0 0 0 14 0c0-4.6-7-12.3-7-12.3z" fill="#A21F17"/>',
+  star:'<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="#A21F17"/>',
+  tool:'<path d="M18 16h-2v-1H8v1H6v-1H2v5h20v-5h-4zm2-8h-3V6c0-1.1-.9-2-2-2H9c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v4h4v-2h2v2h8v-2h2v2h4v-4c0-1.1-.9-2-2-2zm-5 0H9V6h6v2z" fill="#A21F17"/>'};
+const CHEV='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>', ARR='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>';
+const seeT=n=>{ try{ return !window.ntSync || ntSync.canSee(n); }catch(e){ return true; } };
+const nl=a=>a.slice(0,3).join('، ')+(a.length>3?' و '+fa(a.length-3)+' دیگر':'');
+/** کارهای «نگهداری و تعمیرات»: خلاصه‌ای که زبانه «امروز» در همین گوشی می‌نویسد + منتظر قطعه از «ثبت مشکلات» */
+function ntRows(){ const R=[], S=num('nt_ws_nt_v1')||{};
+  const bad=Array.isArray(S.bad)?S.bad:[], svc=Array.isArray(S.svc)?S.svc:[];
+  if(bad.length) R.push({ic:'bad',t:fa(bad.length)+' دستگاه خراب',s:nl(bad),go:'امروز'});
+  if(seeT('ثبت مشکلات')){ const M=num('nt_moshkel_v1'); const W=[...new Set((Array.isArray(M)?M:[]).filter(r=>r&&r.dev&&String(r.state||'').trim()==='منتظر قطعه'&&(!window.ntDept||!ntDept.mine||ntDept.mine(r.dev))).map(r=>String(r.dev)))];
+    if(W.length) R.push({ic:'wait',t:fa(W.length)+' دستگاه منتظر قطعه',s:nl(W),go:'ثبت مشکلات'}); }
+  if(svc.length) R.push({ic:'svc',t:fa(svc.length)+' سرویس گذشته',s:nl(svc),go:'دفترچه قرائت'});
+  return {n:+S.n||0,R}; }
+/** کارهای فوری «تدارکات» (همان کارت «فوری امروز» میز خرید) */
+function khRows(){ const R=[];
+  const jd=()=>{ try{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZone:'Asia/Tehran',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()), g=t=>+p.find(x=>x.type===t).value; return g('year')+'/'+g('month')+'/'+g('day'); }catch(e){ return ''; } };
+  const dn=s=>{ const m=/^(\d{4})\/(\d{1,2})\/(\d{1,2})/.exec(String(s||'')); if(!m) return null; const y=+m[1], mo=+m[2], d=+m[3]; return (y-1)*365+Math.floor((y-1)*8/33)+(mo<=6?(mo-1)*31:186+(mo-7)*30)+d; };
+  const T=jd(), today=dn(T);
+  let ap=false; try{ ap=!window.ntSync || !ntSync.canApprove || ntSync.canApprove(); }catch(e){}
+  if(ap && seeT('پیش‌فاکتور')){ const P=(num('nt_kpre_v1')||[]).filter(x=>x&&x.st==='wait'); if(P.length) R.push({ic:'hand',t:fa(P.length)+' پیش‌فاکتور منتظر تایید شما',s:String(P[0].title||''),go:'پیش‌فاکتور',k:'ntp_pane',p:'open',iq:P[0].id}); }
+  if(seeT('آب شیرین')){ const w=num('nt_kwater_v1')||{}, L=(Array.isArray(w.trips)?w.trips:[]).map(t=>t&&t.d).filter(Boolean).sort(), last=L[L.length-1], mo=+String(T).split('/')[1]||1, gap=mo<=6?(+w.a||2):(+w.b||3);
+    const dl=dn(last), ds=dl!=null&&today!=null?today-dl:null; if(ds==null || ds>=gap) R.push({ic:'drop',t:'نوبت آوردن آب شیرین است',s:ds==null?'هنوز نوبتی ثبت نشده':fa(ds)+' روز از آخرین نوبت',go:'لیست خرید',k:'ntk_pane',p:'water'}); }
+  if(seeT('باکس سندپرداز')){ const B=(num('nt_kbox_v1')||[]).filter(x=>x&&x.imp&&!x.st&&!x.gone); if(B.length){ const lt=B.filter(x=>{ const d=dn(x.need); return d!=null&&today!=null&&today-d>0; }).length;
+    R.push({ic:'star',t:fa(B.length)+' قلم ضروری خریده نشده',s:lt?fa(lt)+' قلم از تاریخ نیاز گذشته':'از باکس سندپرداز',go:'لیست خرید',k:'ntk_pane',p:'box',bf:'imp'}); } }
+  if(seeT('خدمات تدارکات')){ const V=(num('nt_ksvc_v1')||[]).filter(x=>x&&!x.done&&!x.no); if(V.length) R.push({ic:'tool',t:fa(V.length)+' خدمات بدون شماره ثبت',s:String(V[0].title||''),go:'لیست خرید',k:'ntk_pane',p:'svc'}); }
+  return R; }
 function chooser(){
   let el=$('ntWs'); if(!el){ el=document.createElement('div'); el.id='ntWs'; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); el.setAttribute('aria-labelledby','ntWsT'); document.body.appendChild(el);
-    el.addEventListener('click',e=>{ if(e.target.closest('.wgr')){ try{ ntMHead.open(); }catch(x){} return; } const b=e.target.closest('[data-ws]'); if(!b) return; el.hidden=true; set(b.dataset.ws); }); }
+    el.addEventListener('click',e=>{ const r=e.target.closest('[data-wr]'); if(r){ const o=(el._rows||{})[r.dataset.wr]; el.hidden=true; set(r.dataset.w);
+        if(o){ try{ if(o.k) localStorage.setItem(o.k,o.p); if(o.bf) localStorage.setItem('ntk_bf',o.bf); if(o.iq) localStorage.setItem('ntp_open',o.iq); }catch(x){} try{ window.postMessage({nt:'go',tab:o.go},'*'); }catch(x){} } return; }
+      const b=e.target.closest('[data-ws]'); if(!b) return; el.hidden=true; set(b.dataset.ws); }); }
   const co=document.querySelector('.topbar .brand .co'), un=document.querySelector('.topbar .brand .un');
   const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   let who=''; try{ who=(window.ntSync&&ntSync.myName&&ntSync.myName())||''; }catch(e){}
   if(!who && co) who=String(co.textContent||'').trim().split(/\s+/)[0]||'';
-  const sb=$('ntSyBtn'), sl=sb&&sb.querySelector('.l'), slt=sl?sl.textContent.trim():'', syt=slt?(/همگام/.test(slt)?slt:'همگام '+slt):'';
-  const c=counts(), last=ls('ntws_last')==='kh'?'kh':'nt', unN=(un&&(un.dataset.u0||un.textContent))||'واحد نگهداری و تعمیرات';
-  el.innerHTML=`<div class="wbody"><div class="wtop"><div class="tt"><b id="ntWsT">سلام${who?'، '+esc(who):''}</b><small>کدام واحد را باز کنیم؟</small></div>${syt?`<span class="wsy${/نشد|نیست/.test(slt)?' bad':''}"><i></i>${esc(syt)}</span>`:''}<button type="button" class="wgr" aria-label="منو">${GRID}</button></div>
-    <div class="wc">
-      <button type="button" class="wb${last==='nt'?' last':''}" data-ws="nt">${c.att?`<span class="bd">${fa(c.att)} نیاز به توجه</span>`:''}<span class="ic">${WS_I.nt}</span><b>${esc(unN)}</b><span class="d">توقف، قرائت، سرویس و خرابی دستگاه‌ها</span></button>
-      <button type="button" class="wb${last==='kh'?' last':''}" data-ws="kh">${c.kh?`<span class="bd">${fa(c.kh)} کار فوری</span>`:''}<span class="ic">${WS_I.kh}</span><b>واحد تدارکات</b><span class="d">لیست خرید، پیش‌فاکتور و فاکتور خرید</span></button>
-    </div></div>`;
-  el.hidden=false;
+  const draw=()=>{ if(el.hidden) return;
+    const sb=$('ntSyBtn'), sl=sb&&sb.querySelector('.l'), slt=sl?sl.textContent.trim():'', syt=slt?(/همگام/.test(slt)?slt:'همگام '+slt):'';
+    const last=ls('ntws_last')==='kh'?'kh':'nt', unN=(un&&(un.dataset.u0||un.textContent))||'واحد نگهداری و تعمیرات';
+    const N=ntRows(); let K=[]; try{ K=khRows(); }catch(e){} let kn=0; try{ kn=K.length; }catch(e){}
+    const rows={}; let i=0;
+    const row=(w,o)=>{ const id='r'+(i++); rows[id]=o; return `<button type="button" class="wr" data-wr="${id}" data-w="${w}"><span class="ri"><svg viewBox="0 0 24 24" aria-hidden="true">${RI[o.ic]||''}</svg></span><span class="rt"><b>${esc(o.t)}</b>${o.s?`<span><bdi>${esc(o.s)}</bdi></span>`:''}</span><span class="cv">${CHEV}</span></button>`; };
+    const card=(w,name,desc,n,lab,R)=>`<div class="wb${last===w?' last':''}"><div class="wh"><span class="tx">${last===w?'<span class="lt">آخرین واحدی که باز کردید</span>':''}<b>${esc(name)}</b><span class="d">${esc(desc)}</span></span><span class="ic">${WS_I[w]}</span></div>
+      <span class="wn${n?'':' z'}">${n?fa(n)+' '+lab:'کار فوری نیست'}</span>${R.map(o=>row(w,o)).join('')}<span class="we"><button type="button" data-ws="${w}">ورود به ${esc(name)} ${ARR}</button></span></div>`;
+    const html=`<div class="wbody"><div class="wtop"><div class="tt"><b id="ntWsT">سلام${who?'، '+esc(who):''}</b><small>کدام واحد را باز کنیم؟</small></div>${syt?`<span class="wsy${/نشد|نیست/.test(slt)?' bad':''}"><i></i>${esc(syt)}</span>`:''}</div>
+      <div class="wc">${card('nt',unN,'توقف، قرائت، سرویس و خرابی دستگاه‌ها',Math.max(N.n,N.R.length),'نیاز به توجه',N.R)}${card('kh','واحد تدارکات','لیست خرید، پیش‌فاکتور و فاکتور خرید',kn,'کار فوری',K)}</div></div>`;
+    if(el._h!==html){ el._h=html; el._rows=rows; el.innerHTML=html; } };
+  el.hidden=false; draw();
+  /* خلاصه «امروز» ممکن است کمی بعد برسد: تا وقتی صفحه باز است، هر ۲ ثانیه تازه شود */
+  clearInterval(el._t); el._t=setInterval(()=>{ if(el.hidden){ clearInterval(el._t); return; } draw(); },2000);
 }
 const locked=()=>window.ntLocked || document.body.classList.contains('ntlocked') || document.body.classList.contains('ntpin') || document.body.classList.contains('ntdriver');
 /* در آزمایش‌های خودکار (webdriver) صفحه انتخاب نمی‌آید، مگر آزمایش آن را بخواهد (ntws_test) */

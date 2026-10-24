@@ -22,7 +22,7 @@ try{
 let DOWNER=OWNER, DREPO=REPO;
 function setData(d){ DOWNER=OWNER; DREPO=REPO; const m=/^([A-Za-z0-9-]+)\/([A-Za-z0-9._-]+)$/.exec(String(d||'')); if(m){ DOWNER=m[1]; DREPO=m[2]; } }
 /* کلیدهایی که مخصوص همین سیستم است و فرستاده نمی‌شود */
-const SKIP={nt_lasttab:1,nt_al_seen_v1:1,nt_backup_at:1,nt_alerts_v1:1,nt_bridge_sh_v1:1,nt_tavaqof_name:1,nt_tavaqof_dev:1};
+const SKIP={nt_lasttab:1,nt_al_seen_v1:1,nt_backup_at:1,nt_alerts_v1:1,nt_ws_nt_v1:1,nt_bridge_sh_v1:1,nt_tavaqof_name:1,nt_tavaqof_dev:1};
 /* کلیدهای محاسبه‌ای: ادغام نمی‌شوند؛ هر سیستم خودش دوباره می‌سازد */
 const CALC={nt_anbar_sum_v1:1,nt_fixed_done_v1:1};
 /* کلیدهایی که اختلافشان به کاربر گزارش نمی‌شود */

@@ -50,6 +50,8 @@ const TI_I={bad:'<circle cx="12" cy="12" r="10" fill="#C62828"/><path d="M12 7v6
   late:'<rect x="5" y="4" width="14" height="17" rx="2.5" fill="#B7791F"/><rect x="9" y="2.5" width="6" height="3.6" rx="1.2" fill="#7A4F10"/><path d="M12 9v5M12 17h.01" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>'};
 function tiRender(R0){
   if(document.documentElement.classList.contains('mgmt')) return;
+  /* خلاصه برای صفحه انتخاب واحد (فقط همین گوشی؛ همگام نمی‌شود) */
+  try{ const U=a=>[...new Set(a.filter(Boolean))]; localStorage.setItem('nt_ws_nt_v1',JSON.stringify({n:R0.length,bad:U(R0.filter(r=>r.cat==='bad').map(r=>r.nm)),svc:U(R0.filter(r=>r.cat==='svc'&&r.dev).map(r=>r.dev)),at:Date.now()})); }catch(e){}
   let box=$('tiBox'); const at=$('atCard'); if(!at) return;
   if(!box){ box=document.createElement('div'); box.id='tiBox'; box.className='tiles4'; box.setAttribute('role','group'); box.setAttribute('aria-label','خلاصه امروز'); }
   { const par=at.parentNode, first=par.firstElementChild; if(box.parentNode!==par || (first!==box && par.classList.contains('col'))) par.insertBefore(box, par.classList.contains('col')?first:at); }   /* بالای ستون اصلی (چیدمان ممکن است بعداً کارت را جابه‌جا کند) */
