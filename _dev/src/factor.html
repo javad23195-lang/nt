@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#FFFFFF">
+<meta name="theme-color" content="#F3F1EC">
 <title>فاکتور خرید</title>
 <style>
 :root{--bg:#EEF1F4;--card:#FFFFFF;--ink:#17212B;--dim:#51606E;--rule:#D5DCE3;--line:#9AA8B5;--nv:#1B2430;--am:#E6A52E;--acc:#0B5C7A;--bad:#A32018;--badbg:#FBE5E2;--wa:#7A4300;--wabg:#FFF1DB;--ok:#1E6B3A;--okbg:#E4F3E8}
@@ -158,6 +158,61 @@ details.more summary{min-height:44px;display:flex;align-items:center;font-weight
 body.ro .w-only{display:none!important}
 @media (min-width:760px){ .cats{grid-template-columns:repeat(4,1fr)} }
 @media (max-width:899px){ header .tt{display:none} }
+/*KH_COMMON_CSS*/
+/* فاکتور خرید (طرح v2) */
+.phb{display:flex;align-items:center;gap:14px;width:100%;min-height:76px;padding:12px 16px;border:1.5px dashed #B9B3A8;border-radius:16px;background:#fff;text-align:start;color:var(--ink)}
+.phb .ico svg{width:34px;height:34px;stroke-width:2.2}
+.phb .tx{flex:1;min-width:0}.phb b{display:block;font-size:1.05rem;font-weight:900}.phb small{display:block;font-size:.88rem;color:#4E5864}
+.phb img{width:56px;height:56px;object-fit:cover;border-radius:10px;border:1px solid var(--rule)}
+.lrow2{display:flex;align-items:center;gap:8px;margin-top:14px}
+.lrow2 label.f{flex:1;margin:0}
+.lrow2 .cp{min-height:44px;border-radius:12px;padding:0 14px;font-size:.92rem}
+.sgm.kind{margin-top:8px}
+.sgm .cp{border:0;border-radius:0;min-height:54px;background:none;font-size:1.02rem}
+.sgm .cp+.cp{border-inline-start:1px solid var(--rule)}
+.sgm .cp[aria-pressed="true"]{background:var(--nv);color:#fff}
+.bst{display:grid;grid-template-columns:repeat(3,1fr);background:#fff;border:1px solid var(--rule);border-radius:18px;margin-top:14px;overflow:hidden}
+.bst div{padding:14px 14px 12px}.bst div+div{border-inline-start:1px solid var(--rule)}
+.bst span{display:block;font-size:.88rem;font-weight:800;color:#4E5864}.bst b{display:block;font-size:1.45rem;font-weight:900;line-height:1.4}.bst small{display:block;font-size:.84rem;color:#4E5864}
+.bst b.bad{color:var(--bad)}
+.dg{background:#fff;border:1px solid var(--rule);border-radius:18px;margin-top:14px;overflow:hidden}
+.dg .dh{display:flex;justify-content:space-between;padding:10px 16px;background:var(--soft);font-weight:900;font-size:.92rem;color:#4E5864}
+.br{border-top:1px solid var(--rule)}
+.br>button{display:flex;align-items:flex-start;gap:10px;width:100%;padding:12px 16px;border:0;background:none;text-align:start;color:var(--ink);font:inherit}
+.br .tx{flex:1;min-width:0}.br .tx b{display:block;font-size:1.05rem;font-weight:900}.br .tx span{display:block;font-size:.9rem;color:#4E5864}
+.br .am{flex:none;text-align:end}.br .am b{display:block;font-size:1.12rem;font-weight:900;font-variant-numeric:tabular-nums}
+.br .am .tag{margin:4px 0 0 0;margin-inline-start:4px}
+.br .ex{padding:0 16px 12px}
+.br .ex .ac{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.mtot span{display:block;font-size:.92rem;font-weight:800;color:#4E5864}
+.mtot .big{display:flex;align-items:baseline;gap:8px;margin-top:6px}
+.mtot .big b{font-size:2.3rem;font-weight:900;letter-spacing:.02em;line-height:1.2}.mtot .big small{font-size:.95rem;color:#4E5864}
+.sbar{display:flex;height:16px;border-radius:8px;overflow:hidden;margin-top:16px;gap:3px}
+.sbar i{display:block;height:100%;border-radius:8px}
+.lgd{display:flex;justify-content:space-between;margin-top:10px;font-weight:900;font-size:.95rem}
+.lgd span{display:inline-flex;align-items:center;gap:6px}.lgd i{width:14px;height:14px;border-radius:4px;display:inline-block}
+.cbar{margin-top:12px}.cbar .r{display:flex;justify-content:space-between;font-size:.98rem}.cbar .r b{font-weight:900}
+.cbar .t{display:flex;direction:rtl;height:12px;border-radius:6px;background:#ECE8E1;margin-top:6px;overflow:hidden}.cbar .t i{display:block;height:100%;border-radius:6px;background:var(--nv)}
+.ttl{margin:20px 2px 0;font-size:1.08rem;font-weight:900}
+.spc{background:#fff;border:1px solid var(--rule);border-radius:18px;padding:16px;margin-top:12px}
+.spc .r1{display:flex;gap:10px;align-items:flex-start}
+.spc .r1 .tx{flex:1;min-width:0}.spc .r1 b{display:block;font-size:1.05rem;font-weight:900}.spc .r1 span{display:block;font-size:.88rem;color:#4E5864}
+.spc .r1 .amt{flex:none;font-weight:900;font-size:1.05rem;white-space:nowrap}
+.spc .r2{display:flex;gap:8px;margin-top:12px;align-items:stretch}
+.spc .r2 .in{margin-top:0;flex:1;min-height:52px}
+.spc .r2 .cpb{flex:none;width:52px;min-height:52px;border-radius:14px;border:1px solid var(--rule);background:var(--soft);display:grid;place-items:center;padding:0;color:var(--ink)}
+.spc .r2 .cpb.cpd{background:var(--okbg);color:var(--ok)}
+.spc .r2 .btn{min-height:52px;padding:0 18px}
+.spc .lk{margin-top:8px}.spc .lk button{border:0;background:none;color:#4E5864;font-weight:800;font-size:.84rem;text-decoration:underline;min-height:32px;padding:0}
+.stc{background:#fff;border:1px solid var(--rule);border-radius:18px;margin-top:14px;overflow:hidden}
+.stc>h3{margin:0;padding:12px 16px;font-size:.92rem;font-weight:900;color:#4E5864;border-bottom:1px solid var(--rule)}
+.sr{display:flex;align-items:center;gap:14px;min-height:66px;padding:10px 16px;border-top:1px solid var(--rule);width:100%;border-inline:0;border-bottom:0;background:none;text-align:start;color:var(--ink);font:inherit}
+.stc>h3+.sr{border-top:0}
+.sr .ico svg{width:26px;height:26px}
+.sr .tx{flex:1;min-width:0}.sr .tx b{display:block;font-size:1.02rem;font-weight:900}.sr .tx span{display:block;font-size:.88rem;color:#4E5864}
+.sr small{font-size:.86rem;color:#4E5864}
+.sr .av{width:50px;height:50px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-weight:900;font-size:1.1rem}
+.sfs{padding:12px 16px 16px;border-top:1px solid var(--rule)}.sfs b{display:block;font-weight:900;margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -168,34 +223,31 @@ body.ro .w-only{display:none!important}
 <div class="seg" id="seg" role="group" aria-label="بخش">
   <button type="button" data-p="add" aria-pressed="true">ثبت</button>
   <button type="button" data-p="book" aria-pressed="false">دفتر</button>
-  <button type="button" data-p="rep" aria-pressed="false">مالی</button>
-  <button type="button" data-p="sp" aria-pressed="false">سندپرداز</button>
+  <button type="button" data-p="rep" aria-pressed="false">مالی<span class="n" id="nRep"></span></button>
+  <button type="button" data-p="sp" aria-pressed="false">سندپرداز<span class="n" id="nSp"></span></button>
   <button type="button" id="goAdd" hidden></button>
   <button type="button" data-p="set" aria-pressed="false">تنظیم</button>
 </div>
 
 <section id="pAdd">
-  <div class="meter" id="mtr"><div><b id="mN">۰</b><span>فاکتور امروز</span></div><div><b id="mS">۰</b><span>جمع امروز (ریال)</span></div></div>
   <div class="card w-only" id="fCard">
     <div class="edbar" id="edBar" hidden>در حال اصلاح یک فاکتور<button type="button" class="btn s" id="edCancel">انصراف</button></div>
-    <div class="ph">
-      <button type="button" class="btn" id="phBtn"><span aria-hidden="true">📷</span><span id="phTxt">عکس فاکتور</span></button>
-      <img id="phPrev" alt="عکس فاکتور" hidden><small id="phNote">اختیاری؛ فقط روی همین گوشی می‌ماند</small>
-      <input type="file" id="phIn" accept="image/*" capture="environment" hidden>
-    </div>
-    <div id="wNo"><label class="f" for="fNo">شماره فاکتور (بالای برگه) <span class="req">*</span></label>
+    <button type="button" class="phb" id="phBtn"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v9a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span><span class="tx"><b id="phTxt">عکس فاکتور</b><small id="phNote">اختیاری؛ فقط روی همین گوشی می‌ماند</small></span><img id="phPrev" alt="عکس فاکتور" hidden></button>
+    <input type="file" id="phIn" accept="image/*" capture="environment" hidden>
+    <div id="wNo"><div class="lrow2"><label class="f" for="fNo">شماره فاکتور (بالای برگه) <span class="req">*</span></label><button type="button" class="cp" id="fNoNo" aria-pressed="false">شماره ندارد</button></div>
     <input class="in mono big" id="fNo" inputmode="numeric" autocomplete="off" maxlength="20">
-    <div class="chips"><button type="button" class="cp sm" id="fNoNo" aria-pressed="false">فاکتور شماره ندارد</button></div>
     <div class="err" id="eNo" hidden>شماره فاکتور را بنویسید.</div></div>
     <label class="f" for="fAmt">مبلغ (ریال) <span class="req">*</span></label>
     <input class="in mono big" id="fAmt" inputmode="numeric" autocomplete="off">
     <div class="der" id="dAmt"></div><div class="err" id="eAmt" hidden>مبلغ را بنویسید.</div>
-    <div id="wSup"><label class="f" for="fSup"><span id="lSup">تامین کننده</span> <span class="req">*</span></label>
+    <div id="wSup"><label class="f" for="fSup"><span id="lSup">تامین‌کننده</span> <span class="req">*</span></label>
       <input class="in cb" data-cb="sup" id="fSup" autocomplete="off" maxlength="120" placeholder="بنویسید یا از فهرست انتخاب کنید">
       <div class="auto" id="supAuto" hidden></div><div class="err" id="eSup" hidden>این خانه را پر کنید.</div></div>
-    <label class="f">دسته</label>
+    <div id="wKind"><label class="f">پرداخت</label><div class="sgm kind" id="fKind" role="group" aria-label="نوع خرید"><button type="button" class="cp" data-v="نقدی" aria-pressed="true">نقدی</button><button type="button" class="cp" data-v="اعتباری" aria-pressed="false">اعتباری</button></div></div>
+  </div>
+  <div class="card w-only" id="fCard2">
+    <label class="f" style="margin-top:0">دسته</label>
     <div class="cats" id="fCat" role="group" aria-label="دسته فاکتور"></div>
-    <div id="wKind"><div class="chips" id="fKind" role="group" aria-label="نوع خرید"><button type="button" class="cp" data-v="نقدی" aria-pressed="true">نقدی</button><button type="button" class="cp" data-v="اعتباری" aria-pressed="false">اعتباری</button></div></div>
     <div id="wTitle"><label class="f" for="fTitle"><span id="lTitle">شرح کالا</span> <span class="opt">(اگر الان وقت ندارید، بعداً)</span></label>
       <input class="in cb" data-cb="title" id="fTitle" autocomplete="off" maxlength="160" placeholder="بنویسید یا از فهرست انتخاب کنید"></div>
     <div id="wItems"><label class="f">شرح کالا — از باکس سندپرداز <span class="opt">(اگر الان وقت ندارید، بعداً)</span></label>
@@ -236,22 +288,23 @@ body.ro .w-only{display:none!important}
 </section>
 
 <section id="pBook" hidden>
-  <div class="card">
-    <h2>دفتر فاکتورها</h2>
-    <div class="sum" id="bSum"></div>
-    <input class="in" id="bQ" placeholder="جستجو: شماره فاکتور، طرف حساب، شرح، مبلغ" autocomplete="off" style="margin-top:10px">
-    <div class="chips" id="bF" role="group" aria-label="فیلتر">
-      <button type="button" class="cp" data-f="all" aria-pressed="true">همه</button>
-      <button type="button" class="cp" data-f="miss" aria-pressed="false">ناقص (بدون شرح)</button>
-      <button type="button" class="cp" data-f="debt" aria-pressed="false">بدهی پرداخت‌نشده</button>
-      <button type="button" class="cp" data-f="link" aria-pressed="false">وصل به درخواست</button>
-    </div>
-    <div class="chips" id="bM" role="group" aria-label="ماه"></div>
+  <div class="bst" id="bSum"></div>
+  <div class="srch"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></span><input class="in" id="bQ" placeholder="تامین‌کننده یا شماره فاکتور" autocomplete="off" aria-label="جستجو در دفتر"></div>
+  <div class="chips scroll" id="bF" role="group" aria-label="فیلتر" style="margin-top:12px">
+    <button type="button" class="cp" data-f="all" aria-pressed="true">همه</button>
+    <button type="button" class="cp" data-f="cash" aria-pressed="false">نقدی</button>
+    <button type="button" class="cp" data-f="credit" aria-pressed="false">اعتباری</button>
+    <button type="button" class="cp" data-f="miss" aria-pressed="false">ناقص</button>
+    <button type="button" class="cp" data-f="nosp" aria-pressed="false">بی‌سند</button>
+    <button type="button" class="cp" data-f="debt" aria-pressed="false" hidden>بدهی</button>
   </div>
-  <div class="card"><h2>طرف حساب‌ها <small id="bPN"></small></h2><div id="bList"></div></div>
+  <div id="bList"></div><small id="bPN" hidden></small>
 </section>
 
 <section id="pRep" hidden>
+  <div class="chips scroll" id="rM" role="group" aria-label="ماه" style="margin-top:14px"></div>
+  <div class="card mtot" id="rTot"></div>
+  <div class="card" id="rDebt"></div>
   <div class="card">
     <h2>گزارش تازه برای مالی</h2>
     <p class="hint">همه فاکتورهای کامل که هنوز در گزارشی نیامده‌اند، در یک فایل اکسل با همان شکل شیت همیشگی (بلوک‌ها و جمع‌ها) می‌آیند. فایل را در پیام‌رسان برای مالی بفرستید.</p>
@@ -269,17 +322,27 @@ body.ro .w-only{display:none!important}
 </section>
 
 <section id="pSp" hidden>
-  <div class="card">
-    <h2>ثبت در سندپرداز <small id="spSub"></small></h2>
-    <p class="hint">فاکتورهای «کالا — با رسید انبار» باید در سندپرداز ثبت شوند. «کپی» اطلاعات فاکتور را برای نوشتن در سندپرداز آماده می‌کند. بعد از ثبت، شماره سند سندپرداز (اختیاری) را بنویسید و «ثبت شد» را بزنید.</p>
-    <div id="spList"></div>
-  </div>
-  <div class="card"><h2>ثبت‌شده‌ها <small id="spDoneN"></small></h2><div id="spDone"></div></div>
+  <h3 class="ttl">منتظر ثبت در سندپرداز <span id="spSub"></span></h3>
+  <div id="spList"></div>
+  <h3 class="ttl" id="spDoneT">ثبت‌شده، تحویل مالی نشده <span id="spDoneN"></span></h3>
+  <div id="spDone"></div>
 </section>
 
 <section id="pSet" hidden>
+  <div class="stc"><h3>نمایش و همگام‌سازی</h3>
+    <div class="sr"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></span><span class="tx"><b>حالت تیره</b><span>برای کار شب و کارگاه کم‌نور</span></span><button type="button" class="sw" role="switch" id="stDark" aria-checked="false" aria-label="حالت تیره"></button></div>
+    <div class="sr"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0113.7-5.6L20 9M20 4v5h-5M20 12a8 8 0 01-13.7 5.6L4 15M4 20v-5h5"/></svg></span><span class="tx"><b>همگام‌سازی خودکار</b><span>خودکار، هر وقت اینترنت هست</span></span><button type="button" class="sw" role="switch" id="stAuto" aria-checked="true" aria-label="همگام‌سازی خودکار"></button></div>
+    <div class="sr"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0112 0v5l2 2H4zM10 20a2 2 0 004 0"/></svg></span><span class="tx"><b>اعلان کارهای فوری</b><span>آب، ضروری‌ها و تایید پیش‌فاکتور</span></span><button type="button" class="sw" role="switch" id="stNtf" aria-checked="false" aria-label="اعلان کارهای فوری"></button></div>
+    <div class="sfs"><b>اندازه متن</b><div class="sgm" id="stFs" role="group" aria-label="اندازه متن"><button type="button" data-v="1" aria-pressed="true">عادی</button><button type="button" data-v="1.12" aria-pressed="false">بزرگ</button><button type="button" data-v="1.25" aria-pressed="false" style="font-size:1.12rem">خیلی بزرگ</button></div></div>
+    <button type="button" class="sr" id="stSync"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0113.7-5.6L20 9M20 4v5h-5M20 12a8 8 0 01-13.7 5.6L4 15M4 20v-5h5"/></svg></span><span class="tx"><b>همگام‌سازی الان</b></span><small id="stLast"></small></button>
+    <div class="msg" id="stMsg" role="status" style="padding:0 16px"></div>
+  </div>
+  <div class="stc"><h3>حساب</h3>
+    <div class="sr"><span class="av" id="stAv">آ</span><span class="tx"><b id="stName"></b><span id="stRole"></span></span></div>
+    <button type="button" class="sr" id="stWs"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8h14l-4-4M20 16H6l4 4"/></svg></span><span class="tx"><b>تغییر واحد</b></span><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></span></button>
+  </div>
   <div class="card">
-    <h2>فهرست پیشنهادها</h2>
+    <h2>تامین‌کننده‌ها و فهرست پیشنهادها</h2>
     <div class="sum" id="sLex"></div>
     <p class="hint">نام فروشنده‌ها و کالاها هنگام نوشتن پیشنهاد می‌شود. هر فاکتور تازه هم خودش به فهرست اضافه می‌شود. این فهرست فقط در اطلاعات رمزدار سامانه است.</p>
     <div class="w-only">
@@ -342,7 +405,9 @@ function normDate(s){ s=lat(s).trim().replace(/[-.]/g,'/'); let m=/^(1[34]\d{2})
 function maskDate(el){ const at=el.selectionStart===el.value.length; let g=lat(el.value).replace(/\D/g,'').slice(0,8), o=g.slice(0,4); if(g.length>4) o+='/'+g.slice(4,6); if(g.length>6) o+='/'+g.slice(6,8); if(o!==el.value){ el.value=o; if(at) try{ el.setSelectionRange(o.length,o.length); }catch(e){} } }
 function parseAmt(raw){ const s=lat(raw).replace(/[,،٬\s_]/g,''); if(s===''||!/^\d+(\.\d+)?$/.test(s)) return null; const n=Number(s); return Number.isFinite(n)&&n>0?n:null; }
 const g3=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,',');
-const faN=n=>fa(g3(Math.round(n))).replace(/,/g,'٬');
+const faN=n=>fa(g3(Math.round(n)));
+/** مبلغ به میلیون: «۴۸.۵ م» */
+const faM=v=>{ const m=Math.round((+v||0)/1e5)/10; return fa(String(m))+' م'; };
 const noN=s=>lat(s).replace(/[^\dA-Za-z]/g,'').replace(/^0+/,'').toLowerCase();
 const YEK=['','یک','دو','سه','چهار','پنج','شش','هفت','هشت','نه'], DAH=['','','بیست','سی','چهل','پنجاه','شصت','هفتاد','هشتاد','نود'];
 const DAH1=['ده','یازده','دوازده','سیزده','چهارده','پانزده','شانزده','هفده','هجده','نوزده'], SAD=['','صد','دویست','سیصد','چهارصد','پانصد','ششصد','هفتصد','هشتصد','نهصد'];
@@ -487,12 +552,16 @@ function applyCat(){ const c=CAT[cat], F=new Set(c.f);
   if(c.dlvMain){ if($('wDlv').parentElement!==$('fCard')) $('wTitle').after($('wDlv')); } else if($('wDlv').parentElement!==$('dlvSlot')) $('dlvSlot').appendChild($('wDlv'));
   $('wNo').hidden=!!c.noNo; if(F.has('items') && !$('itList').children.length) addLine();
   $('wLink').hidden=!c.link; if(!c.link) link=null;
-  $('lTitle').textContent=c.tl||'شرح'; $('lDate').textContent=c.dl||'تاریخ'; $('lSup').textContent=c.sl||'تامین کننده'; $('lDeliver').textContent=c.dvl||'تاریخ تحویل';
+  $('lTitle').textContent=c.tl||'شرح'; $('lDate').textContent=c.dl||'تاریخ'; $('lSup').textContent=c.sl||'تامین‌کننده'; $('lDeliver').textContent=c.dvl||'تاریخ تحویل';
   fillDL('dlTitle',c.s?sugg(c.s):[]); fillDL('dlSup',sugg(c.ss||'sup'));
   drawLink(); checkDup(); }
-function amtShow(){ const n=parseAmt($('fAmt').value); $('dAmt').innerHTML=n===null?'':`<b>${esc(faN(n))}</b> ریال — ${esc(toWords(n))} ریال${n>=10000?` (${esc(faN(n/10))} تومان)`:''}`; }
+function amtShow(){ const n=parseAmt($('fAmt').value); $('dAmt').textContent=n===null?'':toWords(n)+' ریال'; }
+/* شماره و مبلغ با رقم فارسی (مبلغ با جداکننده)؛ خواندن با lat() */
+function faField(el,grp){ const at=el.selectionStart===el.value.length; let d=lat(el.value); if(grp){ d=d.replace(/[^\d]/g,''); d=d?g3(+d):''; } const v=fa(d); if(v!==el.value){ el.value=v; if(at) try{ el.setSelectionRange(v.length,v.length); }catch(e){} } }
+$('fNo').addEventListener('input',()=>faField($('fNo')));
+$('fAmt').addEventListener('input',()=>faField($('fAmt'),1),true);
 $('fAmt').addEventListener('input',()=>{ amtShow(); checkDup(); });
-$('fAmt').addEventListener('blur',()=>{ const n=parseAmt($('fAmt').value); if(n!==null) $('fAmt').value=g3(n); });
+$('fAmt').addEventListener('blur',()=>{ const n=parseAmt($('fAmt').value); if(n!==null) $('fAmt').value=fa(g3(n)); });
 $('fNo').addEventListener('input',checkDup);
 ['fDate','fRasidDate','fDeliver','fBack','rDate'].forEach(id=>$(id).addEventListener('input',()=>{ maskDate($(id)); if(id==='fDate') checkDup(); }));
 $('fTitle').addEventListener('input',()=>{ checkDup(); if(!$('lnBox').hidden) drawLink(); });
@@ -538,7 +607,7 @@ function clearForm(){ ['fNo','fTitle','fQty','fAmt','fSup','fNote','fRasid','fRa
   phNew=null; const p=$('phPrev'); p.hidden=true; p.removeAttribute('src'); $('phTxt').textContent='عکس فاکتور'; $('phNote').textContent='اختیاری؛ فقط روی همین گوشی می‌ماند'; }
 async function fillForm(r){ clearForm(); cat=r.cat; if(!CAT[cat].noKind&&r.kind) setKind(r.kind); catTouched=true;
   $('fNo').value=r.no||''; noNo=!!r.nono; $('fNoNo').setAttribute('aria-pressed',String(noNo)); $('fNo').disabled=noNo;
-  $('fTitle').value=r.title||''; $('fQty').value=r.qty||''; $('fAmt').value=r.amt?g3(r.amt):''; $('fDate').value=r.date||''; $('fSup').value=r.sup||''; $('fNote').value=r.note||'';
+  $('fTitle').value=r.title||''; $('fQty').value=r.qty||''; $('fAmt').value=r.amt?fa(g3(r.amt)):''; $('fNo').value=fa(r.no||''); $('fDate').value=r.date||''; $('fSup').value=r.sup||''; $('fNote').value=r.note||'';
   $('fRasid').value=r.rasid||''; $('fRasidDate').value=r.rasidDate||''; $('fPay').value=r.pay||''; $('fDeliver').value=r.deliver||''; $('fBack').value=r.back||''; $('fRcv').value=r.rcv||'';
   if(r.unit) $('fUnit').value=r.unit;
   if(CAT[r.cat].f.includes('items')){ $('itList').innerHTML=''; const L=Array.isArray(r.items)&&r.items.length?r.items:(r.title?[{t:r.title,q:r.qty,u:r.unit}]:[{}]); L.forEach(i=>addLine(i)); }
@@ -613,30 +682,29 @@ const monName=k=>{ const m=/^(\d{4})\/(\d{2})$/.exec(k); return m?MONTHS[+m[2]-1
 const partyOf=r=>r.sup?canon(r.cat==='haml'?'payer':'sup',r.sup):(r.note||catName(r.cat));
 const bOpen=new Set();
 function setBF(f){ bF=f; $('bF').querySelectorAll('.cp').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.f===f))); }
-function drawBook(){ const A=rowsAll(), q=norm($('bQ').value).split(' ').filter(Boolean);
-  const mons=[...new Set(A.map(monOf).filter(Boolean))].sort().reverse().slice(0,8);
-  if(bMon && !mons.includes(bMon)) bMon='';
-  $('bM').innerHTML=[['','همه ماه‌ها']].concat(mons.map(m=>[m,monName(m)])).map(([k,n])=>`<button type="button" class="cp sm" data-m="${esc(k)}" aria-pressed="${k===bMon}">${esc(n)}</button>`).join('');
-  let L=A.filter(r=>!bMon||monOf(r)===bMon);
-  const debt=L.filter(r=>r.kind==='اعتباری'&&!r.paid);
-  $('bSum').innerHTML=`<div><b>${esc(faN(L.reduce((a,r)=>a+(r.amt||0),0)))}</b><span>جمع ${esc(bMon?monName(bMon):'همه')} (ریال)، ${fa(L.length)} فاکتور</span></div>
-    <div><b>${esc(faN(L.filter(r=>r.kind!=='اعتباری').reduce((a,r)=>a+(r.amt||0),0)))}</b><span>نقدی</span></div>
-    <div><b style="color:var(--wa)">${esc(faN(debt.reduce((a,r)=>a+(r.amt||0),0)))}</b><span>بدهی پرداخت‌نشده (${fa(debt.length)})</span></div>`;
-  if(bF==='debt') L=debt; else if(bF==='miss') L=L.filter(miss); else if(bF==='link') L=L.filter(r=>r.req);
+/** دفتر (طرح v2): آمار ماه، جستجو، فیلتر، فهرست روزبه‌روز؛ زدن روی هر فاکتور: اصلاح، پرداخت، حذف */
+const bOpenR=new Set();
+const spDone=r=>!CAT[r.cat].sp || !!r.sp;
+function drawBook(){ const A=rowsAll(), q=norm($('bQ').value).split(' ').filter(Boolean), mk=String(TODAY).slice(0,7), mn=MONTHS[+String(TODAY).slice(5,7)-1]||'';
+  const M=A.filter(r=>monOf(r)===mk.replace(/\D/g,'').replace(/^(\d{4})(\d{2})$/,'$1/$2'));
+  $('bSum').innerHTML=`<div><span>فاکتور ${esc(mn)}</span><b>${fa(M.length)}</b><small>عدد</small></div><div><span>جمع ${esc(mn)}</span><b>${esc(faM(M.reduce((a,r)=>a+(r.amt||0),0)))}</b><small>میلیون ریال</small></div><div><span>ناقص</span><b class="${A.filter(miss).length?'bad':''}">${fa(A.filter(miss).length)}</b><small>بدون شرح کالا</small></div>`;
+  let L=A;
+  if(bF==='cash') L=L.filter(r=>r.kind!=='اعتباری'); else if(bF==='credit') L=L.filter(r=>r.kind==='اعتباری'); else if(bF==='miss') L=L.filter(miss); else if(bF==='nosp') L=L.filter(r=>!spDone(r)); else if(bF==='debt') L=L.filter(r=>r.kind==='اعتباری'&&!r.paid);
   if(q.length) L=L.filter(r=>{ const h=norm([r.no,r.title,r.sup,r.note,r.req&&r.req.item,r.amt,catName(r.cat)].join(' ')); return q.every(w=>h.indexOf(w)>-1); });
-  if(bF==='miss'){ $('bPN').textContent=fa(L.length)+' فاکتور ناقص'; $('bList').innerHTML=L.length?sortRows(L).map(r=>rowHTML(r)).join(''):'<div class="empty">فاکتور ناقصی نیست.</div>'; wireActs($('bList')); return; }
-  const G=new Map(), PC=new Map(); L.forEach(r=>{ const raw=r.sup||r.note||''; let p=PC.get(raw); if(p===undefined){ p=partyOf(r); PC.set(raw,p); } if(!G.has(p)) G.set(p,[]); G.get(p).push(r); });
-  const P=[...G.entries()].map(([p,rs])=>({p,rs:sortRows(rs),sum:rs.reduce((a,r)=>a+(r.amt||0),0),debt:rs.filter(r=>r.kind==='اعتباری'&&!r.paid).reduce((a,r)=>a+(r.amt||0),0),last:rs.map(dayOf).sort().pop()||''}))
-    .sort((a,b)=>b.debt-a.debt||String(b.last).localeCompare(String(a.last)));
-  $('bPN').textContent=fa(P.length)+' طرف حساب';
-  $('bList').innerHTML=P.length?P.slice(0,150).map(x=>{ const on=bOpen.has(x.p)||(q.length>0&&P.length<=3);
-    return `<div class="pt"><button type="button" data-p="${esc(x.p)}" aria-expanded="${on}"><span class="tx"><b>${esc(x.p)}</b><span>${fa(x.rs.length)} فاکتور، آخرین ${fa(x.last)}</span></span><span class="am">${esc(faN(x.sum))}${x.debt?`<small>بدهی ${esc(faN(x.debt))}</small>`:''}</span></button>
-      ${on?`<div class="pl">${x.rs.map(r=>rowHTML(r)).join('')}</div>`:''}</div>`; }).join(''):'<div class="empty">فاکتوری نیست.</div>';
-  $('bList').querySelectorAll('.pt>button').forEach(b=>b.addEventListener('click',()=>{ const p=b.dataset.p; if(bOpen.has(p)) bOpen.delete(p); else bOpen.add(p); drawBook(); }));
+  L=sortRows(L).slice(0,300); const G=new Map(); L.forEach(r=>{ const d=r.date||dayOf(r)||''; if(!G.has(d)) G.set(d,[]); G.get(d).push(r); });
+  $('bPN').textContent=fa(L.length);
+  $('bList').innerHTML=L.length?`<div class="dg">${[...G.entries()].map(([d,rs])=>`<div class="dh"><span>${fa(d)}</span><span>${esc(faN(rs.reduce((a,r)=>a+(r.amt||0),0)))}</span></div>${rs.map(bookRow).join('')}`).join('')}</div>`
+    :emptyBook();
   wireActs($('bList')); }
+const emptyBook=()=>`<div class="est"><div class="eic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:56px;height:56px"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3"/></svg></div><b>${bF==='miss'?'فاکتور ناقصی نیست':'فاکتوری نیست'}</b></div>`;
+function bookRow(r){ const on=bOpenR.has(r.id), meta=[r.no?'ش '+fa(r.no):'ش بدون شماره',catName(r.cat).replace(/ — /g,'، ').replace(' / ','، '),r.cat==='sookht'?'':(r.kind||'')].filter(Boolean).join('، ');
+  return `<div class="br"><button type="button" data-br="${esc(r.id)}" aria-expanded="${on}"><span class="tx"><b class="${miss(r)?'miss':''}">${esc(r.sup||r.title||catName(r.cat))}</b><span>${esc(meta)}</span>${miss(r)?'<span class="tag mi">ناقص: شرح ندارد</span>':''}</span>
+    <span class="am"><b>${esc(faN(r.amt||0))}</b><span class="tag ${spDone(r)?'ok':'wa'}">سندپرداز</span><span class="tag ${r.rep?'ok':''}">مالی</span></span></button>
+    ${on?`<div class="ex">${rowHTML(r)}</div>`:''}</div>`; }
+$('bList').addEventListener('click',e=>{ const b=e.target.closest('[data-br]'); if(!b) return; const id=b.dataset.br; if(bOpenR.has(id)) bOpenR.delete(id); else bOpenR.add(id); drawBook(); });
 $('bQ').addEventListener('input',drawBook);
 $('bF').addEventListener('click',e=>{ const b=e.target.closest('[data-f]'); if(!b) return; setBF(b.dataset.f); drawBook(); });
-$('bM').addEventListener('click',e=>{ const b=e.target.closest('[data-m]'); if(!b) return; bMon=b.dataset.m; drawBook(); });
+
 
 /* ============ گزارش مالی ============ */
 const unsent=()=>rowsAll().filter(r=>!r.rep);
@@ -646,7 +714,24 @@ function pickReport(){ const U=unsent(), ok=U.filter(r=>!miss(r)).sort((a,b)=>St
   return {by,take,over,miss:U.filter(miss)}; }
 function defName(d){ const m=/^(\d{4})\/(\d{2})/.exec(d||TODAY); if(!m) return ''; const n=reps().filter(x=>String(x.date||'').slice(0,7)===m[1]+'/'+m[2]).length+1; return MONTHS[+m[2]-1]+n; }
 let rNameTouched=false;
-function drawRep(){ const P=pickReport();
+/* مالی (طرح v2): کل خرید ماه، نقدی/اعتباری، به تفکیک دسته، بدهی پرداخت‌نشده */
+let rMon='';
+const CATSHORT={kala:'کالا',mavad:'مواد غذایی',khat:'خدمات خط',mashin:'خدمات ماشین‌آلات',edari:'خدمات اداری',haml:'برگ حمل',sookht:'سوخت نیسان',mkh:'فاکتور تحویلی'};
+function drawMoney(){ const A=rowsAll(), mons=[...new Set(A.map(monOf).filter(Boolean))].sort().reverse(); const cur=String(TODAY).slice(0,7);
+  /* سه ماه آخر (همین ماه و دو ماه قبل) */
+  const M3=[0,1,2].map(k=>{ let y=+cur.slice(0,4), m=+cur.slice(5,7)-k; while(m<1){ m+=12; y--; } return y+'/'+String(m).padStart(2,'0'); }); if(!rMon||!M3.includes(rMon)) rMon=M3[0];
+  $('rM').innerHTML=M3.map(m=>`<button type="button" class="cp" data-m="${esc(m)}" aria-pressed="${m===rMon}">${esc(monName(m))}</button>`).join('');
+  const L=A.filter(r=>monOf(r)===rMon), tot=L.reduce((a,r)=>a+(r.amt||0),0), cr=L.filter(r=>r.kind==='اعتباری').reduce((a,r)=>a+(r.amt||0),0), ca=tot-cr;
+  const byC={}; L.forEach(r=>{ byC[r.cat]=(byC[r.cat]||0)+(r.amt||0); }); const C=Object.entries(byC).sort((a,b)=>b[1]-a[1]), mx=C.length?C[0][1]:1, mn=MONTHS[+rMon.slice(5,7)-1]||'';
+  $('rTot').innerHTML=`<span>کل خرید ${esc(mn)}</span><div class="big"><b>${esc(faN(tot))}</b><small>ریال</small></div>
+    <div class="sbar">${ca?`<i style="flex:${ca};background:var(--nv)"></i>`:''}${cr?`<i style="flex:${cr};background:var(--am)"></i>`:''}${tot?'':'<i style="flex:1;background:#ECE8E1"></i>'}</div>
+    <div class="lgd"><span><i style="background:var(--nv)"></i>نقدی ${esc(faM(ca))}</span><span><i style="background:var(--am)"></i>اعتباری ${esc(faM(cr))}</span></div>
+    ${C.length?`<h2 style="margin:18px 0 0">به تفکیک دسته</h2>`+C.map(([k,v])=>`<div class="cbar"><div class="r"><span>${esc(CATSHORT[k]||catName(k))}</span><b>${esc(faM(v))}</b></div><div class="t"><i style="width:${Math.max(3,Math.round(v/mx*100))}%;margin-inline-start:auto"></i></div></div>`).join(''):'<p class="hint">این ماه فاکتوری ثبت نشده است.</p>'}`;
+  const D=sortRows(A.filter(r=>r.kind==='اعتباری'&&!r.paid)), ds=D.reduce((a,r)=>a+(r.amt||0),0);
+  $('rDebt').innerHTML=`<h2>بدهی پرداخت‌نشده<small style="color:var(--bad);font-size:1.05rem;font-weight:900">${esc(faN(ds))}</small></h2>${D.length?D.slice(0,40).map(r=>`<div class="it"><div class="tx"><b>${esc(r.sup||catName(r.cat))}</b><span>${r.no?'ش '+fa(r.no)+'، ':''}${fa(r.date||dayOf(r))}، ${esc(catName(r.cat))}</span>${canW?`<div class="ac"><button type="button" class="btn s g" data-pay="${esc(r.id)}">پرداخت شد</button></div>`:''}</div><div class="am">${esc(faN(r.amt||0))}</div></div>`).join(''):'<div class="empty">بدهی پرداخت‌نشده نیست.</div>'}`;
+  wireActs($('rDebt')); }
+$('rM').addEventListener('click',e=>{ const b=e.target.closest('[data-m]'); if(!b) return; rMon=b.dataset.m; drawMoney(); });
+function drawRep(){ const P=pickReport(); drawMoney();
   let h='';
   if(P.miss.length) h+=`<div class="warn">${fa(P.miss.length)} فاکتور شرح ندارد و در گزارش نمی‌آید. <button type="button" class="btn s" id="rFix">نوشتن شرح‌ها</button></div>`;
   if(P.over.length) h+=`<div class="warn">${fa(P.over.length)} فاکتور بیشتر از ظرفیت بلوک است و برای گزارش بعدی می‌ماند.</div>`;
@@ -709,18 +794,21 @@ async function photosOut(rid){ const x=reps().find(r=>r.id===rid); const L=rowsA
 /* ============ سندپرداز ============ */
 const spText=r=>[`فاکتور ${r.no?'شماره '+r.no:'بدون شماره'}`,r.sup,r.date,(Array.isArray(r.items)&&r.items.length>1?r.items.map(i=>i.t+(i.q?' — '+i.q+' '+(i.u||''):'')+(i.code?' (کد '+i.code+')':'')).join('\n'):(r.title||'')+(r.qty?' — '+r.qty+' '+(r.unit||''):'')),g3(r.amt||0)+' ریال',r.kind,r.rasid?'رسید انبار '+r.rasid:''].filter(Boolean).join('\n');
 function drawSp(){ const A=rowsAll(), P=sortRows(A.filter(needSp)).reverse(), D=sortRows(A.filter(r=>CAT[r.cat].sp&&r.sp)).sort((a,b)=>(a.deliver?1:0)-(b.deliver?1:0)), rc=sugg('rcv')[0]||'';
-  $('spSub').textContent=fa(P.length)+' منتظر';
-  $('spList').innerHTML=P.length?P.map(r=>`<div class="spc"><div class="r1">${r.ph?`<img class="thumb" data-ph="${esc(r.id)}" alt="عکس فاکتور">`:''}<div class="tx"><b>${esc(r.sup||'(بدون تامین کننده)')}</b><span>ش فاکتور ${r.no?esc(fa(r.no)):'بدون شماره'}، ${fa(r.date||dayOf(r))}، ${esc(catName(r.cat))}${r.kind?'، '+esc(r.kind):''}</span><span>${esc(r.title||'(شرح نوشته نشده)')}</span></div><b class="amt">${esc(faN(r.amt||0))}</b></div>
-      <div class="r2"><button type="button" class="btn s" data-spc="${esc(r.id)}">${ico('copy')}کپی</button>${canW?`<input class="in mono" data-spn="${esc(r.id)}" inputmode="numeric" placeholder="ش سند سندپرداز" aria-label="شماره سند سندپرداز"><button type="button" class="btn s g" data-spd="${esc(r.id)}">ثبت شد</button>`:''}</div></div>`).join('')
-    :'<div class="empty">فاکتوری منتظر سندپرداز نیست.</div>';
-  $('spDoneN').textContent=fa(D.length)+(D.some(r=>!r.deliver)?'، '+fa(D.filter(r=>!r.deliver).length)+' تحویل مالی نشده':'');
-  $('spDone').innerHTML=D.length?D.slice(0,40).map(r=>`<div class="it"><div class="tx"><b>${esc(r.title||'')}</b><span>${r.no?'ف '+esc(fa(r.no))+'، ':''}${esc(r.sup||'')}، سندپرداز ${r.sp.n?esc(fa(r.sp.n))+'، ':''}${fa(r.sp.d||'')}</span>
-      <div>${r.deliver?`<span class="tag pd">تحویل مالی${r.rcv?' به '+esc(r.rcv):''} ${fa(r.deliver)}</span>`:'<span class="tag mi">تحویل مالی نشده</span>'}</div>
-      ${canW?`<div class="ac">${r.deliver?`<button type="button" class="btn s" data-dlu="${esc(r.id)}">برگرداندن تحویل</button>`:`<input class="in cb" data-cb="rcv" data-rcv="${esc(r.id)}" value="${esc(r.rcv||rc)}" maxlength="60" placeholder="تحویل گیرنده" aria-label="تحویل گیرنده" style="flex:1;min-width:120px;min-height:40px;margin:0"><button type="button" class="btn s g" data-dlv="${esc(r.id)}">تحویل مالی شد</button>`}<button type="button" class="btn s" data-spu="${esc(r.id)}">برگرداندن سندپرداز</button></div>`:''}</div><div class="am">${esc(faN(r.amt||0))}</div></div>`).join(''):'<div class="empty">هنوز چیزی ثبت نشده است.</div>';
+  $('spSub').textContent='('+fa(P.length)+')';
+  $('spList').innerHTML=P.length?P.map(r=>`<div class="spc"><div class="r1">${r.ph?`<img class="thumb" data-ph="${esc(r.id)}" alt="عکس فاکتور">`:''}<div class="tx"><b>${esc(r.sup||'(بدون تامین‌کننده)')}</b><span>ش فاکتور ${r.no?esc(fa(r.no)):'بدون شماره'}، ${fa(r.date||dayOf(r))}، ${esc(catName(r.cat))}</span>${r.title?`<span>${esc(r.title)}</span>`:''}</div><b class="amt">${esc(faN(r.amt||0))}</b></div>
+      <div class="r2"><button type="button" class="cpb" data-spc="${esc(r.id)}" aria-label="کپی برای سندپرداز">${ico('copy')}</button>${canW?`<input class="in" data-spn="${esc(r.id)}" inputmode="numeric" placeholder="ش سند سندپرداز" aria-label="شماره سند سندپرداز"><button type="button" class="btn g" data-spd="${esc(r.id)}">ثبت شد</button>`:''}</div></div>`).join('')
+    :'<div class="card"><div class="empty">فاکتوری منتظر سندپرداز نیست.</div></div>';
+  const Dn=D.filter(r=>!r.deliver), Dy=D.filter(r=>r.deliver);
+  $('spDoneN').textContent='('+fa(Dn.length)+')';
+  const spCard=r=>`<div class="spc"><div class="r1"><div class="tx"><b>${esc(r.sup||'')}</b><span>ش فاکتور ${r.no?esc(fa(r.no)):'بدون شماره'}، سند سندپرداز ${r.sp.n?esc(fa(r.sp.n))+'، ':''}${fa(r.sp.d||'')}</span>${r.deliver?`<span class="tag pd">تحویل مالی${r.rcv?' به '+esc(r.rcv):''} ${fa(r.deliver)}</span>`:''}</div><b class="amt">${esc(faN(r.amt||0))}</b></div>
+      ${canW?(r.deliver?`<div class="lk"><button type="button" data-dlu="${esc(r.id)}">برگرداندن تحویل</button></div>`
+        :`<div class="r2"><input class="in cb" data-cb="rcv" data-rcv="${esc(r.id)}" value="${esc(r.rcv||rc)}" maxlength="60" placeholder="تحویل‌گیرنده" aria-label="تحویل‌گیرنده"><button type="button" class="btn p" data-dlv="${esc(r.id)}">تحویل مالی شد</button></div><div class="lk"><button type="button" data-spu="${esc(r.id)}">برگرداندن سندپرداز</button></div>`):''}</div>`;
+  $('spDone').innerHTML=(Dn.length?Dn.slice(0,40).map(spCard).join(''):'<div class="card"><div class="empty">همه به مالی تحویل شده‌اند.</div></div>')
+    +(Dy.length?`<details class="card"><summary style="font-weight:900;cursor:pointer;min-height:40px;display:flex;align-items:center">تحویل‌شده به مالی (${fa(Dy.length)})</summary>${Dy.slice(0,40).map(spCard).join('')}</details>`:'');
   $('spDone').querySelectorAll('[data-dlv]').forEach(b=>b.addEventListener('click',()=>{ const id=b.dataset.dlv, i=$('spDone').querySelector(`[data-rcv="${CSS.escape(id)}"]`), A2=rowsAll(), r=A2.find(x=>x.id===id); if(!r) return;
     r.deliver=TODAY; const v=canon('rcv',i?i.value:''); if(v) r.rcv=v; else delete r.rcv; put(FK,A2); lexAdd(r); render(); }));
   $('spDone').querySelectorAll('[data-dlu]').forEach(b=>b.addEventListener('click',()=>{ const A2=rowsAll(), r=A2.find(x=>x.id===b.dataset.dlu); if(!r) return; delete r.deliver; put(FK,A2); render(); }));
-  $('spList').querySelectorAll('[data-spc]').forEach(b=>b.addEventListener('click',async()=>{ const r=rowsAll().find(x=>x.id===b.dataset.spc); if(!r) return; const ok=await copyText(spText(r)); b.textContent=ok?'کپی شد ✓':'کپی نشد'; b.classList.toggle('cpd',ok); }));
+  $('spList').querySelectorAll('[data-spc]').forEach(b=>b.addEventListener('click',async()=>{ const r=rowsAll().find(x=>x.id===b.dataset.spc); if(!r) return; const ok=await copyText(spText(r)); b.classList.toggle('cpd',ok); b.setAttribute('aria-label',ok?'کپی شد':'کپی نشد'); }));
   $('spList').querySelectorAll('[data-spd]').forEach(b=>b.addEventListener('click',()=>{ const id=b.dataset.spd, inp=[...$('spList').querySelectorAll('[data-spn]')].find(e=>e.dataset.spn===id), A2=rowsAll(), r=A2.find(x=>x.id===id); if(!r) return;
     r.sp={n:clean(lat(inp?inp.value:''),20),d:TODAY}; put(FK,A2); render(); }));
   $('spDone').querySelectorAll('[data-spu]').forEach(b=>b.addEventListener('click',()=>{ const A2=rowsAll(), r=A2.find(x=>x.id===b.dataset.spu); if(!r) return; delete r.sp; put(FK,A2); render(); }));
@@ -756,11 +844,39 @@ function setPane(p){ pane=p; $('seg').querySelectorAll('button').forEach(b=>b.se
 $('seg').addEventListener('click',e=>{ const b=e.target.closest('[data-p]'); if(b) setPane(b.dataset.p); });
 const badge=(id,n)=>{ $(id).hidden=!n; $(id).textContent=fa(n); };
 function render(){ const A=rowsAll(), T=A.filter(r=>dayOf(r)===TODAY);
-  $('mN').textContent=fa(T.length); $('mS').textContent=faN(T.reduce((a,r)=>a+(r.amt||0),0));
-  const m=/^(\d{4})\/(\d{2})\/(\d{2})$/.exec(TODAY); $('hSub').textContent=m?('امروز '+fa(+m[3])+' '+MONTHS[+m[2]-1]+' '+fa(m[1])):'';
+  const m=/^(\d{4})\/(\d{2})\/(\d{2})$/.exec(TODAY), sub=m?MONTHS[+m[2]-1]+' '+fa(m[1]):''; if($('hSub').textContent!==sub) $('hSub').textContent=sub; try{ parent.postMessage({nt:'sub',t:sub},'*'); }catch(e){}
+  const nU=A.filter(r=>!r.rep).length, nS=A.filter(needSp).length; $('nRep').textContent=nU?fa(nU):''; $('nSp').textContent=nS?fa(nS):'';
   /* شمارنده‌ها فقط در «میز خرید» (تکرار نشود) */
   if(pane==='add'){ const L=sortRows(T); $('lastN').textContent=fa(T.length)+' فاکتور'; $('lastList').innerHTML=L.length?L.map(r=>rowHTML(r)).join(''):'<div class="empty">امروز هنوز فاکتوری ثبت نشده است.</div>'; wireActs($('lastList')); drawLink(); }
-  if(pane==='book') drawBook(); if(pane==='rep') drawRep(); if(pane==='sp') drawSp(); if(pane==='set') drawSet(); }
+  if(pane==='book') drawBook(); if(pane==='rep') drawRep(); if(pane==='sp') drawSp(); if(pane==='set'){ drawSet(); drawUi(); } }
+/* ===== تنظیم (طرح v2): تیره، همگام‌سازی خودکار، اعلان، اندازه متن، همگام‌سازی الان، حساب، تغییر واحد ===== */
+const PS=()=>{ try{ return parent.ntSync||null; }catch(e){ return null; } };
+function drawUi(){ let th='light'; try{ th=parent.ntTheme?parent.ntTheme.get():lsl('ntui_theme','light'); }catch(e){}
+  $('stDark').setAttribute('aria-checked',String(th==='dark')); $('stAuto').setAttribute('aria-checked',String(lsl('ntui_noauto','')!=='1'));
+  $('stNtf').setAttribute('aria-checked',String(lsl('ntui_notify','')==='1' && typeof Notification!=='undefined' && Notification.permission==='granted'));
+  const fs=lsl('ntui_fs','1'); $('stFs').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===fs)));
+  let lab=''; try{ const b=parent.document.getElementById('ntSyBtn'), l=b&&b.querySelector('.l'); lab=l?l.textContent.trim():''; }catch(e){} $('stLast').textContent=lab?('آخرین: '+lab):'';
+  const P=PS(); let nm=myName(); if(!nm){ try{ nm=(parent.document.querySelector('.topbar .brand .co')||{}).textContent||''; }catch(e){} }
+  $('stName').textContent=nm||'این سیستم'; $('stAv').textContent=(String(nm||'آ').trim()[0])||'آ';
+  let role='مسئول تدارکات'; try{ if(P && P.cfg && !P.cfg.uid && P.cfg.mode==='w') role='مدیر سامانه'; else if(P && P.canApprove && P.canApprove()) role='تایید پیش‌فاکتور'; else if(!canW) role='فقط دیدن'; }catch(e){} $('stRole').textContent=role;
+  let both=false; try{ both=!!(parent.ntWs && parent.ntWs.both()); }catch(e){} $('stWs').hidden=!both; }
+$('stDark').addEventListener('click',()=>{ const on=$('stDark').getAttribute('aria-checked')!=='true'; try{ parent.ntTheme.set(on?'dark':'light'); }catch(e){ lss('ntui_theme',on?'dark':'light'); } drawUi(); });
+$('stAuto').addEventListener('click',()=>{ const on=$('stAuto').getAttribute('aria-checked')!=='true'; lss('ntui_noauto',on?'':'1'); drawUi(); say('stMsg',on?'همگام‌سازی خودکار روشن شد':'همگام‌سازی فقط با «همگام‌سازی الان» انجام می‌شود',on?'ok':''); });
+$('stNtf').addEventListener('click',async()=>{ const on=$('stNtf').getAttribute('aria-checked')!=='true';
+  if(on){ if(typeof Notification==='undefined'){ say('stMsg','این گوشی یا مرورگر اعلان ندارد','bad'); return; } let p=Notification.permission; try{ if(p==='default') p=await Notification.requestPermission(); }catch(e){}
+    if(p!=='granted'){ say('stMsg','اجازه اعلان داده نشد (در تنظیم مرورگر)','bad'); lss('ntui_notify',''); drawUi(); return; } lss('ntui_notify','1'); say('stMsg','اعلان کارهای فوری روشن شد','ok'); }
+  else { lss('ntui_notify',''); say('stMsg','اعلان خاموش شد'); } drawUi(); });
+$('stFs').addEventListener('click',e=>{ const b=e.target.closest('[data-v]'); if(!b) return; lss('ntui_fs',b.dataset.v); khFs(); drawUi(); });
+$('stSync').addEventListener('click',async()=>{ const P=PS(); if(!P||!P.sync){ say('stMsg','این سیستم به اطلاعات مشترک وصل نیست','bad'); return; } say('stMsg','در حال همگام‌سازی…'); try{ await P.sync({manual:true}); }catch(e){} drawUi(); say('stMsg',$('stLast').textContent||'انجام شد','ok'); });
+$('stWs').addEventListener('click',()=>{ try{ parent.ntWs.toggle(); }catch(e){} });
+/* قرص همگام در سربرگ (رایانه) */
+function khSyncPill(){ const h=document.querySelector('header'); if(!h) return; let el=document.getElementById('khsy');
+  if(!el){ el=document.createElement('span'); el.id='khsy'; el.className='khsy'; el.innerHTML='<i></i><span></span>'; el.setAttribute('role','button'); el.tabIndex=0; el.title='همگام‌سازی الان'; el.style.cursor='pointer'; const go=()=>{ try{ const b=parent.document.getElementById('ntSyBtn'); if(b) b.click(); }catch(e){} }; el.onclick=go; el.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(); } }; h.appendChild(el); }
+  try{ const b=parent.document.getElementById('ntSyBtn'), l=b&&b.querySelector('.l'); const lab=(l&&l.textContent.trim())||''; const t=lab?(/همگام/.test(lab)?lab:'همگام '+lab):''; el.hidden=!t; el.lastChild.textContent=t; el.classList.toggle('bad',/نشد|نیست/.test(lab)); }catch(e){ el.hidden=true; } }
+setTimeout(khSyncPill,300); setInterval(khSyncPill,5000);
+try{ document.body.classList.add('kh'); }catch(e){}
+function khFs(){ const v=+lsl('ntui_fs','1')||1; document.documentElement.style.setProperty('--fs',String(Math.min(1.3,Math.max(1,v)))); }
+khFs(); window.addEventListener('storage',e=>{ if(e.key==='ntui_fs') khFs(); });
 
 $('fUnit').value='عدد';
 const ICO={store:'<path d="M3 10l2-6h14l2 6M4 10h16M5 10v10h14V10M10 20v-5h4v5"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 012-2h10"/>'};

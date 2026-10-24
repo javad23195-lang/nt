@@ -40,6 +40,8 @@ const KACTS=[
 ];   /* مثل طرح تازه؛ [۶] = فرمی که اجازه ثبت آن لازم است؛ بقیه در منوی ☰ سربرگ (mhead.js) */
 const KI={rcpt:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3"/>',star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
   doc:'<path d="M6 3h9l4 4v14H6zM14 3v5h5M12 11v7M14 12.5c-.5-.7-1.2-1-2-1-1.1 0-2 .6-2 1.5s.9 1.3 2 1.5 2 .6 2 1.5-.9 1.5-2 1.5c-.8 0-1.5-.3-2-1"/>',drop:'<path d="M12 3s6 6.5 6 11a6 6 0 01-12 0c0-4.5 6-11 6-11z"/>'};
+Object.assign(KI,{layout:'<rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M10 3.5v17M10 12h10.5"/>',list:'<path d="M11 6h10M11 12h10M11 18h10M3 6l1.5 1.5L7.5 4.5M3 12l1.5 1.5 3-3M3 18l1.5 1.5 3-3"/>'});
+const KTI={'میز خرید':'layout','لیست خرید':'list','پیش‌فاکتور':'doc','فاکتور خرید':'rcpt'};
 const kSvg=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${KI[k]||KI.doc}</svg>`;
 const actOk=a=>vis(a[0]) && canW(a[6]||a[0]);
 /* کارهای دکمه «+»: [نام زبانه، دکمه افزودن داخل آن، عنوان، توضیح، آیکون، رنگ] */
@@ -111,6 +113,18 @@ body.ntnav:not(.ntlocked):not(.ntdriver) #ntFab.has{display:grid}
 .ntmr svg{width:26px;height:26px;color:#1B2430}
 .ntmr .b{margin-inline-start:auto;min-width:22px;height:22px;border-radius:11px;background:#C0392B;color:#fff;font-size:.72rem;display:none;align-items:center;justify-content:center;padding:0 6px}
 .ntmr .b.show{display:flex}
+/* بخش خرید (طرح v2): نوار پایین شناور تیره، دکمه + مربعی کهربایی، عدد قرمز روشن */
+body.ws-kh #ntNav{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));height:76px;padding:0 6px;border-radius:26px;background:#1B2430;border:0;box-shadow:0 10px 28px rgba(27,36,48,.32);align-items:center;justify-content:space-around;z-index:60}
+body.ws-kh #ntNavBub{display:none}
+body.ws-kh .ntnb{width:auto;min-width:64px;min-height:56px;justify-content:center;gap:4px;color:#D5D8DC;font-size:.84rem;font-weight:800}
+body.ws-kh .ntnb svg{color:#D5D8DC;width:28px;height:28px}
+body.ws-kh .ntnb.on,body.ws-kh .ntnb.on svg{color:#E6A52E}
+body.ws-kh .ntnb.on svg{transform:none}
+body.ws-kh .ntnb .b{top:2px;right:calc(50% + 4px);min-width:22px;height:22px;padding:0 5px;box-sizing:border-box;border-radius:11px;background:#FF6B5E!important;color:#1B2430;border:0;font-weight:900;font-size:.74rem}
+body.ws-kh .ntsp{width:72px}
+body.ws-kh .ntfab{bottom:calc(19px + env(safe-area-inset-bottom));width:64px;height:60px;border-radius:18px;box-shadow:none;z-index:61}
+body.ws-kh .ntfab svg{width:32px;height:32px;stroke-width:2.8}
+html.ntdark body.ws-kh #ntNav,html.ntdark body.ws-kh .ntfab{filter:invert(1) hue-rotate(180deg)}
 .ntkl{display:flex;flex-direction:column;gap:2px}
 .ntkr{display:flex;align-items:center;gap:14px;min-height:58px;padding:6px 4px;border:0;background:none;font:inherit;color:#17212B;text-align:start;cursor:pointer;border-radius:12px}
 .ntkr .ic{width:44px;height:44px;border-radius:12px;background:#F1F4F7;display:grid;place-items:center;color:#1B2430}
@@ -189,7 +203,51 @@ body.ntdriver .topbar{width:200px}
   @keyframes ntLogoM{from{opacity:0;transform:rotate(-140deg) scale(.5)}to{opacity:1;transform:none}}
   @keyframes ntPopM{0%{transform:scale(.88)}100%{transform:scale(1)}}
 }`;
-const stD=document.createElement('style'); stD.textContent=CSSD; document.head.appendChild(stD);
+const CSSK=`
+#ntKQuick,#ntKSet{display:none}
+body:not(.ws-kh) #ntKSet,body:not(.ws-kh) #ntKQuick{display:none!important}
+@media (min-width:1000px){
+body.ws-kh{background:#F3F1EC}
+body.ws-kh .topbar{width:264px;background:#F3F1EC;border-inline-end:1px solid #DAD5CC;padding:20px 16px 16px}
+body.ws-kh .topbar .brand{flex-direction:row;align-items:center;text-align:start;gap:12px;padding:0 4px 18px;margin-bottom:0;border-bottom:0}
+body.ws-kh .topbar .brand::after{display:none}
+body.ws-kh .topbar .brand .lg{width:48px;height:48px;padding:4px;animation:none}
+body.ws-kh .topbar .brand .tt{text-align:start;width:auto;flex:1}
+body.ws-kh .topbar .brand .co{color:#8A5A00;font-size:.8rem}
+body.ws-kh .topbar .brand .un{font-size:1.02rem;font-weight:900}
+body.ws-kh .topbar .brand .dt{display:none}
+body.ws-kh #ntKQuick{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:56px;margin:0 0 14px;border:0;border-radius:14px;background:#E6A52E;color:#1B2430;font:inherit;font-size:1.05rem;font-weight:900;cursor:pointer}
+body.ws-kh #ntKQuick svg{width:26px;height:26px;stroke:currentColor;stroke-width:2.8;fill:none;stroke-linecap:round}
+body.ws-kh .tab{min-height:56px;font-size:1.05rem;font-weight:800!important;color:#1B2430!important;border-radius:14px!important;gap:14px;padding:0 14px!important}
+body.ws-kh .tab .i{color:#1B2430!important;width:24px}
+body.ws-kh .tab .i svg{width:24px;height:24px}
+body.ws-kh .tab.on,body.ws-kh .tab:hover{background:#EDEAE3!important;color:#1B2430!important}
+body.ws-kh .tab.on::before,body.ws-kh #ntTabInd::before{display:none}
+body.ws-kh #ntTabInd{background:#EDEAE3;height:56px;border-radius:14px}
+body.ws-kh .tab .n{min-width:30px;height:30px;border-radius:15px;background:#A21F17!important;font-size:.82rem}
+body.ws-kh .tab .tl{display:none}
+body.ws-kh #ntKSet{display:flex}
+body.ws-kh #ntHam{display:none!important}
+body.ws-kh #ntMenuBtn,body.ws-kh #ntSyBtn{display:none!important}
+body.ws-kh #ntWsBtn svg{width:20px;height:20px;fill:none!important;stroke:#1B2430!important;color:#1B2430!important}
+body.ws-kh #ntWsBtn:not([hidden]){order:10000;margin:auto 0 0;min-height:52px;justify-content:center;border:1px solid #DAD5CC;border-radius:14px;background:transparent;font-size:.98rem}
+body.ws-kh .tabrow>.tabs+*{margin-top:0}
+body.ws-kh #ntSyBtn,body.ws-kh #ntThBtn{min-height:40px!important;background:transparent!important;border-color:#DAD5CC!important;font-size:.82rem!important}
+}
+.tab .ts{display:none}
+@media (min-width:1000px){ body.ws-kh .tab .ts{display:inline} }`;
+const stD=document.createElement('style'); stD.textContent=CSSD+CSSK; document.head.appendChild(stD);
+/* منوی کناری بخش خرید: «ثبت سریع» (فاکتور تازه) بالای زبانه‌ها و «تنظیم» (تنظیم فاکتور) پایین آن‌ها */
+try{ const T=$('tabs');
+  const q=document.createElement('button'); q.type='button'; q.id='ntKQuick'; q.hidden=!document.body.classList.contains('ws-kh'); q.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>ثبت سریع'; T.parentNode.insertBefore(q,T);
+  q.addEventListener('click',()=>{ const a=KACTS.find(actOk); if(a) go(a[0],a[1]); });
+  const g=document.createElement('button'); g.type='button'; g.id='ntKSet'; g.className='tab'; g.hidden=!document.body.classList.contains('ws-kh'); g.style.order='-1'; g.innerHTML='<span class="i"><svg viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg></span><span class="ts">تنظیم</span>';
+  T.appendChild(g); g.addEventListener('click',()=>{ try{ localStorage.setItem('ntf_pane','set'); }catch(e){} go('فاکتور خرید'); try{ const i=idx('فاکتور خرید'); frames[i].contentWindow.postMessage({nt:'show'},'*'); }catch(e){} });
+  /* نام کوتاه زبانه‌های خرید در منوی کناری (میز، لیست، پیش‌فاکتور، فاکتور) */
+  const SH={'میز خرید':'میز','لیست خرید':'لیست','پیش‌فاکتور':'پیش‌فاکتور','فاکتور خرید':'فاکتور'};
+  const KO={'میز خرید':-8,'لیست خرید':-6,'پیش‌فاکتور':-4,'فاکتور خرید':-2};
+  setTimeout(()=>{tabs.forEach((t,i)=>{ const n=DOCS[i].name; if(!SH[n]) return; t.style.order=KO[n]; const ie=t.querySelector('.i'); if(ie && KTI[n]) ie.innerHTML=kSvg(KTI[n]); [...t.childNodes].forEach(c=>{ if(c.nodeType===3 && c.textContent.trim()===n){ const a=document.createElement('span'); a.className='tl'; a.textContent=n; const b=document.createElement('span'); b.className='ts'; b.textContent=SH[n]; c.replaceWith(a,b); } }); }); },0);
+}catch(e){}
 try{ tabs.forEach((t,i)=>{ t.style.order=DOCS[i].name==='مدیریت'?1:i*2; t.style.setProperty('--k',i); const k=TABICON[DOCS[i].name]; const e=t.querySelector('.i'); if(k && e) e.innerHTML=svg(k); }); }catch(e){}
 
 document.body.classList.add('ntnav');
@@ -235,7 +293,7 @@ function paint(){
     requestAnimationFrame(()=>{ moveBub(); moveInd(); }); return; }
   if(document.body.classList.contains('ntsolo')) document.body.classList.remove('ntsolo'); delete fab.dataset.b;
   const act=activeName(), main=barTabs(), more=others();
-  const mk=(n,label,icon,on,badge,extra)=>`<button type="button" class="ntnb${on?' on':''}" data-n="${n}" ${on?'aria-current="page"':''}>${svg(icon)}${label}<span class="b${badge?' show':''}">${cap99(badge)}</span></button>`;
+  const mk=(n,label,icon,on,badge,extra)=>`<button type="button" class="ntnb${on?' on':''}" data-n="${n}" ${on?'aria-current="page"':''}>${KH()&&KTI[n]?kSvg(KTI[n]):svg(icon)}${label}<span class="b${badge?' show':''}">${cap99(badge)}</span></button>`;
   let h=''; const lab={'امروز':'امروز','مدیریت':'مدیریت','برنامه روزانه':'برنامه','انبار':'انبار','دفترچه قرائت':'قرائت','توقف شیفت':'توقف','ثبت مشکلات':'مشکلات','درخواست خرید':'خرید','برون‌سپاری':'برون‌سپاری','شناسنامه':'شناسنامه','خدمات':'خدمات','عکس‌ها':'عکس‌ها','تردد و اضافه‌کار':'تردد','میز خرید':'میز','لیست خرید':'لیست','پیش‌فاکتور':'پیش‌فاکتور','فاکتور خرید':'فاکتور'};
   const first=main.slice(0,2), last=main.slice(2);
   first.forEach(n=>h+=mk(n,lab[n]||n,TABICON[n],act===n,badgeOf(n)));
@@ -245,6 +303,7 @@ function paint(){
     h+=`<button type="button" class="ntnb${more.indexOf(act)>-1?' on':''}" data-more="1">${svg('more')}بیشتر<span class="b${mb?' show':''}">${mb?(mb>99?'۹۹+':faN(mb)):''}</span></button>`; }
   navIn.innerHTML=h;
   requestAnimationFrame(()=>{ moveBub(); moveInd(); });
+  const fi=KH()?'kh':'nt'; if(fab.dataset.ic!==fi){ fab.dataset.ic=fi; fab.innerHTML=KH()?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>':svg('plus'); }
   const canAdd=curActs().some(actOk);
   fab.classList.toggle('has',canAdd);
 }
@@ -302,4 +361,25 @@ mo.observe($('tabs'),{subtree:true,childList:true,attributes:true,characterData:
 mo.observe(document.body,{attributes:true,attributeFilter:['class']});
 paint();
 window.ntNav={paint,openSheet,closeSheet,badgeOf,barTabs,vis};
+/* اعلان کارهای فوری بخش خرید (تنظیم «اعلان کارهای فوری»؛ فقط همین گوشی، وقتی سامانه باز است):
+   کار فوری تازه (نوبت آب، قلم ضروری، خدمات بی‌شماره، پیش‌فاکتور منتظر تایید شما) یک بار اعلان می‌شود. هیچ اطلاعاتی بیرون نمی‌رود. */
+(function(){ const J=k=>{ try{ return JSON.parse(localStorage.getItem(k)||'null'); }catch(e){ return null; } };
+  const sees=n=>{ try{ return !window.ntSync || ntSync.canSee(n); }catch(e){ return true; } };
+  function keys(){ const K=[], T=[];
+    try{ const W=J('nt_kwater_v1')||{}, tr=(Array.isArray(W.trips)?W.trips:[]).map(t=>t&&t.d).filter(Boolean).sort(), last=tr[tr.length-1]||'';
+      if(sees('آب شیرین')){ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZone:'Asia/Tehran',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()), g=t=>+p.find(x=>x.type===t).value;
+        const dn=s=>{ const m=/^(\d{4})\/(\d{1,2})\/(\d{1,2})/.exec(String(s||'')); if(!m) return null; const y=+m[1], mo=+m[2], d=+m[3]; return (y-1)*365+Math.floor((y-1)*8/33)+(mo<=6?(mo-1)*31:186+(mo-7)*30)+d; };
+        const gap=g('month')<=6?(+W.a||2):(+W.b||3), td=g('year')+'/'+g('month')+'/'+g('day'); if(!last || dn(td)-dn(last)>=gap){ K.push('w|'+td); T.push('نوبت آوردن آب شیرین است'); } } }catch(e){}
+    try{ if(sees('باکس سندپرداز')) (J('nt_kbox_v1')||[]).forEach(x=>{ if(x&&x.imp&&!x.st&&!x.gone){ K.push('b|'+x.id); T.push('قلم ضروری: '+String(x.name||'').slice(0,40)); } }); }catch(e){}
+    try{ if(sees('خدمات تدارکات')) (J('nt_ksvc_v1')||[]).forEach(x=>{ if(x&&!x.done&&!x.no){ K.push('s|'+x.id); T.push('خدمات بدون شماره: '+String(x.title||'').slice(0,40)); } }); }catch(e){}
+    try{ const ap=!window.ntSync || !ntSync.canApprove || ntSync.canApprove(); if(ap && sees('پیش‌فاکتور')) (J('nt_kpre_v1')||[]).forEach(x=>{ if(x&&x.st==='wait'){ K.push('p|'+x.id); T.push('پیش‌فاکتور منتظر تایید: '+String(x.title||'').slice(0,40)); } }); }catch(e){}
+    return {K,T}; }
+  async function check(){ try{ if(localStorage.getItem('ntui_notify')!=='1' || typeof Notification==='undefined' || Notification.permission!=='granted') return;
+      if(window.ntLocked || document.body.classList.contains('ntlocked')) return;
+      const {K,T}=keys(), seen=new Set(J('ntui_nseen')||[]), fresh=K.map((k,i)=>[k,T[i]]).filter(([k])=>!seen.has(k)); localStorage.setItem('ntui_nseen',JSON.stringify(K.slice(0,500)));
+      if(!fresh.length) return; const title=fresh.length===1?'کار فوری تازه':fa2(fresh.length)+' کار فوری تازه', body=fresh.slice(0,4).map(x=>x[1]).join('\n');
+      let done=false; try{ const r=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration(); if(r&&r.showNotification){ await r.showNotification(title,{body,tag:'nt-kh',lang:'fa',dir:'rtl'}); done=true; } }catch(e){}
+      if(!done) try{ new Notification(title,{body,tag:'nt-kh',lang:'fa',dir:'rtl'}); }catch(e){} }catch(e){} }
+  const fa2=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+  setTimeout(check,8000); setInterval(check,60000); })();
 })();

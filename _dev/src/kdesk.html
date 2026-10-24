@@ -3,50 +3,47 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#FFFFFF">
+<meta name="theme-color" content="#F3F1EC">
 <title>میز خرید</title>
 <style>
 /*KH_COMMON_CSS*/
-.dk{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
-@media(min-width:720px){.dk{grid-template-columns:repeat(3,1fr)} #alerts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px} #alerts .alr{margin-top:0}}
-@media(min-width:760px){.dk{grid-template-columns:repeat(5,1fr)}}
-.dc{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:112px;padding:14px 16px;border:1px solid var(--rule);border-radius:18px;background:#fff;text-align:start;font:inherit;color:inherit}
-.dc .n{font-size:2rem;font-weight:900;line-height:1.15;margin-bottom:4px}
-.dc .n small{font-size:.9rem;font-weight:800;margin-inline-start:4px}
-.dc b{font-size:.95rem;font-weight:900}
-.dc span.s{font-size:.8rem;color:var(--dim)}
-.dc.bad{border-color:#EDB9B2;background:var(--badbg)}.dc.bad .n{color:var(--bad)}
-.dc.wa{border-color:#EAC98F;background:var(--wabg)}.dc.wa .n{color:var(--wa)}
-.dc.ok .n{color:var(--ok)}
-.sec{margin:20px 2px 0;font-size:.92rem;font-weight:900;color:#3D4852}
-.lead{margin:10px 2px 0;font-size:.9rem;font-weight:700;color:var(--dim)}
-#alerts{margin-top:4px}
-@media(min-width:900px){.mob{display:none}}
+.dcs{background:#fff;border:2px solid var(--am);border-radius:18px;padding:18px;margin-top:14px}
+.dcs .k{display:flex;align-items:center;gap:6px;color:var(--amt);font-weight:900;font-size:.95rem}
+.dcs .k .ico svg{width:24px;height:24px}
+.dcs h2{margin:8px 0 4px;font-size:1.35rem;font-weight:900;line-height:1.5}
+.dcs p{margin:0;color:#4E5864;font-size:.92rem}
+.dcs .btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:16px;min-height:54px;font-size:1.05rem}
+.dcs .btn .ico svg{width:24px;height:24px;stroke-width:2.6}
+.lc>.lh .ico.x{color:var(--bad)}
+.lc>.lh .ico.x svg{stroke-width:3}
+.top,.cols{display:block}
+@media (min-width:760px){
+  .top{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start}
+  .top>*,.cols>*{margin-top:14px} }
 </style>
 </head>
 <body>
 <div class="wrap">
-<header><div class="tt"><h1>میز خرید</h1><p class="sub">کارهای باز بخش خرید در یک نگاه</p></div></header>
-<p class="lead mob">کارهای باز بخش خرید در یک نگاه</p>
-<div id="alerts"></div>
-<div class="sec">لیست خرید</div>
-<div class="dk" id="dList"></div>
-<div class="sec">پیش‌فاکتور</div>
-<div class="dk" id="dPre"></div>
-<div class="sec">فاکتور خرید</div>
-<div class="dk" id="dFac"></div>
+<header><div class="tt"><h1>میز خرید</h1><p class="sub" id="hSub"></p></div></header>
+<div class="top"><div id="dDec"></div><div id="alerts"></div></div>
+<div class="cols"><div class="lc" id="dList"></div><div class="lc" id="dPre"></div><div class="lc" id="dFac"></div></div>
 <div id="dEmpty"></div>
 </div>
 <script>
 /*KH_COMMON_JS*/
 const arr=k=>{ const a=LS(k,[]); return Array.isArray(a)?a:[]; };
 const obj=k=>{ const o=LS(k,{}); return (o&&typeof o==='object'&&!Array.isArray(o))?o:{}; };
-/* هر کارت یک فرم دارد (دسترسی جدا): کارت فرمی که این سیستم نمی‌بیند ساخته نمی‌شود */
+/* هر ردیف یک فرم دارد (دسترسی جدا): ردیف فرمی که این سیستم نمی‌بیند ساخته نمی‌شود */
 const goAttr=o=>`data-go="${esc(o.tab)}|${esc(o.key||'')}|${esc(o.pane||'')}|${esc(o.bf||'')}"`;
-function card(o){ if(!canSeeT(o.form||o.tab)) return ''; return `<button type="button" class="dc ${o.c||''}" ${goAttr(o)}><span class="n">${o.n}${o.u?`<small>${esc(o.u)}</small>`:''}</span><b>${esc(o.t)}</b>${o.s?`<span class="s">${esc(o.s)}</span>`:''}</button>`; }
-function alr(o){ if(!canSeeT(o.form||o.tab)) return ''; return `<button type="button" class="alr${o.wa?' wa':''}" ${goAttr(o)}>${ico(o.ic,24)}<span class="tx">${esc(o.t)}</span>${ico('chev',20)}</button>`; }
+const seeOf=o=>canSeeT(o.form||o.tab);
+function row(o){ if(!seeOf(o)) return ''; return `<button type="button" class="lr dc" ${goAttr(o)}><span class="tx"><b>${esc(o.t)}</b>${o.s?`<span>${esc(o.s)}</span>`:''}</span><span class="v ${o.c||''}">${o.n}${o.u?`<small>${esc(o.u)}</small>`:''}</span></button>`; }
+function urg(o){ if(!seeOf(o)) return ''; return `<button type="button" class="lr" ${goAttr(o)}><span class="it2${o.wa?' wa':''}">${ico(o.ic)}</span><span class="tx"><b>${esc(o.t)}</b>${o.s?`<span>${esc(o.s)}</span>`:''}</span><span class="cv">${ico('chev',20)}</span></button>`; }
+function sec(id,o,rows){ const h=rows.join(''); const el=$(id); if(!h || !seeOf(o)){ el.hidden=true; el.innerHTML=''; return false; }
+  el.hidden=false; el.innerHTML=`<button type="button" class="lh" ${goAttr(o)}>${ico(o.ic)}<span class="t">${esc(o.t)}</span>${ico('chev',20)}</button>`+h; return true; }
 function stats(){
   const B=arr('nt_kbox_v1').filter(x=>x&&x.id&&!x.gone), Bo=B.filter(x=>!x.st), imp=Bo.filter(x=>x.imp), teh=B.filter(x=>x.st==='teh');
+  const late=imp.filter(x=>{ const d=daysSince(x.need); return d!=null && d>0; });
   const seen=B.reduce((a,x)=>x.seen&&x.seen>a?x.seen:a,''), boxAge=seen?daysSince(seen):null;
   const W=arr('nt_kweek_v1').filter(w=>w&&!w.arch&&Array.isArray(w.items)).sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0];
   const wN=W?W.items.length:0, wD=W?W.items.filter(i=>i.done).length:0;
@@ -54,39 +51,45 @@ function stats(){
   const S=arr('nt_ksvc_v1').filter(s=>s&&s.id&&!s.done), Sn=S.filter(s=>!s.no);
   const P=arr('nt_kpre_v1').filter(x=>x&&x.id&&Array.isArray(x.items)), Pw=P.filter(x=>x.st==='wait'), Pd=P.filter(x=>!x.st), Po=P.filter(x=>x.st==='ok'&&!x.inList);
   const F=arr('nt_factor_v1').filter(r=>r&&r.id), miss=F.filter(r=>r.cat!=='sookht'&&!String(r.title||'').trim()), sp=F.filter(r=>r.cat==='kala'&&!r.sp), dl=F.filter(r=>r.cat==='kala'&&r.sp&&!r.deliver), un=F.filter(r=>!r.rep), debt=F.filter(r=>r.kind==='اعتباری'&&!r.paid);
-  return {dl,B,Bo,imp,teh,boxAge,W,wN,wD,last,ds,gap,left,S,Sn,P,Pw,Pd,Po,F,miss,sp,un,debt,debtSum:debt.reduce((a,r)=>a+(+r.amt||0),0)}; }
+  return {dl,B,Bo,imp,late,teh,boxAge,W,wN,wD,last,ds,gap,left,S,Sn,P,Pw,Pd,Po,F,miss,sp,un,debt,debtSum:debt.reduce((a,r)=>a+(+r.amt||0),0)}; }
+/** ارزان‌ترین ترکیب یک استعلام (هر قلم از ارزان‌ترین فروشنده) */
+function mix(iq){ let s=0; (iq.items||[]).forEach(it=>{ let b=null; (iq.quotes||[]).forEach(q=>{ const p=q.prices&&q.prices[it.id]; if(p==null||p==='') return; const v=(+p)*((+it.q)||1); if(b===null||v<b) b=v; }); if(b!=null) s+=b; }); return s; }
 function draw(){ const s=stats(), L='لیست خرید', PF='پیش‌فاکتور', FC='فاکتور خرید', AP=canAppr();
   const BOX='باکس سندپرداز', WK='خرید هفتگی', WT='آب شیرین', SV='خدمات تدارکات', K='ntk_pane';
-  $('alerts').innerHTML=[
-    AP&&s.Pw.length?alr({tab:PF,key:'ntp_pane',pane:'open',ic:'hand',t:fa(s.Pw.length)+' پیش‌فاکتور منتظر تایید شماست'}):'',
-    s.ds==null||s.left<=0?alr({tab:L,form:WT,key:K,pane:'water',ic:'drop',t:'نوبت آوردن آب شیرین است'}):'',
-    s.Sn.length?alr({tab:L,form:SV,key:K,pane:'svc',ic:'toolbox',t:fa(s.Sn.length)+' خدمات بدون شماره ثبت'}):'',
-    s.B.length&&s.boxAge!=null&&s.boxAge>7?alr({tab:L,form:BOX,key:K,pane:'box',ic:'archive',wa:1,t:'فایل باکس سندپرداز '+fa(s.boxAge)+' روز است تازه نشده'}):''
-  ].join('');
-  $('dList').innerHTML=[
-    card({tab:L,form:BOX,key:K,pane:'box',bf:'imp',n:fa(s.imp.length),t:'ضروری‌های باز',s:`از ${fa(s.Bo.length)} قلم باز کارتابل`,c:s.imp.length?'bad':''}),
-    card({tab:L,form:BOX,key:K,pane:'box',bf:'teh',n:fa(s.teh.length),t:'با مأمور تهران',s:'خرید در تهران'}),
-    card({tab:L,form:WK,key:K,pane:'week',n:s.W?fa(s.wD)+'/'+fa(s.wN):'—',t:'خرید هفتگی',s:s.W?fa(s.W.title):'لیست باز نیست',c:s.W&&s.wD<s.wN?'wa':(s.W?'ok':'')}),
-    card({tab:L,form:WT,key:K,pane:'water',n:s.ds==null?'—':fa(s.ds),u:s.ds==null?'':'روز',t:'آب شیرین',s:s.ds==null?'هنوز ثبت نشده':(s.left<=0?'از آخرین نوبت؛ نوبت آوردن است':(s.left===1?'فردا نوبت است':fa(s.left)+' روز دیگر')),c:s.ds==null||s.left<=0?'bad':(s.left===1?'wa':'ok')}),
-    card({tab:L,form:SV,key:K,pane:'svc',n:fa(s.S.length),t:'خدمات باز',s:s.Sn.length?fa(s.Sn.length)+' بدون شماره ثبت':'همه شماره دارند',c:s.Sn.length?'bad':''})
-  ].join('');
-  $('dPre').innerHTML=[
-    card({tab:PF,key:'ntp_pane',pane:'open',n:fa(s.Pw.length),t:'منتظر تایید',s:AP?'تصمیم با شما':'منتظر مدیر',c:s.Pw.length?(AP?'bad':'wa'):''}),
-    card({tab:PF,key:'ntp_pane',pane:'open',n:fa(s.Pd.length),t:'در حال استعلام',s:'هنوز فرستاده نشده',c:s.Pd.length?'wa':''}),
-    card({tab:PF,key:'ntp_pane',pane:'open',n:fa(s.Po.length),t:'تایید شده',s:'تایید شده، خرید نشده',c:s.Po.length?'ok':''})
-  ].join('');
-  $('dFac').innerHTML=[
-    card({tab:FC,key:'ntf_pane',pane:'book',bf:'miss',n:fa(s.miss.length),t:'ناقص',s:'بدون شرح',c:s.miss.length?'bad':''}),
-    card({tab:FC,key:'ntf_pane',pane:'sp',n:fa(s.sp.length),t:'منتظر سندپرداز',s:'ثبت نشده در سندپرداز',c:s.sp.length?'wa':''}),
-    card({tab:FC,key:'ntf_pane',pane:'sp',n:fa(s.dl.length),t:'تحویل مالی نشده',s:'ثبت سندپرداز شده',c:s.dl.length?'wa':''}),
-    card({tab:FC,key:'ntf_pane',pane:'rep',n:fa(s.un.length),t:'در گزارش مالی نیامده',c:s.un.length?'wa':''}),
-    card({tab:FC,key:'ntf_pane',pane:'book',bf:'debt',n:fa(s.debt.length),t:'بدهی پرداخت‌نشده',s:s.debt.length?faN(s.debtSum)+' ریال':'',c:s.debt.length?'bad':''})
-  ].join('');
-  let any=false; ['dList','dPre','dFac'].forEach(id=>{ const v=!!$(id).children.length; $(id).hidden=!v; $(id).previousElementSibling.hidden=!v; any=any||v; });
+  khSub(dayName(TODAY)+' '+fa(String(TODAY).slice(0,4)));
+  /* تصمیم با شما: اولین پیش‌فاکتور منتظر تایید */
+  const iq=AP&&canSeeT(PF)?s.Pw[0]:null;
+  $('dDec').innerHTML=iq?`<div class="dcs"><div class="k">${ico('hand')}تصمیم با شما${s.Pw.length>1?' ('+fa(s.Pw.length)+')':''}</div><h2>پیش‌فاکتور ${esc(iq.title)}</h2>
+    <p>${fa(iq.items.length)} قلم از ${fa((iq.quotes||[]).length)} فروشنده. ارزان‌ترین ترکیب: ${faN(mix(iq))} ریال</p>
+    <button type="button" class="btn p" data-go="${PF}|ntp_pane|open|" data-iq="${esc(iq.id)}">بررسی و تصمیم ${ico('arrow')}</button></div>`:'';
+  const U=[
+    s.ds==null||s.left<=0?urg({tab:L,form:WT,key:K,pane:'water',ic:'drop',t:'نوبت آوردن آب شیرین است',s:s.ds==null?'هنوز نوبتی ثبت نشده':fa(s.ds)+' روز از آخرین نوبت'}):'',
+    s.imp.length?urg({tab:L,form:BOX,key:K,pane:'box',bf:'imp',ic:'star',t:fa(s.imp.length)+' قلم ضروری خریده نشده',s:s.late.length?fa(s.late.length)+' قلم از تاریخ نیاز گذشته':'از باکس سندپرداز'}):'',
+    s.Sn.length?urg({tab:L,form:SV,key:K,pane:'svc',ic:'toolbox',t:fa(s.Sn.length)+' خدمات بدون شماره ثبت',s:s.Sn[0].title}):'',
+    s.B.length&&s.boxAge!=null&&s.boxAge>7?urg({tab:L,form:BOX,key:K,pane:'box',ic:'archive',wa:1,t:'فایل باکس '+fa(s.boxAge)+' روز است تازه نشده',s:'خروجی تازه از سندپرداز بارگذاری کنید'}):''
+  ].filter(Boolean);
+  $('alerts').innerHTML=U.length?`<div class="lc"><div class="lh"><span class="ico x">${ICO.excl?`<svg viewBox="0 0 24 24">${ICO.excl}</svg>`:''}</span><span class="t">فوری امروز <small>(${fa(U.length)})</small></span></div>${U.join('')}</div>`:'';
+  sec('dList',{tab:L,ic:'list',t:'لیست خرید'},[
+    row({tab:L,form:BOX,key:K,pane:'box',bf:'imp',n:fa(s.imp.length),t:'ضروری‌های باز',s:`از ${fa(s.Bo.length)} قلم باز کارتابل`,c:s.imp.length?'bad':''}),
+    row({tab:L,form:BOX,key:K,pane:'box',bf:'teh',n:fa(s.teh.length),t:'با مأمور تهران',s:'خرید در تهران'}),
+    row({tab:L,form:WK,key:K,pane:'week',n:s.W?fa(s.wD)+'/'+fa(s.wN):'—',t:'خرید هفتگی',s:s.W?fa(String(s.W.date||'')):'لیست باز نیست',c:s.W&&s.wD<s.wN?'wa':(s.W?'ok':'')}),
+    row({tab:L,form:WT,key:K,pane:'water',n:s.ds==null?'—':fa(s.ds),u:s.ds==null?'':'روز',t:'آب شیرین',s:s.ds==null?'هنوز ثبت نشده':'از آخرین نوبت',c:s.ds==null||s.left<=0?'bad':(s.left===1?'wa':'ok')}),
+    row({tab:L,form:SV,key:K,pane:'svc',n:fa(s.S.length),t:'خدمات باز',s:s.Sn.length?fa(s.Sn.length)+' بدون شماره ثبت':'همه شماره دارند',c:s.Sn.length?'bad':''})]);
+  sec('dPre',{tab:PF,key:'ntp_pane',pane:'open',ic:'docm',t:'پیش‌فاکتور'},[
+    row({tab:PF,key:'ntp_pane',pane:'open',n:fa(s.Pw.length),t:'منتظر تایید',s:AP?'تصمیم با شما':'منتظر مدیر',c:s.Pw.length?'bad':''}),
+    row({tab:PF,key:'ntp_pane',pane:'open',n:fa(s.Pd.length),t:'در حال استعلام',s:'هنوز فرستاده نشده',c:s.Pd.length?'wa':''}),
+    row({tab:PF,key:'ntp_pane',pane:'old',n:fa(s.Po.length),t:'تایید شده',s:'تایید شده، خرید نشده',c:s.Po.length?'ok':''})]);
+  sec('dFac',{tab:FC,key:'ntf_pane',pane:'add',ic:'rcpt',t:'فاکتور خرید'},[
+    row({tab:FC,key:'ntf_pane',pane:'book',bf:'miss',n:fa(s.miss.length),t:'ناقص',s:'بدون شرح کالا',c:s.miss.length?'bad':''}),
+    row({tab:FC,key:'ntf_pane',pane:'sp',n:fa(s.sp.length),t:'منتظر سندپرداز',s:'ثبت نشده در سندپرداز',c:s.sp.length?'wa':''}),
+    row({tab:FC,key:'ntf_pane',pane:'sp',n:fa(s.dl.length),t:'تحویل مالی نشده',s:'ثبت سندپرداز شده',c:s.dl.length?'wa':''}),
+    row({tab:FC,key:'ntf_pane',pane:'rep',n:fa(s.un.length),t:'در گزارش مالی نیامده',s:'هنوز به مالی نرفته',c:s.un.length?'wa':''}),
+    row({tab:FC,key:'ntf_pane',pane:'rep',n:fa(s.debt.length),t:'بدهی پرداخت‌نشده',s:s.debt.length?faN(s.debtSum)+' ریال':'بدهی نیست',c:s.debt.length?'bad':''})]);
+  const any=!$('dList').hidden||!$('dPre').hidden||!$('dFac').hidden||!!U.length||!!iq;
   $('dEmpty').innerHTML=any?'':emptyState('clipck','کاری برای نمایش نیست','دسترسی این سیستم به فرم‌های بخش خرید را مدیر تنظیم می‌کند.');
 }
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-go]'); if(!b) return; const [tab,key,pane,bf]=b.dataset.go.split('|');
-  if(bf) lss(key==='ntf_pane'?'ntf_bf':'ntk_bf',bf); goTab(tab,key,pane); });
+  if(bf) lss(key==='ntf_pane'?'ntf_bf':'ntk_bf',bf); if(b.dataset.iq) lss('ntp_open',b.dataset.iq); goTab(tab,key,pane); });
 window.addEventListener('storage',draw);
 window.addEventListener('message',e=>{ if(e.source===parent && e.data && e.data.nt==='show') draw(); });
 setInterval(()=>{ if(!document.hidden) draw(); },15000);

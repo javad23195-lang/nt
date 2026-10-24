@@ -70,7 +70,7 @@ const AOA2=[HEAD,row('101','1','1001','کالای نمونه الف','2','عدد
   ok(await f.evaluate(()=>document.getElementById('aState').classList.contains('ok')) && (await LSg(p,'nt_kwater_v1')).trips.length===1,'آب: ثبت امروز، حالت سبز');
   await f.click('#aAdd'); await sleep(200);
   ok(/قبلاً/.test(await f.evaluate(()=>document.getElementById('aMsg').textContent)),'آب: دوبار در یک روز ثبت نمی‌شود');
-  await f.click('#seg [data-p="svc"]'); await f.fill('#sUnit','واحد نمونه'); await f.fill('#sTitle','کار نمونه'); await f.click('#sAdd'); await sleep(200);
+  await f.click('#seg [data-p="svc"]'); await f.evaluate(()=>document.getElementById('sNewW').open=true); await f.fill('#sUnit','واحد نمونه'); await f.fill('#sTitle','کار نمونه'); await f.click('#sAdd'); await sleep(200);
   ok(/شماره خدمات ندارد/.test(await f.evaluate(()=>document.getElementById('sMsg').textContent)) && await f.evaluate(()=>document.querySelectorAll('#sOpen .svc.nr').length===1),'خدمات بدون شماره: هشدار و قرمز');
   await f.fill('#sOpen [data-no]','5501'); await f.dispatchEvent('#sOpen [data-no]','change'); await sleep(200);
   ok((await LSg(p,'nt_ksvc_v1'))[0].no==='5501' && await f.evaluate(()=>!document.querySelector('#sOpen .svc.nr')),'شماره خدمات بعداً اضافه شد');
@@ -80,16 +80,16 @@ const AOA2=[HEAD,row('101','1','1001','کالای نمونه الف','2','عدد
   await f.click('#seg [data-p="new"]'); await f.fill('#nT','استعلام نمونه'); await f.fill('#nI','قلم الف ۱۰ کیسه\nقلم ب ۲ عدد'); await f.click('#nSave'); await sleep(400);
   let P=await LSg(p,'nt_kpre_v1');
   ok(P.length===1 && P[0].items.length===2 && P[0].items[0].t==='قلم الف' && P[0].items[0].q===10 && P[0].items[0].u==='کیسه','اقلام از متن: نام، تعداد، واحد');
-  const addQ=async(sup,a,b,file)=>{ const q='.qt'; await f.fill(q+' [data-k=sup]',sup); const ins=await f.$$(q+' [data-it]'); await ins[0].fill(a); await ins[1].fill(b);
+  const addQ=async(sup,a,b,file)=>{ const q='.qt'; await f.evaluate(()=>document.querySelectorAll('details.ed').forEach(d=>d.open=true)); await f.fill(q+' [data-k=sup]',sup); const ins=await f.$$(q+' [data-it]'); await ins[0].fill(a); await ins[1].fill(b);
     if(file) await f.setInputFiles(q+' [data-k=file]',file); await f.click(q+' [data-addq]'); await sleep(700); };
   const PNG=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==','base64');
   await addQ('فروشنده نمونه یک','100000','50000',{name:'q.png',mimeType:'image/png',buffer:PNG});
   await addQ('فروشنده نمونه دو','90000','70000');
   P=await LSg(p,'nt_kpre_v1'); const FL=await LSg(p,'nt_kpre_files_v1');
   ok(P[0].quotes.length===2 && P[0].quotes[0].fid && FL[P[0].quotes[0].fid] && /^image\//.test(FL[P[0].quotes[0].fid].t),'دو پیش‌فاکتور؛ عکس فشرده در اطلاعات همگام');
-  const best=await f.evaluate(()=>[...document.querySelectorAll('.cmp td.best')].map(t=>t.innerText.split('\n')[0]));
-  ok(best.length===3 && /۹۰۰٬۰۰۰/.test(best[0]) && /۱۰۰٬۰۰۰/.test(best[1]),'مقایسه: ارزان‌ترین هر قلم و جمع سبز — '+best.join(' | '));
-  ok(/ترکیب بهترین/.test(await f.evaluate(()=>document.querySelector('.iq .bd').innerText)) && /۱٬۰۰۰٬۰۰۰/.test(await f.evaluate(()=>document.querySelector('.iq .bd .lg').innerText)),'ترکیب بهترین: ۱٬۰۰۰٬۰۰۰');
+  const best=await f.evaluate(()=>[...document.querySelectorAll('.cl.best')].map(t=>t.innerText.split('\n')[0]));
+  ok(best.length===2 && /۰\.۹ م/.test(best[0]) && /۰\.۱ م/.test(best[1]),'مقایسه: ارزان‌ترین هر قلم سبز (میلیون) — '+best.join(' | '));
+  ok(/ارزان‌ترین ترکیب/.test(await f.evaluate(()=>document.querySelector('.iq .bd').innerText)) && /۱,۰۰۰,۰۰۰/.test(await f.evaluate(()=>document.querySelector('.iq .bd .lg').innerText)),'ترکیب بهترین: ۱٬۰۰۰٬۰۰۰');
   await f.click('[data-fv]'); await sleep(300);
   ok(await f.evaluate(()=>!document.getElementById('fv').hidden),'دیدن پیوست عکس'); await f.click('#fvX');
   await f.click('[data-send]'); await sleep(300);
@@ -98,7 +98,7 @@ const AOA2=[HEAD,row('101','1','1001','کالای نمونه الف','2','عدد
   console.log('۵) میز خرید');
   await go(p,'میز خرید'); f=await frameOf(p,'میز خرید'); await sleep(300);
   let D=await f.evaluate(()=>document.body.innerText);
-  ok(/پیش‌فاکتور منتظر تایید شماست/.test(D),'مدیر: هشدار «منتظر تایید شما»');
+  ok(/تصمیم با شما/.test(D) && /پیش‌فاکتور استعلام نمونه/.test(D),'مدیر: هشدار «منتظر تایید شما»');
   ok(!/نوبت آوردن آب/.test(D) && !/بدون شماره ثبت/.test(D),'آب امروز آمده و خدمات شماره دارد: بی‌هشدار');
   await f.click('.dc:has-text("ضروری‌های باز")'); await sleep(900);
   ok(await p.evaluate(()=>DOCS[tabs.findIndex(t=>t.classList.contains('on'))].name==='لیست خرید'),'کارت ضروری‌ها: رفتن به لیست خرید');
@@ -111,7 +111,7 @@ const AOA2=[HEAD,row('101','1','1001','کالای نمونه الف','2','عدد
   await f.click('[data-apok]'); await sleep(200);
   ok(/اول یک فروشنده/.test(await f.evaluate(()=>document.querySelector('[data-am]').textContent)),'تایید بدون انتخاب: پیام');
   await f.click('[data-apmix]'); await sleep(100);
-  ok(await f.evaluate(()=>document.querySelectorAll('.cmp td.pick').length===2),'«هر قلم ارزان‌ترین»: دو خانه انتخاب شد');
+  ok(await f.evaluate(()=>document.querySelectorAll('.cl.pick').length===2),'«هر قلم ارزان‌ترین»: دو خانه انتخاب شد');
   await f.click('[data-apok]'); await sleep(400);
   P=await LSg(p,'nt_kpre_v1');
   ok(P[0].st==='ok' && P[0].dec.mode==='item' && Object.keys(P[0].dec.per).length===2 && P[0].quotes.find(q=>q.id===P[0].dec.per[P[0].items[0].id]).sup==='فروشنده نمونه دو','تایید: هر قلم از فروشنده ارزان‌تر');
@@ -128,14 +128,14 @@ const AOA2=[HEAD,row('101','1','1001','کالای نمونه الف','2','عدد
   const cfgU=(acl,appr)=>({uid:'u1',mode:'w',acl,appr:!!appr});
   ({c,p,errs}=await run(cfgU({'میز خرید':'w','لیست خرید':'w','پیش‌فاکتور':'w','فاکتور خرید':'w'}),{nt_kpre_v1:P0}));
   if(await p.evaluate(()=>{ const e=document.getElementById('ntWs'); return e&&!e.hidden; })){ await p.click('#ntWs [data-ws="kh"]'); await sleep(1200); }
-  await go(p,'پیش‌فاکتور'); f=await frameOf(p,'پیش‌فاکتور'); await f.click('.iq > button.h'); await sleep(200);
+  await go(p,'پیش‌فاکتور'); f=await frameOf(p,'پیش‌فاکتور'); if(!(await f.$('.iq .bd'))){ await f.click('.iq > button.h'); await sleep(200); }
   ok(await f.evaluate(()=>!document.querySelector('[data-apok]') && /منتظر تایید مدیر/.test(document.body.innerText)),'مأمور خرید (بی‌حق تایید): دکمه تایید ندارد');
   await go(p,'میز خرید'); f=await frameOf(p,'میز خرید');
-  ok(!/منتظر تایید شماست/.test(await f.evaluate(()=>document.body.innerText)),'میز: هشدار تایید برای مأمور خرید نیست');
+  ok(!/تصمیم با شما/.test(await f.evaluate(()=>document.body.innerText)),'میز: هشدار تایید برای مأمور خرید نیست');
   await c.close();
   ({c,p,errs}=await run(cfgU({'میز خرید':'w','لیست خرید':'r','پیش‌فاکتور':'w'},true),{nt_kpre_v1:P0}));
   if(await p.evaluate(()=>{ const e=document.getElementById('ntWs'); return e&&!e.hidden; })){ await p.click('#ntWs [data-ws="kh"]'); await sleep(1200); }
-  await go(p,'پیش‌فاکتور'); f=await frameOf(p,'پیش‌فاکتور'); await f.click('.iq > button.h'); await sleep(200);
+  await go(p,'پیش‌فاکتور'); f=await frameOf(p,'پیش‌فاکتور'); if(!(await f.$('.iq .bd'))){ await f.click('.iq > button.h'); await sleep(200); }
   ok(await f.evaluate(()=>!!document.querySelector('[data-apok]')),'کاربر با «تایید پیش‌فاکتور»: دکمه تایید دارد');
   await go(p,'لیست خرید'); f=await frameOf(p,'لیست خرید');
   ok(await f.evaluate(()=>['box','week','water','svc'].every(k=>document.getElementById('p_'+k).classList.contains('ro')) && getComputedStyle(document.querySelector('#p_box .w-only')).display==='none'),'لیست خرید فقط‌خواندنی: فرم‌ها پنهان');
@@ -181,7 +181,7 @@ const AOA2=[HEAD,row('101','1','1001','کالای نمونه الف','2','عدد
   await go(p,'پیش‌فاکتور'); f=await frameOf(p,'پیش‌فاکتور');
   await f.click('#seg [data-p="new"]'); await f.fill('#nI','<svg onload=window.__y=1>'); await f.click('#nSave'); await sleep(300);
   await f.fill('.qt [data-k=sup]','<img src=x onerror=window.__y=1>'); await f.fill('.qt [data-it]','1'); await f.click('.qt [data-addq]'); await sleep(400);
-  ok(await f.evaluate(()=>!window.__y && !document.querySelector('.cmp img, .cmp svg')),'نام قلم و فروشنده بی‌خطر');
+  ok(await f.evaluate(()=>!window.__y && !document.querySelector('.ib img, .ib svg')),'نام قلم و فروشنده بی‌خطر');
   ok(!errs.length,'بدون خطای صفحه '+errs.join(' | ').slice(0,300)); await c.close();
 
   await br.close(); web.close(); console.log(fails?`\n${fails} FAIL`:'\nALL OK'); process.exit(fails?1:0);

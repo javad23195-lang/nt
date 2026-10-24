@@ -12,6 +12,8 @@ t=open('factor.html',encoding='utf-8').read()
 # طرح برگه گزارش مالی (فقط برچسب‌ها و فرمول‌های شیت خالی؛ بدون اطلاعات): factor_tpl.json
 tpl=open('factor_tpl.json',encoding='utf-8').read().strip()
 assert t.count('/*TPL*/null')==1; t=t.replace('/*TPL*/null',tpl)
+# سبک مشترک بخش خرید (طرح v2) بعد از سبک خود فاکتور
+assert t.count('/*KH_COMMON_CSS*/')==1; t=t.replace('/*KH_COMMON_CSS*/',open('kh_common.css',encoding='utf-8').read())
 docs.append({"name":N,"icon":"▦","color":"#1B2430","b64":base64.b64encode(t.encode('utf-8')).decode('ascii')})
 s=s[:i]+json.dumps(docs,ensure_ascii=False)+s[j:]
 open(out,'w',encoding='utf-8').write(s); print('factor')

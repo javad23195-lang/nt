@@ -28,7 +28,7 @@ function dn(s){ const m=/^(1[34]\d{2})\/(\d{1,2})\/(\d{1,2})/.exec(lat(s||'').tr
 const daysSince=s=>{ const a=dn(s), b=dn(TODAY); return (a===null||b===null)?null:b-a; };
 function parseAmt(raw){ const s=lat(raw).replace(/[,،٬\s_]/g,''); if(s===''||!/^\d+(\.\d+)?$/.test(s)) return null; const n=Number(s); return Number.isFinite(n)&&n>=0?n:null; }
 const g3=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,',');
-const faN=n=>fa(g3(Math.round(n))).replace(/,/g,'٬');
+const faN=n=>fa(g3(Math.round(n)));
 function say(id,t,c){ const e=$(id); if(!e) return; e.textContent=t||''; e.className='msg'+(c?' '+c:''); }
 function armButton(btn,action,b,ms){ let on=false,tm=null; const a=btn.textContent; const off=()=>{ on=false; btn.classList.remove('armed'); btn.textContent=a; clearTimeout(tm); };
   btn.addEventListener('click',()=>{ if(!on){ on=true; btn.classList.add('armed'); btn.textContent=b||'مطمئنید؟ دوباره بزنید'; tm=setTimeout(off,ms||5000); return; } off(); action(); }); }
@@ -68,3 +68,25 @@ const WDAY=['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','
 function dayName(s){ const m=/^(\d{4})\/(\d{1,2})\/(\d{1,2})/.exec(lat(s||'')); if(!m) return fa(s||''); try{ const g=j2g(+m[1],+m[2],+m[3]); const w=new Date(Date.UTC(g[0],g[1]-1,g[2])).getUTCDay(); return WDAY[w]+' '+fa(+m[3])+' '+MONTHS[+m[2]-1]; }catch(e){ return fa(s); } }
 /** حالت خالی: آیکن، عنوان، توضیح، دکمه */
 const emptyState=(ic,t,p,btn)=>`<div class="est"><div class="eic">${ico(ic,40)}</div><b>${esc(t)}</b>${p?`<p>${esc(p)}</p>`:''}${btn||''}</div>`;
+/* ===== طرح v2: زیرعنوان سربرگ، قرص همگام (رایانه)، اندازه متن ===== */
+/** مبلغ به میلیون: ۴۸٫۵ میلیون → «۴۸.۵ م» */
+const faM=v=>{ const m=Math.round((+v||0)/1e5)/10; return fa(String(m))+' م'; };
+/** زیرعنوان سربرگ سامانه (گوشی) و سربرگ همین بخش (رایانه) */
+function khSub(t){ t=String(t||''); const s=document.querySelector('header .sub'); if(s && s.textContent!==t) s.textContent=t;
+  try{ parent.postMessage({nt:'sub',t},'*'); }catch(e){} }
+function khSyncPill(){ const h=document.querySelector('header'); if(!h) return; let el=document.getElementById('khsy');
+  if(!el){ el=document.createElement('span'); el.id='khsy'; el.className='khsy'; el.innerHTML='<i></i><span></span>'; el.setAttribute('role','button'); el.tabIndex=0; el.title='همگام‌سازی الان'; el.style.cursor='pointer'; const go=()=>{ try{ const b=parent.document.getElementById('ntSyBtn'); if(b) b.click(); }catch(e){} }; el.onclick=go; el.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(); } }; h.appendChild(el); }
+  try{ const b=parent.document.getElementById('ntSyBtn'), l=b&&b.querySelector('.l'); const lab=(l&&l.textContent.trim())||'';
+    const t=lab?(/همگام/.test(lab)?lab:'همگام '+lab):''; el.hidden=!t; el.lastChild.textContent=t; el.classList.toggle('bad',!!(b&&b.classList.contains('err'))||/نشد|نیست/.test(lab)); }catch(e){ el.hidden=true; } }
+function khFs(){ const v=+lsl('ntui_fs','1')||1; document.documentElement.style.setProperty('--fs',String(Math.min(1.3,Math.max(1,v)))); }
+khFs(); window.addEventListener('storage',e=>{ if(!e.key||e.key==='ntui_fs') khFs(); });
+try{ document.body.classList.add('kh'); }catch(e){}
+setTimeout(khSyncPill,300); setInterval(khSyncPill,5000);
+/* تیک (بازبینی): دکمه شبیه چک‌باکس */
+const CHK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>';
+Object.assign(ICO,{filechk:'<path d="M6 3h9l4 4v14H6zM14 3v5h5M9 14l2 2 4-4"/>',cart:'<path d="M3 4h2l2.4 11h10.2L20 7H6.2M9 20h.01M17 20h.01M12 7v5M9.5 9.5h5"/>',
+  truck:'<path d="M3 6h11v9H3zM14 9h4l3 3v3h-7M7 18a2 2 0 100-4 2 2 0 000 4zM17 18a2 2 0 100-4 2 2 0 000 4z"/>',ban:'<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>',
+  box0:'<rect x="5" y="5" width="14" height="14" rx="2"/>',boxck:'<rect x="5" y="5" width="14" height="14" rx="2"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',chevd:'<path d="M6 9l6 6 6-6"/>',chevu:'<path d="M6 15l6-6 6 6"/>',
+  excl:'<path d="M12 4v10M12 19v.5"/>',back:'<path d="M5 12h14M13 6l6 6-6 6"/>',moon:'<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',sync:'<path d="M4 12a8 8 0 0113.7-5.6L20 9M20 4v5h-5M20 12a8 8 0 01-13.7 5.6L4 15M4 20v-5h5"/>',
+  bell:'<path d="M6 16V11a6 6 0 0112 0v5l2 2H4zM10 20a2 2 0 004 0"/>',swap:'<path d="M4 8h14l-4-4M20 16H6l4 4"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/>'});

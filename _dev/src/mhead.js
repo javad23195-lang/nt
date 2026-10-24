@@ -35,8 +35,8 @@ body.ntnav .topbar #ntSyBtn .l{display:inline;max-width:76px;overflow:hidden;tex
 #ntSyBtn .l{display:none}
 body.ntnav .topbar #ntSyBtn .d{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none}
 @media (max-width:370px){ body.ntnav .topbar #ntSyBtn .l{max-width:52px} }
-#ntDrwBd{position:fixed;inset:0;background:rgba(18,25,33,.55);z-index:90}
-#ntDrw{position:fixed;top:0;bottom:0;right:0;width:min(86vw,340px);background:#fff;z-index:91;overflow-y:auto;box-shadow:-8px 0 24px rgba(0,0,0,.25);
+#ntDrwBd{position:fixed;inset:0;background:rgba(18,25,33,.55);z-index:319}
+#ntDrw{position:fixed;top:0;bottom:0;right:0;width:min(86vw,340px);background:#fff;z-index:320;overflow-y:auto;box-shadow:-8px 0 24px rgba(0,0,0,.25);
   padding:calc(14px + env(safe-area-inset-top)) 14px calc(20px + env(safe-area-inset-bottom));direction:rtl}
 body.ntdrw #ntDrwBd,body.ntdrw #ntDrw{display:block}
 @media (prefers-reduced-motion:no-preference){ body.ntdrw #ntDrw{animation:ntDrwIn .2s ease-out} @keyframes ntDrwIn{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}} }
@@ -54,6 +54,24 @@ body.ntdrw #ntDrwBd,body.ntdrw #ntDrw{display:block}
 #ntDrw .di .v{margin-inline-start:auto;font-size:.78rem;color:#5B6874;font-weight:700}
 #ntDrw .di.x{color:#B3261E}
 #ntDrw .di:focus-visible,#ntHam:focus-visible,#ntMoon:focus-visible{outline:3px solid #E6A52E;outline-offset:1px}
+}
+/* بخش خرید (طرح v2): سربرگ روشن کرم، عنوان درشت، زیرعنوان هر زبانه، قرص همگام و دکمه شبکه‌ای */
+#ntGrid,#ntHS{display:none}
+@media (max-width:899px){
+body.ws-kh.ntnav .topbar{background:#F3F1EC!important;box-shadow:none!important;border-bottom:0!important;padding:12px 16px 4px;padding-top:calc(12px + env(safe-area-inset-top));gap:10px}
+body.ws-kh #ntHam,body.ws-kh #ntMoon{display:none!important}
+body.ws-kh #ntHT{color:#1B2430;font-size:1.75rem;font-weight:900;line-height:1.3}
+body.ws-kh.ntnav .brand .dt{color:#4E5864!important;font-size:.95rem;font-weight:800}
+body.ws-kh.khsub.ntnav .brand .dt{display:none!important}
+body.ws-kh #ntHS{display:block;color:#4E5864;font-size:.95rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.ws-kh.ntnav .topbar #ntSyBtn{height:40px;padding:0 14px;border-radius:20px!important;background:transparent!important;border:1px solid #DAD5CC!important;color:#1B2430!important;font-weight:800}
+body.ws-kh.ntnav .topbar #ntSyBtn .l::before{content:"همگام "}
+body.ws-kh.ntnav .topbar #ntSyBtn .l{max-width:110px}
+body.ws-kh #ntGrid{display:grid;place-items:center;flex:none;width:50px;height:50px;border-radius:14px;border:1px solid #DAD5CC;background:#fff;color:#1B2430;cursor:pointer;position:relative}
+body.ws-kh #ntGrid svg{width:24px;height:24px}
+body.ws-kh #ntGrid .b{position:absolute;top:-4px;inset-inline-start:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#FF6B5E;color:#1B2430;font-size:.7rem;font-weight:900;display:none;align-items:center;justify-content:center}
+body.ws-kh #ntGrid .b.show{display:flex}
+html.ntdark body.ws-kh .topbar{filter:none!important}
 }
 html.ntdark #ntDrw{background:#1A222B}html.ntdark #ntDrw .di{color:#E8EDF2}html.ntdark #ntDrw .di svg{color:#E8EDF2}html.ntdark #ntDrw .di:hover{background:#24303B}html.ntdark #ntDrw .di.on{background:#3A2F17}
 @media print{ #ntHam,#ntMoon,#ntDrw,#ntDrwBd{display:none!important} }
@@ -75,6 +93,10 @@ function build(){
   if(tt && !$('ntHT')){ const h=document.createElement('span'); h.id='ntHT'; tt.insertBefore(h,tt.firstChild); }
   if(!$('ntMoon')){ const m=document.createElement('button'); m.type='button'; m.id='ntMoon'; m.innerHTML=MOON; m.setAttribute('aria-label','ظاهر (روشن، تیره، آفتاب)');
     m.addEventListener('click',()=>{ const t=$('ntThBtn'); if(t) t.click(); setTimeout(paint,50); }); row.appendChild(m); }
+  if(!$('ntGrid')){ const g=document.createElement('button'); g.type='button'; g.id='ntGrid'; g.setAttribute('aria-label','منو: همه بخش‌ها و ابزارها');
+    g.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="19" cy="19" r="2"/></svg><span class="b"></span>';
+    row.appendChild(g); g.addEventListener('click',open); }
+  if(tt && !$('ntHS')){ const h=document.createElement('span'); h.id='ntHS'; const d=tt.querySelector('.dt'); tt.insertBefore(h,d||null); }
   if(!$('ntDrw')){ const bd=document.createElement('div'); bd.id='ntDrwBd'; bd.addEventListener('click',close); document.body.appendChild(bd);
     const d=document.createElement('aside'); d.id='ntDrw'; d.setAttribute('aria-label','منو'); d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); document.body.appendChild(d);
     d.addEventListener('click',onDrw); }
@@ -84,6 +106,9 @@ function paint(){
   if(!build()) return;
   const i=activeIdx(), name=i>-1&&DOCS[i]?DOCS[i].name:'';
   const h=$('ntHT'); if(h && h.textContent!==name) h.textContent=name;
+  /* زیرعنوان زبانه‌های خرید (پیام {nt:'sub'} از خود زبانه) */
+  const kh=document.body.classList.contains('ws-kh'), sub=kh&&i>-1?(SUB[i]||''):''; const hs=$('ntHS'); if(hs && hs.textContent!==sub) hs.textContent=sub;
+  if(document.body.classList.contains('khsub')!==!!sub) document.body.classList.toggle('khsub',!!sub);
   /* قرص همگام: فقط ساعت آخرین همگام‌سازی (کوتاه، تا نام زبانه جا شود) */
   const sb=$('ntSyBtn'); if(sb){ const tx=sb.querySelector('.tx'); let l=sb.querySelector('.l'); if(!l){ l=document.createElement('span'); l.className='l'; sb.appendChild(l); }
     const raw=tx?tx.textContent.trim():'', m=/^همگام\s+(.+)$/.exec(raw), lab=m?m[1]:(raw==='اطلاعات مشترک'?'همگام نیست':raw);
@@ -93,6 +118,7 @@ function paint(){
   const solo=document.body.classList.contains('ntsolo');
   const n=DOCS.reduce((s,d,k)=>s+((vis(k)&&(solo||bar.indexOf(d.name)<0))?num(badge(d.name)):0),0);
   const b=$('ntHam') && $('ntHam').querySelector('.b'); if(b){ const t=n?(n>99?'۹۹+':fa(n)):''; if(b.textContent!==t) b.textContent=t; b.classList.toggle('show',!!n); }
+  const gb=$('ntGrid') && $('ntGrid').querySelector('.b'); if(gb){ const t=n?(n>99?'۹۹+':fa(n)):''; if(gb.textContent!==t) gb.textContent=t; gb.classList.toggle('show',!!n); }
   if(document.body.classList.contains('ntdrw')) fill();
 }
 function fill(){
@@ -121,10 +147,13 @@ function onDrw(e){ const b=e.target.closest('button'); if(!b) return;
   if(b.dataset.t!==undefined){ close(); try{ show(+b.dataset.t); }catch(x){} return; }
   if(b.dataset.a){ const t=$(b.dataset.a); if(b.dataset.keep){ if(t) t.click(); setTimeout(fill,60); return; } close(); if(t) setTimeout(()=>t.click(),30); } }
 let last=null;
-function open(){ if(document.body.classList.contains('ntdrw')) return; last=document.activeElement; fill(); document.body.classList.add('ntdrw'); $('ntHam').setAttribute('aria-expanded','true');
+function open(){ if(document.body.classList.contains('ntdrw')) return; last=document.activeElement; fill(); document.body.classList.add('ntdrw'); if($('ntHam')) $('ntHam').setAttribute('aria-expanded','true');
   const f=$('ntDrw').querySelector('.di.on')||$('ntDrw').querySelector('button'); if(f) try{ f.focus(); }catch(e){} }
 function close(){ if(!document.body.classList.contains('ntdrw')) return; document.body.classList.remove('ntdrw'); const b=$('ntHam'); if(b) b.setAttribute('aria-expanded','false'); try{ if(last&&last.focus) last.focus(); }catch(e){} }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') close(); });
+const SUB={};
+window.addEventListener('message',e=>{ const m=e&&e.data; if(!m || m.nt!=='sub') return; const k=(typeof frames!=='undefined'?frames:[]).findIndex(f=>{ try{ return f.contentWindow===e.source; }catch(x){ return false; } });
+  if(k<0) return; const t=String(m.t||'').slice(0,80); if(SUB[k]!==t){ SUB[k]=t; paint(); } });
 let q=0; const sched=()=>{ if(q) return; q=setTimeout(()=>{ q=0; paint(); },60); };
 try{ new MutationObserver(sched).observe($('tabs'),{subtree:true,childList:true,attributes:true,characterData:true,attributeFilter:['class','hidden']}); }catch(e){}
 setInterval(paint,2000);

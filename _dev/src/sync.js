@@ -660,6 +660,8 @@ function tick(){
   const m=mode(); if((m!=='w' && m!=='v') || busy || conflict) return;
   const now=Date.now();
   if(waiting){ sync({}); return; }
+  /* «همگام‌سازی خودکار» خاموش (تنظیم بخش خرید؛ فقط همین سیستم): فقط با دکمه همگام‌سازی */
+  try{ if(localStorage.getItem('ntui_noauto')==='1') return; }catch(e){}
   if(phase==='err' || phase==='off'){ if(now-lastChk>(phase==='off'?Math.min(T.retry,30000):T.retry)) sync({}); return; }
   if(document.hidden) { if(m==='v') return; }
   if(now-lastChk >= (m==='w'?T.pollW:T.poll)){ sync({}); return; }

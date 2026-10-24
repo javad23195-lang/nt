@@ -28,7 +28,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   ok(await p.evaluate(()=>JSON.stringify(ntSync.khForms())==='["خدمات تدارکات"]' && ntSync.canWriteTab('خدمات تدارکات') && !ntSync.canSee('آب شیرین') && !ntSync.canSee('باکس سندپرداز')),'دسترسی: فقط خدمات');
   let f=await frameOf(p,'لیست خرید');
   ok(await f.evaluate(()=>document.getElementById('seg').hidden && !document.getElementById('p_svc').hidden && document.getElementById('p_box').hidden && document.getElementById('p_water').hidden),'لیست خرید: فقط قسمت خدمات، بدون دکمه‌های بخش');
-  await f.fill('#sUnit','واحد نمونه ب'); await f.fill('#sTitle','کار تازه'); await f.fill('#sNo','77'); await f.click('#sAdd'); await sleep(200);
+  await f.evaluate(()=>document.getElementById('sNewW').open=true); await f.fill('#sUnit','واحد نمونه ب'); await f.fill('#sTitle','کار تازه'); await f.fill('#sNo','77'); await f.click('#sAdd'); await sleep(200);
   ok((await p.evaluate(()=>JSON.parse(localStorage.getItem('nt_ksvc_v1')))).some(x=>x.title==='کار تازه' && x.no==='77'),'ثبت خدمات تازه');
   ok(!errs.length,'بدون خطا '+errs.join('|').slice(0,200)); await c.close();
 
@@ -65,13 +65,13 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   console.log('۴) صفحه انتخاب و منوی کناری (طرح تازه)');
   ({c,p,errs}=await run({mode:'w'},{},true));
   T=await p.evaluate(()=>document.getElementById('ntWs').innerText);
-  ok(/کدام واحد؟/.test(T) && /واحد تدارکات/.test(T) && /لیست خرید، پیش‌فاکتور و فاکتور خرید/.test(T) && /کار باز/.test(T),'صفحه انتخاب: دو کارت با شمار «کار باز»');
+  ok(/کدام واحد را باز کنیم؟/.test(T) && /واحد تدارکات/.test(T) && /لیست خرید، پیش‌فاکتور و فاکتور خرید/.test(T) && /سلام/.test(T),'صفحه انتخاب طرح تازه: سلام و دو کارت');
   await p.click('#ntWs [data-ws="kh"]'); await sleep(1200);
   ok(await p.evaluate(()=>[...document.querySelectorAll('.topbar .brand .un')].every(e=>e.textContent==='واحد تدارکات')),'نام واحد در سربرگ: واحد تدارکات');
   await p.click('#ntFab'); await sleep(300);
   ok((await p.evaluate(()=>document.querySelectorAll('#ntNavSh .ntkr').length))===4,'منوی +: چهار کار با آیکن و فلش');
   await p.keyboard.press('Escape');
-  await p.click('#ntHam'); await sleep(300); await p.click('#ntDrw [data-a="ws"]'); await sleep(1000);
+  await p.click('#ntGrid'); await sleep(300); await p.click('#ntDrw [data-a="ws"]'); await sleep(1000);
   ok(await p.evaluate(()=>[...document.querySelectorAll('.topbar .brand .un')].every(e=>e.textContent!=='واحد تدارکات')),'برگشت به نت: نام واحد اصلی');
   ok(!errs.length,'بدون خطا '+errs.join('|').slice(0,200)); await c.close();
 

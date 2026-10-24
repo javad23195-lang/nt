@@ -30,7 +30,7 @@ body.ntnav .brand .tt{min-width:0;overflow:hidden}
 `;
 /* CSS داخل هر بخش */
 const FCSS={
-  dark:'img,video,canvas,.ntico{filter:invert(1) hue-rotate(180deg)}',
+  dark:'img,video,canvas,.ntico{filter:invert(1) hue-rotate(180deg)}body.kh .btn.p,body.kh .dcs .btn{background:#E6A52E;border-color:#E6A52E;color:#fff}body.kh .cp[aria-pressed="true"],body.kh .sgm button[aria-pressed="true"]{background:#fff;border-color:#fff;color:#1B2430}',
   sun:'body{font-weight:500}small,.dim,.hint,.fhint{opacity:1!important}',
   fx:`@media (prefers-reduced-motion:no-preference){ button:active:not(:disabled),.btn:active,[role=button]:active,label.chk:active{scale:.97} }
 .ntok{animation:ntOk .7s ease-out}.ntbad{animation:ntBad .5s ease-in-out}
