@@ -946,8 +946,16 @@ $('roCard').hidden=canW; $('fDate').value=TODAY; $('rDate').value=TODAY;
 drawCats(); applyCat();
 { const p=lsl('ntf_pane','add'); setPane(['add','book','rep','sp','set'].includes(p)?p:'add'); }
 $('goAdd').addEventListener('click',()=>{ setPane('add'); try{ $('fNo').focus(); }catch(e){} });
+/* از «باکس سندپرداز»: «ثبت فاکتور» (فرم کالا با اقلام همان باکس) یا «افزودن رسید» (همان فاکتور، خانه رسید انبار) */
+async function takeIntent(){ let o=null; try{ o=JSON.parse(localStorage.getItem('ntf_intent')||'null'); localStorage.removeItem('ntf_intent'); }catch(e){} if(!o||!canW) return;
+  if(o.a==='new' && Array.isArray(o.bx)){ const B=boxAll(), L=o.bx.map(id=>B.find(y=>y.id===id)).filter(Boolean); if(!L.length) return;
+    if(editId) endEdit(); cat='kala'; catTouched=true; applyCat(); clearForm(); applyCat();
+    $('itList').innerHTML=''; L.forEach(b=>addLine({t:b.name,q:b.qty||'',u:b.unit||'',bx:b.id})); checkDup();
+    setPane('add'); try{ $('fNo').focus({preventScroll:true}); }catch(e){} $('fCard').scrollIntoView({block:'start'}); }
+  else if(o.a==='rs' && o.id){ if(!rowsAll().some(r=>r.id===o.id)) return; await startEdit(o.id); $('wMore').open=true; try{ $('fRasid').focus({preventScroll:true}); $('fRasid').scrollIntoView({block:'center'}); }catch(e){} } }
+setTimeout(takeIntent,0);
 /* رفتن به این زبانه از «میز خرید»: قسمت خواسته‌شده (ntf_pane) */
-window.addEventListener('message',e=>{ if(e.source!==parent || !e.data || e.data.nt!=='show') return; const p=lsl('ntf_pane',pane), f=p==='book'?lsl('ntf_bf',''):''; if(f){ setBF(f); lss('ntf_bf',''); } if(['add','book','rep','sp','set'].includes(p) && (p!==pane||f)) setPane(p); });
+window.addEventListener('message',e=>{ if(e.source!==parent || !e.data || e.data.nt!=='show') return; setTimeout(takeIntent,0); const p=lsl('ntf_pane',pane), f=p==='book'?lsl('ntf_bf',''):''; if(f){ setBF(f); lss('ntf_bf',''); } if(['add','book','rep','sp','set'].includes(p) && (p!==pane||f)) setPane(p); });
 window.addEventListener('storage',e=>{ if(!e.key||[FK,LK,NK,CK,PK,RK].includes(e.key)){ if(document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && pane==='add') return; render(); } });
 </script>
 </body>

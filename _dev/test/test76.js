@@ -51,7 +51,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   await f.click('#itList [data-t]'); await sleep(150);
   ok((await cbt(f)).length===1,'فاکتور بعدی: فقط قلم باز باکس (سه) در فهرست'); await blur(f);
   await go(p,'لیست خرید'); let k=await frameOf(p,'لیست خرید'); await k.click('#bF [data-f="done"]'); await sleep(200);
-  ok(/خریدم( \(فاکتور خودم\))? — فاکتور ۷۰۱/.test(await k.evaluate(()=>document.getElementById('bList').innerText)),'باکس ← انجام‌شده: «خریدم — فاکتور ۷۰۱»');
+  { const T=await k.evaluate(()=>document.getElementById('bList').innerText); ok(/خریدم/.test(T) && /فاکتور ۷۰۱/.test(T),'باکس ← انجام‌شده: «خریدم» و «فاکتور ۷۰۱»'); }
 
   console.log('۲) اصلاح و حذف: قلم برداشته‌شده دوباره باز می‌شود');
   await go(p,'فاکتور خرید'); f=await frameOf(p,'فاکتور خرید');

@@ -59,21 +59,34 @@ const S1=[HEAD,row('301','1','3001','کالای ثبت یک','1','عدد','نو'
   ok(Object.values(await LSg('nt_kunits_v1')).includes('نمونه سه'),'نوشتن واحد در فهرست (بدون «واحد» تکراری)');
   await f.click('#bU [data-u=""]'); await sleep(200);
 
-  console.log('۳) رسید انبار');
-  await f.click('#bList .bx [data-st="me"]'); await sleep(200);
-  ok((await f.evaluate(()=>document.querySelector('#bF [data-f="rcv"]').textContent)).includes('(۱)'),'بعد از «خریدم»: «منتظر رسید انبار (۱)»');
-  await f.click('#bF [data-f="rcv"]'); await sleep(200);
-  ok((await cards()).length===1 && await f.evaluate(()=>!!document.querySelector('#bList .rcv') && !document.querySelector('#bList .bx.dn')),'کارت منتظر رسید: کادر رسید انبار، کم‌رنگ نیست');
-  await f.fill('#bList [data-rd]','1405/13/40'); await f.click('#bList [data-rcv]'); await sleep(150);
-  ok(/تاریخ درست نیست/.test(await f.evaluate(()=>document.querySelector('#bList [data-rm]').textContent)),'تاریخ نادرست: پیام');
-  await f.fill('#bList [data-rn]','۴۵۱۲'); await f.fill('#bList [data-rd]','۱۴۰۵/۰۸/۰۵'); await f.click('#bList [data-rcv]'); await sleep(250);
-  B=await LSg('nt_kbox_v1'); const x=B.find(y=>y.rs);
-  ok(x && x.rs.n==='4512' && x.rs.d==='1405/08/05' && x.st==='me','رسید ذخیره شد: شماره ۴۵۱۲، تاریخ ۱۴۰۵/۰۸/۰۵');
+  console.log('۳) خریدم ← ثبت فاکتور ← رسید انبار (فقط در فاکتور)');
+  await f.click('#bList .bx [data-st="me"]'); await sleep(250);
+  ok(await f.evaluate(()=>!document.getElementById('bBuy').hidden && /۱ قلم خریده شد/.test(document.getElementById('bBuyN').textContent) && /\(۱\)/.test(document.querySelector('#bF [data-f="fac"]').textContent)),'بعد از «خریدم»: نوار «۱ قلم خریده شد» و «منتظر فاکتور (۱)»');
+  ok(await f.evaluate(()=>!document.querySelector('#bList .rcv')),'کادر رسید در باکس نیست');
+  const bx=(await LSg('nt_kbox_v1')).find(y=>y.st==='me');
+  await f.click('#bBuyGo'); await sleep(1500);
+  ok(await p.evaluate(()=>DOCS[tabs.findIndex(t=>t.classList.contains('on'))].name==='فاکتور خرید'),'«ثبت فاکتور»: رفتن به فاکتور خرید');
+  const fi=await p.evaluate(()=>DOCS.findIndex(d=>d.name==='فاکتور خرید')); const g=await (await p.$$('iframe'))[fi].contentFrame();
+  ok(await g.evaluate(id=>cat==='kala' && document.querySelectorAll('#itList .itl').length===1 && document.querySelector('#itList .itl').dataset.bx===id && !document.getElementById('pAdd').hidden,bx.id),'فرم کالا با همان قلم باکس پر شد');
+  await g.fill('#fNo','۷۷۱'); await g.fill('#fAmt','2500000'); await g.fill('#fSup','فروشگاه نمونه'); await g.click('#fKind [data-v="اعتباری"]'); await g.evaluate(()=>document.activeElement&&document.activeElement.blur()); await sleep(250);
+  await g.click('#bSave'); await sleep(500);
+  let F=await LSg('nt_factor_v1'); const fr=(F||[]).find(r=>r.no==='771');
+  ok(fr && fr.kind==='اعتباری' && fr.items && fr.items[0].bx===bx.id,'فاکتور اعتباری ثبت شد (بدون رسید)');
+  await p.evaluate(()=>{ localStorage.setItem('ntk_pane','box'); window.postMessage({nt:'go',tab:'لیست خرید'},'*'); }); await sleep(1000);
+  await f.click('#bF [data-f="rcv"]'); await sleep(250);
+  let T=await f.evaluate(()=>document.getElementById('bList').innerText);
+  ok((await cards()).length===1 && /فاکتور ۷۷۱، اعتباری، فروشگاه نمونه/.test(T) && /منتظر رسید انبار/.test(T),'باکس: «فاکتور ۷۷۱، اعتباری» و «منتظر رسید انبار»');
+  await f.click('#bList [data-addrs]'); await sleep(1500);
+  ok(await g.evaluate(id=>editId===id && document.getElementById('wMore').open && document.activeElement===document.getElementById('fRasid'),fr.id),'«افزودن رسید»: همان فاکتور، خانه رسید انبار');
+  await g.fill('#fRasid','4512'); await g.click('#bSave'); await sleep(500);
+  ok((await LSg('nt_factor_v1')).find(r=>r.id===fr.id).rasid==='4512','رسید در فاکتور ثبت شد');
+  await p.evaluate(()=>{ localStorage.setItem('ntk_pane','box'); window.postMessage({nt:'go',tab:'لیست خرید'},'*'); }); await sleep(1000);
+  ok(/\(۰\)/.test(await f.evaluate(()=>document.querySelector('#bF [data-f="rcv"]').textContent)),'دیگر منتظر رسید نیست');
   await f.click('#bF [data-f="done"]'); await sleep(200);
-  ok(/رسید انبار ۴۵۱۲ — ۱۴۰۵\/۰۸\/۰۵/.test(await f.evaluate(()=>document.getElementById('bList').innerText)),'«انجام‌شده»: برچسب رسید انبار');
-  await f.click('#bList [data-rsx]'); await sleep(200);
-  ok(!(await LSg('nt_kbox_v1')).some(y=>y.rs),'«برگرداندن رسید»');
+  ok(/رسید انبار ۴۵۱۲/.test(await f.evaluate(()=>document.getElementById('bList').innerText)),'«انجام‌شده»: برچسب رسید انبار ۴۵۱۲ (از فاکتور)');
+  await f.click('#bF [data-f="open"]'); await sleep(150);
   ok(await f.evaluate(()=>!document.querySelector('#bList b x, #bUnits b')),'متن خطرناک اجرا نشد');
+
   console.log('۴) واحد از «دلیل نیاز» و انتخاب دستی برای کل درخواست');
   await f.click('#bSrc [data-src="sabt"]'); await sleep(150);
   await imp([HEAD,row('401','1','4001','قطعه کامیون','1','عدد','مورد نياز کاميون TRs02','ثبت‌کننده انبار نمونه'),row('402','1','4002','پیچ نمونه','1','عدد','شارژ انبار // بخش فني','ثبت‌کننده انبار نمونه'),

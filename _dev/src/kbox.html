@@ -68,12 +68,12 @@ details.up .bd{padding:0 16px 16px}
 .bx .acts .g{color:var(--ok)}.bx .acts .r{color:var(--bad)}
 .bx .acts [aria-pressed="true"]{color:var(--amt)}
 .bx .pad{height:14px}
-#bSel{position:fixed;inset-inline:12px;bottom:calc(98px + env(safe-area-inset-bottom));z-index:20;display:flex;gap:10px;align-items:center;padding:12px;border-radius:18px;background:var(--am);color:var(--nv);box-shadow:0 8px 24px rgba(0,0,0,.22)}
-#bSel b{flex:1;font-size:.98rem;font-weight:900;padding-inline-start:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#bSel .btn{padding:0 16px;font-size:.98rem}
-#bSel .btn{min-height:50px}
-#bSel #bSelX{background:transparent;border:1.5px solid var(--nv);color:var(--nv);padding:0 14px}
-@media (min-width:900px){ #bSel{position:sticky;bottom:12px;inset-inline:auto;margin-top:12px} }
+#bSel,#bBuy{position:fixed;inset-inline:12px;bottom:calc(98px + env(safe-area-inset-bottom));z-index:20;display:flex;gap:10px;align-items:center;padding:12px;border-radius:18px;background:var(--am);color:var(--nv);box-shadow:0 8px 24px rgba(0,0,0,.22)}
+#bSel b,#bBuy b{flex:1;font-size:.98rem;font-weight:900;padding-inline-start:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#bSel .btn,#bBuy .btn{padding:0 16px;font-size:.98rem}
+#bSel .btn,#bBuy .btn{min-height:50px}
+#bSel #bSelX,#bBuy #bBuyX{background:transparent;border:1.5px solid var(--nv);color:var(--nv);padding:0 14px}
+@media (min-width:900px){ #bSel,#bBuy{position:sticky;bottom:12px;inset-inline:auto;margin-top:12px} }
 /* هفتگی */
 .wh{display:flex;align-items:baseline;gap:8px}
 .wh h2{margin:0;flex:1;font-size:1.08rem}
@@ -156,6 +156,7 @@ details.up .bd{padding:0 16px 16px}
     <div id="bUnits"></div><datalist id="bUnitL"></datalist>
     <label class="f" for="bUnitsP">چسباندن فهرست (هر خط: نام و واحد)</label><textarea class="in" id="bUnitsP" rows="4" placeholder="نام درخواست‌کننده: واحد"></textarea>
     <button type="button" class="btn s" id="bUnitsGo" style="margin-top:8px">افزودن از فهرست</button><div class="msg" id="bUnitsM" role="status"></div></details>
+  <div id="bBuy" class="sbar2" hidden><b id="bBuyN"></b><button type="button" class="btn s" id="bBuyX">بعداً</button><button type="button" class="btn p" id="bBuyGo">ثبت فاکتور</button></div>
   <div id="bSel" hidden><b id="bSelN"></b><button type="button" class="btn s" id="bSelX">لغو</button><button type="button" class="btn p" id="bSelGo">ساخت استعلام</button></div>
 </section>
 
@@ -257,7 +258,16 @@ function unitGuess(x,U){ U=U||unitsGet(); const m=U[docKey(x)]; if(m) return {u:
 const unitOf=(x,U)=>unitGuess(x,U).u;
 const unitChoices=U=>[...new Set([NT_U,'فنی تعمیرات','برق','انبار','آزمایشگاه','اداری','تولید'].concat(Object.values(U||unitsGet()).filter(Boolean)))];
 let uOpen='';
-const waitRcv=x=>x.st==='me'&&!x.rs;
+/* خرید ← فاکتور ← رسید انبار: رسید، نقدی/اعتباری و فروشنده فقط در «فاکتور خرید» نوشته می‌شوند؛ باکس فقط وضعیت را نشان می‌دهد */
+const FAC=()=>{ const a=LS('nt_factor_v1',[]); return Array.isArray(a)?a:[]; };
+let FM=new Map();
+const facOf=x=>x&&x.fac&&x.fac.id?FM.get(x.fac.id)||null:null;
+const rsOf=x=>{ const f=facOf(x); if(f&&f.rasid) return {n:String(f.rasid),d:f.rasidDate||''}; return x.rs||null; };
+const waitFac=x=>x.st==='me'&&!x.fac&&!x.rs;
+const waitRcv=x=>x.st==='me'&&!!x.fac&&!rsOf(x);
+const canFac=()=>W.box&&canWT('فاکتور خرید');
+const buyNow=new Set();
+function goFactor(o){ try{ localStorage.setItem('ntf_intent',JSON.stringify(o)); }catch(e){} goTab('فاکتور خرید','ntf_pane','add'); }
 /* ستون‌های خروجی سندپرداز (نام ستون، نه شماره، تا جابه‌جایی ستون مهم نباشد) */
 const COLS={y:'سال مالی',no:'شماره',row:'ردیف',code:'کد کالا',name:'شرح کالا',qty:'مقدار',unit:'واحد',need:'تاریخ نیاز',why:'دلیل نیاز',note:'ملاحظات',date:'تاریخ',desc:'توضیحات',req:'درخواست کننده'};
 const colKey=s=>nkey(s);
@@ -297,11 +307,11 @@ function counts(){ const A=box(), W0=waterState(), S=svcs();
   const imp=A.filter(x=>x.imp&&isOpen(x)).length, open=A.filter(isOpen).length, nr=S.filter(s=>!s.done&&!s.no).length;
   $('nBox').textContent=imp?fa(imp):''; $('nWater').textContent=W0.cls==='due'?'۱':''; $('nSvc').textContent=nr?fa(nr):''; $('nWeek').textContent='';
   khSub(SEE.box?(A.length?fa(open)+' قلم باز در باکس':'باکس سندپرداز هنوز بارگذاری نشده'):'امروز '+fa(TODAY)); }
-function drawBox(){ const ALL=box(), A=ALL.filter(x=>srcOf(x)===bSrc), q=norm($('bQ').value).split(' ').filter(Boolean), U=unitsGet(); PM=preMap();
+function drawBox(){ FM=new Map(FAC().filter(r=>r&&r.id).map(r=>[r.id,r])); const ALL=box(), A=ALL.filter(x=>srcOf(x)===bSrc), q=norm($('bQ').value).split(' ').filter(Boolean), U=unitsGet(); PM=preMap();
   /* دو باکس: گزارش مأمور / ثبت */
   $('bSrc').innerHTML=Object.keys(SRC).map(k=>`<button type="button" data-src="${k}" aria-pressed="${k===bSrc}">${SRC[k]} (${fa(ALL.filter(x=>srcOf(x)===k&&isOpen(x)).length)})</button>`).join('');
-  const c={imp:A.filter(x=>x.imp&&isOpen(x)).length,open:A.filter(isOpen).length,rcv:A.filter(waitRcv).length,teh:A.filter(x=>x.st==='teh').length,done:A.filter(x=>x.st&&x.st!=='teh').length,gone:A.filter(x=>x.gone&&!x.st).length};
-  const F=[['imp','ضروری'],['open','همه باز'],['rcv','منتظر رسید انبار'],['teh','تهران'],['done','انجام‌شده'],['gone','رفته از باکس']];
+  const c={imp:A.filter(x=>x.imp&&isOpen(x)).length,open:A.filter(isOpen).length,fac:A.filter(waitFac).length,rcv:A.filter(waitRcv).length,teh:A.filter(x=>x.st==='teh').length,done:A.filter(x=>x.st&&x.st!=='teh').length,gone:A.filter(x=>x.gone&&!x.st).length};
+  const F=[['imp','ضروری'],['open','همه باز'],['fac','منتظر فاکتور'],['rcv','منتظر رسید انبار'],['teh','تهران'],['done','انجام‌شده'],['gone','رفته از باکس']];
   if(!F.some(f=>f[0]===bF)) bF='imp';
   $('bF').innerHTML=F.map(([k,n])=>`<button type="button" class="cp" data-f="${k}" aria-pressed="${k===bF}">${n} (${fa(c[k])})</button>`).join('')+(c.imp?`<button type="button" class="cp" id="bCopy">${ico('copy',18)} کپی ضروری‌ها</button>`:'');
   const last=A.map(x=>x.seen||'').sort().pop(); const ds=last?daysSince(last):null, sn='«'+SRC[bSrc]+'»';
@@ -309,7 +319,7 @@ function drawBox(){ const ALL=box(), A=ALL.filter(x=>srcOf(x)===bSrc), q=norm($(
   $('bUpI').innerHTML=ico(last?'filechk':'upload'); $('bUpT').textContent=!last?'فایل باکس '+sn+' هنوز بارگذاری نشده':(ds?'فایل باکس '+sn+' '+fa(ds)+' روز پیش بارگذاری شد':'فایل باکس '+sn+' امروز بارگذاری شد');
   $('bLast').textContent=last?'آخرین فایل: '+fa(last):'خروجی اکسل باکس '+sn+' از سندپرداز';
   if(!last && $('bUp').dataset.t!==bSrc){ $('bUp').open=true; $('bUp').dataset.t=bSrc; }
-  let L=A.filter(x=>bF==='imp'?(x.imp&&isOpen(x)):bF==='open'?isOpen(x):bF==='rcv'?waitRcv(x):bF==='teh'?x.st==='teh':bF==='done'?(x.st&&x.st!=='teh'):(x.gone&&!x.st));
+  let L=A.filter(x=>bF==='imp'?(x.imp&&isOpen(x)):bF==='open'?isOpen(x):bF==='fac'?waitFac(x):bF==='rcv'?waitRcv(x):bF==='teh'?x.st==='teh':bF==='done'?(x.st&&x.st!=='teh'):(x.gone&&!x.st));
   if(q.length) L=L.filter(x=>{ const h=norm([x.name,x.code,x.why,x.note,x.desc,x.req,x.memo,unitOf(x,U)].join(' ')); return q.every(w=>h.indexOf(w)>-1); });
   /* واحد درخواست‌کننده: شمارش از همین فهرست؛ «بی‌واحد» = درخواست‌کننده‌ای که واحدش نوشته نشده */
   const uc=new Map(); let un=0; L.forEach(x=>{ const u=unitOf(x,U); if(u) uc.set(u,(uc.get(u)||0)+1); else un++; });
@@ -320,10 +330,10 @@ function drawBox(){ const ALL=box(), A=ALL.filter(x=>srcOf(x)===bSrc), q=norm($(
   if(bU) L=L.filter(x=>bU==='-'?!unitOf(x,U):unitOf(x,U)===bU);
   L.sort((a,b)=>(b.imp?1:0)-(a.imp?1:0)||String(a.need||a.date).localeCompare(String(b.need||b.date)));
   $('bList').innerHTML=L.length?L.slice(0,300).map(x=>bxHTML(x,U)).join(''):(!A.length?emptyState('archive','باکس '+sn+' خالی است',W.box?'فایل اکسل باکس '+sn+' را از سندپرداز بگیرید و بالا انتخاب کنید.':'هنوز فایل این باکس بارگذاری نشده است.')
-    :emptyState('star',bF==='imp'?'قلم ضروری نیست':(bF==='rcv'?'قلمی منتظر رسید انبار نیست':'موردی نیست'),bF==='imp'?'در «همه باز» با ستاره، قلم‌های ضروری را جدا کنید.':''));
+    :emptyState('star',bF==='imp'?'قلم ضروری نیست':(bF==='rcv'?'قلمی منتظر رسید انبار نیست':bF==='fac'?'قلمی منتظر فاکتور نیست':'موردی نیست'),bF==='imp'?'در «همه باز» با ستاره، قلم‌های ضروری را جدا کنید.':''));
   if($('bUnitsW').open) drawUnits();
   else $('bUnitsN').textContent=unitsMissing()?'('+fa(unitsMissing())+' بدون واحد)':'';
-  drawSel(); counts(); }
+  drawSel(); drawBuy(); counts(); }
 /* فهرست درخواست‌کننده‌ها (از هر دو باکس) با واحدشان */
 function reqList(){ const m=new Map(); box().forEach(x=>{ if(!x.req) return; const k=pkey(x.req); if(!k) return; const o=m.get(k)||{k,n:0,sp:new Map()}; o.n++; o.sp.set(x.req,(o.sp.get(x.req)||0)+1); m.set(k,o); });
   return [...m.values()].map(o=>({k:o.k,n:o.n,name:[...o.sp.entries()].sort((a,b)=>b[1]-a[1])[0][0]})).sort((a,b)=>b.n-a.n); }
@@ -344,28 +354,38 @@ $('bUnitsGo').addEventListener('click',()=>{ if(!W.box) return; const U=unitsGet
   put(UK,U); $('bUnitsP').value=''; say('bUnitsM',fa(n)+' نفر ذخیره شد'+(bad?'، '+fa(bad)+' خط خوانده نشد (نام و واحد را با «:» جدا کنید)':''),bad?'bad':'ok'); drawBox(); drawUnits(); });
 $('bSrc').addEventListener('click',e=>{ const b=e.target.closest('[data-src]'); if(!b) return; bSrc=b.dataset.src; lss('ntk_bsrc',bSrc); sel.clear(); bU=''; lss('ntk_bu',''); drawBox(); });
 $('bU').addEventListener('click',e=>{ const b=e.target.closest('[data-u]'); if(!b) return; bU=b.dataset.u; lss('ntk_bu',bU); drawBox(); });
+function drawBuy(){ [...buyNow].forEach(i=>{ const y=box().find(z=>z.id===i); if(!y||!waitFac(y)) buyNow.delete(i); }); const on=!!buyNow.size && !sel.size && canFac(); $('bBuy').hidden=!on; if(on) $('bBuyN').textContent=fa(buyNow.size)+' قلم خریده شد'; }
+$('bBuyX').addEventListener('click',()=>{ buyNow.clear(); drawBuy(); });
+$('bBuyGo').addEventListener('click',()=>{ const L=[...buyNow]; buyNow.clear(); drawBuy(); if(L.length) goFactor({a:'new',bx:L}); });
 function drawSel(){ [...sel].forEach(id=>{ const x=box().find(y=>y.id===id); if(!x||!isOpen(x)||PM.has(id)) sel.delete(id); }); $('bSel').hidden=!sel.size; $('bSelN').textContent=fa(sel.size)+' قلم برای پیش‌فاکتور'; }
 $('bSelX').addEventListener('click',()=>{ sel.clear(); drawBox(); });
 $('bSelGo').addEventListener('click',()=>{ const A=box().filter(x=>sel.has(x.id)); if(!A.length) return; const P=LS('nt_kpre_v1',[]), L=Array.isArray(P)?P:[];
   const id=uid('p'); L.push({id,title:'استعلام '+fa(TODAY)+(A.length===1?' — '+A[0].name:''),date:TODAY,by:myName(),quotes:[],st:'',
     items:A.slice(0,60).map(x=>({id:uid('i'),t:clean(x.name,120),q:parseAmt(x.qty)??'',u:clean(x.unit,15),code:clean(x.code,30),bx:x.id}))});
   if(!put('nt_kpre_v1',L)){ say('bMsg2','ذخیره نشد','bad'); return; } sel.clear(); drawBox(); lss('ntp_open',id); goTab('پیش‌فاکتور','ntp_pane','open'); });
+function facTags(x){ const f=facOf(x), r=rsOf(x); let h='';
+  if(f) h+=`<span class="tag ok">فاکتور ${f.no?esc(fa(f.no)):'بدون شماره'}${f.kind?'، '+esc(f.kind):''}${f.sup?'، '+esc(f.sup):''}</span>`;
+  else if(x.fac) h+=`<span class="tag ok">فاکتور ${x.fac.no?esc(fa(x.fac.no)):'ثبت شد'}</span>`;
+  if(r) h+=`<span class="tag rs">رسید انبار${r.n?' '+esc(fa(r.n)):''}${r.d?' — '+esc(fa(r.d)):''}</span>`;
+  else h+=`<span class="tag wa">${x.fac?'منتظر رسید انبار':'منتظر فاکتور'}</span>`;
+  return h; }
 function bxHTML(x,U){ const d=daysSince(x.need||x.date), texts=[...new Set([x.why,x.note,x.desc].map(t=>clean(t,200)).filter(Boolean))];
   const pm=PM.get(x.id), preTag=pm?(pm.st==='ok'?`<span class="tag sp">پیش‌فاکتور تایید شد${pm.sup?': از '+esc(pm.sup):''}</span>`:`<span class="tag wa">${pm.st==='wait'?'پیش‌فاکتور: منتظر تایید':'در استعلام پیش‌فاکتور'}</span>`):'';
-  const stTag=(x.st?`<span class="tag ${x.st==='teh'?'wa':(x.st==='x'?'bad':'ok')}">${esc(ST[x.st])}${x.st==='me'&&x.fac?(x.fac.no?' — فاکتور '+esc(fa(x.fac.no)):' — با فاکتور'):''}${x.stAt?' '+fa(x.stAt):''}</span>`:(x.gone?`<span class="tag">از باکس رفته ${fa(x.gone)}</span>`:''))+preTag
-    +(x.st==='me'?(x.rs?`<span class="tag rs">رسید انبار${x.rs.n?' '+esc(fa(x.rs.n)):''} — ${esc(fa(x.rs.d||''))}</span>`:'<span class="tag wa">منتظر رسید انبار</span>'):'');
+  const stTag=(x.st?`<span class="tag ${x.st==='teh'?'wa':(x.st==='x'?'bad':'ok')}">${esc(ST[x.st])}${x.stAt?' '+fa(x.stAt):''}</span>`:(x.gone?`<span class="tag">از باکس رفته ${fa(x.gone)}</span>`:''))+preTag
+    +(x.st==='me'?facTags(x):'');
   const u=unitOf(x,U), U2=U||unitsGet();
   const need=x.need?`<span class="nd${d!=null&&d>0&&isOpen(x)?' old':''}">نیاز ${fa(x.need)}${d!=null&&d>0&&isOpen(x)?' ('+fa(d)+' روز گذشته)':''}</span>`:'';
   const on=sel.has(x.id);
-  return `<div class="bx${x.st&&x.st!=='teh'&&!waitRcv(x)?' dn':''}${on?' sel':''}" data-id="${esc(x.id)}">
+  return `<div class="bx${x.st&&x.st!=='teh'&&!waitRcv(x)&&!waitFac(x)?' dn':''}${on?' sel':''}" data-id="${esc(x.id)}">
     <div class="r1">${W.box?`<button type="button" class="st" data-imp aria-pressed="${!!x.imp}" aria-label="ضروری">${ico('star')}</button>`:(x.imp?`<span class="st" aria-label="ضروری" style="background:var(--am);border-color:var(--am);color:var(--nv)">${ico('star')}</span>`:'')}
       <div class="tx"><span class="bn">${esc(x.name)}</span><span class="mt">${[x.code?'کد '+esc(fa(x.code)):'',x.req?esc(x.req):''].filter(Boolean).join('، ')}</span>${u||W.box?`<button type="button" class="un${u?'':' no'}" data-un ${W.box?'':'disabled'} aria-expanded="${uOpen===x.id}" title="${W.box?'تغییر واحد این درخواست':''}">${u?'واحد '+esc(u):'+ واحد'}</button>`:''}${need}</div>
       <div class="q">${esc(fa(x.qty||''))}<small>${esc(x.unit||'')}</small></div></div>
     ${uOpen===x.id&&W.box?`<div class="uch"><span>واحد همه اقلام درخواست ${esc(fa(x.no||''))}:</span>${unitChoices(U2).map(c=>`<button type="button" class="cp" data-setu="${esc(c)}" aria-pressed="${c===u}">${esc(c)}</button>`).join('')}${U2[docKey(x)]?'<button type="button" class="cp" data-setu="">خودکار</button>':''}</div>`:''}
     ${texts.length?`<div class="why">${texts.map(esc).join(' — ')}</div>`:''}${stTag?`<div class="tg">${stTag}</div>`:''}
     ${x.imp&&W.box&&!x.st?`<div class="memo"><input class="in" data-memo value="${esc(x.memo||'')}" maxlength="160" placeholder="توضیح مهم برای خرید (مثلاً فوری، حتماً اصل)" aria-label="توضیح مهم"></div>`:(x.memo?`<div class="memo"><div>${esc(x.memo)}</div></div>`:'')}
-    ${W.box&&waitRcv(x)?`<div class="rcv"><b>رسید انبار</b><div class="g2"><input class="in mono" data-rn inputmode="numeric" maxlength="20" placeholder="شماره رسید" aria-label="شماره رسید انبار"><input class="in mono" data-rd inputmode="numeric" maxlength="10" value="${esc(fa(TODAY))}" aria-label="تاریخ رسید انبار"></div><button type="button" class="btn" data-rcv>رسید انبار شد</button><div class="msg" data-rm role="status"></div></div>`:''}
-    ${W.box?(x.st?(x.rs?`<div class="acts two"><button type="button" data-rsx>برگرداندن رسید</button><button type="button" data-st="">برگرداندن</button></div>`:`<div class="acts one"><button type="button" data-st="">برگرداندن</button></div>`)
+    ${W.box?(x.st?(waitFac(x)&&canFac()?`<div class="acts two"><button type="button" class="g" data-fac>${ico('rcpt')}ثبت فاکتور</button><button type="button" data-st="">برگرداندن</button></div>`
+      :waitRcv(x)&&canFac()?`<div class="acts two"><button type="button" class="g" data-addrs>${ico('filechk')}افزودن رسید</button><button type="button" data-st="">برگرداندن</button></div>`
+      :`<div class="acts one"><button type="button" data-st="">برگرداندن</button></div>`)
       :`<div class="acts"><button type="button" class="g" data-st="me">${ico('cart')}خریدم</button><button type="button" data-st="teh">${ico('truck')}مأمور تهران</button><button type="button" class="r" data-st="x">${ico('ban')}لازم نیست</button>${canPre&&isOpen(x)&&!pm?`<button type="button" data-sel aria-pressed="${on}">${ico(on?'boxck':'box0')}پیش‌فاکتور</button>`:'<button type="button" disabled style="opacity:.35">'+ico('box0')+'پیش‌فاکتور</button>'}</div>`):'<div class="pad"></div>'}</div>`; }
 function setItem(id,fn){ const A=box(), x=A.find(y=>y.id===id); if(!x) return; fn(x); put(BK,A); drawBox(); }
 $('bList').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||!W.box) return; const c=b.closest('.bx'); if(!c) return; const id=c.dataset.id;
@@ -373,11 +393,13 @@ $('bList').addEventListener('click',e=>{ const b=e.target.closest('button'); if(
   if(b.hasAttribute('data-un')){ uOpen=uOpen===id?'':id; drawBox(); return; }
   if(b.hasAttribute('data-setu')){ const x=box().find(y=>y.id===id); if(!x) return; const U=unitsGet(), v=unitName(b.dataset.setu); if(v) U[docKey(x)]=v; else delete U[docKey(x)]; put(UK,U); uOpen=''; drawBox(); return; }
   if(b.hasAttribute('data-imp')) setItem(id,x=>{ x.imp=x.imp?0:1; if(!x.imp) delete x.imp; });
+  else if(b.hasAttribute('data-fac')){ const L=[...new Set([id,...buyNow])].filter(i=>{ const y=box().find(z=>z.id===i); return y&&waitFac(y); }); buyNow.clear(); goFactor({a:'new',bx:L.length?L:[id]}); return; }
+  else if(b.hasAttribute('data-addrs')){ const y=box().find(z=>z.id===id); if(y&&y.fac) goFactor({a:'rs',id:y.fac.id}); return; }
   else if(b.hasAttribute('data-rcv')){ const n=clean(lat(c.querySelector('[data-rn]').value).replace(/[^0-9A-Za-z\/-]/g,''),20), dv=lat(c.querySelector('[data-rd]').value).trim(), d=dv?normDate(dv):TODAY;
     if(!d){ const m=c.querySelector('[data-rm]'); if(m){ m.textContent='تاریخ درست نیست (مثل ۱۴۰۵/۰۸/۰۵)'; m.className='msg bad'; } return; }
     setItem(id,x=>{ x.rs={d}; if(n) x.rs.n=n; const by=myName(); if(by) x.rs.by=by; }); }
   else if(b.hasAttribute('data-rsx')) setItem(id,x=>{ delete x.rs; });
-  else if(b.dataset.st!==undefined) setItem(id,x=>{ if(b.dataset.st){ x.st=b.dataset.st; x.stAt=TODAY; x.stBy=myName(); } else { delete x.st; delete x.stAt; delete x.stBy; delete x.rs; } }); });
+  else if(b.dataset.st!==undefined) setItem(id,x=>{ if(b.dataset.st==='me') buyNow.add(id); else buyNow.delete(id); if(b.dataset.st){ x.st=b.dataset.st; x.stAt=TODAY; x.stBy=myName(); } else { delete x.st; delete x.stAt; delete x.stBy; delete x.rs; } }); });
 /* توضیح: ذخیره بدون ساختن دوباره فهرست (ساختن دوباره هنگام blur خطا می‌دهد) */
 $('bList').addEventListener('change',e=>{ const i=e.target.closest('[data-memo]'); if(!i||!W.box) return; const id=i.closest('.bx').dataset.id, v=clean(i.value,160), A=box(), x=A.find(y=>y.id===id); if(!x || (x.memo||'')===v) return; if(v) x.memo=v; else delete x.memo; put(BK,A); });
 $('bF').addEventListener('click',async e=>{ if(e.target.closest('#bCopy')){ const L=box().filter(x=>x.imp&&isOpen(x)); if(!L.length) return;
