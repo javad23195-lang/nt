@@ -34,7 +34,12 @@ details.up .bd{padding:0 16px 16px}
 .bx .mt{display:block;font-size:.88rem;color:#4E5864}
 .bx .nd{display:block;font-size:.88rem;font-weight:900;color:#4E5864}
 .bx .nd.old{color:var(--bad)}
-.bx .un{display:inline-block;margin-top:6px;font-size:.78rem;font-weight:900;padding:2px 10px;border-radius:8px;background:#E3ECF5;color:#1F4E79}
+.bx .un{display:inline-block;margin-top:6px;font:inherit;font-size:.78rem;font-weight:900;padding:2px 10px;min-height:26px;border:0;border-radius:8px;background:#E3ECF5;color:#1F4E79;cursor:pointer}
+.bx .un.no{background:transparent;border:1px dashed #9AA8B5;color:#4E5864}
+.bx .un:disabled{cursor:default}
+.bx .uch{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 14px 0;padding:10px;border-radius:14px;background:#EEF3F8}
+.bx .uch span{width:100%;font-size:.84rem;font-weight:800;color:#1F4E79}
+.bx .uch .cp{min-height:38px;font-size:.86rem;background:#fff}
 .bx .rcv{margin:12px 14px 0;padding:12px;border-radius:14px;background:var(--ambg)}
 .bx .rcv b{display:block;font-size:.95rem;color:var(--amt);margin-bottom:8px}
 .bx .rcv .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -147,7 +152,7 @@ details.up .bd{padding:0 16px 16px}
   <div class="msg" id="bMsg2" role="status"></div>
   <div id="bList"></div>
   <details class="card w-only" id="bUnitsW" style="margin-top:16px"><summary style="font-weight:900;cursor:pointer;min-height:40px;display:flex;align-items:center">واحد درخواست‌کننده‌ها&nbsp;<small id="bUnitsN" style="color:#4E5864"></small></summary>
-    <p class="hint">برای هر درخواست‌کننده، واحدش را بنویسید یا از فهرست انتخاب کنید. فقط در اطلاعات رمزشده ذخیره می‌شود.</p>
+    <p class="hint">برای هر درخواست‌کننده، واحدش را بنویسید یا از فهرست انتخاب کنید. کسی که برای دیگران ثبت می‌کند (مثل انبار) را خالی بگذارید؛ واحد از «دلیل نیاز» پیدا می‌شود. فقط در اطلاعات رمزشده ذخیره می‌شود.</p>
     <div id="bUnits"></div><datalist id="bUnitL"></datalist>
     <label class="f" for="bUnitsP">چسباندن فهرست (هر خط: نام و واحد)</label><textarea class="in" id="bUnitsP" rows="4" placeholder="نام درخواست‌کننده: واحد"></textarea>
     <button type="button" class="btn s" id="bUnitsGo" style="margin-top:8px">افزودن از فهرست</button><div class="msg" id="bUnitsM" role="status"></div></details>
@@ -228,7 +233,30 @@ const UK='nt_kunits_v1';
 const pkey=t=>norm(t).replace(/\s+/g,'');
 const unitsGet=()=>{ const o=LS(UK,{}); return o&&typeof o==='object'&&!Array.isArray(o)?o:{}; };
 const unitName=t=>clean(String(t||'').replace(/^\s*واحد\s+/,''),40);
-const unitOf=(x,U)=>{ if(!x||!x.req) return ''; U=U||unitsGet(); return U[pkey(x.req)]||''; };
+/* واحد هر قلم (به ترتیب):
+   ۱) انتخاب دستی برای همان شماره درخواست (U['d:'+باکس-سال-شماره])
+   ۲) پشت «مورد نیاز» در دلیل نیاز: نام یکی از افراد فهرست، دستگاه (← نگهداری و تعمیرات) یا نام واحد
+   ۳) «شارژ انبار» ← انبار   ۴) عبارت روشن واحد (بخش فنی، خط فراوری، استخر، ...)   ۵) واحد درخواست‌کننده */
+const NT_U='نگهداری و تعمیرات';
+const DEVW=['کامیون','بیل','لودر','لیفتراک','نیسان','ژنراتور','گریدر','بولدوزر','دامپتراک','تانکر','جرثقیل','مینی بوس','مینیبوس','کاپرا','وانت','خودرو','ماشین الات','ماشینالات'];
+const KW_TAIL=[[/نگهداری و تعمیرات|(^|\s)نت(\s|$)/,NT_U],[/فنی/,'فنی تعمیرات'],[/برق/,'برق'],[/انبار/,'انبار'],[/آزمایشگاه|ازمایشگاه/,'آزمایشگاه'],[/اداری|دفتر/,'اداری'],[/تولید|خط فراوری|خط فرآوری|استخر/,'تولید']];
+const KW_ALL=[[/واحد نگهداری|نگهداری و تعمیرات/,NT_U],[/بخش فنی|فنی تعمیرات/,'فنی تعمیرات'],[/واحد برق|بخش برق/,'برق'],[/آزمایشگاه|ازمایشگاه/,'آزمایشگاه'],[/واحد اداری|بخش اداری/,'اداری'],[/واحد تولید|بخش تولید|خط فراوری|خط فرآوری|استخر/,'تولید']];
+let DEVK=null; const devKeys=()=>{ if(DEVK) return DEVK; DEVK=[]; try{ (parent.ntQr&&parent.ntQr.DEVS||[]).forEach(d=>{ [d.id,d.name].forEach(t=>{ const k=pkey(t); if(k&&k.length>2) DEVK.push(k); }); }); }catch(e){} return DEVK; };
+const docKey=x=>{ const p=String(x.id||'').split('-'); return 'd:'+srcOf(x)+'-'+(p[1]||'')+'-'+(x.no||p[2]||''); };
+function unitGuess(x,U){ U=U||unitsGet(); const m=U[docKey(x)]; if(m) return {u:m,man:1};
+  const why=norm(x.why||''), all=norm([x.why,x.note,x.desc].join(' '));
+  const t=/مورد\s*نیاز\s*(.+)/.exec(why);
+  if(t){ const tail=t[1], tk=tail.replace(/\s+/g,'');
+    const P=Object.keys(U).filter(k=>!/^[a-z]:/.test(k)&&k.length>3&&U[k]).sort((a,b)=>b.length-a.length).find(k=>tk.indexOf(k)>-1); if(P) return {u:U[P]};
+    if(DEVW.some(w=>tail.indexOf(norm(w))>-1) || devKeys().some(k=>tk.indexOf(k)>-1)) return {u:NT_U};
+    const k=KW_TAIL.find(([r])=>r.test(tail)); if(k) return {u:k[1]}; }
+  if(/شارژ انبار/.test(all)) return {u:'انبار'};
+  const k=KW_ALL.find(([r])=>r.test(all)); if(k) return {u:k[1]};
+  if(x.req){ const r=U[pkey(x.req)]; if(r) return {u:r}; }
+  return {u:''}; }
+const unitOf=(x,U)=>unitGuess(x,U).u;
+const unitChoices=U=>[...new Set([NT_U,'فنی تعمیرات','برق','انبار','آزمایشگاه','اداری','تولید'].concat(Object.values(U||unitsGet()).filter(Boolean)))];
+let uOpen='';
 const waitRcv=x=>x.st==='me'&&!x.rs;
 /* ستون‌های خروجی سندپرداز (نام ستون، نه شماره، تا جابه‌جایی ستون مهم نباشد) */
 const COLS={y:'سال مالی',no:'شماره',row:'ردیف',code:'کد کالا',name:'شرح کالا',qty:'مقدار',unit:'واحد',need:'تاریخ نیاز',why:'دلیل نیاز',note:'ملاحظات',date:'تاریخ',desc:'توضیحات',req:'درخواست کننده'};
@@ -300,7 +328,7 @@ function drawBox(){ const ALL=box(), A=ALL.filter(x=>srcOf(x)===bSrc), q=norm($(
 function reqList(){ const m=new Map(); box().forEach(x=>{ if(!x.req) return; const k=pkey(x.req); if(!k) return; const o=m.get(k)||{k,n:0,sp:new Map()}; o.n++; o.sp.set(x.req,(o.sp.get(x.req)||0)+1); m.set(k,o); });
   return [...m.values()].map(o=>({k:o.k,n:o.n,name:[...o.sp.entries()].sort((a,b)=>b[1]-a[1])[0][0]})).sort((a,b)=>b.n-a.n); }
 const unitsMissing=()=>{ const U=unitsGet(); return reqList().filter(r=>!U[r.k]).length; };
-function drawUnits(){ const U=unitsGet(), R=reqList(), us=[...new Set(Object.values(U).filter(Boolean))].sort();
+function drawUnits(){ const U=unitsGet(), R=reqList(), us=unitChoices(U);
   $('bUnitL').innerHTML=us.map(u=>`<option value="${esc(u)}">`).join('');
   $('bUnitsN').textContent=R.length?'('+fa(R.length)+' نفر'+(unitsMissing()?'، '+fa(unitsMissing())+' بدون واحد':'')+')':'';
   $('bUnits').innerHTML=R.length?R.map(r=>`<div class="urow"><span class="nm">${esc(r.name)}<small>${fa(r.n)} قلم</small></span><input class="in" list="bUnitL" data-uk="${esc(r.k)}" value="${esc(U[r.k]||'')}" maxlength="40" placeholder="واحد" aria-label="واحد ${esc(r.name)}" ${W.box?'':'disabled'}></div>`).join('')
@@ -326,13 +354,14 @@ function bxHTML(x,U){ const d=daysSince(x.need||x.date), texts=[...new Set([x.wh
   const pm=PM.get(x.id), preTag=pm?(pm.st==='ok'?`<span class="tag sp">پیش‌فاکتور تایید شد${pm.sup?': از '+esc(pm.sup):''}</span>`:`<span class="tag wa">${pm.st==='wait'?'پیش‌فاکتور: منتظر تایید':'در استعلام پیش‌فاکتور'}</span>`):'';
   const stTag=(x.st?`<span class="tag ${x.st==='teh'?'wa':(x.st==='x'?'bad':'ok')}">${esc(ST[x.st])}${x.st==='me'&&x.fac?(x.fac.no?' — فاکتور '+esc(fa(x.fac.no)):' — با فاکتور'):''}${x.stAt?' '+fa(x.stAt):''}</span>`:(x.gone?`<span class="tag">از باکس رفته ${fa(x.gone)}</span>`:''))+preTag
     +(x.st==='me'?(x.rs?`<span class="tag rs">رسید انبار${x.rs.n?' '+esc(fa(x.rs.n)):''} — ${esc(fa(x.rs.d||''))}</span>`:'<span class="tag wa">منتظر رسید انبار</span>'):'');
-  const u=unitOf(x,U);
+  const u=unitOf(x,U), U2=U||unitsGet();
   const need=x.need?`<span class="nd${d!=null&&d>0&&isOpen(x)?' old':''}">نیاز ${fa(x.need)}${d!=null&&d>0&&isOpen(x)?' ('+fa(d)+' روز گذشته)':''}</span>`:'';
   const on=sel.has(x.id);
   return `<div class="bx${x.st&&x.st!=='teh'&&!waitRcv(x)?' dn':''}${on?' sel':''}" data-id="${esc(x.id)}">
     <div class="r1">${W.box?`<button type="button" class="st" data-imp aria-pressed="${!!x.imp}" aria-label="ضروری">${ico('star')}</button>`:(x.imp?`<span class="st" aria-label="ضروری" style="background:var(--am);border-color:var(--am);color:var(--nv)">${ico('star')}</span>`:'')}
-      <div class="tx"><span class="bn">${esc(x.name)}</span><span class="mt">${[x.code?'کد '+esc(fa(x.code)):'',x.req?esc(x.req):''].filter(Boolean).join('، ')}</span>${u?`<span class="un">واحد ${esc(u)}</span>`:''}${need}</div>
+      <div class="tx"><span class="bn">${esc(x.name)}</span><span class="mt">${[x.code?'کد '+esc(fa(x.code)):'',x.req?esc(x.req):''].filter(Boolean).join('، ')}</span>${u||W.box?`<button type="button" class="un${u?'':' no'}" data-un ${W.box?'':'disabled'} aria-expanded="${uOpen===x.id}" title="${W.box?'تغییر واحد این درخواست':''}">${u?'واحد '+esc(u):'+ واحد'}</button>`:''}${need}</div>
       <div class="q">${esc(fa(x.qty||''))}<small>${esc(x.unit||'')}</small></div></div>
+    ${uOpen===x.id&&W.box?`<div class="uch"><span>واحد همه اقلام درخواست ${esc(fa(x.no||''))}:</span>${unitChoices(U2).map(c=>`<button type="button" class="cp" data-setu="${esc(c)}" aria-pressed="${c===u}">${esc(c)}</button>`).join('')}${U2[docKey(x)]?'<button type="button" class="cp" data-setu="">خودکار</button>':''}</div>`:''}
     ${texts.length?`<div class="why">${texts.map(esc).join(' — ')}</div>`:''}${stTag?`<div class="tg">${stTag}</div>`:''}
     ${x.imp&&W.box&&!x.st?`<div class="memo"><input class="in" data-memo value="${esc(x.memo||'')}" maxlength="160" placeholder="توضیح مهم برای خرید (مثلاً فوری، حتماً اصل)" aria-label="توضیح مهم"></div>`:(x.memo?`<div class="memo"><div>${esc(x.memo)}</div></div>`:'')}
     ${W.box&&waitRcv(x)?`<div class="rcv"><b>رسید انبار</b><div class="g2"><input class="in mono" data-rn inputmode="numeric" maxlength="20" placeholder="شماره رسید" aria-label="شماره رسید انبار"><input class="in mono" data-rd inputmode="numeric" maxlength="10" value="${esc(fa(TODAY))}" aria-label="تاریخ رسید انبار"></div><button type="button" class="btn" data-rcv>رسید انبار شد</button><div class="msg" data-rm role="status"></div></div>`:''}
@@ -341,6 +370,8 @@ function bxHTML(x,U){ const d=daysSince(x.need||x.date), texts=[...new Set([x.wh
 function setItem(id,fn){ const A=box(), x=A.find(y=>y.id===id); if(!x) return; fn(x); put(BK,A); drawBox(); }
 $('bList').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||!W.box) return; const c=b.closest('.bx'); if(!c) return; const id=c.dataset.id;
   if(b.hasAttribute('data-sel')){ if(sel.has(id)) sel.delete(id); else sel.add(id); drawBox(); return; }
+  if(b.hasAttribute('data-un')){ uOpen=uOpen===id?'':id; drawBox(); return; }
+  if(b.hasAttribute('data-setu')){ const x=box().find(y=>y.id===id); if(!x) return; const U=unitsGet(), v=unitName(b.dataset.setu); if(v) U[docKey(x)]=v; else delete U[docKey(x)]; put(UK,U); uOpen=''; drawBox(); return; }
   if(b.hasAttribute('data-imp')) setItem(id,x=>{ x.imp=x.imp?0:1; if(!x.imp) delete x.imp; });
   else if(b.hasAttribute('data-rcv')){ const n=clean(lat(c.querySelector('[data-rn]').value).replace(/[^0-9A-Za-z\/-]/g,''),20), dv=lat(c.querySelector('[data-rd]').value).trim(), d=dv?normDate(dv):TODAY;
     if(!d){ const m=c.querySelector('[data-rm]'); if(m){ m.textContent='تاریخ درست نیست (مثل ۱۴۰۵/۰۸/۰۵)'; m.className='msg bad'; } return; }

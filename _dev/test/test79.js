@@ -74,6 +74,25 @@ const S1=[HEAD,row('301','1','3001','کالای ثبت یک','1','عدد','نو'
   await f.click('#bList [data-rsx]'); await sleep(200);
   ok(!(await LSg('nt_kbox_v1')).some(y=>y.rs),'«برگرداندن رسید»');
   ok(await f.evaluate(()=>!document.querySelector('#bList b x, #bUnits b')),'متن خطرناک اجرا نشد');
+  console.log('۴) واحد از «دلیل نیاز» و انتخاب دستی برای کل درخواست');
+  await f.click('#bSrc [data-src="sabt"]'); await sleep(150);
+  await imp([HEAD,row('401','1','4001','قطعه کامیون','1','عدد','مورد نياز کاميون TRs02','ثبت‌کننده انبار نمونه'),row('402','1','4002','پیچ نمونه','1','عدد','شارژ انبار // بخش فني','ثبت‌کننده انبار نمونه'),
+    row('403','1','4003','آب نمونه','1','لیتر','مورد نياز استخر خط فراوري تر','ثبت‌کننده انبار نمونه'),row('404','1','4004','ابزار نمونه','1','عدد','مورد نياز درخواست کننده الف','ثبت‌کننده انبار نمونه'),
+    row('405','1','4005','کالای بی‌نشان یک','1','عدد','نامعلوم','ثبت‌کننده انبار نمونه'),row('405','2','4006','کالای بی‌نشان دو','1','عدد','نامعلوم','ثبت‌کننده انبار نمونه')]);
+  await f.click('#bF [data-f="open"]'); await sleep(200);
+  const un=()=>f.evaluate(()=>Object.fromEntries([...document.querySelectorAll('#bList .bx')].map(c=>[c.querySelector('.bn').textContent,(c.querySelector('[data-un]')||{}).textContent||''])));
+  let M=await un();
+  ok(M['قطعه کامیون']==='واحد نگهداری و تعمیرات' && M['پیچ نمونه']==='واحد انبار' && M['آب نمونه']==='واحد تولید' && M['ابزار نمونه']==='واحد نمونه یک' && M['کالای بی‌نشان یک']==='+ واحد','حدس واحد: دستگاه، شارژ انبار، خط فراوری، نام فرد پشت «مورد نیاز» — '+JSON.stringify(M));
+  await f.click('#bList .bx:has-text("کالای بی‌نشان یک") [data-un]'); await sleep(150);
+  ok(await f.evaluate(()=>!!document.querySelector('#bList .uch [data-setu="برق"]')),'ضربه روی برچسب: فهرست واحدها');
+  await f.click('#bList .uch [data-setu="برق"]'); await sleep(200);
+  M=await un();
+  ok(M['کالای بی‌نشان یک']==='واحد برق' && M['کالای بی‌نشان دو']==='واحد برق','انتخاب دستی برای همه اقلام همان شماره درخواست');
+  await imp([HEAD,row('405','1','4005','کالای بی‌نشان یک','1','عدد','نامعلوم','ثبت‌کننده انبار نمونه')]);
+  await f.click('#bF [data-f="open"]'); await sleep(150);
+  ok((await un())['کالای بی‌نشان یک']==='واحد برق','فایل تازه: انتخاب دستی می‌ماند');
+  await f.click('#bList .bx:has-text("کالای بی‌نشان یک") [data-un]'); await sleep(150); await f.click('#bList .uch [data-setu=""]'); await sleep(150);
+  ok((await un())['کالای بی‌نشان یک']==='+ واحد','«خودکار»: برگشت به حدس');
   ok(!errs.length,'بدون خطا '+errs.join('|').slice(0,200));
   await br.close(); web.close(); console.log(fails?`\n${fails} FAIL`:'\nALL OK'); process.exit(fails?1:0);
 })().catch(e=>{ console.error(e); process.exit(1); });
