@@ -34,6 +34,21 @@ details.up .bd{padding:0 16px 16px}
 .bx .mt{display:block;font-size:.88rem;color:#4E5864}
 .bx .nd{display:block;font-size:.88rem;font-weight:900;color:#4E5864}
 .bx .nd.old{color:var(--bad)}
+.bx .un{display:inline-block;margin-top:6px;font-size:.78rem;font-weight:900;padding:2px 10px;border-radius:8px;background:#E3ECF5;color:#1F4E79}
+.bx .rcv{margin:12px 14px 0;padding:12px;border-radius:14px;background:var(--ambg)}
+.bx .rcv b{display:block;font-size:.95rem;color:var(--amt);margin-bottom:8px}
+.bx .rcv .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bx .rcv .in{background:#fff;margin:0}
+.bx .rcv .btn{width:100%;margin-top:10px;background:var(--ok);color:#fff;border:0}
+.bx .rcv .msg:empty{display:none}
+.bx .tag.rs{background:var(--ok);color:#fff}
+.bx .acts.two{grid-template-columns:1fr 1fr}
+#bU .cp:not([aria-pressed="true"]){background:#fff}
+.urow{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--rule)}
+.urow:first-child{border-top:0}
+.urow .nm{flex:1;min-width:0;font-weight:800}
+.urow .nm small{display:block;font-weight:600;color:#4E5864;font-size:.8rem}
+.urow .in{flex:1.2;margin:0}
 .bx .q{flex:none;min-width:58px;padding:6px 8px;border-radius:12px;background:var(--soft);text-align:center;font-weight:900;font-size:1.35rem;line-height:1.3}
 .bx .q small{display:block;font-size:.8rem;color:#4E5864;font-weight:600}
 .bx .why{padding:10px 14px 0;font-size:.98rem;color:var(--ink)}
@@ -120,6 +135,7 @@ details.up .bd{padding:0 16px 16px}
 
 <!-- ============ باکس سندپرداز ============ -->
 <section id="p_box">
+  <div class="sgm" id="bSrc" role="group" aria-label="باکس" style="margin:0 0 12px"></div>
   <details class="up w-only" id="bUp"><summary><span class="fi" id="bUpI"></span><span class="tx"><b id="bUpT"></b><span class="s" id="bLast"></span></span><span class="cv" id="bUpC"></span></summary>
     <div class="bd"><p class="hint" style="margin-top:0">خروجی اکسل باکس خرید را از سندپرداز بگیرید و اینجا انتخاب کنید. اقلام تازه اضافه می‌شوند؛ ستاره‌ها و توضیح‌ها می‌مانند؛ قلمی که دیگر در باکس نیست «رفته از باکس» می‌شود.</p>
     <button type="button" class="btn dash" id="bPick" style="margin-top:12px">انتخاب فایل اکسل</button>
@@ -127,8 +143,14 @@ details.up .bd{padding:0 16px 16px}
     <div class="msg" id="bMsg" role="status"></div></div></details>
   <div class="srch"><span id="bQi"></span><input class="in" id="bQ" placeholder="نام کالا، کد، دلیل نیاز یا درخواست‌کننده" autocomplete="off" aria-label="جستجو در باکس"></div>
   <div class="chips scroll" id="bF" role="group" aria-label="فیلتر" style="margin-top:12px"></div>
+  <div class="chips scroll" id="bU" role="group" aria-label="واحد درخواست‌کننده" style="margin-top:10px"></div>
   <div class="msg" id="bMsg2" role="status"></div>
   <div id="bList"></div>
+  <details class="card w-only" id="bUnitsW" style="margin-top:16px"><summary style="font-weight:900;cursor:pointer;min-height:40px;display:flex;align-items:center">واحد درخواست‌کننده‌ها&nbsp;<small id="bUnitsN" style="color:#4E5864"></small></summary>
+    <p class="hint">برای هر درخواست‌کننده، واحدش را بنویسید یا از فهرست انتخاب کنید. فقط در اطلاعات رمزشده ذخیره می‌شود.</p>
+    <div id="bUnits"></div><datalist id="bUnitL"></datalist>
+    <label class="f" for="bUnitsP">چسباندن فهرست (هر خط: نام و واحد)</label><textarea class="in" id="bUnitsP" rows="4" placeholder="نام درخواست‌کننده: واحد"></textarea>
+    <button type="button" class="btn s" id="bUnitsGo" style="margin-top:8px">افزودن از فهرست</button><div class="msg" id="bUnitsM" role="status"></div></details>
   <div id="bSel" hidden><b id="bSelN"></b><button type="button" class="btn s" id="bSelX">لغو</button><button type="button" class="btn p" id="bSelGo">ساخت استعلام</button></div>
 </section>
 
@@ -197,10 +219,21 @@ $('bPick').addEventListener('click',()=>$('bFile').click());
 
 /* ============ باکس سندپرداز ============ */
 const box=()=>{ const a=LS(BK,[]); return Array.isArray(a)?a.filter(x=>x&&x.id&&x.name):[]; };
+/* دو باکس جدا در سندپرداز: «گزارش مأمور» (پیش‌فرض، اقلام قدیمی) و «ثبت» */
+const SRC={mamur:'گزارش مأمور',sabt:'ثبت'};
+let bSrc=lsl('ntk_bsrc','mamur'); if(!SRC[bSrc]) bSrc='mamur';
+const srcOf=x=>x&&x.src==='sabt'?'sabt':'mamur';
+/* واحد هر درخواست‌کننده (نام → واحد) — فقط در اطلاعات رمزشده؛ هیچ نامی در کد نیست */
+const UK='nt_kunits_v1';
+const pkey=t=>norm(t).replace(/\s+/g,'');
+const unitsGet=()=>{ const o=LS(UK,{}); return o&&typeof o==='object'&&!Array.isArray(o)?o:{}; };
+const unitName=t=>clean(String(t||'').replace(/^\s*واحد\s+/,''),40);
+const unitOf=(x,U)=>{ if(!x||!x.req) return ''; U=U||unitsGet(); return U[pkey(x.req)]||''; };
+const waitRcv=x=>x.st==='me'&&!x.rs;
 /* ستون‌های خروجی سندپرداز (نام ستون، نه شماره، تا جابه‌جایی ستون مهم نباشد) */
 const COLS={y:'سال مالی',no:'شماره',row:'ردیف',code:'کد کالا',name:'شرح کالا',qty:'مقدار',unit:'واحد',need:'تاریخ نیاز',why:'دلیل نیاز',note:'ملاحظات',date:'تاریخ',desc:'توضیحات',req:'درخواست کننده'};
 const colKey=s=>nkey(s);
-async function importBox(file){
+async function importBox(file,src){ src=src==='sabt'?'sabt':'mamur';
   if(!parent.ntReport||!parent.ntReport.readAoa) throw new Error('lib');
   const buf=await file.arrayBuffer(); const A=await parent.ntReport.readAoa(buf);
   const hi=A.findIndex(r=>Array.isArray(r) && r.some(c=>colKey(c)===colKey(COLS.name)) && r.some(c=>colKey(c)===colKey(COLS.qty)));
@@ -211,19 +244,19 @@ async function importBox(file){
   const rows=A.slice(hi+1).filter(r=>Array.isArray(r) && v(r,'name'));
   if(rows.length>3000) throw new Error('big');
   const cur=box(), map=new Map(cur.map(x=>[x.id,x])), seen=new Set(); let nw=0, back=0;
-  rows.forEach((r,i)=>{ const id=['sp',v(r,'y')||'0',v(r,'no')||'0',v(r,'row')||String(i+1),v(r,'code')].join('-'); if(seen.has(id)) return; seen.add(id);
+  rows.forEach((r,i)=>{ const id=[src==='sabt'?'sb':'sp',v(r,'y')||'0',v(r,'no')||'0',v(r,'row')||String(i+1),v(r,'code')].join('-'); if(seen.has(id)) return; seen.add(id);
     const f={code:v(r,'code'),name:v(r,'name'),qty:v(r,'qty'),unit:v(r,'unit'),need:normDate(v(r,'need'))||v(r,'need'),why:v(r,'why'),note:v(r,'note'),date:normDate(v(r,'date'))||v(r,'date'),desc:v(r,'desc'),req:v(r,'req'),no:v(r,'no')};
-    const o=map.get(id); if(o){ Object.assign(o,f); if(o.gone){ delete o.gone; back++; } o.seen=TODAY; } else { map.set(id,Object.assign({id,add:TODAY,seen:TODAY},f)); nw++; } });
-  let gone=0; map.forEach(o=>{ if(!seen.has(o.id) && !o.gone && !o.st){ o.gone=TODAY; gone++; } });
+    if(src==='sabt') f.src='sabt'; const o=map.get(id); if(o){ Object.assign(o,f); if(o.gone){ delete o.gone; back++; } o.seen=TODAY; } else { map.set(id,Object.assign({id,add:TODAY,seen:TODAY},f)); nw++; } });
+  let gone=0; map.forEach(o=>{ if(srcOf(o)===src && !seen.has(o.id) && !o.gone && !o.st){ o.gone=TODAY; gone++; } });
   const out=[...map.values()]; if(!put(BK,out)) throw new Error('save');
   return {n:seen.size,nw,gone,back}; }
 
 $('bFile').addEventListener('change',async()=>{ const f=$('bFile').files&&$('bFile').files[0]; $('bFile').value=''; if(!f||!W.box) return;
   if(f.size>8e6){ say('bMsg','فایل خیلی بزرگ است','bad'); return; }
   say('bMsg','در حال خواندن…');
-  try{ const r=await importBox(f); say('bMsg',`${fa(r.n)} قلم در فایل: ${fa(r.nw)} تازه${r.gone?'، '+fa(r.gone)+' قلم دیگر در باکس نیست':''}${r.back?'، '+fa(r.back)+' قلم دوباره برگشت':''}`,'ok'); bF='open'; drawBox(); }
+  try{ const r=await importBox(f,bSrc); say('bMsg',`${fa(r.n)} قلم در فایل: ${fa(r.nw)} تازه${r.gone?'، '+fa(r.gone)+' قلم دیگر در باکس نیست':''}${r.back?'، '+fa(r.back)+' قلم دوباره برگشت':''}`,'ok'); bF='open'; drawBox(); }
   catch(e){ say('bMsg',e&&e.message==='lib'?'برای بار اول اینترنت لازم است (کتابخانه اکسل)':'این فایل خروجی باکس سندپرداز نیست (ستون «شرح کالا» و «مقدار» پیدا نشد)','bad'); } });
-let bF=lsl('ntk_bf','imp');
+let bF=lsl('ntk_bf','imp'), bU=lsl('ntk_bu','');
 const ST={me:'خریدم',teh:'مأمور تهران',x:'لازم نیست'};
 const isOpen=x=>!x.st && !x.gone;
 /* پیوند با «پیش‌فاکتور»: قلم‌هایی که در استعلام جاری یا تاییدشده هستند (استعلام ردشده قلم را آزاد می‌کند) */
@@ -236,46 +269,84 @@ function counts(){ const A=box(), W0=waterState(), S=svcs();
   const imp=A.filter(x=>x.imp&&isOpen(x)).length, open=A.filter(isOpen).length, nr=S.filter(s=>!s.done&&!s.no).length;
   $('nBox').textContent=imp?fa(imp):''; $('nWater').textContent=W0.cls==='due'?'۱':''; $('nSvc').textContent=nr?fa(nr):''; $('nWeek').textContent='';
   khSub(SEE.box?(A.length?fa(open)+' قلم باز در باکس':'باکس سندپرداز هنوز بارگذاری نشده'):'امروز '+fa(TODAY)); }
-function drawBox(){ const A=box(), q=norm($('bQ').value).split(' ').filter(Boolean); PM=preMap();
-  const c={imp:A.filter(x=>x.imp&&isOpen(x)).length,open:A.filter(isOpen).length,teh:A.filter(x=>x.st==='teh').length,done:A.filter(x=>x.st&&x.st!=='teh').length,gone:A.filter(x=>x.gone&&!x.st).length};
-  const F=[['imp','ضروری'],['open','همه باز'],['teh','تهران'],['done','انجام‌شده'],['gone','رفته از باکس']];
+function drawBox(){ const ALL=box(), A=ALL.filter(x=>srcOf(x)===bSrc), q=norm($('bQ').value).split(' ').filter(Boolean), U=unitsGet(); PM=preMap();
+  /* دو باکس: گزارش مأمور / ثبت */
+  $('bSrc').innerHTML=Object.keys(SRC).map(k=>`<button type="button" data-src="${k}" aria-pressed="${k===bSrc}">${SRC[k]} (${fa(ALL.filter(x=>srcOf(x)===k&&isOpen(x)).length)})</button>`).join('');
+  const c={imp:A.filter(x=>x.imp&&isOpen(x)).length,open:A.filter(isOpen).length,rcv:A.filter(waitRcv).length,teh:A.filter(x=>x.st==='teh').length,done:A.filter(x=>x.st&&x.st!=='teh').length,gone:A.filter(x=>x.gone&&!x.st).length};
+  const F=[['imp','ضروری'],['open','همه باز'],['rcv','منتظر رسید انبار'],['teh','تهران'],['done','انجام‌شده'],['gone','رفته از باکس']];
   if(!F.some(f=>f[0]===bF)) bF='imp';
   $('bF').innerHTML=F.map(([k,n])=>`<button type="button" class="cp" data-f="${k}" aria-pressed="${k===bF}">${n} (${fa(c[k])})</button>`).join('')+(c.imp?`<button type="button" class="cp" id="bCopy">${ico('copy',18)} کپی ضروری‌ها</button>`:'');
-  const last=A.map(x=>x.seen||'').sort().pop(); const ds=last?daysSince(last):null;
+  const last=A.map(x=>x.seen||'').sort().pop(); const ds=last?daysSince(last):null, sn='«'+SRC[bSrc]+'»';
   $('bUp').classList.toggle('no',!last||ds>7);
-  $('bUpI').innerHTML=ico(last?'filechk':'upload'); $('bUpT').textContent=!last?'فایل باکس هنوز بارگذاری نشده':(ds?'فایل باکس '+fa(ds)+' روز پیش بارگذاری شد':'فایل باکس امروز بارگذاری شد');
-  $('bLast').textContent=last?'آخرین فایل: '+fa(last):'خروجی اکسل باکس خرید از سندپرداز';
-  if(!last && !$('bUp').dataset.t){ $('bUp').open=true; $('bUp').dataset.t='1'; }
-  let L=A.filter(x=>bF==='imp'?(x.imp&&isOpen(x)):bF==='open'?isOpen(x):bF==='teh'?x.st==='teh':bF==='done'?(x.st&&x.st!=='teh'):(x.gone&&!x.st));
-  if(q.length) L=L.filter(x=>{ const h=norm([x.name,x.code,x.why,x.note,x.desc,x.req,x.memo].join(' ')); return q.every(w=>h.indexOf(w)>-1); });
+  $('bUpI').innerHTML=ico(last?'filechk':'upload'); $('bUpT').textContent=!last?'فایل باکس '+sn+' هنوز بارگذاری نشده':(ds?'فایل باکس '+sn+' '+fa(ds)+' روز پیش بارگذاری شد':'فایل باکس '+sn+' امروز بارگذاری شد');
+  $('bLast').textContent=last?'آخرین فایل: '+fa(last):'خروجی اکسل باکس '+sn+' از سندپرداز';
+  if(!last && $('bUp').dataset.t!==bSrc){ $('bUp').open=true; $('bUp').dataset.t=bSrc; }
+  let L=A.filter(x=>bF==='imp'?(x.imp&&isOpen(x)):bF==='open'?isOpen(x):bF==='rcv'?waitRcv(x):bF==='teh'?x.st==='teh':bF==='done'?(x.st&&x.st!=='teh'):(x.gone&&!x.st));
+  if(q.length) L=L.filter(x=>{ const h=norm([x.name,x.code,x.why,x.note,x.desc,x.req,x.memo,unitOf(x,U)].join(' ')); return q.every(w=>h.indexOf(w)>-1); });
+  /* واحد درخواست‌کننده: شمارش از همین فهرست؛ «بی‌واحد» = درخواست‌کننده‌ای که واحدش نوشته نشده */
+  const uc=new Map(); let un=0; L.forEach(x=>{ const u=unitOf(x,U); if(u) uc.set(u,(uc.get(u)||0)+1); else un++; });
+  if(bU && bU!=='-' && !uc.has(bU)) bU=''; if(bU==='-' && !un) bU='';
+  const UL=[...uc.entries()].sort((a,b)=>b[1]-a[1]);
+  $('bU').hidden=!UL.length;
+  $('bU').innerHTML=`<button type="button" class="cp" data-u="" aria-pressed="${!bU}">همه واحدها (${fa(L.length)})</button>`+UL.map(([u,n])=>`<button type="button" class="cp" data-u="${esc(u)}" aria-pressed="${bU===u}">${esc(u)} (${fa(n)})</button>`).join('')+(un&&UL.length?`<button type="button" class="cp" data-u="-" aria-pressed="${bU==='-'}">بی‌واحد (${fa(un)})</button>`:'');
+  if(bU) L=L.filter(x=>bU==='-'?!unitOf(x,U):unitOf(x,U)===bU);
   L.sort((a,b)=>(b.imp?1:0)-(a.imp?1:0)||String(a.need||a.date).localeCompare(String(b.need||b.date)));
-  $('bList').innerHTML=L.length?L.slice(0,300).map(bxHTML).join(''):(!A.length?emptyState('archive','باکس خالی است',W.box?'فایل اکسل باکس خرید را از سندپرداز بگیرید و بالا انتخاب کنید.':'هنوز فایل باکس بارگذاری نشده است.')
-    :emptyState('star',bF==='imp'?'قلم ضروری نیست':'موردی نیست',bF==='imp'?'در «همه باز» با ستاره، قلم‌های ضروری را جدا کنید.':''));
+  $('bList').innerHTML=L.length?L.slice(0,300).map(x=>bxHTML(x,U)).join(''):(!A.length?emptyState('archive','باکس '+sn+' خالی است',W.box?'فایل اکسل باکس '+sn+' را از سندپرداز بگیرید و بالا انتخاب کنید.':'هنوز فایل این باکس بارگذاری نشده است.')
+    :emptyState('star',bF==='imp'?'قلم ضروری نیست':(bF==='rcv'?'قلمی منتظر رسید انبار نیست':'موردی نیست'),bF==='imp'?'در «همه باز» با ستاره، قلم‌های ضروری را جدا کنید.':''));
+  if($('bUnitsW').open) drawUnits();
+  else $('bUnitsN').textContent=unitsMissing()?'('+fa(unitsMissing())+' بدون واحد)':'';
   drawSel(); counts(); }
+/* فهرست درخواست‌کننده‌ها (از هر دو باکس) با واحدشان */
+function reqList(){ const m=new Map(); box().forEach(x=>{ if(!x.req) return; const k=pkey(x.req); if(!k) return; const o=m.get(k)||{k,n:0,sp:new Map()}; o.n++; o.sp.set(x.req,(o.sp.get(x.req)||0)+1); m.set(k,o); });
+  return [...m.values()].map(o=>({k:o.k,n:o.n,name:[...o.sp.entries()].sort((a,b)=>b[1]-a[1])[0][0]})).sort((a,b)=>b.n-a.n); }
+const unitsMissing=()=>{ const U=unitsGet(); return reqList().filter(r=>!U[r.k]).length; };
+function drawUnits(){ const U=unitsGet(), R=reqList(), us=[...new Set(Object.values(U).filter(Boolean))].sort();
+  $('bUnitL').innerHTML=us.map(u=>`<option value="${esc(u)}">`).join('');
+  $('bUnitsN').textContent=R.length?'('+fa(R.length)+' نفر'+(unitsMissing()?'، '+fa(unitsMissing())+' بدون واحد':'')+')':'';
+  $('bUnits').innerHTML=R.length?R.map(r=>`<div class="urow"><span class="nm">${esc(r.name)}<small>${fa(r.n)} قلم</small></span><input class="in" list="bUnitL" data-uk="${esc(r.k)}" value="${esc(U[r.k]||'')}" maxlength="40" placeholder="واحد" aria-label="واحد ${esc(r.name)}" ${W.box?'':'disabled'}></div>`).join('')
+    :'<p class="hint">هنوز درخواست‌کننده‌ای در باکس نیست.</p>'; }
+$('bUnitsW').addEventListener('toggle',()=>{ if($('bUnitsW').open) drawUnits(); });
+$('bUnits').addEventListener('change',e=>{ const i=e.target.closest('[data-uk]'); if(!i||!W.box) return; const U=unitsGet(), v=unitName(i.value); if(v) U[i.dataset.uk]=v; else delete U[i.dataset.uk]; put(UK,U); setTimeout(()=>{ drawBox(); },0); });
+/* چسباندن: «نام: واحد»، «نام - واحد»، یا «نام واحد ...» (وقتی نام در باکس هست) */
+$('bUnitsGo').addEventListener('click',()=>{ if(!W.box) return; const U=unitsGet(), R=reqList().sort((a,b)=>b.k.length-a.k.length); let n=0, bad=0;
+  String($('bUnitsP').value||'').split(/\r?\n/).map(t=>t.trim()).filter(Boolean).forEach(t=>{ let nm='', u='';
+    const m=/^(.+?)\s*[:：\t|،,=–—-]\s*(.+)$/.exec(t); if(m){ nm=m[1]; u=m[2]; }
+    else { const k=pkey(t), r=R.find(r=>k.startsWith(r.k)&&k.length>r.k.length); if(r){ nm=r.name; for(let i=1;i<=t.length;i++){ if(pkey(t.slice(0,i))===r.k){ u=t.slice(i); break; } } } }
+    u=unitName(u); const k=pkey(nm); if(k && u){ U[k]=u; n++; } else bad++; });
+  put(UK,U); $('bUnitsP').value=''; say('bUnitsM',fa(n)+' نفر ذخیره شد'+(bad?'، '+fa(bad)+' خط خوانده نشد (نام و واحد را با «:» جدا کنید)':''),bad?'bad':'ok'); drawBox(); drawUnits(); });
+$('bSrc').addEventListener('click',e=>{ const b=e.target.closest('[data-src]'); if(!b) return; bSrc=b.dataset.src; lss('ntk_bsrc',bSrc); sel.clear(); bU=''; lss('ntk_bu',''); drawBox(); });
+$('bU').addEventListener('click',e=>{ const b=e.target.closest('[data-u]'); if(!b) return; bU=b.dataset.u; lss('ntk_bu',bU); drawBox(); });
 function drawSel(){ [...sel].forEach(id=>{ const x=box().find(y=>y.id===id); if(!x||!isOpen(x)||PM.has(id)) sel.delete(id); }); $('bSel').hidden=!sel.size; $('bSelN').textContent=fa(sel.size)+' قلم برای پیش‌فاکتور'; }
 $('bSelX').addEventListener('click',()=>{ sel.clear(); drawBox(); });
 $('bSelGo').addEventListener('click',()=>{ const A=box().filter(x=>sel.has(x.id)); if(!A.length) return; const P=LS('nt_kpre_v1',[]), L=Array.isArray(P)?P:[];
   const id=uid('p'); L.push({id,title:'استعلام '+fa(TODAY)+(A.length===1?' — '+A[0].name:''),date:TODAY,by:myName(),quotes:[],st:'',
     items:A.slice(0,60).map(x=>({id:uid('i'),t:clean(x.name,120),q:parseAmt(x.qty)??'',u:clean(x.unit,15),code:clean(x.code,30),bx:x.id}))});
   if(!put('nt_kpre_v1',L)){ say('bMsg2','ذخیره نشد','bad'); return; } sel.clear(); drawBox(); lss('ntp_open',id); goTab('پیش‌فاکتور','ntp_pane','open'); });
-function bxHTML(x){ const d=daysSince(x.need||x.date), texts=[...new Set([x.why,x.note,x.desc].map(t=>clean(t,200)).filter(Boolean))];
+function bxHTML(x,U){ const d=daysSince(x.need||x.date), texts=[...new Set([x.why,x.note,x.desc].map(t=>clean(t,200)).filter(Boolean))];
   const pm=PM.get(x.id), preTag=pm?(pm.st==='ok'?`<span class="tag sp">پیش‌فاکتور تایید شد${pm.sup?': از '+esc(pm.sup):''}</span>`:`<span class="tag wa">${pm.st==='wait'?'پیش‌فاکتور: منتظر تایید':'در استعلام پیش‌فاکتور'}</span>`):'';
-  const stTag=(x.st?`<span class="tag ${x.st==='teh'?'wa':(x.st==='x'?'bad':'ok')}">${esc(ST[x.st])}${x.st==='me'&&x.fac?(x.fac.no?' — فاکتور '+esc(fa(x.fac.no)):' — با فاکتور'):''}${x.stAt?' '+fa(x.stAt):''}</span>`:(x.gone?`<span class="tag">از باکس رفته ${fa(x.gone)}</span>`:''))+preTag;
+  const stTag=(x.st?`<span class="tag ${x.st==='teh'?'wa':(x.st==='x'?'bad':'ok')}">${esc(ST[x.st])}${x.st==='me'&&x.fac?(x.fac.no?' — فاکتور '+esc(fa(x.fac.no)):' — با فاکتور'):''}${x.stAt?' '+fa(x.stAt):''}</span>`:(x.gone?`<span class="tag">از باکس رفته ${fa(x.gone)}</span>`:''))+preTag
+    +(x.st==='me'?(x.rs?`<span class="tag rs">رسید انبار${x.rs.n?' '+esc(fa(x.rs.n)):''} — ${esc(fa(x.rs.d||''))}</span>`:'<span class="tag wa">منتظر رسید انبار</span>'):'');
+  const u=unitOf(x,U);
   const need=x.need?`<span class="nd${d!=null&&d>0&&isOpen(x)?' old':''}">نیاز ${fa(x.need)}${d!=null&&d>0&&isOpen(x)?' ('+fa(d)+' روز گذشته)':''}</span>`:'';
   const on=sel.has(x.id);
-  return `<div class="bx${x.st&&x.st!=='teh'?' dn':''}${on?' sel':''}" data-id="${esc(x.id)}">
+  return `<div class="bx${x.st&&x.st!=='teh'&&!waitRcv(x)?' dn':''}${on?' sel':''}" data-id="${esc(x.id)}">
     <div class="r1">${W.box?`<button type="button" class="st" data-imp aria-pressed="${!!x.imp}" aria-label="ضروری">${ico('star')}</button>`:(x.imp?`<span class="st" aria-label="ضروری" style="background:var(--am);border-color:var(--am);color:var(--nv)">${ico('star')}</span>`:'')}
-      <div class="tx"><span class="bn">${esc(x.name)}</span><span class="mt">${[x.code?'کد '+esc(fa(x.code)):'',x.req?esc(x.req):''].filter(Boolean).join('، ')}</span>${need}</div>
+      <div class="tx"><span class="bn">${esc(x.name)}</span><span class="mt">${[x.code?'کد '+esc(fa(x.code)):'',x.req?esc(x.req):''].filter(Boolean).join('، ')}</span>${u?`<span class="un">واحد ${esc(u)}</span>`:''}${need}</div>
       <div class="q">${esc(fa(x.qty||''))}<small>${esc(x.unit||'')}</small></div></div>
     ${texts.length?`<div class="why">${texts.map(esc).join(' — ')}</div>`:''}${stTag?`<div class="tg">${stTag}</div>`:''}
     ${x.imp&&W.box&&!x.st?`<div class="memo"><input class="in" data-memo value="${esc(x.memo||'')}" maxlength="160" placeholder="توضیح مهم برای خرید (مثلاً فوری، حتماً اصل)" aria-label="توضیح مهم"></div>`:(x.memo?`<div class="memo"><div>${esc(x.memo)}</div></div>`:'')}
-    ${W.box?(x.st?`<div class="acts one"><button type="button" data-st="">برگرداندن</button></div>`
+    ${W.box&&waitRcv(x)?`<div class="rcv"><b>رسید انبار</b><div class="g2"><input class="in mono" data-rn inputmode="numeric" maxlength="20" placeholder="شماره رسید" aria-label="شماره رسید انبار"><input class="in mono" data-rd inputmode="numeric" maxlength="10" value="${esc(fa(TODAY))}" aria-label="تاریخ رسید انبار"></div><button type="button" class="btn" data-rcv>رسید انبار شد</button><div class="msg" data-rm role="status"></div></div>`:''}
+    ${W.box?(x.st?(x.rs?`<div class="acts two"><button type="button" data-rsx>برگرداندن رسید</button><button type="button" data-st="">برگرداندن</button></div>`:`<div class="acts one"><button type="button" data-st="">برگرداندن</button></div>`)
       :`<div class="acts"><button type="button" class="g" data-st="me">${ico('cart')}خریدم</button><button type="button" data-st="teh">${ico('truck')}مأمور تهران</button><button type="button" class="r" data-st="x">${ico('ban')}لازم نیست</button>${canPre&&isOpen(x)&&!pm?`<button type="button" data-sel aria-pressed="${on}">${ico(on?'boxck':'box0')}پیش‌فاکتور</button>`:'<button type="button" disabled style="opacity:.35">'+ico('box0')+'پیش‌فاکتور</button>'}</div>`):'<div class="pad"></div>'}</div>`; }
 function setItem(id,fn){ const A=box(), x=A.find(y=>y.id===id); if(!x) return; fn(x); put(BK,A); drawBox(); }
 $('bList').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||!W.box) return; const c=b.closest('.bx'); if(!c) return; const id=c.dataset.id;
   if(b.hasAttribute('data-sel')){ if(sel.has(id)) sel.delete(id); else sel.add(id); drawBox(); return; }
   if(b.hasAttribute('data-imp')) setItem(id,x=>{ x.imp=x.imp?0:1; if(!x.imp) delete x.imp; });
-  else if(b.dataset.st!==undefined) setItem(id,x=>{ if(b.dataset.st){ x.st=b.dataset.st; x.stAt=TODAY; x.stBy=myName(); } else { delete x.st; delete x.stAt; delete x.stBy; } }); });
+  else if(b.hasAttribute('data-rcv')){ const n=clean(lat(c.querySelector('[data-rn]').value).replace(/[^0-9A-Za-z\/-]/g,''),20), dv=lat(c.querySelector('[data-rd]').value).trim(), d=dv?normDate(dv):TODAY;
+    if(!d){ const m=c.querySelector('[data-rm]'); if(m){ m.textContent='تاریخ درست نیست (مثل ۱۴۰۵/۰۸/۰۵)'; m.className='msg bad'; } return; }
+    setItem(id,x=>{ x.rs={d}; if(n) x.rs.n=n; const by=myName(); if(by) x.rs.by=by; }); }
+  else if(b.hasAttribute('data-rsx')) setItem(id,x=>{ delete x.rs; });
+  else if(b.dataset.st!==undefined) setItem(id,x=>{ if(b.dataset.st){ x.st=b.dataset.st; x.stAt=TODAY; x.stBy=myName(); } else { delete x.st; delete x.stAt; delete x.stBy; delete x.rs; } }); });
 /* توضیح: ذخیره بدون ساختن دوباره فهرست (ساختن دوباره هنگام blur خطا می‌دهد) */
 $('bList').addEventListener('change',e=>{ const i=e.target.closest('[data-memo]'); if(!i||!W.box) return; const id=i.closest('.bx').dataset.id, v=clean(i.value,160), A=box(), x=A.find(y=>y.id===id); if(!x || (x.memo||'')===v) return; if(v) x.memo=v; else delete x.memo; put(BK,A); });
 $('bF').addEventListener('click',async e=>{ if(e.target.closest('#bCopy')){ const L=box().filter(x=>x.imp&&isOpen(x)); if(!L.length) return;
