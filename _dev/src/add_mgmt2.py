@@ -98,6 +98,8 @@ CSS="""
 .kpv small{margin-inline-start:4px}
 .kp.hot{border-color:#EBC3BF}
 @media (max-width:959px){ .kpsp{display:none} .kp{min-height:0;padding:12px 14px} .kpv{font-size:2rem} }
+/* مدیریت: «نیاز به توجه» نمی‌آید (۱۴۰۵/۰۸/۰۴؛ فقط در «امروز») */
+html.mgmt #atCard{display:none!important}
 @media (max-width:959px){ html.mgmt #flCard{order:2!important} html.mgmt #atCard{order:3!important} html.mgmt #tlCard{order:4!important} html.mgmt .tools{order:5!important} }
 #flCard.fl2>#flSum,#flCard.fl2>#flBar,#flCard.fl2>#flGrid,#flCard.fl2>.flnote{display:none!important}
 #flCard.fl2{background:transparent;border:0;padding:0}

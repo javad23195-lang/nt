@@ -33,8 +33,7 @@ const J=ago=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZo
       ok(/خرابی باز ۲ مورد ۱ در حال اقدام/.test(K[3].t),'خرابی باز: ۲، ۱ در حال اقدام — '+K[3].t);
       ok(new Set(K.map(x=>Math.round(x.r))).size===(w>=700?1:2),w>=700?'چهار کارت در یک ردیف':'دو کارت در هر ردیف');
     }
-    if(w===1920){ const top=await fr.evaluate(()=>[document.getElementById('kpis'),document.getElementById('atCard')].map(e=>Math.round(e.getBoundingClientRect().top)));
-      ok(top[0]<top[1],'کارت‌ها بالای «نیاز به توجه»'); }
+    if(w===1920){ ok(await fr.evaluate(()=>getComputedStyle(document.getElementById('atCard')).display==='none'),'مدیریت: «نیاز به توجه» نیست'); }
     ok(await fr.evaluate(()=>!window.__x && !document.querySelector('#kpis img')),'متن خطرناک اجرا نشد');
     await p.screenshot({path:`/tmp/claude-0/k${w}.png`});
     await fr.evaluate(()=>[...document.querySelectorAll('#kpis .kp')].find(b=>b.dataset.go==='ثبت مشکلات').click()); await sleep(800);

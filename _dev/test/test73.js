@@ -33,8 +33,8 @@ const J=ago=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZo
   const sep=await fr.evaluate(()=>{ const a=[...document.querySelectorAll('#kpis .kp')].map(b=>b.getBoundingClientRect()); return a.length===4 && Math.abs(a[0].top-a[1].top)<2 && a[2].top>a[0].bottom+4 && getComputedStyle(document.querySelector('#kpis .kp')).borderRadius==='16px'; });
   ok(sep,'کارت‌های خلاصه: ۴ کارت جدا، ۲×۲ '+JSON.stringify(await fr.evaluate(()=>[...document.querySelectorAll('#kpis .kp')].map(b=>{const r=b.getBoundingClientRect(); return [r.top|0,r.bottom|0,getComputedStyle(b).borderRadius]; }))));
   ok(await fr.evaluate(()=>[...document.querySelectorAll('.kpsp')].every(e=>!e.getClientRects().length)),'گوشی: نمودار کوچک پنهان');
-  const order=await fr.evaluate(()=>['kpis','flCard','atCard'].map(id=>document.getElementById(id).getBoundingClientRect().top));
-  ok(order[0]<order[1] && order[1]<order[2],'ترتیب گوشی: خلاصه، ناوگان، نیاز به توجه');
+  const order=await fr.evaluate(()=>['kpis','flCard','tlCard'].map(id=>document.getElementById(id).getBoundingClientRect().top));
+  ok(order[0]<order[1] && order[1]<order[2] && await fr.evaluate(()=>getComputedStyle(document.getElementById('atCard')).display==='none'),'ترتیب گوشی: خلاصه، ناوگان، خط زمان (بدون «نیاز به توجه»)');
   const seg=await fr.evaluate(()=>[...document.querySelectorAll('#fl2 .fsg button')].map(b=>b.textContent+(b.getAttribute('aria-pressed')==='true'?'*':'')));
   ok(seg.length===3 && /^همه \(۸\)\*$/.test(seg[0]) && seg.some(s=>/تولید \(۳\)/.test(s)) && seg.some(s=>/استخراج \(۵\)/.test(s)),'انتخاب بخش: همه ۸، تولید ۳، استخراج ۵ — '+seg.join('|'));
   const rd=()=>fr.evaluate(()=>({p:document.querySelector('#fl2 .frh b').textContent,l:document.querySelector('#fl2 .frl').innerText.replace(/\s+/g,' '),n:document.querySelectorAll('#fl2 .frb i').length,rows:[...document.querySelectorAll('#fl2 .fr2')].map(r=>r.className.match(/fl-(\w+)/)[1]+'|'+r.querySelector('.frw').innerText.replace(/\s+/g,' '))}));
