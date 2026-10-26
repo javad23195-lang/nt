@@ -12,9 +12,10 @@ const N='برنامه هفتگی انبار';
   const DATA={
     nt_svc_v1:[{id:'s1',dev:'لودر ZL50',name:'روغن موتور',every:250,last:1000,ld:J(-30),months:12},     // ۳۰ روز ۲۱۰ ساعت → ۷/روز؛ ۴۰ ساعت مانده → ~۶ روز
                {id:'s2',dev:'کامیون TRS02',name:'روغن موتور',every:5000,last:20000,ld:J(-40),months:12},  // گذشته (۲۵۲۰۰)
-               {id:'s3',dev:'بیل مکانیکی کوماتسو PC290',name:'روغن هیدرولیک',every:2000,last:1000,ld:J(-10),months:12}], // خیلی دور
+               {id:'s3',dev:'بیل مکانیکی کوماتسو PC290',name:'روغن هیدرولیک',every:2000,last:1000,ld:J(-10),months:12},
+               {id:'s4',dev:'بیل مکانیکی کوماتسو PC290',name:'روغن گردان',every:1000,last:900,ld:J(-400),months:12}], // فقط زمان گذشته → بازرسی // خیلی دور
     nt_daftar_v1:[{dev:'لودر ZL50',val:1000,date:J(-30)},{dev:'لودر ZL50',val:1210,date:J(0)},{dev:'کامیون TRS02',val:20000,date:J(-40)},{dev:'کامیون TRS02',val:25200,date:J(0)},{dev:'بیل مکانیکی کوماتسو PC290',val:1000,date:J(-10)},{dev:'بیل مکانیکی کوماتسو PC290',val:1050,date:J(0)}],
-    nt_oil_v1:{rows:[{dev:'لودر ZL50',part:'روغن موتور',oil:'روغن نمونه 20W-50',code:'111111',l:28},{dev:'کامیون TRS02',part:'روغن موتور',oil:'روغن نمونه 20W-50',code:'111111',l:24}]},
+    nt_oil_v1:{rows:[{dev:'بیل مکانیکی کوماتسو PC290',part:'روغن گردان',oil:'روغن نمونه 20W-50',code:'111111',l:8},{dev:'لودر ZL50',part:'روغن موتور',oil:'روغن نمونه 20W-50',code:'111111',l:28},{dev:'کامیون TRS02',part:'روغن موتور',oil:'روغن نمونه 20W-50',code:'111111',l:24}]},
     nt_stock_v1:{at:J(0),items:{'111112':{n:'روغن نمونه 50-20',q:30,u:'لیتر'}}}};
   const run=async cfg=>{ const c=await br.newContext({locale:'fa-IR',viewport:{width:390,height:844}});
     await c.addInitScript(([cfg,D])=>{ if(localStorage.getItem('__s')) return; localStorage.setItem('__s','1'); localStorage.setItem('ntsync_cfg_v1',JSON.stringify(cfg)); Object.keys(D).forEach(k=>localStorage.setItem(k,JSON.stringify(D[k]))); },[cfg,DATA]);
@@ -28,8 +29,9 @@ const N='برنامه هفتگی انبار';
   console.log('۱) مهندس (ثبت)');
   let {c,p,f,errs}=await run({mode:'w'});
   let T=await f.evaluate(()=>document.body.innerText);
-  ok(/سررسید گذشته/.test(T) && /کامیون TRS02/.test(T) && /لودر ZL50/.test(T) && !/PC290/.test(T),'کامیون گذشته، لودر این هفته، بیل دور (نیست)');
-  ok(await f.evaluate(()=>[...document.querySelectorAll('.kp3 .k b')].map(b=>b.textContent).join(','))==='۱,۱,۰','خلاصه: ۱ گذشته، ۱ این هفته، ۰ هفته بعد');
+  ok(/سررسید گذشته/.test(T) && /کامیون TRS02/.test(T) && /لودر ZL50/.test(T) && !/روغن هیدرولیک/.test(T),'کامیون گذشته، لودر این هفته، هیدرولیک بیل دور (نیست)');
+  ok(await f.evaluate(()=>[...document.querySelectorAll('.kp3 .k b')].map(b=>b.textContent).join(','))==='۱,۱,۰,۱','خلاصه: ۱ گذشته، ۱ این هفته، ۰ هفته بعد، ۱ بازرسی');
+  ok(await f.evaluate(()=>{ const g=[...document.querySelectorAll('.grp')].find(x=>/بازرسی کنید/.test(x.querySelector('h2').textContent)); return !!g && /روغن گردان/.test(g.innerText) && !g.querySelector('.rdy'); }),'گردان بیل (فقط زمان): گروه «بازرسی کنید»، بدون «آماده شد»');
   ok(/حدود ۶ روز دیگر/.test(T) && /۴۰ ساعت مانده/.test(T),'روز مانده از کارکرد واقعی (۷ ساعت در روز)');
   ok(/۵,?۲۰۰ کیلومتر گذشته|۲۰۰ کیلومتر گذشته/.test(T),'کامیون: کیلومتر گذشته — '+(T.match(/[\d۰-۹,]+ کیلومتر گذشته/)||[''])[0]);
   const ND=await f.evaluate(()=>document.getElementById('need').innerText.replace(/\s+/g,' '));
@@ -37,7 +39,7 @@ const N='برنامه هفتگی انبار';
   await f.click('.rdy'); await sleep(200);
   ok(Object.keys((await p.evaluate(()=>JSON.parse(localStorage.getItem('nt_wplan_v1')))).ready).length===1 && /آماده شد/.test(await f.evaluate(()=>document.querySelector('.rdy').textContent)),'«آماده شد» ذخیره شد');
   await f.click('#rng [data-r="30"]'); await sleep(200);
-  ok(!/PC290/.test(await f.evaluate(()=>document.body.innerText)),'۳۰ روز: بیل هنوز دور است');
+  ok(!/روغن هیدرولیک/.test(await f.evaluate(()=>document.body.innerText)),'۳۰ روز: هیدرولیک بیل هنوز دور است');
   // بارگذاری موجودی
   await p.evaluate(()=>{ window.ntReport.readAoa=async()=>[['کد تفصيل','نام تفصيل','كد كالا','نام کالا','مقدار وارده','مقدار صادره','موجودي_x000D_\nواحد اصلي','واحد اصلي'],[1,'مشترک','111111','روغن نمونه 20W-50',100,40,60,'ليتر'],[1,'مشترک','222222','<b>x</b>',5,0,5,'عدد']]; });
   await f.evaluate(()=>document.getElementById('stW').open=true);
@@ -49,7 +51,7 @@ const N='برنامه هفتگی انبار';
   await p.evaluate(()=>{ window.ntReport.readAoa=async(b,o)=>{ const A=[['x'],[null,'دستگاه','بخش','نوع روغن','کد کالا','لیتر'],[null,'بیل مکانیکی کوماتسو PC290','روغن هیدرولیک','روغن نمونه H','333333','150']]; return o&&o.find&&o.find(A)?A:null; }; });
   await f.evaluate(()=>document.getElementById('olW').open=true);
   await f.setInputFiles('#olFile',{name:'o.xlsx',mimeType:'application/octet-stream',buffer:Buffer.from('x')}); await sleep(500);
-  ok((await p.evaluate(()=>JSON.parse(localStorage.getItem('nt_oil_v1')).rows.length))===3,'جدول روغن از اکسل: ردیف تازه اضافه شد');
+  ok((await p.evaluate(()=>JSON.parse(localStorage.getItem('nt_oil_v1')).rows.length))===4,'جدول روغن از اکسل: ردیف تازه اضافه شد');
   ok(!errs.length,'بدون خطا '+errs.join('|').slice(0,200)); await c.close();
 
   console.log('۲) انبار: فقط همین زبانه');

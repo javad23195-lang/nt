@@ -7,10 +7,12 @@
 <title>برنامه هفتگی انبار</title>
 <style>
 /*KH_COMMON_CSS*/
-.kp3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.kp3{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
 .kp3 .k{background:#fff;border:1px solid var(--rule);border-radius:16px;padding:12px 6px;text-align:center}
 .kp3 .k b{display:block;font-size:1.6rem;font-weight:900;line-height:1.3}
 .kp3 .k span{font-size:.82rem;color:#4E5864;font-weight:800}
+.kp3 .k.i b{color:#0B5C7A}
+.it .ins{display:block;margin-top:6px;font-size:.8rem;font-weight:800;color:#0B5C7A}
 .kp3 .k.r b{color:var(--bad)}.kp3 .k.a b{color:var(--amt)}.kp3 .k.g b{color:var(--ok)}
 .grp{background:#fff;border:1px solid var(--rule);border-radius:18px;margin-top:14px;overflow:hidden}
 .grp>h2{display:flex;align-items:center;gap:8px;margin:0;padding:14px 16px;font-size:1.02rem;font-weight:900;border-bottom:1px solid var(--rule)}
@@ -116,7 +118,8 @@ function plan(){ const sv=S(); if(!sv) return {L:[],nores:true};
     if(pd===null) return;
     if(pd>RANGE) return;
     const ol=oilFor(dev,x.it.name);
-    out.push({x,dev,name:x.it.name,u,pd,how,rate,ol,id:x.it.id||(dev+'|'+x.it.name),rk:(x.it.id||dev+'|'+x.it.name)+'|'+(x.it.last||'')+'|'+(x.it.ld||'')}); });
+    const insp=how==='time' && (x.rem===null || x.rem>=0);
+    out.push({x,dev,name:x.it.name,u,pd,how,rate,ol,insp,id:x.it.id||(dev+'|'+x.it.name),rk:(x.it.id||dev+'|'+x.it.name)+'|'+(x.it.last||'')+'|'+(x.it.ld||'')}); });
   return {L:out.sort((a,b)=>a.pd-b.pd)}; }
 const addDays=n=>{ try{ const d=new Date(Date.now()+n*864e5); const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZone:'Asia/Tehran',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d), g=t=>p.find(x=>x.type===t).value; return g('year')+'/'+g('month')+'/'+g('day'); }catch(e){ return ''; } };
 function whenTxt(p){ const x=p.x, uu=/کیلومتر/.test(p.u)?'کیلومتر':(/ساعت/.test(p.u)?'ساعت':'');
@@ -127,16 +130,17 @@ function whenTxt(p){ const x=p.x, uu=/کیلومتر/.test(p.u)?'کیلومتر'
 function draw(){ const P=plan(), L=P.L, RD=obj(RK).ready||{}, ST=stock();
   khSub(dayName(TODAY)+'، بازه '+fa(RANGE)+' روز');
   $('rng').innerHTML=[7,14,30].map(n=>`<button type="button" class="cp" data-r="${n}" aria-pressed="${n===RANGE}">${fa(n)} روز</button>`).join('');
-  const G=[['r','سررسید گذشته','var(--bad)',p=>p.pd<0],['a','این هفته','var(--am)',p=>p.pd>=0&&p.pd<7],['g','هفته بعد','var(--ok)',p=>p.pd>=7&&p.pd<14],['l','بعد از آن','#9AA8B5',p=>p.pd>=14]];
-  $('kp').innerHTML=G.slice(0,3).map(([k,t,c,f])=>`<div class="k ${k}"><b>${fa(L.filter(f).length)}</b><span>${t}</span></div>`).join('');
+  /* فقط سقف زمانی رسیده (کارکرد نه): «بازرسی کنید»، جدا و بیرون از نیاز روغن */
+  const G=[['r','سررسید گذشته','var(--bad)',p=>!p.insp&&p.pd<0],['a','این هفته','var(--am)',p=>!p.insp&&p.pd>=0&&p.pd<7],['g','هفته بعد','var(--ok)',p=>!p.insp&&p.pd>=7&&p.pd<14],['l','بعد از آن','#9AA8B5',p=>!p.insp&&p.pd>=14],['i','بازرسی کنید (فقط زمان)','#0B5C7A',p=>p.insp]];
+  $('kp').innerHTML=[G[0],G[1],G[2],G[4]].map(([k,t,c,f])=>`<div class="k ${k}"><b>${fa(L.filter(f).length)}</b><span>${t.replace(' (فقط زمان)','')}</span></div>`).join('');
   if(P.nores){ $('groups').innerHTML=emptyState('list','برنامه سرویس خوانده نشد',''); return; }
   $('groups').innerHTML=L.length?G.map(([k,t,c,f])=>{ const A=L.filter(f); if(!A.length) return ''; return `<div class="grp"><h2><i style="background:${c}"></i>${t}<small>${fa(A.length)} سرویس</small></h2>${A.map(p=>{ const r=RD[p.rk];
       return `<div class="it"><div class="tx"><b>${esc(p.dev)}</b><span class="o">${esc(p.name)}${p.ol&&p.ol.oil?': '+esc(p.ol.oil):''}</span><span class="d ${p.pd<0?'r':(p.pd<7?'a':'g')}">${esc(whenTxt(p))}</span>
-        <button type="button" class="rdy${r?' on':''}" data-rk="${esc(p.rk)}" ${canW?'':'disabled'}>${r?'✓ آماده شد'+(r.d?' '+esc(fa(r.d)):''):'آماده نشده'}</button></div>
+        ${p.insp?'<span class="ins">سقف زمانی رسیده؛ اول بازرسی (در دفترچه «بازرسی شد» یا «تعویض شد»)</span>':`<button type="button" class="rdy${r?' on':''}" data-rk="${esc(p.rk)}" ${canW?'':'disabled'}>${r?'✓ آماده شد'+(r.d?' '+esc(fa(r.d)):''):'آماده نشده'}</button>`}</div>
         ${p.ol&&+p.ol.l?`<div class="lt">${esc(faD(+p.ol.l))}<small>لیتر</small></div>`:`<div class="lt no">${p.ol?'لیتر ندارد':'در جدول روغن نیست'}</div>`}</div>`; }).join('')}</div>`; }).join('')
     :emptyState('clipck','در '+fa(RANGE)+' روز آینده سرویسی نیست',oilRows().length?'':'برنامه سرویس در «دفترچه قرائت» است.');
   /* نیاز روغن */
-  const N=new Map(); L.forEach(p=>{ if(!p.ol||!+p.ol.l) return; const k=key(p.ol.oil)||'-'; const o=N.get(k)||{oil:p.ol.oil||'(نوع روغن ندارد)',code:p.ol.code,l:0}; o.l+=+p.ol.l; if(!o.code&&p.ol.code) o.code=p.ol.code; N.set(k,o); });
+  const N=new Map(); L.forEach(p=>{ if(p.insp||!p.ol||!+p.ol.l) return; const k=key(p.ol.oil)||'-'; const o=N.get(k)||{oil:p.ol.oil||'(نوع روغن ندارد)',code:p.ol.code,l:0}; o.l+=+p.ol.l; if(!o.code&&p.ol.code) o.code=p.ol.code; N.set(k,o); });
   const NL=[...N.values()].sort((a,b)=>b.l-a.l), has=!!Object.keys(ST.items).length; let short=[];
   $('need').innerHTML=NL.length?`<table class="nd"><tr><th>نوع روغن</th><th class="n">نیاز</th><th class="n">موجودی</th><th class="n">کسری</th></tr>${NL.map(o=>{ const s=has?stockOf(o.oil,o.code,ST):null, q=s?(+s.q||0):null, k=q===null?null:Math.max(0,o.l-q);
       if(k) short.push({oil:o.oil,k,u:(s&&s.u)||'لیتر'});

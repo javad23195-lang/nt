@@ -14,13 +14,16 @@
   function state(it,cur,todayKey){
     const every=num(it.every), last=num(it.last), months=num(it.months)||12;
     const out={every,last,next:null,rem:null,days:null,st:'n',by:''};
-    const t=dn(todayKey||today()), ld=dn(it.ld);
+    /* ti = تاریخ آخرین «بازرسی شد، سالم»: سقف زمانی از آن روز دوباره شروع می‌شود (ساعت/کیلومتر نه) */
+    const t=dn(todayKey||today()), ld0=dn(it.ld), ti=dn(it.ti), ld=(ti!==null&&(ld0===null||ti>ld0))?ti:ld0;
     if(ld!==null && t!==null){ out.days=Math.round(ld+months*30.4-t); }
     if(every && last!==null){ out.next=last+every; if(cur!==null && cur!==undefined) out.rem=out.next-cur; }
     let st='n';
     if(out.rem!==null){ st = out.rem<0?'r':(out.rem<=Math.max(1,every*0.1)?'o':'g'); out.by='use'; }
     if(out.days!==null){ const ts = out.days<0?'r':(out.days<=15?'o':'g');
       const rank={r:3,o:2,g:1,n:0}; if(rank[ts]>rank[st]){ st=ts; out.by='time'; } else if(st==='n'){ st=ts; out.by='time'; } }
+    /* فقط زمان: سررسید از سقف زمانی است و کارکرد هنوز نرسیده → «بازرسی کنید» (نه تعویض حتمی) */
+    out.tonly = st!=='g' && st!=='n' && out.by==='time' && (out.rem===null || out.rem>=0);
     out.st=st; return out;
   }
   /** دستگاه‌هایی که دیگر در معدن نیستند: سرویسشان نشان داده و شمرده نمی‌شود (همان فهرست add_df_retire.py) */
