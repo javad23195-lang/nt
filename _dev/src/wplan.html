@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F3F1EC">
+<title>برنامه هفتگی انبار</title>
+<style>
+/*KH_COMMON_CSS*/
+.kp3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.kp3 .k{background:#fff;border:1px solid var(--rule);border-radius:16px;padding:12px 6px;text-align:center}
+.kp3 .k b{display:block;font-size:1.6rem;font-weight:900;line-height:1.3}
+.kp3 .k span{font-size:.82rem;color:#4E5864;font-weight:800}
+.kp3 .k.r b{color:var(--bad)}.kp3 .k.a b{color:var(--amt)}.kp3 .k.g b{color:var(--ok)}
+.grp{background:#fff;border:1px solid var(--rule);border-radius:18px;margin-top:14px;overflow:hidden}
+.grp>h2{display:flex;align-items:center;gap:8px;margin:0;padding:14px 16px;font-size:1.02rem;font-weight:900;border-bottom:1px solid var(--rule)}
+.grp>h2 i{width:10px;height:10px;border-radius:50%;flex:none}
+.grp>h2 small{margin-inline-start:auto;font-size:.84rem;color:#4E5864;font-weight:800}
+.it{display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-top:1px solid #EFEBE4}
+.it:first-of-type{border-top:0}
+.it .tx{flex:1;min-width:0}
+.it .tx b{display:block;font-size:1rem;font-weight:900}
+.it .o{display:block;font-size:.88rem;color:#4E5864;margin-top:2px}
+.it .d{display:block;font-size:.86rem;font-weight:800;margin-top:4px}
+.it .d.r{color:var(--bad)}.it .d.a{color:var(--amt)}.it .d.g{color:var(--ok)}
+.it .lt{flex:none;min-width:60px;text-align:center;background:var(--soft);border-radius:12px;padding:6px 4px;font-weight:900;font-size:1.15rem}
+.it .lt small{display:block;font-size:.72rem;color:#4E5864;font-weight:700}
+.it .lt.no{background:transparent;border:1px dashed var(--line);font-size:.8rem;color:#4E5864;padding:10px 4px}
+.rdy{display:inline-flex;align-items:center;gap:4px;margin-top:6px;min-height:32px;font:inherit;font-size:.8rem;font-weight:900;padding:2px 12px;border-radius:9px;border:1px dashed #9AA8B5;background:transparent;color:#4E5864;cursor:pointer}
+.rdy.on{border:0;background:var(--okbg);color:var(--ok)}
+.rdy:disabled{cursor:default}
+table.nd{width:100%;border-collapse:collapse;font-size:.9rem}
+table.nd th,table.nd td{padding:10px 10px;border-top:1px solid #EFEBE4;text-align:start}
+table.nd th{font-size:.78rem;color:#4E5864;font-weight:800;background:#FAF8F4}
+table.nd .n{text-align:center;font-weight:800;white-space:nowrap}
+table.nd .s{text-align:center;font-weight:900;color:var(--bad);white-space:nowrap}
+table.nd .ok{color:var(--ok)}
+table.nd small{display:block;font-size:.74rem;color:#4E5864;font-weight:600}
+.pad{padding:12px 16px}
+.stw{display:flex;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid var(--rule);font-size:.86rem;color:#4E5864}
+.stw b{color:var(--ink)}
+.stw.old{background:var(--ambg);color:var(--amt)}
+.otb{width:100%;border-collapse:collapse;font-size:.86rem}
+.otb td,.otb th{padding:6px 6px;border-top:1px solid #EFEBE4;text-align:start;vertical-align:middle}
+.otb th{font-size:.76rem;color:#4E5864}
+.otb .in{min-height:40px;font-size:.88rem;padding:4px 8px;margin:0}
+.otb .dv{font-weight:900;background:#FAF8F4}
+.otb .x{border:0;background:none;color:var(--bad);font-size:1.1rem;min-width:36px;min-height:36px;cursor:pointer}
+details.card>summary{font-weight:900;cursor:pointer;min-height:40px;display:flex;align-items:center;gap:6px}
+details.card>summary small{color:#4E5864;font-weight:700}
+.row3{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.row3 .btn{flex:1;min-width:150px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div class="tt"><h1>برنامه هفتگی انبار</h1><p class="sub" id="hSub"></p></div></header>
+<p class="hint" style="margin:6px 0 0">تعویض روغن‌ها و سرویس‌های پیش رو (از برنامه سرویس دفترچه قرائت)، برای آماده کردن روغن در انبار.</p>
+<div class="chips" id="rng" role="group" aria-label="بازه" style="margin-top:12px"></div>
+<div class="kp3" id="kp"></div>
+<div id="groups"></div>
+<div class="grp" id="needW"><h2>نیاز روغن در بازه</h2><div id="need"></div>
+  <div class="stw" id="stInfo"></div>
+  <div class="pad" id="needAct"></div></div>
+<details class="card" id="stW" style="margin-top:14px"><summary>موجودی انبار از سندپرداز <small id="stN"></small></summary>
+  <p class="hint">خروجی اکسل «موجودی کالا» را از سندپرداز بگیرید و انتخاب کنید. موجودی هر کد کالا از همین فایل خوانده می‌شود (فقط در اطلاعات رمزشده).</p>
+  <div class="w-only"><button type="button" class="btn dash" id="stPick">انتخاب فایل موجودی</button><input id="stFile" type="file" accept=".xlsx,.xls" hidden></div>
+  <div class="msg" id="stMsg" role="status"></div></details>
+<details class="card" id="olW" style="margin-top:14px"><summary>جدول روغن دستگاه‌ها <small id="olN"></small></summary>
+  <p class="hint">هر ردیف: دستگاه، بخش (همان نام سرویس، مثل «روغن موتور»)، نوع روغن، کد کالا، لیتر. فقط در اطلاعات رمزشده.</p>
+  <div class="ol-w" id="olEd"><div class="row3"><button type="button" class="btn dash" id="olPick">بارگذاری از اکسل</button><button type="button" class="btn s" id="olAdd">+ ردیف</button></div><input id="olFile" type="file" accept=".xlsx,.xls" hidden>
+    <label class="f" for="olPaste">یا چسباندن از اکسل (۵ ستون: دستگاه، بخش، نوع روغن، کد کالا، لیتر)</label><textarea class="in" id="olPaste" rows="3"></textarea><button type="button" class="btn s" id="olGo" style="margin-top:8px">افزودن از متن</button></div>
+  <div class="msg" id="olMsg" role="status"></div>
+  <div id="olList" style="overflow-x:auto;margin-top:10px"></div></details>
+</div>
+<script>
+/*KH_COMMON_JS*/
+const TAB='برنامه هفتگی انبار', OK='nt_oil_v1', SK='nt_stock_v1', RK='nt_wplan_v1';
+const canW=canWT(TAB), canOil=canW&&canWT('دفترچه قرائت');
+document.querySelectorAll('.w-only').forEach(e=>{ if(!canW) e.hidden=true; });
+if(!canOil) $('olEd').hidden=true;
+const S=()=>{ try{ return parent.ntSvc; }catch(e){ return null; } };
+const arr=k=>{ const a=LS(k,[]); return Array.isArray(a)?a:[]; };
+const obj=k=>{ const o=LS(k,{}); return (o&&typeof o==='object'&&!Array.isArray(o))?o:{}; };
+const key=t=>norm(t).replace(/\s+/g,'');
+const faD=v=>fa(String(Math.round(v*10)/10));
+/* کد قدیمی → کد تازه (همان فهرست report.js) */
+const MOVED={'40240034':'966651','40370067':'967281'};
+const cKey=c=>{ const k=lat(String(c||'')).replace(/\D/g,'').replace(/^0+/,''); return MOVED[k]||k; };
+const DEVS=()=>{ try{ return parent.ntQr&&parent.ntQr.DEVS||[]; }catch(e){ return []; } };
+const unitOfDev=d=>{ const x=DEVS().find(y=>key(y.name)===key(d)); return x?x.unit:''; };
+let RANGE=+lsl('ntw_range','14'); if(![7,14,30].includes(RANGE)) RANGE=14;
+
+/* کارکرد روزانه هر دستگاه از دفترچه: (آخرین − قرائت حدود ۳۰ تا ۶۰ روز پیش) ÷ روزها. ساعتی بدون سابقه = ۸ ساعت در روز (مثل اکسل) */
+function rates(){ const sv=S(), L=arr('nt_daftar_v1'), by={}, out={};
+  L.forEach(x=>{ if(!x||!x.dev) return; const d=sv?sv.dn(x.date):null, v=sv?sv.num(x.val):null; if(d==null||v==null) return; (by[x.dev]=by[x.dev]||[]).push({d,v}); });
+  Object.keys(by).forEach(dev=>{ const a=by[dev].sort((p,q)=>p.d-q.d), z=a[a.length-1]; const old=a.filter(p=>z.d-p.d>=7 && z.d-p.d<=60); const b=old[0];
+    if(b && z.v>b.v) out[dev]=(z.v-b.v)/(z.d-b.d); });
+  return out; }
+function oilRows(){ const o=obj(OK); return Array.isArray(o.rows)?o.rows.filter(r=>r&&r.dev&&r.part):[]; }
+function oilFor(dev,name){ const R=oilRows().filter(r=>key(r.dev)===key(dev)), n=key(name);
+  return R.filter(r=>n.indexOf(key(r.part))>-1).sort((a,b)=>key(b.part).length-key(a.part).length)[0]||null; }
+/* موجودی: کد کالا (با کد منتقل‌شده)؛ وگرنه نام (واژه‌ها و عددها یکی؛ ترتیب و حروف لاتین مهم نیست، مثل 20W-50 و 50-20) */
+function stock(){ const o=obj(SK); return {at:o.at||'',items:(o.items&&typeof o.items==='object')?o.items:{}}; }
+const nameSig=t=>{ const n=norm(t); const w=(n.match(/[؀-ۿ]+/g)||[]).sort().join(' '), d=(lat(t).match(/\d+(\.\d+)?/g)||[]).map(Number).sort((a,b)=>a-b).join(','); return w+'|'+d; };
+function stockOf(oil,code,ST){ ST=ST||stock(); const k=cKey(code); if(k && ST.items[k]) return Object.assign({code:k,by:'code'},ST.items[k]);
+  const sg=nameSig(oil); const m=Object.keys(ST.items).find(c=>nameSig(ST.items[c].n)===sg); return m?Object.assign({code:m,by:'name'},ST.items[m]):null; }
+
+function plan(){ const sv=S(); if(!sv) return {L:[],nores:true};
+  const items=sv.all(arr('nt_svc_v1'),arr('nt_daftar_v1')), R=rates(), out=[];
+  items.forEach(x=>{ if(x.st==='n') return; const dev=x.it.dev, u=unitOfDev(dev)||'';
+    let rate=R[dev]||null; if(!rate && /ساعت/.test(u)) rate=8;
+    let pd=null, how='';
+    if(x.rem!==null && rate){ pd=x.rem/rate; how='use'; }
+    if(x.days!==null && (pd===null || x.days<pd)){ pd=x.days; how='time'; }
+    if(pd===null) return;
+    if(pd>RANGE) return;
+    const ol=oilFor(dev,x.it.name);
+    out.push({x,dev,name:x.it.name,u,pd,how,rate,ol,id:x.it.id||(dev+'|'+x.it.name),rk:(x.it.id||dev+'|'+x.it.name)+'|'+(x.it.last||'')+'|'+(x.it.ld||'')}); });
+  return {L:out.sort((a,b)=>a.pd-b.pd)}; }
+const addDays=n=>{ try{ const d=new Date(Date.now()+n*864e5); const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZone:'Asia/Tehran',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d), g=t=>p.find(x=>x.type===t).value; return g('year')+'/'+g('month')+'/'+g('day'); }catch(e){ return ''; } };
+function whenTxt(p){ const x=p.x, uu=/کیلومتر/.test(p.u)?'کیلومتر':(/ساعت/.test(p.u)?'ساعت':'');
+  if(p.pd<0){ if(p.how==='use' && x.rem!==null) return fa(Math.round(-x.rem).toLocaleString('en-US'))+(uu?' '+uu:'')+' گذشته'; return fa(Math.round(-p.pd))+' روز گذشته'; }
+  const d=Math.round(p.pd); let t=d<1?'امروز':'حدود '+fa(d)+' روز دیگر'; if(d>=1) t+=' ('+fa(addDays(d))+')';
+  if(p.how==='use' && x.rem!==null) t+='، '+fa(Math.round(x.rem).toLocaleString('en-US'))+(uu?' '+uu:'')+' مانده'; return t; }
+
+function draw(){ const P=plan(), L=P.L, RD=obj(RK).ready||{}, ST=stock();
+  khSub(dayName(TODAY)+'، بازه '+fa(RANGE)+' روز');
+  $('rng').innerHTML=[7,14,30].map(n=>`<button type="button" class="cp" data-r="${n}" aria-pressed="${n===RANGE}">${fa(n)} روز</button>`).join('');
+  const G=[['r','سررسید گذشته','var(--bad)',p=>p.pd<0],['a','این هفته','var(--am)',p=>p.pd>=0&&p.pd<7],['g','هفته بعد','var(--ok)',p=>p.pd>=7&&p.pd<14],['l','بعد از آن','#9AA8B5',p=>p.pd>=14]];
+  $('kp').innerHTML=G.slice(0,3).map(([k,t,c,f])=>`<div class="k ${k}"><b>${fa(L.filter(f).length)}</b><span>${t}</span></div>`).join('');
+  if(P.nores){ $('groups').innerHTML=emptyState('list','برنامه سرویس خوانده نشد',''); return; }
+  $('groups').innerHTML=L.length?G.map(([k,t,c,f])=>{ const A=L.filter(f); if(!A.length) return ''; return `<div class="grp"><h2><i style="background:${c}"></i>${t}<small>${fa(A.length)} سرویس</small></h2>${A.map(p=>{ const r=RD[p.rk];
+      return `<div class="it"><div class="tx"><b>${esc(p.dev)}</b><span class="o">${esc(p.name)}${p.ol&&p.ol.oil?': '+esc(p.ol.oil):''}</span><span class="d ${p.pd<0?'r':(p.pd<7?'a':'g')}">${esc(whenTxt(p))}</span>
+        <button type="button" class="rdy${r?' on':''}" data-rk="${esc(p.rk)}" ${canW?'':'disabled'}>${r?'✓ آماده شد'+(r.d?' '+esc(fa(r.d)):''):'آماده نشده'}</button></div>
+        ${p.ol&&+p.ol.l?`<div class="lt">${esc(faD(+p.ol.l))}<small>لیتر</small></div>`:`<div class="lt no">${p.ol?'لیتر ندارد':'در جدول روغن نیست'}</div>`}</div>`; }).join('')}</div>`; }).join('')
+    :emptyState('clipck','در '+fa(RANGE)+' روز آینده سرویسی نیست',oilRows().length?'':'برنامه سرویس در «دفترچه قرائت» است.');
+  /* نیاز روغن */
+  const N=new Map(); L.forEach(p=>{ if(!p.ol||!+p.ol.l) return; const k=key(p.ol.oil)||'-'; const o=N.get(k)||{oil:p.ol.oil||'(نوع روغن ندارد)',code:p.ol.code,l:0}; o.l+=+p.ol.l; if(!o.code&&p.ol.code) o.code=p.ol.code; N.set(k,o); });
+  const NL=[...N.values()].sort((a,b)=>b.l-a.l), has=!!Object.keys(ST.items).length; let short=[];
+  $('need').innerHTML=NL.length?`<table class="nd"><tr><th>نوع روغن</th><th class="n">نیاز</th><th class="n">موجودی</th><th class="n">کسری</th></tr>${NL.map(o=>{ const s=has?stockOf(o.oil,o.code,ST):null, q=s?(+s.q||0):null, k=q===null?null:Math.max(0,o.l-q);
+      if(k) short.push({oil:o.oil,k,u:(s&&s.u)||'لیتر'});
+      return `<tr><td>${esc(o.oil)}${s&&s.by==='name'&&o.code?`<small>کد ${esc(fa(o.code))} در موجودی نبود؛ با نام: ${esc(fa(s.code))}</small>`:''}${has&&!s?'<small>در فایل موجودی پیدا نشد</small>':''}</td><td class="n">${esc(faD(o.l))}</td><td class="n">${q===null?'—':esc(faD(q))}</td><td class="${k?'s':'n ok'}">${q===null?'—':(k?esc(faD(k)):'✓')}</td></tr>`; }).join('')}</table>`
+    :'<div class="pad hint">در این بازه روغنی با لیتر مشخص لازم نیست (جدول روغن را پایین ببینید).</div>';
+  const dsd=ST.at?daysSince(ST.at):null;
+  $('stInfo').className='stw'+(!has||dsd>7?' old':''); $('stInfo').innerHTML=has?`موجودی از سندپرداز، بارگذاری <b>${esc(fa(ST.at))}</b>${dsd>7?'، '+fa(dsd)+' روز پیش؛ فایل تازه بگذارید':''}`:'موجودی انبار هنوز بارگذاری نشده؛ کسری حساب نمی‌شود (پایین، «موجودی انبار از سندپرداز»)';
+  $('needAct').innerHTML=short.length?`<button type="button" class="btn p w" id="cpShort">${ico('copy',20)} کپی فهرست کسری (${fa(short.length)} قلم)</button><div class="msg" id="cpMsg"></div>`:'';
+  window.__short=short;
+  $('stN').textContent=has?'('+fa(Object.keys(ST.items).length)+' کالا، '+fa(ST.at)+')':'(بارگذاری نشده)';
+  drawOil(); }
+/* جدول روغن */
+function drawOil(){ const R=oilRows(); $('olN').textContent='('+fa(R.length)+' ردیف)';
+  if(!R.length){ $('olList').innerHTML='<p class="hint">هنوز ردیفی نیست.</p>'; return; }
+  let last=''; const ed=canOil;
+  $('olList').innerHTML=`<table class="otb"><tr><th>بخش</th><th>نوع روغن</th><th>کد کالا</th><th>لیتر</th>${ed?'<th></th>':''}</tr>${R.map((r,i)=>{ const h=key(r.dev)!==last?`<tr><td class="dv" colspan="${ed?5:4}">${esc(r.dev)}</td></tr>`:''; last=key(r.dev);
+    return h+(ed?`<tr data-i="${i}"><td><input class="in" data-k="part" value="${esc(r.part)}" maxlength="40" aria-label="بخش"></td><td><input class="in" data-k="oil" value="${esc(r.oil||'')}" maxlength="60" aria-label="نوع روغن"></td><td><input class="in mono" data-k="code" value="${esc(r.code||'')}" maxlength="20" inputmode="numeric" aria-label="کد کالا" style="width:96px"></td><td><input class="in mono" data-k="l" value="${esc(r.l==null?'':String(r.l))}" maxlength="8" inputmode="decimal" aria-label="لیتر" style="width:64px"></td><td><button type="button" class="x" data-del="${i}" aria-label="حذف ردیف">✕</button></td></tr>`
+      :`<tr><td>${esc(r.part)}</td><td>${esc(r.oil||'')}</td><td>${esc(fa(r.code||''))}</td><td>${esc(r.l==null?'':faD(+r.l))}</td></tr>`); }).join('')}</table>`; }
+const saveOil=R=>put(OK,{rows:R,at:TODAY});
+const cleanRow=r=>({dev:clean(r.dev,80),part:clean(r.part,40),oil:clean(r.oil,60),code:clean(lat(r.code||'').replace(/[^0-9A-Za-z-]/g,''),20),l:(()=>{ const n=parseFloat(lat(String(r.l||'')).replace(/[^\d.]/g,'')); return isFinite(n)?n:''; })()});
+function mergeOil(add){ const R=oilRows(), m=new Map(R.map((r,i)=>[key(r.dev)+'|'+key(r.part),i])); let n=0;
+  add.forEach(a=>{ const r=cleanRow(a); if(!r.dev||!r.part) return; const k=key(r.dev)+'|'+key(r.part); if(m.has(k)) R[m.get(k)]=r; else { m.set(k,R.length); R.push(r); } n++; });
+  R.sort((a,b)=>key(a.dev).localeCompare(key(b.dev))); saveOil(R); return n; }
+$('olList').addEventListener('change',e=>{ const i=e.target.closest('[data-k]'); if(!i||!canOil) return; const tr=i.closest('tr'), R=oilRows(), r=R[+tr.dataset.i]; if(!r) return; r[i.dataset.k]=i.value; R[+tr.dataset.i]=cleanRow(r); saveOil(R); setTimeout(draw,0); });
+$('olList').addEventListener('click',e=>{ const b=e.target.closest('[data-del]'); if(!b||!canOil) return; const R=oilRows(); R.splice(+b.dataset.del,1); saveOil(R); draw(); });
+$('olAdd').addEventListener('click',()=>{ const dev=prompt('نام دستگاه'); if(!dev) return; const part=prompt('بخش (مثل «روغن موتور»)'); if(!part) return; mergeOil([{dev,part,oil:'',code:'',l:''}]); draw(); });
+$('olGo').addEventListener('click',()=>{ const L=String($('olPaste').value||'').split(/\r?\n/).map(t=>t.split('\t').map(s=>s.trim())).filter(c=>c.length>=5&&c[0]&&c[1]&&c[0]!=='دستگاه');
+  const n=mergeOil(L.map(c=>({dev:c[0],part:c[1],oil:c[2],code:c[3],l:c[4]}))); $('olPaste').value=''; say('olMsg',n?fa(n)+' ردیف ذخیره شد':'ردیفی خوانده نشد (۵ ستون با Tab)',n?'ok':'bad'); draw(); });
+const hk=c=>norm(c).replace(/\s+/g,'').replace(/x000d/g,'');
+$('olPick').addEventListener('click',()=>$('olFile').click());
+$('olFile').addEventListener('change',async()=>{ const f=$('olFile').files&&$('olFile').files[0]; $('olFile').value=''; if(!f) return; say('olMsg','در حال خواندن…');
+  try{ let pos=null; const find=A=>{ for(let r=0;r<Math.min(A.length,40);r++){ const H=(A[r]||[]).map(hk); for(let c=0;c<H.length-4;c++){ if(H[c]==='دستگاه'&&H[c+1]==='بخش'&&/نوعروغن/.test(H[c+2])&&/کد/.test(H[c+3])&&/لیتر/.test(H[c+4])){ pos={r,c}; return true; } } } return false; };
+    const A=await parent.ntReport.readAoa(await f.arrayBuffer(),{find}); if(!A||!pos) throw new Error('head');
+    const rows=A.slice(pos.r+1).map(r=>r||[]).filter(r=>r[pos.c]&&r[pos.c+1]).map(r=>({dev:r[pos.c],part:r[pos.c+1],oil:r[pos.c+2],code:r[pos.c+3],l:r[pos.c+4]}));
+    const n=mergeOil(rows); say('olMsg',fa(n)+' ردیف از فایل خوانده شد','ok'); draw(); }
+  catch(e){ say('olMsg',e&&e.message==='head'?'جدولی با ستون‌های «دستگاه، بخش، نوع روغن، کد کالا، لیتر» پیدا نشد':'فایل خوانده نشد (برای بار اول اینترنت لازم است)','bad'); } });
+/* موجودی سندپرداز */
+$('stPick').addEventListener('click',()=>$('stFile').click());
+$('stFile').addEventListener('change',async()=>{ const f=$('stFile').files&&$('stFile').files[0]; $('stFile').value=''; if(!f||!canW) return; say('stMsg','در حال خواندن…');
+  try{ const A=await parent.ntReport.readAoa(await f.arrayBuffer()); let hi=-1, ix={};
+    for(let r=0;r<Math.min(A.length,20)&&hi<0;r++){ const H=(A[r]||[]).map(hk); const c=H.findIndex(h=>/کد?کالا/.test(h)&&/^کد/.test(h)), q=H.findIndex(h=>/موجودی/.test(h)&&/اصلی/.test(h)); if(c>-1&&q>-1){ hi=r; ix={c,q,n:H.findIndex(h=>/^نامکالا/.test(h)),u:H.findIndex(h=>/^واحداصلی/.test(h))}; } }
+    if(hi<0) throw new Error('head');
+    const items={}; A.slice(hi+1).forEach(r=>{ if(!r) return; const c=cKey(r[ix.c]); if(!c) return; const q=parseFloat(lat(String(r[ix.q]==null?'0':r[ix.q])).replace(/[^\d.\-]/g,''))||0;
+      const o=items[c]||{n:clean(ix.n>-1?r[ix.n]:'',80),q:0,u:clean(ix.u>-1?r[ix.u]:'',15)}; o.q=Math.round((o.q+q)*100)/100; items[c]=o; });
+    if(!Object.keys(items).length) throw new Error('empty');
+    put(SK,{at:TODAY,items}); say('stMsg',fa(Object.keys(items).length)+' کالا خوانده شد؛ موجودی امروز به‌روز شد','ok'); draw(); }
+  catch(e){ say('stMsg',e&&e.message==='head'?'ستون «کد کالا» و «موجودی واحد اصلی» پیدا نشد؛ خروجی «موجودی کالا» سندپرداز را بدهید':'فایل خوانده نشد (برای بار اول اینترنت لازم است)','bad'); } });
+document.addEventListener('click',async e=>{
+  const r=e.target.closest('[data-r]'); if(r){ RANGE=+r.dataset.r; lss('ntw_range',String(RANGE)); draw(); return; }
+  const b=e.target.closest('[data-rk]'); if(b&&canW){ const o=obj(RK), R=o.ready&&typeof o.ready==='object'?o.ready:{}, k=b.dataset.rk; if(R[k]) delete R[k]; else { R[k]={d:TODAY}; const by=myName(); if(by) R[k].by=by; }
+    /* علامت‌های قدیمی (سرویس انجام شد، کلید عوض شد) بعد از ۶۰ روز پاک می‌شوند */
+    Object.keys(R).forEach(x=>{ const d=daysSince(R[x]&&R[x].d); if(d!=null&&d>60) delete R[x]; }); o.ready=R; put(RK,o); draw(); return; }
+  if(e.target.closest('#cpShort')){ const L=window.__short||[]; const t='کسری روغن برای '+fa(RANGE)+' روز آینده ('+fa(TODAY)+')\n'+L.map((x,i)=>`${fa(i+1)}. ${x.oil}: ${faD(x.k)} ${x.u}`).join('\n'); const ok=await copyText(t); say('cpMsg',ok?'کپی شد؛ در پیام‌رسان بچسبانید':'کپی نشد',ok?'ok':'bad'); }
+});
+window.addEventListener('storage',e=>{ if(!e.key||[OK,SK,RK,'nt_svc_v1','nt_daftar_v1'].includes(e.key)){ if(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName)) return; draw(); } });
+window.addEventListener('message',e=>{ if(e.source===parent&&e.data&&e.data.nt==='show') draw(); });
+draw();
+</script>
+</body>
+</html>

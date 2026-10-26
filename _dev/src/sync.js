@@ -48,7 +48,8 @@ const TABKEYS={
   'خرید هفتگی':['nt_kweek_v1'],
   'آب شیرین':['nt_kwater_v1'],
   'خدمات تدارکات':['nt_ksvc_v1'],
-  'پیش‌فاکتور':['nt_kpre_v1','nt_kpre_files_v1']
+  'پیش‌فاکتور':['nt_kpre_v1','nt_kpre_files_v1'],
+  'برنامه هفتگی انبار':['nt_oil_v1','nt_stock_v1','nt_wplan_v1']
 };
 /* «لیست خرید» یک زبانه است با چهار فرم که هر کدام دسترسی جدا دارد. کاربر قدیمی (فقط «لیست خرید» تنظیم شده): همان دسترسی برای هر چهار فرم */
 const SUBF={'لیست خرید':['باکس سندپرداز','خرید هفتگی','آب شیرین','خدمات تدارکات']};
@@ -62,7 +63,7 @@ const PRESET={'توقف شیفت':'w','دفترچه قرائت':'w'};
 const DRIVER={'توقف شیفت':'w','دفترچه قرائت':'w','ثبت مشکلات':'w'};
 const devList=()=>{ try{ return (window.ntQr && ntQr.DEVS || []).map(d=>d.name); }catch(e){ return []; } };
 /* نام بخش‌ها برای پیام‌ها */
-const LABEL={nt_kbox_v1:'باکس خرید سندپرداز',nt_kunits_v1:'واحد درخواست‌کننده‌ها',nt_kweek_v1:'لیست خرید هفتگی',nt_kwater_v1:'آب شیرین',nt_ksvc_v1:'خدمات (خرید)',nt_kpre_v1:'پیش‌فاکتور',nt_kpre_files_v1:'پیوست پیش‌فاکتور',nt_factor_v1:'فاکتور خرید',nt_factor_lex_v1:'فهرست پیشنهاد فاکتور',nt_factor_learn_v1:'اتصال فاکتور و درخواست',nt_factor_cfg_v1:'تنظیم فاکتور',nt_factor_rep_v1:'گزارش مالی خرید',nt_tarad_v1:'بررسی تردد',nt_staff_v1:'افراد (تردد)',nt_ezafe_v1:'اضافه‌کار و مأموریت',nt_anbar_out_v1:'خروج انبار',nt_anbar_in_v1:'ورود انبار',nt_kharid9_v1:'درخواست خرید',nt_moshkel_v1:'مشکلات',nt_sh8_v1:'شناسنامه',
+const LABEL={nt_oil_v1:'جدول روغن دستگاه‌ها',nt_stock_v1:'موجودی انبار (سندپرداز)',nt_wplan_v1:'برنامه هفتگی انبار',nt_kbox_v1:'باکس خرید سندپرداز',nt_kunits_v1:'واحد درخواست‌کننده‌ها',nt_kweek_v1:'لیست خرید هفتگی',nt_kwater_v1:'آب شیرین',nt_ksvc_v1:'خدمات (خرید)',nt_kpre_v1:'پیش‌فاکتور',nt_kpre_files_v1:'پیوست پیش‌فاکتور',nt_factor_v1:'فاکتور خرید',nt_factor_lex_v1:'فهرست پیشنهاد فاکتور',nt_factor_learn_v1:'اتصال فاکتور و درخواست',nt_factor_cfg_v1:'تنظیم فاکتور',nt_factor_rep_v1:'گزارش مالی خرید',nt_tarad_v1:'بررسی تردد',nt_staff_v1:'افراد (تردد)',nt_ezafe_v1:'اضافه‌کار و مأموریت',nt_anbar_out_v1:'خروج انبار',nt_anbar_in_v1:'ورود انبار',nt_kharid9_v1:'درخواست خرید',nt_moshkel_v1:'مشکلات',nt_sh8_v1:'شناسنامه',
   nt_khadamat_v1:'خدمات',nt_daftar_v1:'قرائت',nt_prog_v1:'برنامه روزانه',nt_today_todo_v1:'یادداشت',nt_tavaqof_v1:'توقف شیفت',nt_outsrc_v1:'برون‌سپاری'};
 /* شناسه ردیف در لیست‌هایی که هر ردیف باید یکتا باشد */
 const IDF={nt_daftar_v1:e=>(e && typeof e==='object' && e.dev && e.date)?e.dev+'|'+e.date:null};

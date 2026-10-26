@@ -68,7 +68,8 @@ python3 add_mgmt2.py "$T/b49e.html" "$T/b49f.html"
 python3 add_factor.py "$T/b49f.html" "$T/b49g.html"
 python3 add_factor_link.py "$T/b49g.html" "$T/b49h.html"
 python3 add_kharid2.py "$T/b49h.html" "$T/b49i.html"
-python3 add_kh_fix2.py "$T/b49i.html" "$T/b49.html"
+python3 add_kh_fix2.py "$T/b49i.html" "$T/b49j.html"
+python3 add_wplan.py "$T/b49j.html" "$T/b49.html"
 python3 build.py "$T/b49.html" ../out.html
 python3 fix_hover.py ../out.html
 python3 stamp.py ../out.html

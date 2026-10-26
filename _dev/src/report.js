@@ -270,6 +270,9 @@ async function book(sheets,name,opt){
   return fname;
 }
 /* خواندن اکسل (فقط برای «بررسی تردد»): برگه اول → آرایه ردیف‌ها (متن نمایش‌داده‌شده، مثل 09:13). چیزی ذخیره نمی‌شود. */
-async function readAoa(buf){ await loadLib(); const X=window.XLSX, wb=X.read(new Uint8Array(buf),{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]]; return X.utils.sheet_to_json(ws,{header:1,raw:false,defval:null}); }
+async function readAoa(buf,opt){ await loadLib(); const X=window.XLSX, wb=X.read(new Uint8Array(buf),{type:'array'}); const aoa=n=>X.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:false,defval:null});
+  /* opt.find(aoa): برگه‌ای که این تابع برایش true بدهد (مثلاً «جدول روغن» در فایل چندبرگه‌ای) */
+  if(opt && typeof opt.find==='function'){ for(const n of wb.SheetNames){ try{ const a=aoa(n); if(opt.find(a)) return a; }catch(e){} } return null; }
+  return aoa(wb.SheetNames[0]); }
 window.ntReport={open,collect,sheets,workbook,finance,readAoa,book};
 })();
