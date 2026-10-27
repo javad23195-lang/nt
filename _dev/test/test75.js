@@ -168,7 +168,7 @@ const AOA2=[HEAD,row('101','1','1001','کالای نمونه الف','2','عدد
   await p.evaluate(id=>{ const A=JSON.parse(localStorage.getItem('nt_kpre_v1')); const x=A.find(y=>y.id===id); x.quotes=[{id:'q1',sup:'فروشنده آزمایشی',prices:{[x.items[0].id]:5,[x.items[1].id]:6}}]; x.st='ok'; x.dec={mode:'sup',sup:'q1',by:'م',at:'1405/07/01'}; localStorage.setItem('nt_kpre_v1',JSON.stringify(A)); },Q[0].id);
   await go(p,'لیست خرید'); f=await frameOf(p,'لیست خرید'); await f.evaluate(()=>drawBox()); await sleep(200);
   const tg=await f.evaluate(()=>[document.querySelector('.bx[data-id="b1"]').innerText,document.querySelector('.bx[data-id="b3"]').innerText]);
-  ok(/پیش‌فاکتور تایید شد: از فروشنده آزمایشی/.test(tg[0]) && /در استعلام پیش‌فاکتور/.test(tg[1]) && await f.evaluate(()=>!document.querySelector('.bx[data-id="b1"] [data-sel]')),'باکس: برچسب «تایید شد: از فروشنده» و «در استعلام»؛ قلم باز می‌ماند');
+  ok(/پیش‌فاکتور تایید شد: از فروشنده آزمایشی/.test(tg[0]) && /در استعلام پیش‌فاکتور/.test(tg[1]) && await f.evaluate(()=>{ document.querySelector('.bx[data-id="b1"] [data-sel]').click(); const h=document.getElementById('bSelGo').hidden; document.getElementById('bSelX').click(); return h; }),'باکس: برچسب «تایید شد: از فروشنده» و «در استعلام»؛ قلم در پیش‌فاکتور: انتخاب برای کپی بله، «استعلام» نه');
   ok(!errs.length,'بدون خطای صفحه '+errs.join(' | ').slice(0,300)); await c.close();
 
   console.log('۸) امنیت: متن خطرناک در فایل باکس و نام فروشنده');
