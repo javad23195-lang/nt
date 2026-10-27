@@ -374,16 +374,20 @@ const preOk=x=>x&&isOpen(x)&&!PM.has(x.id);
 const SHR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
 const coName=()=>{ try{ const e=parent.document.querySelector('.topbar .brand .co'); return clean(e&&e.textContent||'',60); }catch(e){ return ''; } };
 const qtyTxt=x=>[fa(clean(x.qty||'',20)),clean(x.unit||'',15)].filter(Boolean).join(' ');
-/** متن تمیز برای تامین‌کننده: عنوان، تاریخ، نام کالا، مقدار، توضیح مهم */
+/** توضیحات هر قلم (همان متن‌های کارت: توضیح مهم، توضیحات، ملاحظات، دلیل نیاز؛ تکراری‌ها یک بار) */
+const descOf=x=>[...new Set([x.memo,x.desc,x.note,x.why].map(t=>clean(t||'',200)).filter(Boolean))].join(' — ');
+/** متن تمیز برای تامین‌کننده: عنوان، تاریخ؛ هر قلم: نام، مقدار، توضیحات */
 function supText(A){ const co=coName(), h=['استعلام قیمت، '+fa(TODAY)]; if(co) h.push(co+'، واحد تدارکات');
-  const body=A.map((x,i)=>{ const L=[fa(i+1)+') '+clean(x.name,160)]; const q=qtyTxt(x); if(q) L.push('   مقدار: '+q); if(x.memo) L.push('   توضیح: '+clean(x.memo,160)); return L.join('\n'); });
+  const body=A.map((x,i)=>{ const q=qtyTxt(x), L=[fa(i+1)+') '+clean(x.name,160)+(q?'، '+q:'')]; const d=descOf(x); if(d) L.push('   توضیحات: '+d); return L.join('\n'); });
   return h.join('\n')+'\n\n'+body.join('\n\n')+'\n\nلطفاً قیمت، موجودی و زمان تحویل را اعلام کنید.'; }
-async function supXl(A,share){ if(!parent.ntReport||!parent.ntReport.book) throw new Error('lib'); const co=coName(), C={};
-  C.A1={v:'استعلام قیمت'}; C.A2={v:[co?co+'، واحد تدارکات':'واحد تدارکات','تاریخ '+fa(TODAY)].join('، ')};
-  ['ردیف','شرح کالا','مقدار','واحد','توضیح','قیمت واحد (ریال)','جمع (ریال)'].forEach((t,i)=>{ C[String.fromCharCode(65+i)+'4']={v:t}; });
-  A.forEach((x,i)=>{ const r=5+i, q=parseAmt(x.qty); C['A'+r]={v:i+1,z:'0'}; C['B'+r]={v:clean(x.name,160)}; C['C'+r]=q==null?{v:clean(x.qty||'',20)}:{v:q,z:'#,##0.##'}; C['D'+r]={v:clean(x.unit||'',15)}; C['E'+r]={v:clean(x.memo||'',160)}; C['F'+r]={v:''}; C['G'+r]={f:`=IF(F${r}="","",C${r}*F${r})`}; });
-  const e=5+A.length; C['A'+(e+1)]={v:'لطفاً قیمت، موجودی و زمان تحویل را اعلام کنید.'};
-  return parent.ntReport.book([{name:'استعلام',cells:C,merges:['A1:G1','A2:G2','A'+(e+1)+':G'+(e+1)],cols:{A:6,B:42,C:10,D:10,E:32,F:16,G:16}}],'NT-estelam-'+TODAY.replace(/\//g,'-')+'.xlsx',{share,title:'استعلام قیمت'}); }
+/** اکسل مرتب (رنگ، کادر، سرستون ثابت، ستون قیمت برای تامین‌کننده، جمع کل) */
+async function supXl(A,share){ const X=parent.ntXl; if(!X||!X.table) throw new Error('lib'); const co=coName();
+  return X.table({sheet:'استعلام',title:'استعلام قیمت',sub:[co?co+'، واحد تدارکات':'واحد تدارکات','تاریخ '+fa(TODAY),fa(A.length)+' قلم'].join('     '),
+    head:['ردیف','شرح کالا','مقدار','واحد','توضیحات','قیمت واحد (ریال)','جمع (ریال)'], widths:[7,38,10,10,44,18,20], num:[2], fill:[5],
+    rows:A.map((x,i)=>{ const q=parseAmt(x.qty); return [i+1,clean(x.name,160),q==null?clean(x.qty||'',20):q,clean(x.unit||'',15),descOf(x),'','']; }),
+    total:{col:6,label:'جمع کل',f:r=>`IF(F${r}="","",C${r}*F${r})`},
+    foot:'لطفاً قیمت واحد را در ستون زرد بنویسید و زمان تحویل و موجودی را اعلام کنید.',
+    name:'NT-estelam-'+TODAY.replace(/\//g,'-')+'.xlsx',share}); }
 /** اشتراک متن: پنجره اشتراک گوشی (واتساپ، تلگرام، ایتا، بله، روبیکا …)؛ وگرنه کپی */
 async function shareText(t,msgId){ try{ const N=parent.navigator; if(N.share){ await N.share({text:t}); return; } }catch(e){ if(e&&e.name==='AbortError') return; }
   const ok=await copyText(t); say(msgId,ok?'اشتراک در این مرورگر نیست؛ متن کپی شد، در پیام‌رسان بچسبانید':'کپی نشد',ok?'ok':'bad'); }
@@ -391,7 +395,7 @@ const selItems=()=>{ const B=box(); return B.filter(x=>sel.has(x.id)); };
 $('bSelCp').addEventListener('click',async()=>{ const A=selItems(); if(!A.length) return; const ok=await copyText(supText(A)); say('bSelM',ok?fa(A.length)+' قلم کپی شد؛ در پیام‌رسان بچسبانید':'کپی نشد',ok?'ok':'bad'); });
 $('bSelSh').addEventListener('click',()=>{ const A=selItems(); if(A.length) shareText(supText(A),'bSelM'); });
 $('bSelXl').addEventListener('click',async()=>{ const A=selItems(); if(!A.length) return; say('bSelM','در حال ساخت اکسل…');
-  try{ const r=await supXl(A,true); say('bSelM',r==='share'?'فایل اکسل فرستاده شد':(r==='cancel'?'':'فایل اکسل دانلود شد'),'ok'); }catch(e){ say('bSelM','برای بار اول اینترنت لازم است (کتابخانه اکسل)','bad'); } });
+  try{ const r=await supXl(A,true); say('bSelM',r==='share'?'فایل اکسل فرستاده شد':(r==='cancel'?'':'فایل اکسل دانلود شد'),'ok'); }catch(e){ say('bSelM','اکسل ساخته نشد','bad'); } });
 function drawSel(){ const B=box(); [...sel].forEach(id=>{ if(!B.some(y=>y.id===id)) sel.delete(id); }); $('bSel').hidden=!sel.size;
   const np=B.filter(x=>sel.has(x.id)&&preOk(x)).length;
   $('bSelN').textContent=fa(sel.size)+' قلم انتخاب شد'; $('bSelGo').hidden=!canPre||!np; $('bSelGo').title=np<sel.size?fa(np)+' قلم باز برای استعلام':''; }
