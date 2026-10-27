@@ -6,7 +6,7 @@ src,out=sys.argv[1],sys.argv[2]
 s=open(src,encoding='utf-8').read()
 i=s.find("const DOCS = ")+13; j=s.find("];\nconst $",i)+1
 docs=json.loads(s[i:j])
-css=open('kh_common.css',encoding='utf-8').read(); js=open('kh_common.js',encoding='utf-8').read()
+css=open('kh_common.css',encoding='utf-8').read(); js=open('kh_common.js',encoding='utf-8').read()+'\n'+open('dragscroll.js',encoding='utf-8').read()
 for N,f,ic in [('میز خرید','kdesk.html','▤'),('لیست خرید','kbox.html','☰'),('پیش‌فاکتور','kpre.html','⚖')]:
   assert not any(d['name']==N for d in docs)
   t=open(f,encoding='utf-8').read()

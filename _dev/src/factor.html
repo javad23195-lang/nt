@@ -957,6 +957,7 @@ setTimeout(takeIntent,0);
 /* رفتن به این زبانه از «میز خرید»: قسمت خواسته‌شده (ntf_pane) */
 window.addEventListener('message',e=>{ if(e.source!==parent || !e.data || e.data.nt!=='show') return; setTimeout(takeIntent,0); const p=lsl('ntf_pane',pane), f=p==='book'?lsl('ntf_bf',''):''; if(f){ setBF(f); lss('ntf_bf',''); } if(['add','book','rep','sp','set'].includes(p) && (p!==pane||f)) setPane(p); });
 window.addEventListener('storage',e=>{ if(!e.key||[FK,LK,NK,CK,PK,RK].includes(e.key)){ if(document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && pane==='add') return; render(); } });
+/*DRAGSCROLL*/
 </script>
 </body>
 </html>
