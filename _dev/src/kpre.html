@@ -25,7 +25,7 @@
 .ib .ih span{color:#4E5864;font-size:.9rem}
 .cells{display:grid;gap:8px;margin-top:10px}
 .cl{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:62px;padding:6px 4px;border:0;border-radius:12px;background:var(--soft);color:var(--ink);font:inherit;min-width:0}
-.cl b{font-size:1.12rem;font-weight:900;line-height:1.35}
+.cl b{font-size:clamp(.86rem,3.7vw,1.1rem);font-weight:900;line-height:1.35;direction:ltr;unicode-bidi:isolate}
 .cl small{font-size:.84rem;font-weight:800;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
 .cl.best{background:var(--okbg);color:var(--ok)}.cl.best small{color:var(--ok)}
 .cl.na b{color:#6B7178}.cl.na small{color:#6B7178;font-weight:700}
@@ -56,9 +56,21 @@ details.bxw .bd2{border-top:1px solid var(--rule)}
 .bxp .t span{display:block;font-size:.84rem;color:#4E5864}
 .qt{border:1.5px dashed var(--line);border-radius:14px;padding:12px 14px;margin-top:14px;background:#FBFAF7}
 .qt>b{font-weight:900}
-.qt .pr{display:grid;grid-template-columns:1fr 130px;gap:8px;align-items:center;margin-top:8px}
-.qt .pr span{font-size:.92rem}
-.qt .pr .in{margin:0;min-height:46px}
+.th{display:grid;gap:8px;margin-top:10px;padding:0 2px 4px;border-bottom:1.5px solid var(--line);font-size:.8rem;font-weight:900;color:#4E5864}
+.qt .th,.qt .pr{grid-template-columns:1fr 62px minmax(128px,42%)}
+.qt .pr{display:grid;gap:4px 8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--rule)}
+.qt .pr>span{font-size:.92rem;overflow-wrap:anywhere}.qt .pr>i{font-style:normal;font-size:.88rem;color:#4E5864}
+.qt .pr .in{margin:0;min-height:46px;padding:0 10px;text-align:left;direction:ltr}
+.mw{grid-column:1/-1;font-size:.8rem;color:#4E5864;line-height:1.6;min-height:0}.mw:empty{display:none}.mw b{color:var(--ink);font-weight:900}
+.nrs .th,.nr{grid-template-columns:1fr 60px 80px 40px}
+.nr{display:grid;gap:6px;align-items:center;padding:8px 0;border-bottom:1px solid var(--rule)}
+.nr .in{margin:0;min-height:46px;padding:0 8px}
+.nr .np{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center}
+.nr .np span{font-size:.8rem;font-weight:800;color:#4E5864}
+.nr .np .in{text-align:left;direction:ltr}
+.nr .x{min-height:44px;border:1px solid var(--line);border-radius:12px;background:#fff;font-weight:900;color:var(--bad)}
+.ch{font-size:.8rem;font-weight:900;color:#4E5864;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.cl .uq{font-size:.74rem;font-weight:700;color:#4E5864}.cl.best .uq{color:var(--ok)}
 .dec{margin-top:16px;padding:16px;border-radius:16px;border:2px solid var(--am);background:#fff}
 .dec h3{margin:0 0 6px;font-size:1.05rem;font-weight:900}
 .dec .na{color:#6B7178}
@@ -91,8 +103,12 @@ details.ed summary{min-height:48px;display:flex;align-items:center;font-weight:9
     <input class="in fill" id="nT" maxlength="80" autocomplete="off" placeholder="مثلاً: مواد غذایی آبان">
     <details id="nBoxW" class="bxw" hidden open><summary><span id="nBoxI"></span><span class="t">از باکس سندپرداز</span><small id="nBoxN"></small><span class="cv" id="nBoxC"></span></summary>
       <div class="bd2"><div style="padding:10px 14px 4px"><input class="in" id="nBoxQ" placeholder="جستجو در اقلام باز باکس" autocomplete="off" style="margin:0"></div><div id="nBox"></div></div></details>
-    <label class="f" for="nI">اقلام</label><p class="hint" style="margin-top:2px">هر خط یک قلم؛ تعداد و واحد بعد از نام</p>
-    <textarea class="in fill" id="nI" rows="5" placeholder="برنج ۱۰ کیسه&#10;روغن ۵ حلب&#10;رب گوجه ۲۰ قوطی"></textarea>
+    <label class="f">اقلام</label><p class="hint" style="margin-top:2px">قیمت کل هر قلم را بنویسید (اختیاری)؛ قیمت واحد را سامانه حساب می‌کند.</p>
+    <div class="nrs"><div class="th"><span>عنوان کالا</span><span>تعداد</span><span>واحد</span><span></span></div><div id="nRows"></div></div>
+    <button type="button" class="btn s" id="nAdd" style="margin-top:8px">+ ردیف دیگر</button>
+    <label class="f" for="nSup">فروشنده (اگر قیمت نوشتید)</label><input class="in fill" id="nSup" maxlength="80" list="supL" autocomplete="off">
+    <details class="ed" id="nPasteW"><summary>چسباندن فهرست چندخطی</summary><p class="hint" style="margin-top:2px">هر خط یک قلم؛ تعداد و واحد بعد از نام</p>
+    <textarea class="in fill" id="nI" rows="4" placeholder="برنج ۱۰ کیسه&#10;روغن ۵ حلب&#10;رب گوجه ۲۰ قوطی"></textarea></details>
     <button type="button" class="btn p w" id="nSave">ساخت استعلام</button>
     <div class="msg" id="nMsg" role="status"></div>
   </div>
@@ -112,13 +128,38 @@ const files=()=>{ const o=LS(FK,{}); return (o&&typeof o==='object'&&!Array.isAr
 function save(fn){ const A=all(); fn(A); if(!put(PK,A)) return false; drawAll(); return true; }
 const ST={'':'پیش‌نویس',wait:'منتظر تایید',ok:'تایید شد',no:'رد شد'};
 const UNITS=['عدد','کیسه','حلب','قوطی','کیلوگرم','لیتر','بسته','کارتن','متر','دست','شاخه','گالن'];
+/* مبلغ مثل بانک: جداکننده هنگام نوشتن و مبلغ به حروف */
+const W1=['','یک','دو','سه','چهار','پنج','شش','هفت','هشت','نه'], W10=['','','بیست','سی','چهل','پنجاه','شصت','هفتاد','هشتاد','نود'], W11=['ده','یازده','دوازده','سیزده','چهارده','پانزده','شانزده','هفده','هجده','نوزده'], W100=['','صد','دویست','سیصد','چهارصد','پانصد','ششصد','هفتصد','هشتصد','نهصد'], WSC=['','هزار','میلیون','میلیارد','هزار میلیارد'];
+function wd3(n){ const p=[], s=Math.floor(n/100), r=n%100; if(s) p.push(W100[s]); if(r>=10&&r<20) p.push(W11[r-10]); else { const d=Math.floor(r/10), y=r%10; if(d) p.push(W10[d]); if(y) p.push(W1[y]); } return p.join(' و '); }
+function rialWords(n){ n=Math.floor(+n||0); if(!n) return 'صفر'; const P=[]; let i=0; while(n>0&&i<WSC.length){ const c=n%1000; if(c) P.unshift(wd3(c)+(WSC[i]?' '+WSC[i]:'')); n=Math.floor(n/1000); i++; } return P.join(' و '); }
+function mnyFmt(el){ const at=el.selectionStart===el.value.length; let d=lat(el.value).replace(/[^\d]/g,'').replace(/^0+(?=\d)/,'').slice(0,15); const v=d?fa(g3(d)):''; if(v!==el.value){ el.value=v; if(at) try{ el.setSelectionRange(v.length,v.length); }catch(e){} } }
+/** زیر کادر: به حروف + قیمت واحد (قیمت کل ÷ تعداد) */
+function mnyNote(el){ const w=el.closest('.pr,.nr'), m=w&&w.querySelector('.mw'); if(!m) return; const n=parseAmt(el.value); if(n===null||!n){ m.innerHTML=''; return; }
+  const qEl=w.querySelector('[data-n=q]'), q=+(qEl?parseAmt(qEl.value):el.dataset.q)||0;
+  m.innerHTML=esc(rialWords(n))+' ریال'+(q>1?`<br>قیمت واحد: <b>${esc(faN(n/q))}</b> ریال`:''); }
+document.addEventListener('input',e=>{ const t=e.target; if(t.classList&&t.classList.contains('mny')){ mnyFmt(t); mnyNote(t); } else if(t.dataset&&t.dataset.n==='q'){ const v=fa(lat(t.value).replace(/[^\d.]/g,'')); if(v!==t.value) t.value=v; const m=t.closest('.nr').querySelector('.mny'); if(m) mnyNote(m); } });
+const unitOf=(tot,q)=>Math.round(tot/((+q)||1));
+function nRow(x){ x=x||{}; const d=document.createElement('div'); d.className='nr'; d.innerHTML=`<input class="in" data-n="t" maxlength="120" autocomplete="off" aria-label="عنوان کالا" value="${esc(x.t||'')}"><input class="in mono" data-n="q" inputmode="decimal" aria-label="تعداد" value="${esc(x.q?fa(x.q):'')}"><input class="in" data-n="u" maxlength="15" list="unitL" aria-label="واحد" value="${esc(x.u||'')}"><button type="button" class="x" data-nx aria-label="حذف ردیف">×</button>
+  <label class="np"><span>قیمت کل (ریال)</span><input class="in mono mny" data-n="p" inputmode="numeric" autocomplete="off" aria-label="قیمت کل به ریال"></label><div class="mw" aria-live="polite"></div>`; $('nRows').appendChild(d); return d; }
+function nReset(){ $('nRows').innerHTML=''; for(let k=0;k<3;k++) nRow(); }
+$('nAdd').addEventListener('click',()=>{ nRow().querySelector('input').focus(); });
+$('nRows').addEventListener('click',e=>{ const b=e.target.closest('[data-nx]'); if(!b) return; const r=b.closest('.nr'); if($('nRows').children.length>1) r.remove(); else r.querySelectorAll('input').forEach(i=>i.value=''), r.querySelector('.mw').innerHTML=''; });
+/* متن چسبانده: هر خط یک ردیف جدول */
+$('nI').addEventListener('change',()=>{ const L=String($('nI').value).split(/\r?\n/).map(parseLine).filter(x=>x.t); if(!L.length) return; [...$('nRows').children].forEach(r=>{ if(![...r.querySelectorAll('input')].some(i=>i.value.trim())) r.remove(); }); L.slice(0,60).forEach(nRow); $('nI').value=''; $('nPasteW').open=false; });
+nReset();
 /** «برنج ۱۰ کیسه» → {t:'برنج',q:10,u:'کیسه'} */
 function parseLine(l){ l=clean(l,120); const m=/^(.*?)[\s\-:]+([\d۰-۹٠-٩.,/]+)\s*([^\d\s]*)$/.exec(l); if(m && m[1].trim()) return {t:m[1].trim(),q:+lat(m[2]).replace(/,/g,'')||'',u:clean(m[3],15)}; return {t:l,q:'',u:''}; }
 $('nSave').addEventListener('click',()=>{ const T=clean($('nT').value,80)||('استعلام '+fa(TODAY)), L=String($('nI').value).split(/\r?\n/).map(parseLine).filter(x=>x.t);
+  const R=[...$('nRows').children].map(r=>{ const v=k=>r.querySelector(`[data-n=${k}]`).value; return {t:clean(v('t'),120),q:parseAmt(v('q'))||'',u:clean(v('u'),15),p:parseAmt(v('p'))}; }).filter(x=>x.t);
   const BX=freeBox().filter(x=>nSel.has(x.id)).map(x=>({t:clean(x.name,120),q:parseAmt(x.qty)??'',u:clean(x.unit,15),code:clean(x.code,30),bx:x.id}));
-  if(!L.length && !BX.length){ say('nMsg','اقلام را بنویسید یا از باکس انتخاب کنید','bad'); return; }
-  const id=uid('p'); save(A=>A.push({id,title:T,date:TODAY,by:myName(),items:BX.concat(L).slice(0,60).map(x=>Object.assign({id:uid('i')},x)),quotes:[],st:''}));
-  $('nT').value=''; $('nI').value=''; nSel.clear(); OPEN.add(id); S.set('open'); });
+  if(!L.length && !BX.length && !R.length){ say('nMsg','اقلام را بنویسید یا از باکس انتخاب کنید','bad'); return; }
+  const priced=R.filter(x=>x.p), sup=clean($('nSup').value,80);
+  if(priced.length && !sup){ say('nMsg','قیمت نوشتید؛ نام فروشنده را هم بنویسید','bad'); $('nSup').focus(); return; }
+  const items=BX.concat(R,L).slice(0,60).map(x=>{ const o=Object.assign({id:uid('i')},x); delete o.p; o._p=x.p; return o; });
+  const lt={}, prices={}; items.forEach(it=>{ if(it._p){ lt[it.id]=it._p; prices[it.id]=unitOf(it._p,it.q); } delete it._p; });
+  const quotes=priced.length?[{id:uid('q'),sup,date:TODAY,lt,prices,fid:'',note:'',by:myName()}]:[];
+  const id=uid('p'); save(A=>A.push({id,title:T,date:TODAY,by:myName(),items,quotes,st:''}));
+  $('nT').value=''; $('nI').value=''; $('nSup').value=''; nReset(); say('nMsg',''); nSel.clear(); OPEN.add(id); S.set('open'); });
 /* اقلام باز باکس سندپرداز که در استعلام جاری یا تاییدشده‌ای نیستند */
 const nSel=new Set();
 function freeBox(){ if(!canSeeT('باکس سندپرداز')) return []; const B=LS('nt_kbox_v1',[]), used=new Set(); all().forEach(iq=>{ if(iq.st!=='no') iq.items.forEach(it=>{ if(it.bx) used.add(it.bx); }); });
@@ -131,7 +172,7 @@ $('nBox').addEventListener('change',e=>{ const c=e.target.closest('[data-nb]'); 
 $('nBoxQ').addEventListener('input',drawNBox);
 const OPEN=new Set(), SHUT=new Set();
 /** قیمت کل یک قلم در یک پیش‌فاکتور (قیمت واحد × تعداد) */
-const lineTot=(it,q)=>{ const p=q.prices&&q.prices[it.id]; if(p==null||p==='') return null; return (+p)*((+it.q)||1); };
+const lineTot=(it,q)=>{ const t=q.lt&&q.lt[it.id]; if(t!=null&&t!=='') return +t; const p=q.prices&&q.prices[it.id]; if(p==null||p==='') return null; return (+p)*((+it.q)||1); };
 function best(iq){ const per={}, tot={}; iq.items.forEach(it=>{ let b=null; iq.quotes.forEach(q=>{ const v=lineTot(it,q); if(v!=null && (b===null||v<b.v)) b={v,q:q.id}; }); per[it.id]=b; });
   iq.quotes.forEach(q=>{ let s=0, n=0; iq.items.forEach(it=>{ const v=lineTot(it,q); if(v!=null){ s+=v; n++; } }); tot[q.id]={s,full:n===iq.items.length,n}; });
   const fulls=iq.quotes.filter(q=>tot[q.id].full); const bs=fulls.length?fulls.reduce((a,q)=>tot[q.id].s<tot[a.id].s?q:a,fulls[0]):null;
@@ -141,18 +182,19 @@ function best(iq){ const per={}, tot={}; iq.items.forEach(it=>{ let b=null; iq.q
 function cmpHTML(iq){ if(!iq.quotes.length) return '<div class="empty">هنوز پیش‌فاکتوری اضافه نشده است.</div>';
   const B=best(iq), dec=iq.dec||{}, n=iq.quotes.length, cols=`grid-template-columns:repeat(${Math.min(n,3)},1fr)`;
   const picked=(it,q)=>iq.st==='ok' && (dec.mode==='sup'?dec.sup===q.id:(dec.per&&dec.per[it.id]===q.id));
-  return iq.items.map(it=>`<div class="ib"><div class="ih"><b>${esc(it.t)}</b>${it.q?`<span>${fa(it.q)} ${esc(it.u||'')}</span>`:''}</div><div class="cells" style="${cols}">${iq.quotes.map(q=>{ const v=lineTot(it,q), bs=B.per[it.id]&&B.per[it.id].q===q.id;
+  return `<div class="cells th" style="${cols};border:0;margin-top:6px">${iq.quotes.map(q=>`<span class="ch" title="${esc(q.sup)}">${esc(q.sup)}</span>`).join('')}</div><p class="hint" style="margin:2px 0 0">مبلغ‌ها: قیمت کل هر قلم به ریال؛ زیر آن قیمت واحد</p>`+iq.items.map(it=>`<div class="ib"><div class="ih"><b>${esc(it.t)}</b>${it.q?`<span>${fa(it.q)} ${esc(it.u||'')}</span>`:''}</div><div class="cells" style="${cols}">${iq.quotes.map(q=>{ const v=lineTot(it,q), bs=B.per[it.id]&&B.per[it.id].q===q.id;
       return v==null?`<span class="cl na"><b>ندارد</b><small>${esc(q.sup)}</small></span>`
-        :`<button type="button" class="cl${bs?' best':''}${picked(it,q)?' pick':''}" data-it="${esc(it.id)}" data-q="${esc(q.id)}" title="${esc(q.sup)}: ${esc(faN(v))} ریال"><b>${esc(faM(v))}</b><small>${bs?'ارزان‌ترین':esc(q.sup)}</small></button>`; }).join('')}</div></div>`).join('')
-    +`<div class="tots"><div class="cells" style="${cols}">${iq.quotes.map(q=>`<span class="cl"><b>${esc(faM(B.tot[q.id].s))}</b><small>${B.tot[q.id].full?'همه اقلام':fa(B.tot[q.id].n)+' از '+fa(iq.items.length)+' قلم'}</small></span>`).join('')}</div></div>
+        :`<button type="button" class="cl${bs?' best':''}${picked(it,q)?' pick':''}" data-it="${esc(it.id)}" data-q="${esc(q.id)}" title="${esc(q.sup)}: ${esc(faN(v))} ریال"><b>${esc(faN(v))}</b>${(+it.q)>1?`<small class="uq">واحد ${esc(faN(v/(+it.q)))}</small>`:''}<small>${bs?'ارزان‌ترین':esc(q.sup)}</small></button>`; }).join('')}</div></div>`).join('')
+    +`<div class="tots"><p class="hint" style="margin:0 0 4px">جمع هر فروشنده (ریال)</p><div class="cells" style="${cols}">${iq.quotes.map(q=>`<span class="cl"><b>${esc(faN(B.tot[q.id].s))}</b><small class="uq">ریال</small><small>${B.tot[q.id].full?'همه اقلام':fa(B.tot[q.id].n)+' از '+fa(iq.items.length)+' قلم'}</small></span>`).join('')}</div></div>
     <p class="lg">ارزان‌ترین ترکیب: ${mixText(iq,B)}؛ جمع <b>${esc(faN(B.mix))}</b> ریال</p>`; }
 /** «برنج و چای از فروشگاه ب؛ روغن از فروشگاه الف» */
 function mixText(iq,B){ const g=new Map(); iq.items.forEach(it=>{ const b=B.per[it.id]; if(!b) return; if(!g.has(b.q)) g.set(b.q,[]); g.get(b.q).push(it.t); });
   return [...g.entries()].map(([qid,L])=>{ const n=L.length>3?L.slice(0,3).join('، ')+' و '+fa(L.length-3)+' قلم دیگر':(L.length>1?L.slice(0,-1).join('، ')+' و '+L[L.length-1]:L[0]); return esc(n)+' از '+esc((iq.quotes.find(q=>q.id===qid)||{}).sup||''); }).join('؛ ')||'—'; }
 function quoteForm(iq){ return `<div class="qt w-only" data-qf="${esc(iq.id)}"><b>افزودن پیش‌فاکتور فروشنده</b>
     <div class="row2"><div><label class="f">فروشنده</label><input class="in" data-k="sup" maxlength="80" list="supL" autocomplete="off"></div><div><label class="f">تاریخ</label><input class="in mono dt" data-k="date" value="${esc(TODAY)}" inputmode="numeric"></div></div>
-    <label class="f">قیمت واحد هر قلم (ریال؛ خالی = این قلم را ندارد)</label>
-    ${iq.items.map(it=>`<div class="pr"><span>${esc(it.t)}${it.q?' — '+fa(it.q)+' '+esc(it.u||''):''}</span><input class="in mono" data-it="${esc(it.id)}" inputmode="numeric" aria-label="قیمت ${esc(it.t)}"></div>`).join('')}
+    <label class="f">قیمت کل هر قلم (ریال؛ خالی = این قلم را ندارد)</label><p class="hint" style="margin-top:2px">قیمت واحد را سامانه حساب می‌کند.</p>
+    <div class="th"><span>عنوان کالا</span><span>تعداد</span><span>قیمت کل (ریال)</span></div>
+    ${iq.items.map(it=>`<div class="pr"><span>${esc(it.t)}</span><i>${it.q?fa(it.q)+' '+esc(it.u||''):'—'}</i><input class="in mono mny" data-it="${esc(it.id)}" data-q="${esc(String((+it.q)||1))}" inputmode="numeric" autocomplete="off" aria-label="قیمت کل ${esc(it.t)} به ریال"><div class="mw" aria-live="polite"></div></div>`).join('')}
     <label class="f">پیوست: عکس یا PDF پیش‌فاکتور (اختیاری)</label><input class="in" type="file" data-k="file" accept="image/*,application/pdf" style="padding-top:10px">
     <label class="f">توضیح</label><input class="in" data-k="note" maxlength="120" autocomplete="off">
     <button type="button" class="btn p w" data-addq="${esc(iq.id)}">افزودن پیش‌فاکتور</button><div class="msg" data-qm="${esc(iq.id)}"></div></div>`; }
@@ -214,14 +256,14 @@ async function packFile(f){ if(!f) return null;
 document.addEventListener('click',async e=>{ const b=e.target.closest('button'); if(!b) return;
   const card=b.closest('.iq'), id=card&&card.dataset.iq;
   if(b.classList.contains('h')){ if(isOpenIq(id)){ OPEN.delete(id); SHUT.add(id); } else { SHUT.delete(id); OPEN.add(id); } drawAll(); return; }
-  if(b.hasAttribute('data-ix')){ const iid=b.closest('[data-ie]').dataset.ie; save(A=>{ const iq=A.find(x=>x.id===id); if(!iq||iq.st||iq.items.length<2) return; iq.items=iq.items.filter(x=>x.id!==iid); iq.quotes.forEach(q=>{ if(q.prices) delete q.prices[iid]; }); }); return; }
+  if(b.hasAttribute('data-ix')){ const iid=b.closest('[data-ie]').dataset.ie; save(A=>{ const iq=A.find(x=>x.id===id); if(!iq||iq.st||iq.items.length<2) return; iq.items=iq.items.filter(x=>x.id!==iid); iq.quotes.forEach(q=>{ if(q.prices) delete q.prices[iid]; if(q.lt) delete q.lt[iid]; }); }); return; }
   if(b.dataset.addq){ const f=b.closest('.qt'), sup=clean(f.querySelector('[data-k=sup]').value,80); if(!sup){ say_q(id,'نام فروشنده را بنویسید',1); return; }
-    const prices={}; f.querySelectorAll('[data-it]').forEach(i=>{ const v=parseAmt(i.value); if(v!==null) prices[i.dataset.it]=v; });
-    if(!Object.keys(prices).length){ say_q(id,'دست‌کم قیمت یک قلم را بنویسید',1); return; }
+    const lt={}, prices={}; f.querySelectorAll('[data-it]').forEach(i=>{ const v=parseAmt(i.value); if(v!==null){ lt[i.dataset.it]=v; prices[i.dataset.it]=unitOf(v,i.dataset.q); } });
+    if(!Object.keys(lt).length){ say_q(id,'دست‌کم قیمت یک قلم را بنویسید',1); return; }
     let fid=''; const fi=f.querySelector('[data-k=file]').files[0];
     if(fi){ try{ const p=await packFile(fi); fid=uid('F'); const F=files(); F[fid]=Object.assign(p,{at:TODAY,iq:id}); if(!put(FK,F)){ say_q(id,'پیوست ذخیره نشد (حافظه)',1); return; } }
       catch(x){ say_q(id,x.message==='pdf'?'PDF بزرگ‌تر از ۵۰۰ کیلوبایت است':'پیوست خوانده نشد',1); return; } }
-    save(A=>{ const iq=A.find(x=>x.id===id); iq.quotes.push({id:uid('q'),sup,date:normDate(f.querySelector('[data-k=date]').value)||TODAY,prices,fid,note:clean(f.querySelector('[data-k=note]').value,120),by:myName()}); }); return; }
+    save(A=>{ const iq=A.find(x=>x.id===id); iq.quotes.push({id:uid('q'),sup,date:normDate(f.querySelector('[data-k=date]').value)||TODAY,lt,prices,fid,note:clean(f.querySelector('[data-k=note]').value,120),by:myName()}); }); return; }
   if(b.dataset.dq){ const [i,q]=b.dataset.dq.split('|'); save(A=>{ const iq=A.find(x=>x.id===i); const Q=iq.quotes.find(x=>x.id===q); if(Q&&Q.fid){ const F=files(); delete F[Q.fid]; put(FK,F); } iq.quotes=iq.quotes.filter(x=>x.id!==q); }); return; }
   if(b.dataset.send){ save(A=>{ const iq=A.find(x=>x.id===b.dataset.send); iq.st='wait'; iq.sent=TODAY; }); return; }
   if(b.dataset.apsup){ pick[id]={mode:'sup',sup:b.dataset.apsup}; card.querySelectorAll('[data-apsup],[data-apmix]').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); markPicks(); return; }
@@ -232,8 +274,8 @@ document.addEventListener('click',async e=>{ const b=e.target.closest('button');
   if(b.dataset.apno){ const note=clean(card.querySelector('[data-apnote]').value,120); save(A=>{ const iq=A.find(x=>x.id===id); iq.st='no'; iq.dec={by:myName()||'مدیر',at:TODAY,note}; }); return; }
   if(b.dataset.tolist){ const iq=all().find(x=>x.id===b.dataset.tolist), d=iq.dec||{}, q=i=>(iq.quotes.find(x=>x.id===i)||{}); const W=LS(WK,[]), A2=Array.isArray(W)?W:[];
     let w=A2.filter(x=>x&&!x.arch&&Array.isArray(x.items)).sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0]; if(!w){ w={id:uid('W'),title:'خرید هفتگی '+TODAY,date:TODAY,by:myName(),items:[]}; A2.push(w); }
-    iq.items.forEach(it=>{ const qid=d.mode==='sup'?d.sup:(d.per&&d.per[it.id]); if(!qid) return; const Q=q(qid), p=Q.prices&&Q.prices[it.id];
-      w.items.push({id:uid('w'),t:clean(`${it.t}${it.q?' '+it.q+' '+(it.u||''):''} — از ${Q.sup}${p!=null?' ('+g3(p)+' ریال)':''}`,120)}); });
+    iq.items.forEach(it=>{ const qid=d.mode==='sup'?d.sup:(d.per&&d.per[it.id]); if(!qid) return; const Q=q(qid), p=lineTot(it,Q);
+      w.items.push({id:uid('w'),t:clean(`${it.t}${it.q?' '+it.q+' '+(it.u||''):''} — از ${Q.sup}${p!=null?' ('+g3(Math.round(p))+' ریال)':''}`,120)}); });
     put(WK,A2); save(A=>{ A.find(x=>x.id===iq.id).inList=TODAY; }); return; }
   if(b.dataset.del){ const i=b.dataset.del; armDel(b,i); return; }
   if(b.dataset.fv){ const F=files()[b.dataset.fv]; if(!F) return; const bin=atob(F.d), u8=new Uint8Array(bin.length); for(let k=0;k<bin.length;k++) u8[k]=bin.charCodeAt(k);

@@ -53,7 +53,7 @@ function stats(){
   const F=arr('nt_factor_v1').filter(r=>r&&r.id), miss=F.filter(r=>r.cat!=='sookht'&&!String(r.title||'').trim()), sp=F.filter(r=>r.cat==='kala'&&!r.sp), dl=F.filter(r=>r.cat==='kala'&&r.sp&&!r.deliver), un=F.filter(r=>!r.rep), debt=F.filter(r=>r.kind==='اعتباری'&&!r.paid);
   return {dl,B,Bo,imp,late,teh,boxAge,W,wN,wD,last,ds,gap,left,S,Sn,P,Pw,Pd,Po,F,miss,sp,un,debt,debtSum:debt.reduce((a,r)=>a+(+r.amt||0),0)}; }
 /** ارزان‌ترین ترکیب یک استعلام (هر قلم از ارزان‌ترین فروشنده) */
-function mix(iq){ let s=0; (iq.items||[]).forEach(it=>{ let b=null; (iq.quotes||[]).forEach(q=>{ const p=q.prices&&q.prices[it.id]; if(p==null||p==='') return; const v=(+p)*((+it.q)||1); if(b===null||v<b) b=v; }); if(b!=null) s+=b; }); return s; }
+function mix(iq){ let s=0; (iq.items||[]).forEach(it=>{ let b=null; (iq.quotes||[]).forEach(q=>{ const t=q.lt&&q.lt[it.id], p=q.prices&&q.prices[it.id]; if((t==null||t==='')&&(p==null||p==='')) return; const v=(t!=null&&t!=='')?+t:(+p)*((+it.q)||1); if(b===null||v<b) b=v; }); if(b!=null) s+=b; }); return s; }
 function draw(){ const s=stats(), L='لیست خرید', PF='پیش‌فاکتور', FC='فاکتور خرید', AP=canAppr();
   const BOX='باکس سندپرداز', WK='خرید هفتگی', WT='آب شیرین', SV='خدمات تدارکات', K='ntk_pane';
   khSub(dayName(TODAY)+' '+fa(String(TODAY).slice(0,4)));

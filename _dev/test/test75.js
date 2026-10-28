@@ -77,7 +77,7 @@ const AOA2=[HEAD,row('101','1','1001','کالای نمونه الف','2','عدد
 
   console.log('۴) پیش‌فاکتور: استعلام، دو فروشنده، مقایسه');
   await go(p,'پیش‌فاکتور'); f=await frameOf(p,'پیش‌فاکتور');
-  await f.click('#seg [data-p="new"]'); await f.fill('#nT','استعلام نمونه'); await f.fill('#nI','قلم الف ۱۰ کیسه\nقلم ب ۲ عدد'); await f.click('#nSave'); await sleep(400);
+  await f.click('#seg [data-p="new"]'); await f.fill('#nT','استعلام نمونه'); await f.evaluate(()=>document.getElementById('nPasteW').open=true); await f.fill('#nI','قلم الف ۱۰ کیسه\nقلم ب ۲ عدد'); await f.click('#nSave'); await sleep(400);
   let P=await LSg(p,'nt_kpre_v1');
   ok(P.length===1 && P[0].items.length===2 && P[0].items[0].t==='قلم الف' && P[0].items[0].q===10 && P[0].items[0].u==='کیسه','اقلام از متن: نام، تعداد، واحد');
   const addQ=async(sup,a,b,file)=>{ const q='.qt'; await f.evaluate(()=>document.querySelectorAll('details.ed').forEach(d=>d.open=true)); await f.fill(q+' [data-k=sup]',sup); const ins=await f.$$(q+' [data-it]'); await ins[0].fill(a); await ins[1].fill(b);
@@ -88,8 +88,9 @@ const AOA2=[HEAD,row('101','1','1001','کالای نمونه الف','2','عدد
   P=await LSg(p,'nt_kpre_v1'); const FL=await LSg(p,'nt_kpre_files_v1');
   ok(P[0].quotes.length===2 && P[0].quotes[0].fid && FL[P[0].quotes[0].fid] && /^image\//.test(FL[P[0].quotes[0].fid].t),'دو پیش‌فاکتور؛ عکس فشرده در اطلاعات همگام');
   const best=await f.evaluate(()=>[...document.querySelectorAll('.cl.best')].map(t=>t.innerText.split('\n')[0]));
-  ok(best.length===2 && /۰\.۹ م/.test(best[0]) && /۰\.۱ م/.test(best[1]),'مقایسه: ارزان‌ترین هر قلم سبز (میلیون) — '+best.join(' | '));
-  ok(/ارزان‌ترین ترکیب/.test(await f.evaluate(()=>document.querySelector('.iq .bd').innerText)) && /۱,۰۰۰,۰۰۰/.test(await f.evaluate(()=>document.querySelector('.iq .bd .lg').innerText)),'ترکیب بهترین: ۱٬۰۰۰٬۰۰۰');
+  ok(best.length===2 && /۹۰,۰۰۰/.test(best[0]) && /۵۰,۰۰۰/.test(best[1]),'مقایسه: ارزان‌ترین هر قلم سبز (قیمت کل کامل، ریال) — '+best.join(' | '));
+  ok(P[0].quotes[1].lt[P[0].items[0].id]===90000 && P[0].quotes[1].prices[P[0].items[0].id]===9000,'قیمت کل ذخیره شد؛ قیمت واحد = کل ÷ تعداد');
+  ok(/ارزان‌ترین ترکیب/.test(await f.evaluate(()=>document.querySelector('.iq .bd').innerText)) && /۱۴۰,۰۰۰/.test(await f.evaluate(()=>document.querySelector('.iq .bd .lg').innerText)),'ترکیب بهترین: ۱۴۰٬۰۰۰');
   await f.click('[data-fv]'); await sleep(300);
   ok(await f.evaluate(()=>!document.getElementById('fv').hidden),'دیدن پیوست عکس'); await f.click('#fvX');
   await f.click('[data-send]'); await sleep(300);
@@ -179,7 +180,7 @@ const AOA2=[HEAD,row('101','1','1001','کالای نمونه الف','2','عدد
   await f.setInputFiles('#bFile',{name:'b.xlsx',mimeType:'application/octet-stream',buffer:Buffer.from('x')}); await sleep(500); await f.click('#bF [data-f="open"]'); await sleep(200);
   ok(await f.evaluate(()=>!window.__x && !document.querySelector('#bList img') && !document.querySelector('#bList .why b')),'متن فایل باکس پاک‌سازی و بی‌خطر نمایش داده شد');
   await go(p,'پیش‌فاکتور'); f=await frameOf(p,'پیش‌فاکتور');
-  await f.click('#seg [data-p="new"]'); await f.fill('#nI','<svg onload=window.__y=1>'); await f.click('#nSave'); await sleep(300);
+  await f.click('#seg [data-p="new"]'); await f.evaluate(()=>document.getElementById('nPasteW').open=true); await f.fill('#nI','<svg onload=window.__y=1>'); await f.click('#nSave'); await sleep(300);
   await f.fill('.qt [data-k=sup]','<img src=x onerror=window.__y=1>'); await f.fill('.qt [data-it]','1'); await f.click('.qt [data-addq]'); await sleep(400);
   ok(await f.evaluate(()=>!window.__y && !document.querySelector('.ib img, .ib svg')),'نام قلم و فروشنده بی‌خطر');
   ok(!errs.length,'بدون خطای صفحه '+errs.join(' | ').slice(0,300)); await c.close();
