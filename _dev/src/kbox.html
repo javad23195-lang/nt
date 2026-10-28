@@ -62,6 +62,7 @@ details.up .bd{padding:0 16px 16px}
 .bx .memo .in,.bx .memo div{min-height:50px;margin:0;border:0;border-radius:14px;background:var(--badbg);color:var(--ink);padding:12px 16px;font-size:.98rem}
 .bx .acts{display:grid;grid-template-columns:repeat(4,1fr);margin-top:14px;border-top:1px solid var(--rule)}
 .bx .acts.one{grid-template-columns:1fr}
+.bx .acts.three{grid-template-columns:repeat(3,1fr)}
 .bx .acts button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:64px;border:0;background:none;font-weight:900;font-size:.92rem;color:var(--ink)}
 .bx .acts button+button{border-inline-start:1px solid var(--rule)}
 .bx .acts button svg{width:26px;height:26px}
@@ -296,7 +297,7 @@ async function importBox(file,src){ src=src==='sabt'?'sabt':'mamur';
   rows.forEach((r,i)=>{ const id=[src==='sabt'?'sb':'sp',v(r,'y')||'0',v(r,'no')||'0',v(r,'row')||String(i+1),v(r,'code')].join('-'); if(seen.has(id)) return; seen.add(id);
     const f={code:v(r,'code'),name:v(r,'name'),qty:v(r,'qty'),unit:v(r,'unit'),need:normDate(v(r,'need'))||v(r,'need'),why:v(r,'why'),note:v(r,'note'),date:normDate(v(r,'date'))||v(r,'date'),desc:v(r,'desc'),req:v(r,'req'),no:v(r,'no')};
     if(src==='sabt') f.src='sabt'; const o=map.get(id); if(o){ Object.assign(o,f); if(o.gone){ delete o.gone; back++; } o.seen=TODAY; } else { map.set(id,Object.assign({id,add:TODAY,seen:TODAY},f)); nw++; } });
-  let gone=0; map.forEach(o=>{ if(srcOf(o)===src && !seen.has(o.id) && !o.gone && !o.st){ o.gone=TODAY; gone++; } });
+  let gone=0; map.forEach(o=>{ if(srcOf(o)===src && !o.mv && !seen.has(o.id) && !o.gone && !o.st){ o.gone=TODAY; gone++; } });
   const out=[...map.values()]; if(!put(BK,out)) throw new Error('save');
   return {n:seen.size,nw,gone,back}; }
 
@@ -307,6 +308,15 @@ $('bFile').addEventListener('change',async()=>{ const f=$('bFile').files&&$('bFi
   catch(e){ say('bMsg',e&&e.message==='lib'?'برای بار اول اینترنت لازم است (کتابخانه اکسل)':'این فایل خروجی باکس سندپرداز نیست (ستون «شرح کالا» و «مقدار» پیدا نشد)','bad'); } });
 let bF=lsl('ntk_bf','imp'), bU=lsl('ntk_bu','');
 const ST={me:'خریدم',teh:'مأمور تهران',x:'لازم نیست'};
+/* «مأمور تهران» در باکس نهبندان: یک نسخه در باکس تهران (شناسه tn-…، mv:'nb'). برگرداندن: نسخه تهران اگر هنوز کاری رویش نشده پاک می‌شود */
+const THK=agK('nt_kbox_v1','th'), thBox=()=>{ const a=LS(THK,[]); return Array.isArray(a)?a:[]; };
+function toTeh(x,on){ const T=thBox(), id='tn-'+x.id, i=T.findIndex(y=>y&&y.id===id);
+  if(on){ const o={id,mv:'nb',add:TODAY,seen:TODAY,by:myName()}; ['code','name','qty','unit','need','why','note','date','desc','req','no','imp','memo'].forEach(k=>{ if(x[k]!=null&&x[k]!=='') o[k]=x[k]; });
+    if(i>-1){ const y=T[i]; delete y.gone; if(y.st==='x') delete y.st; } else T.push(o); put(THK,T); }
+  else if(x.st==='teh' && i>-1 && !T[i].st){ T.splice(i,1); put(THK,T); } }
+/* قلم‌هایی که پیش از دو تکه شدن «مأمور تهران» خورده‌اند: یک بار به باکس تهران فرستاده می‌شوند */
+if(AG==='nb' && W.box) try{ const T0=thBox(); box().forEach(x=>{ if(x.st==='teh' && !x.gone && !T0.some(y=>y&&y.id==='tn-'+x.id)) toTeh(x,true); }); }catch(e){}
+const tehSt=x=>{ if(AG!=='nb'||x.st!=='teh') return ''; const y=thBox().find(z=>z&&z.id==='tn-'+x.id); return !y?'':(y.st==='me'?'تهران: خریده شد':y.st==='x'?'تهران: لازم نیست':'در باکس تهران'); };
 const isOpen=x=>!x.st && !x.gone;
 /* پیوند با «پیش‌فاکتور»: قلم‌هایی که در استعلام جاری یا تاییدشده هستند (استعلام ردشده قلم را آزاد می‌کند) */
 const canPre=W.box && canWT('پیش‌فاکتور'), sel=new Set();
@@ -322,7 +332,7 @@ function drawBox(){ FM=new Map(FAC().filter(r=>r&&r.id).map(r=>[r.id,r])); const
   /* دو باکس: گزارش مأمور / ثبت */
   $('bSrc').innerHTML=Object.keys(SRC).map(k=>`<button type="button" data-src="${k}" aria-pressed="${k===bSrc}">${SRC[k]} (${fa(ALL.filter(x=>srcOf(x)===k&&isOpen(x)).length)})</button>`).join('');
   const c={imp:A.filter(x=>x.imp&&isOpen(x)).length,open:A.filter(isOpen).length,fac:A.filter(waitFac).length,rcv:A.filter(waitRcv).length,teh:A.filter(x=>x.st==='teh').length,done:A.filter(x=>x.st&&x.st!=='teh').length,gone:A.filter(x=>x.gone&&!x.st).length};
-  const F=[['imp','ضروری'],['open','همه باز'],['fac','منتظر فاکتور'],['rcv','منتظر رسید انبار'],['teh','تهران'],['done','انجام‌شده'],['gone','رفته از باکس']];
+  const F=[['imp','ضروری'],['open','همه باز'],['fac','منتظر فاکتور'],['rcv','منتظر رسید انبار'],['teh','تهران'],['done','انجام‌شده'],['gone','رفته از باکس']].filter(f=>AG!=='th'||f[0]!=='teh');
   if(!F.some(f=>f[0]===bF)) bF='imp';
   $('bF').innerHTML=F.map(([k,n])=>`<button type="button" class="cp" data-f="${k}" aria-pressed="${k===bF}">${n} (${fa(c[k])})</button>`).join('')+(c.imp?`<button type="button" class="cp" id="bCopy">${ico('copy',18)} کپی ضروری‌ها</button>`:'');
   const last=A.map(x=>x.seen||'').sort().pop(); const ds=last?daysSince(last):null, sn='«'+SRC[bSrc]+'»';
@@ -414,7 +424,7 @@ function facTags(x){ const f=facOf(x), r=rsOf(x); let h='';
   return h; }
 function bxHTML(x,U){ const d=daysSince(x.need||x.date), texts=[...new Set([x.why,x.note,x.desc].map(t=>clean(t,200)).filter(Boolean))];
   const pm=PM.get(x.id), preTag=pm?(pm.st==='ok'?`<span class="tag sp">پیش‌فاکتور تایید شد${pm.sup?': از '+esc(pm.sup):''}</span>`:`<span class="tag wa">${pm.st==='wait'?'پیش‌فاکتور: منتظر تایید':'در استعلام پیش‌فاکتور'}</span>`):'';
-  const stTag=(x.st?`<span class="tag ${x.st==='teh'?'wa':(x.st==='x'?'bad':'ok')}">${esc(ST[x.st])}${x.stAt?' '+fa(x.stAt):''}</span>`:(x.gone?`<span class="tag">از باکس رفته ${fa(x.gone)}</span>`:''))+preTag
+  const tS=tehSt(x), stTag=(x.mv?'<span class="tag">از باکس نهبندان</span>':'')+(x.st?`<span class="tag ${x.st==='teh'?'wa':(x.st==='x'?'bad':'ok')}">${esc(ST[x.st])}${x.stAt?' '+fa(x.stAt):''}</span>${tS?`<span class="tag">${esc(tS)}</span>`:''}`:(x.gone?`<span class="tag">از باکس رفته ${fa(x.gone)}</span>`:''))+preTag
     +(x.st==='me'?facTags(x):'');
   const u=unitOf(x,U), U2=U||unitsGet();
   const need=x.need?`<span class="nd${d!=null&&d>0&&isOpen(x)?' old':''}">نیاز ${fa(x.need)}${d!=null&&d>0&&isOpen(x)?' ('+fa(d)+' روز گذشته)':''}</span>`:'';
@@ -429,7 +439,7 @@ function bxHTML(x,U){ const d=daysSince(x.need||x.date), texts=[...new Set([x.wh
     ${W.box?(x.st?(waitFac(x)&&canFac()?`<div class="acts two"><button type="button" class="g" data-fac>${ico('rcpt')}ثبت فاکتور</button><button type="button" data-st="">برگرداندن</button></div>`
       :waitRcv(x)&&canFac()?`<div class="acts two"><button type="button" class="g" data-addrs>${ico('filechk')}افزودن رسید</button><button type="button" data-st="">برگرداندن</button></div>`
       :`<div class="acts one"><button type="button" data-st="">برگرداندن</button></div>`)
-      :`<div class="acts"><button type="button" class="g" data-st="me">${ico('cart')}خریدم</button><button type="button" data-st="teh">${ico('truck')}مأمور تهران</button><button type="button" class="r" data-st="x">${ico('ban')}لازم نیست</button><button type="button" data-sel aria-pressed="${on}">${ico(on?'boxck':'box0')}انتخاب</button></div>`):'<div class="pad"></div>'}</div>`; }
+      :`<div class="acts${AG==='th'?' three':''}"><button type="button" class="g" data-st="me">${ico('cart')}خریدم</button>${AG==='th'?'':`<button type="button" data-st="teh">${ico('truck')}مأمور تهران</button>`}<button type="button" class="r" data-st="x">${ico('ban')}لازم نیست</button><button type="button" data-sel aria-pressed="${on}">${ico(on?'boxck':'box0')}انتخاب</button></div>`):'<div class="pad"></div>'}</div>`; }
 function setItem(id,fn){ const A=box(), x=A.find(y=>y.id===id); if(!x) return; fn(x); put(BK,A); drawBox(); }
 $('bList').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; if(b.hasAttribute('data-shr')||b.hasAttribute('data-sel')){} else if(!W.box) return; const c=b.closest('.bx'); if(!c) return; const id=c.dataset.id;
   if(b.hasAttribute('data-sel')){ if(sel.has(id)) sel.delete(id); else sel.add(id); drawBox(); return; }
@@ -443,7 +453,7 @@ $('bList').addEventListener('click',e=>{ const b=e.target.closest('button'); if(
     if(!d){ const m=c.querySelector('[data-rm]'); if(m){ m.textContent='تاریخ درست نیست (مثل ۱۴۰۵/۰۸/۰۵)'; m.className='msg bad'; } return; }
     setItem(id,x=>{ x.rs={d}; if(n) x.rs.n=n; const by=myName(); if(by) x.rs.by=by; }); }
   else if(b.hasAttribute('data-rsx')) setItem(id,x=>{ delete x.rs; });
-  else if(b.dataset.st!==undefined) setItem(id,x=>{ if(b.dataset.st==='me') buyNow.add(id); else buyNow.delete(id); if(b.dataset.st){ x.st=b.dataset.st; x.stAt=TODAY; x.stBy=myName(); } else { delete x.st; delete x.stAt; delete x.stBy; delete x.rs; } }); });
+  else if(b.dataset.st!==undefined) setItem(id,x=>{ if(b.dataset.st==='me') buyNow.add(id); else buyNow.delete(id); if(AG==='nb') toTeh(x,b.dataset.st==='teh'); if(b.dataset.st){ x.st=b.dataset.st; x.stAt=TODAY; x.stBy=myName(); } else { delete x.st; delete x.stAt; delete x.stBy; delete x.rs; } }); });
 /* توضیح: ذخیره بدون ساختن دوباره فهرست (ساختن دوباره هنگام blur خطا می‌دهد) */
 $('bList').addEventListener('change',e=>{ const i=e.target.closest('[data-memo]'); if(!i||!W.box) return; const id=i.closest('.bx').dataset.id, v=clean(i.value,160), A=box(), x=A.find(y=>y.id===id); if(!x || (x.memo||'')===v) return; if(v) x.memo=v; else delete x.memo; put(BK,A); });
 $('bF').addEventListener('click',async e=>{ if(e.target.closest('#bCopy')){ const L=box().filter(x=>x.imp&&isOpen(x)); if(!L.length) return;
@@ -542,7 +552,7 @@ const S=segInit('seg','ntk_pane',PANES.length?PANES:['box'],p=>{ if(DRAW[p]) DRA
 window.addEventListener('message',e=>{ if(e.source===parent && e.data && e.data.nt==='show'){ counts(); const f=lsl('ntk_bf',bF); if(f!==bF){ bF=f; if(S.cur==='box') drawBox(); } } });
 $('goImp').addEventListener('click',()=>{ if(!SEE.box) return; bF='imp'; lss('ntk_bf','imp'); S.set('box'); });
 $('goWater').addEventListener('click',()=>{ if(!SEE.water) return; S.set('water'); });
-window.addEventListener('storage',e=>{ if(!e.key||[BK,WK,AK,SK,'nt_khadamat_v1',PRK].includes(e.key)){ if(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return; S.set(S.cur); } });
+window.addEventListener('storage',e=>{ if(!e.key||[BK,WK,AK,SK,'nt_khadamat_v1',PRK,THK].includes(e.key)){ if(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return; S.set(S.cur); } });
 </script>
 </body>
 </html>
