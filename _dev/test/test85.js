@@ -46,7 +46,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   console.log('۲) مقایسه: عدد کامل به ریال، سربرگ فروشنده');
   let T=await f.evaluate(()=>document.querySelector('.iq .bd').innerText);
   ok(/۱,۲۰۰,۰۰۰/.test(T) && /واحد ۳۰۰,۰۰۰/.test(T) && !/ م\b|\d م/.test(T.replace(/[^\S\n]+/g,' ')) && /قیمت کل هر قلم به ریال/.test(T),'خانه: قیمت کل کامل و قیمت واحد؛ بی «م»');
-  ok(await f.evaluate(()=>document.querySelector('.iq .ch').textContent==='فروشنده نمونه'),'سربرگ ستون: نام فروشنده');
+  ok(await f.evaluate(()=>document.querySelector('.iq .sups').innerText.trim()==='فروشنده نمونه' && !document.querySelector('.iq .ch')),'سربرگ ستون: نام فروشنده (یک بار)');
   ok(/جمع هر فروشنده \(ریال\)/.test(T),'سربرگ جمع');
 
   console.log('۳) فرم پیش‌فاکتور فروشنده دوم: قیمت کل');
@@ -60,11 +60,25 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   ok(Q2.lt[A[0].items[0].id]===1000000 && Q2.prices[A[0].items[0].id]===250000 && Q2.lt[A[0].items[1].id]===500000,'دوم: قیمت کل ذخیره، واحد = کل ÷ تعداد');
   T=await f.evaluate(()=>document.querySelector('.iq .bd .lg').innerText);
   ok(/۱,۵۰۰,۰۰۰/.test(T),'ارزان‌ترین ترکیب: '+T);
+
+  console.log('۳-ب) ویرایش پیش‌فاکتور');
+  await f.click('[data-qe="'+Q.id+'"]'); await sleep(300);
+  const ed=await f.evaluate(()=>{ const q=document.querySelector('[data-qf]'); return {e:q.classList.contains('edit'),h:q.querySelector('[data-qh]').textContent,s:q.querySelector('[data-k=sup]').value,v:[...q.querySelectorAll('[data-it]')].map(i=>i.value),b:q.querySelector('[data-addq]').textContent}; });
+  ok(ed.e && /ویرایش پیش‌فاکتور فروشنده نمونه/.test(ed.h) && ed.s==='فروشنده نمونه' && ed.v[0]==='۱,۲۰۰,۰۰۰' && ed.v[1]==='' && ed.b==='ذخیره تغییر','ویرایش: فرم با مبلغ‌های قبلی پر شد');
+  await f.fill('.qt [data-it="'+A[0].items[0].id+'"]','900000'); await f.dispatchEvent('.qt [data-it="'+A[0].items[0].id+'"]','input');
+  await f.fill('.qt [data-it="'+A[0].items[1].id+'"]','400000'); await f.dispatchEvent('.qt [data-it="'+A[0].items[1].id+'"]','input');
+  await f.click('.qt [data-addq]'); await sleep(500);
+  A=await LSg(p,'nt_kpre_v1'); const Qe=A[0].quotes.find(x=>x.id===Q.id);
+  ok(A[0].quotes.length===2 && A[0].quotes[0].id===Q.id && Qe.lt[A[0].items[0].id]===900000 && Qe.prices[A[0].items[0].id]===225000 && Qe.lt[A[0].items[1].id]===400000 && Qe.sup==='فروشنده نمونه' && Qe.ed,'ذخیره تغییر: همان پیش‌فاکتور عوض شد (تازه اضافه نشد)');
+  ok(await f.evaluate(()=>{ const q=document.querySelector('[data-qf]'); return !q.classList.contains('edit') && q.querySelector('[data-addq]').textContent==='افزودن پیش‌فاکتور'; }),'بعد از ذخیره: فرم به حالت افزودن برگشت');
+  ok(/۱,۳۰۰,۰۰۰/.test(await f.evaluate(()=>document.querySelector('.iq .bd .lg').innerText)),'ترکیب تازه: ۱٬۳۰۰٬۰۰۰');
+  await f.click('[data-qe="'+Q.id+'"]'); await sleep(200); await f.click('.qt [data-qx]'); await sleep(200);
+  ok(await f.evaluate(()=>!document.querySelector('[data-qf].edit')),'لغو ویرایش');
   await f.click('[data-send]'); await sleep(300);
 
   console.log('۴) میز خرید: جمع با قیمت کل');
   await go(p,'میز خرید'); f=await frameOf(p,'میز خرید'); await sleep(300);
-  ok(/۱,۵۰۰,۰۰۰|۱٫۵|۱\.۵/.test(await f.evaluate(()=>document.body.innerText)),'میز خرید جمع درست را نشان می‌دهد');
+  ok(/۱,۳۰۰,۰۰۰|۱٫۳|۱\.۳/.test(await f.evaluate(()=>document.body.innerText)),'میز خرید جمع درست را نشان می‌دهد');
   ok(!errs.length,'بدون خطای صفحه '+errs.join(' | ').slice(0,300)); await c.close();
   await br.close(); web.close(); console.log(fails?`\n${fails} FAIL`:'\nALL OK'); process.exit(fails?1:0);
 })().catch(e=>{ console.error(e); process.exit(1); });

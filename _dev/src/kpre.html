@@ -80,7 +80,10 @@ details.bxw .bd2{border-top:1px solid var(--rule)}
 .ie .x{min-height:44px;border:1px solid var(--line);border-radius:12px;background:#fff;font-weight:900;color:var(--bad)}
 details.ed{margin-top:14px}
 details.ed summary{min-height:48px;display:flex;align-items:center;font-weight:900;cursor:pointer;color:var(--ink)}
-.qdel{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.qdel{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.qdel .qr{display:flex;align-items:center;gap:8px;padding:4px 0}.qdel .qr b{flex:1;min-width:0;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qdel button.qe{color:var(--nv);border-color:var(--nv)}
+.qt.edit{border-style:solid;border-color:var(--nv);background:#F3F6FA}
 .qdel button{border:1px solid var(--line);background:#fff;border-radius:10px;min-height:38px;padding:0 12px;color:var(--bad);font-weight:800;font-size:.84rem}
 #fv{position:fixed;inset:0;z-index:50;background:rgba(10,14,20,.92);display:flex;align-items:center;justify-content:center;padding:12px}
 #fv img{max-width:100%;max-height:100%;border-radius:8px}
@@ -182,7 +185,7 @@ function best(iq){ const per={}, tot={}; iq.items.forEach(it=>{ let b=null; iq.q
 function cmpHTML(iq){ if(!iq.quotes.length) return '<div class="empty">هنوز پیش‌فاکتوری اضافه نشده است.</div>';
   const B=best(iq), dec=iq.dec||{}, n=iq.quotes.length, cols=`grid-template-columns:repeat(${Math.min(n,3)},1fr)`;
   const picked=(it,q)=>iq.st==='ok' && (dec.mode==='sup'?dec.sup===q.id:(dec.per&&dec.per[it.id]===q.id));
-  return `<div class="cells th" style="${cols};border:0;margin-top:6px">${iq.quotes.map(q=>`<span class="ch" title="${esc(q.sup)}">${esc(q.sup)}</span>`).join('')}</div><p class="hint" style="margin:2px 0 0">مبلغ‌ها: قیمت کل هر قلم به ریال؛ زیر آن قیمت واحد</p>`+iq.items.map(it=>`<div class="ib"><div class="ih"><b>${esc(it.t)}</b>${it.q?`<span>${fa(it.q)} ${esc(it.u||'')}</span>`:''}</div><div class="cells" style="${cols}">${iq.quotes.map(q=>{ const v=lineTot(it,q), bs=B.per[it.id]&&B.per[it.id].q===q.id;
+  return `<p class="hint" style="margin:6px 0 0">مبلغ‌ها: قیمت کل هر قلم به ریال؛ زیر آن قیمت واحد</p>`+iq.items.map(it=>`<div class="ib"><div class="ih"><b>${esc(it.t)}</b>${it.q?`<span>${fa(it.q)} ${esc(it.u||'')}</span>`:''}</div><div class="cells" style="${cols}">${iq.quotes.map(q=>{ const v=lineTot(it,q), bs=B.per[it.id]&&B.per[it.id].q===q.id;
       return v==null?`<span class="cl na"><b>ندارد</b><small>${esc(q.sup)}</small></span>`
         :`<button type="button" class="cl${bs?' best':''}${picked(it,q)?' pick':''}" data-it="${esc(it.id)}" data-q="${esc(q.id)}" title="${esc(q.sup)}: ${esc(faN(v))} ریال"><b>${esc(faN(v))}</b>${(+it.q)>1?`<small class="uq">واحد ${esc(faN(v/(+it.q)))}</small>`:''}<small>${bs?'ارزان‌ترین':esc(q.sup)}</small></button>`; }).join('')}</div></div>`).join('')
     +`<div class="tots"><p class="hint" style="margin:0 0 4px">جمع هر فروشنده (ریال)</p><div class="cells" style="${cols}">${iq.quotes.map(q=>`<span class="cl"><b>${esc(faN(B.tot[q.id].s))}</b><small class="uq">ریال</small><small>${B.tot[q.id].full?'همه اقلام':fa(B.tot[q.id].n)+' از '+fa(iq.items.length)+' قلم'}</small></span>`).join('')}</div></div>
@@ -190,14 +193,14 @@ function cmpHTML(iq){ if(!iq.quotes.length) return '<div class="empty">هنوز 
 /** «برنج و چای از فروشگاه ب؛ روغن از فروشگاه الف» */
 function mixText(iq,B){ const g=new Map(); iq.items.forEach(it=>{ const b=B.per[it.id]; if(!b) return; if(!g.has(b.q)) g.set(b.q,[]); g.get(b.q).push(it.t); });
   return [...g.entries()].map(([qid,L])=>{ const n=L.length>3?L.slice(0,3).join('، ')+' و '+fa(L.length-3)+' قلم دیگر':(L.length>1?L.slice(0,-1).join('، ')+' و '+L[L.length-1]:L[0]); return esc(n)+' از '+esc((iq.quotes.find(q=>q.id===qid)||{}).sup||''); }).join('؛ ')||'—'; }
-function quoteForm(iq){ return `<div class="qt w-only" data-qf="${esc(iq.id)}"><b>افزودن پیش‌فاکتور فروشنده</b>
+function quoteForm(iq){ return `<div class="qt w-only" data-qf="${esc(iq.id)}"><b data-qh>افزودن پیش‌فاکتور فروشنده</b>
     <div class="row2"><div><label class="f">فروشنده</label><input class="in" data-k="sup" maxlength="80" list="supL" autocomplete="off"></div><div><label class="f">تاریخ</label><input class="in mono dt" data-k="date" value="${esc(TODAY)}" inputmode="numeric"></div></div>
     <label class="f">قیمت کل هر قلم (ریال؛ خالی = این قلم را ندارد)</label><p class="hint" style="margin-top:2px">قیمت واحد را سامانه حساب می‌کند.</p>
     <div class="th"><span>عنوان کالا</span><span>تعداد</span><span>قیمت کل (ریال)</span></div>
     ${iq.items.map(it=>`<div class="pr"><span>${esc(it.t)}</span><i>${it.q?fa(it.q)+' '+esc(it.u||''):'—'}</i><input class="in mono mny" data-it="${esc(it.id)}" data-q="${esc(String((+it.q)||1))}" inputmode="numeric" autocomplete="off" aria-label="قیمت کل ${esc(it.t)} به ریال"><div class="mw" aria-live="polite"></div></div>`).join('')}
     <label class="f">پیوست: عکس یا PDF پیش‌فاکتور (اختیاری)</label><input class="in" type="file" data-k="file" accept="image/*,application/pdf" style="padding-top:10px">
     <label class="f">توضیح</label><input class="in" data-k="note" maxlength="120" autocomplete="off">
-    <button type="button" class="btn p w" data-addq="${esc(iq.id)}">افزودن پیش‌فاکتور</button><div class="msg" data-qm="${esc(iq.id)}"></div></div>`; }
+    <button type="button" class="btn p w" data-addq="${esc(iq.id)}">افزودن پیش‌فاکتور</button><button type="button" class="btn s w" data-qx hidden style="margin-top:8px">لغو ویرایش</button><div class="msg" data-qm="${esc(iq.id)}"></div></div>`; }
 function decHTML(iq){ const dec=iq.dec||{};
   if(iq.st==='ok'){ const q=id=>(iq.quotes.find(x=>x.id===id)||{}).sup||'?';
     const lines=dec.mode==='sup'?[`همه اقلام از <b>${esc(q(dec.sup))}</b>`]:iq.items.map(it=>dec.per&&dec.per[it.id]?`${esc(it.t)}: <b>${esc(q(dec.per[it.id]))}</b>`:`${esc(it.t)}: <span class="na">خرید نشود</span>`);
@@ -225,7 +228,7 @@ function iqHTML(iq){ const on=isOpenIq(iq.id), F=files();
   return `<div class="iq" data-iq="${esc(iq.id)}"><button type="button" class="h" aria-expanded="${on}"><span class="tx"><b>${esc(iq.title)}</b><span class="m">${fa(iq.items.length)} قلم، ${fa(n)} پیش‌فاکتور، ${fa(iq.date)}</span></span><span class="stt ${esc(iq.st||'')}">${ST[iq.st||'']}</span></button>
     ${on?`<div class="bd">${n?`<div class="sups" style="grid-template-columns:repeat(${Math.min(n,3)},1fr)">${iq.quotes.map(q=>q.fid&&F[q.fid]?`<button type="button" class="fl" data-fv="${esc(q.fid)}" title="پیوست ${F[q.fid].t==='application/pdf'?'PDF':'عکس'}">${ico('clip')}<span>${esc(q.sup)}</span></button>`:`<span class="fl"><span>${esc(q.sup)}</span></span>`).join('')}</div>`:''}
       ${cmpHTML(iq)}
-      ${!iq.st&&canW?`${n?`<div class="qdel">${iq.quotes.map(q=>`<button type="button" data-dq="${esc(iq.id)}|${esc(q.id)}">حذف پیش‌فاکتور ${esc(q.sup)}</button>`).join('')}</div>`:''}<details class="ed"${n?'':' open'}><summary>${n?'ویرایش اقلام و افزودن پیش‌فاکتور':'اقلام و پیش‌فاکتور فروشنده‌ها'}</summary>${itemsEdit(iq)+quoteForm(iq)}</details>`:''}${decHTML(iq)}
+      ${!iq.st&&canW?`${n?`<div class="qdel">${iq.quotes.map(q=>`<div class="qr"><b>${esc(q.sup)}</b><button type="button" class="qe" data-qe="${esc(q.id)}">ویرایش</button><button type="button" data-dq="${esc(iq.id)}|${esc(q.id)}" aria-label="حذف پیش‌فاکتور ${esc(q.sup)}">حذف</button></div>`).join('')}</div>`:''}<details class="ed"${n?'':' open'}><summary>${n?'ویرایش اقلام و افزودن پیش‌فاکتور':'اقلام و پیش‌فاکتور فروشنده‌ها'}</summary>${itemsEdit(iq)+quoteForm(iq)}</details>`:''}${decHTML(iq)}
       ${canW?`<button type="button" class="btn s d" data-del="${esc(iq.id)}" style="margin-top:10px">حذف استعلام</button>`:''}</div>`:''}</div>`; }
 function drawAll(){ const A=all().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   const O=A.filter(x=>!x.st||x.st==='wait'||(x.st==='ok'&&!x.inList&&daysSince(x.dec&&x.dec.at||x.date)<15)), C=A.filter(x=>!O.includes(x));
@@ -257,13 +260,22 @@ document.addEventListener('click',async e=>{ const b=e.target.closest('button');
   const card=b.closest('.iq'), id=card&&card.dataset.iq;
   if(b.classList.contains('h')){ if(isOpenIq(id)){ OPEN.delete(id); SHUT.add(id); } else { SHUT.delete(id); OPEN.add(id); } drawAll(); return; }
   if(b.hasAttribute('data-ix')){ const iid=b.closest('[data-ie]').dataset.ie; save(A=>{ const iq=A.find(x=>x.id===id); if(!iq||iq.st||iq.items.length<2) return; iq.items=iq.items.filter(x=>x.id!==iid); iq.quotes.forEach(q=>{ if(q.prices) delete q.prices[iid]; if(q.lt) delete q.lt[iid]; }); }); return; }
+  if(b.dataset.qe){ const iq=all().find(x=>x.id===id), Q=iq&&iq.quotes.find(x=>x.id===b.dataset.qe), f=card.querySelector('[data-qf]'); if(!Q||!f||iq.st) return;
+    const d=card.querySelector('details.ed'); if(d) d.open=true; f.dataset.edit=Q.id; f.classList.add('edit'); f.querySelector('[data-qh]').textContent='ویرایش پیش‌فاکتور '+Q.sup;
+    f.querySelector('[data-k=sup]').value=Q.sup||''; f.querySelector('[data-k=date]').value=Q.date||TODAY; f.querySelector('[data-k=note]').value=Q.note||'';
+    f.querySelectorAll('[data-it]').forEach(i=>{ const it=iq.items.find(x=>x.id===i.dataset.it), v=it?lineTot(it,Q):null; i.value=v==null?'':fa(g3(Math.round(v))); mnyNote(i); });
+    f.querySelector('[data-addq]').textContent='ذخیره تغییر'; f.querySelector('[data-qx]').hidden=false; say_q(id,'');
+    try{ f.scrollIntoView({block:'start',behavior:'smooth'}); }catch(x){} return; }
+  if(b.hasAttribute('data-qx')){ drawAll(); return; }
   if(b.dataset.addq){ const f=b.closest('.qt'), sup=clean(f.querySelector('[data-k=sup]').value,80); if(!sup){ say_q(id,'نام فروشنده را بنویسید',1); return; }
     const lt={}, prices={}; f.querySelectorAll('[data-it]').forEach(i=>{ const v=parseAmt(i.value); if(v!==null){ lt[i.dataset.it]=v; prices[i.dataset.it]=unitOf(v,i.dataset.q); } });
     if(!Object.keys(lt).length){ say_q(id,'دست‌کم قیمت یک قلم را بنویسید',1); return; }
-    let fid=''; const fi=f.querySelector('[data-k=file]').files[0];
-    if(fi){ try{ const p=await packFile(fi); fid=uid('F'); const F=files(); F[fid]=Object.assign(p,{at:TODAY,iq:id}); if(!put(FK,F)){ say_q(id,'پیوست ذخیره نشد (حافظه)',1); return; } }
+    const eid=f.dataset.edit||'', old=eid&&((all().find(x=>x.id===id)||{}).quotes||[]).find(x=>x.id===eid);
+    let fid=old?old.fid||'':''; const fi=f.querySelector('[data-k=file]').files[0];
+    if(fi){ try{ const p=await packFile(fi); const F=files(); if(old&&old.fid) delete F[old.fid]; fid=uid('F'); F[fid]=Object.assign(p,{at:TODAY,iq:id}); if(!put(FK,F)){ say_q(id,'پیوست ذخیره نشد (حافظه)',1); return; } }
       catch(x){ say_q(id,x.message==='pdf'?'PDF بزرگ‌تر از ۵۰۰ کیلوبایت است':'پیوست خوانده نشد',1); return; } }
-    save(A=>{ const iq=A.find(x=>x.id===id); iq.quotes.push({id:uid('q'),sup,date:normDate(f.querySelector('[data-k=date]').value)||TODAY,lt,prices,fid,note:clean(f.querySelector('[data-k=note]').value,120),by:myName()}); }); return; }
+    const rec={sup,date:normDate(f.querySelector('[data-k=date]').value)||TODAY,lt,prices,fid,note:clean(f.querySelector('[data-k=note]').value,120)};
+    save(A=>{ const iq=A.find(x=>x.id===id), Q=eid&&iq.quotes.find(x=>x.id===eid); if(Q) Object.assign(Q,rec,{ed:TODAY}); else iq.quotes.push(Object.assign({id:uid('q')},rec,{by:myName()})); }); return; }
   if(b.dataset.dq){ const [i,q]=b.dataset.dq.split('|'); save(A=>{ const iq=A.find(x=>x.id===i); const Q=iq.quotes.find(x=>x.id===q); if(Q&&Q.fid){ const F=files(); delete F[Q.fid]; put(FK,F); } iq.quotes=iq.quotes.filter(x=>x.id!==q); }); return; }
   if(b.dataset.send){ save(A=>{ const iq=A.find(x=>x.id===b.dataset.send); iq.st='wait'; iq.sent=TODAY; }); return; }
   if(b.dataset.apsup){ pick[id]={mode:'sup',sup:b.dataset.apsup}; card.querySelectorAll('[data-apsup],[data-apmix]').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); markPicks(); return; }
