@@ -105,15 +105,21 @@ function counts(){ let att=0, kh=0; const sees=n=>{ try{ return !window.ntSync |
   try{ const a=num('nt_alerts_v1'); att=+(a&&a.n)||0; }catch(e){}
   try{ kh=khUrgent(); }catch(e){}
   return {att,kh}; }
+/* مأمور خرید (agent.js): کلید تهران _th_v1. numA = همه مأمورهای این سیستم، numC = مأمور جاری */
+const AGS=()=>{ try{ return window.ntAg?ntAg.allowed():['nb']; }catch(e){ return ['nb']; } };
+const AGC=()=>{ try{ return window.ntAg?ntAg.cur():'nb'; }catch(e){ return 'nb'; } };
+const akey=(k,a)=>a==='th'?k.replace(/_v1$/,'_th_v1'):k;
+const numA=k=>{ const o=[]; AGS().forEach(a=>{ const v=num(akey(k,a)); if(Array.isArray(v)) o.push(...v); }); return o; };
+const numC=k=>num(akey(k,AGC()));
 function khUrgent(){ const sees=n=>{ try{ return !window.ntSync || ntSync.canSee(n); }catch(e){ return true; } }; let k=0;
   const jd=()=>{ try{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZone:'Asia/Tehran',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()), g=t=>+p.find(x=>x.type===t).value; return [g('year'),g('month'),g('day')]; }catch(e){ return null; } };
   const dn=s=>{ const m=/^(\d{4})\/(\d{1,2})\/(\d{1,2})/.exec(String(s||'')); if(!m) return null; const y=+m[1], mo=+m[2], d=+m[3]; return (y-1)*365+Math.floor((y-1)*8/33)+(mo<=6?(mo-1)*31:186+(mo-7)*30)+d; };
-  if(sees('آب شیرین')){ const w=num('nt_kwater_v1')||{}, T=(Array.isArray(w.trips)?w.trips:[]).map(t=>t&&t.d).filter(Boolean).sort(), t=jd(); const last=T[T.length-1];
+  if(sees('آب شیرین') && AGS().includes('nb')){ const w=num('nt_kwater_v1')||{}, T=(Array.isArray(w.trips)?w.trips:[]).map(t=>t&&t.d).filter(Boolean).sort(), t=jd(); const last=T[T.length-1];
     if(t){ const g=t[1]<=6?(+w.a||2):(+w.b||3), today=dn(t.join('/')); if(!last || today-dn(last)>=g) k++; } }
-  if(sees('باکس سندپرداز')){ const b=num('nt_kbox_v1'); (Array.isArray(b)?b:[]).forEach(x=>{ if(x&&x.imp&&!x.st&&!x.gone) k++; }); }
-  if(sees('خدمات تدارکات')){ const v=num('nt_ksvc_v1'); (Array.isArray(v)?v:[]).forEach(x=>{ if(x&&!x.done&&!x.no) k++; }); }
+  if(sees('باکس سندپرداز')){ const b=numA('nt_kbox_v1'); (Array.isArray(b)?b:[]).forEach(x=>{ if(x&&x.imp&&!x.st&&!x.gone) k++; }); }
+  if(sees('خدمات تدارکات')){ const v=numA('nt_ksvc_v1'); (Array.isArray(v)?v:[]).forEach(x=>{ if(x&&!x.done&&!x.no) k++; }); }
   let ap=false; try{ ap=!window.ntSync || !ntSync.canApprove || ntSync.canApprove(); }catch(e){}
-  if(ap && sees('پیش‌فاکتور')){ const p=num('nt_kpre_v1'); (Array.isArray(p)?p:[]).forEach(x=>{ if(x&&x.st==='wait') k++; }); }
+  if(ap && sees('پیش‌فاکتور')){ const p=numA('nt_kpre_v1'); (Array.isArray(p)?p:[]).forEach(x=>{ if(x&&x.st==='wait') k++; }); }
   return k; }
 /* صفحه انتخاب (طرح تازه): هر کارت = کارهای فوری آن واحد + دکمه «ورود به ...» */
 const RI={
@@ -141,12 +147,12 @@ function khRows(){ const R=[];
   const dn=s=>{ const m=/^(\d{4})\/(\d{1,2})\/(\d{1,2})/.exec(String(s||'')); if(!m) return null; const y=+m[1], mo=+m[2], d=+m[3]; return (y-1)*365+Math.floor((y-1)*8/33)+(mo<=6?(mo-1)*31:186+(mo-7)*30)+d; };
   const T=jd(), today=dn(T);
   let ap=false; try{ ap=!window.ntSync || !ntSync.canApprove || ntSync.canApprove(); }catch(e){}
-  if(ap && seeT('پیش‌فاکتور')){ const P=(num('nt_kpre_v1')||[]).filter(x=>x&&x.st==='wait'); if(P.length) R.push({ic:'hand',t:fa(P.length)+' پیش‌فاکتور منتظر تایید شما',s:String(P[0].title||''),go:'پیش‌فاکتور',k:'ntp_pane',p:'open',iq:P[0].id}); }
-  if(seeT('آب شیرین')){ const w=num('nt_kwater_v1')||{}, L=(Array.isArray(w.trips)?w.trips:[]).map(t=>t&&t.d).filter(Boolean).sort(), last=L[L.length-1], mo=+String(T).split('/')[1]||1, gap=mo<=6?(+w.a||2):(+w.b||3);
+  if(ap && seeT('پیش‌فاکتور')){ const P=numA('nt_kpre_v1').filter(x=>x&&x.st==='wait'); if(P.length) R.push({ic:'hand',t:fa(P.length)+' پیش‌فاکتور منتظر تایید شما',s:String(P[0].title||''),go:'پیش‌فاکتور',k:'ntp_pane',p:'open',iq:P[0].id}); }
+  if(seeT('آب شیرین') && AGS().includes('nb')){ const w=num('nt_kwater_v1')||{}, L=(Array.isArray(w.trips)?w.trips:[]).map(t=>t&&t.d).filter(Boolean).sort(), last=L[L.length-1], mo=+String(T).split('/')[1]||1, gap=mo<=6?(+w.a||2):(+w.b||3);
     const dl=dn(last), ds=dl!=null&&today!=null?today-dl:null; if(ds==null || ds>=gap) R.push({ic:'drop',t:'نوبت آوردن آب شیرین است',s:ds==null?'هنوز نوبتی ثبت نشده':fa(ds)+' روز از آخرین نوبت',go:'لیست خرید',k:'ntk_pane',p:'water'}); }
-  if(seeT('باکس سندپرداز')){ const B=(num('nt_kbox_v1')||[]).filter(x=>x&&x.imp&&!x.st&&!x.gone); if(B.length){ const lt=B.filter(x=>{ const d=dn(x.need); return d!=null&&today!=null&&today-d>0; }).length;
+  if(seeT('باکس سندپرداز')){ const B=numA('nt_kbox_v1').filter(x=>x&&x.imp&&!x.st&&!x.gone); if(B.length){ const lt=B.filter(x=>{ const d=dn(x.need); return d!=null&&today!=null&&today-d>0; }).length;
     R.push({ic:'star',t:fa(B.length)+' قلم ضروری خریده نشده',s:lt?fa(lt)+' قلم از تاریخ نیاز گذشته':'از باکس سندپرداز',go:'لیست خرید',k:'ntk_pane',p:'box',bf:'imp'}); } }
-  if(seeT('خدمات تدارکات')){ const V=(num('nt_ksvc_v1')||[]).filter(x=>x&&!x.done&&!x.no); if(V.length) R.push({ic:'tool',t:fa(V.length)+' خدمات بدون شماره ثبت',s:String(V[0].title||''),go:'لیست خرید',k:'ntk_pane',p:'svc'}); }
+  if(seeT('خدمات تدارکات')){ const V=numA('nt_ksvc_v1').filter(x=>x&&!x.done&&!x.no); if(V.length) R.push({ic:'tool',t:fa(V.length)+' خدمات بدون شماره ثبت',s:String(V[0].title||''),go:'لیست خرید',k:'ntk_pane',p:'svc'}); }
   return R; }
 function chooser(){
   let el=$('ntWs'); if(!el){ el=document.createElement('div'); el.id='ntWs'; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); el.setAttribute('aria-labelledby','ntWsT'); document.body.appendChild(el);
@@ -186,15 +192,15 @@ function tick(){
 /* عدد زبانه‌های خرید (نوار پایین و منوی کناری): لیست = کارهای فوری، پیش‌فاکتور = منتظر تایید، فاکتور = منتظر سندپرداز */
 try{ if(typeof window.pending==='function'){ const P0=window.pending; const sees=n=>{ try{ return !window.ntSync || ntSync.canSee(n); }catch(e){ return true; } };
   window.pending=function(n){ try{
-    if(n==='لیست خرید'){ let k=0; const W=num('nt_kwater_v1')||{}, b=num('nt_kbox_v1'), v=num('nt_ksvc_v1');
-      if(sees('آب شیرین')){ try{ const T=(Array.isArray(W.trips)?W.trips:[]).map(t=>t&&t.d).filter(Boolean).sort(), last=T[T.length-1]; const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZone:'Asia/Tehran',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()), g=t=>+p.find(x=>x.type===t).value;
+    if(n==='لیست خرید'){ let k=0; const W=num('nt_kwater_v1')||{}, b=numC('nt_kbox_v1'), v=numC('nt_ksvc_v1');
+      if(sees('آب شیرین') && AGC()==='nb'){ try{ const T=(Array.isArray(W.trips)?W.trips:[]).map(t=>t&&t.d).filter(Boolean).sort(), last=T[T.length-1]; const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZone:'Asia/Tehran',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()), g=t=>+p.find(x=>x.type===t).value;
         const dn=s=>{ const m=/^(\d{4})\/(\d{1,2})\/(\d{1,2})/.exec(String(s||'')); if(!m) return null; const y=+m[1], mo=+m[2], d=+m[3]; return (y-1)*365+Math.floor((y-1)*8/33)+(mo<=6?(mo-1)*31:186+(mo-7)*30)+d; };
         const gap=g('month')<=6?(+W.a||2):(+W.b||3); if(!last || dn(g('year')+'/'+g('month')+'/'+g('day'))-dn(last)>=gap) k++; }catch(e){} }
       if(sees('باکس سندپرداز')) (Array.isArray(b)?b:[]).forEach(x=>{ if(x&&x.imp&&!x.st&&!x.gone) k++; });
       if(sees('خدمات تدارکات')) (Array.isArray(v)?v:[]).forEach(x=>{ if(x&&!x.done&&!x.no) k++; });
       return k; }
-    if(n==='پیش‌فاکتور'){ const p=num('nt_kpre_v1'); return (Array.isArray(p)?p:[]).filter(x=>x&&x.st==='wait').length; }
-    if(n==='فاکتور خرید'){ const f=num('nt_factor_v1'); return (Array.isArray(f)?f:[]).filter(r=>r&&r.id&&r.cat==='kala'&&!r.sp).length; }
+    if(n==='پیش‌فاکتور'){ const p=numC('nt_kpre_v1'); return (Array.isArray(p)?p:[]).filter(x=>x&&x.st==='wait').length; }
+    if(n==='فاکتور خرید'){ const f=numC('nt_factor_v1'); return (Array.isArray(f)?f:[]).filter(r=>r&&r.id&&r.cat==='kala'&&!r.sp).length; }
     if(n==='میز خرید') return 0;
   }catch(e){} return P0.apply(this,arguments); }; } }catch(e){}
 /* دکمه رایانه: بالای فهرست زبانه‌ها */

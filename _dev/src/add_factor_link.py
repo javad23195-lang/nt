@@ -29,7 +29,7 @@ JS=r"""
 /* ===== اتصال به «فاکتور خرید» (add_factor_link) ===== */
 const fxOff=new WeakSet();                      /* ردیف‌هایی که کاربر تیک پیشنهادی‌شان را برداشته (فقط در همین صفحه) */
 const fxN=s=>String(s==null?'':s).replace(/[<>"]/g,'').replace(/[\t\r\n]+/g,' ').replace(/\s+/g,' ').trim();
-function fxList(){ try{ const a=JSON.parse(localStorage.getItem('nt_factor_v1')||'[]'); return Array.isArray(a)?a.filter(f=>f&&f.req&&typeof f.req==='object'):[]; }catch(e){ return []; } }
+function fxList(){ const o=[]; ['nt_factor_v1','nt_factor_th_v1'].forEach(k=>{ try{ const a=JSON.parse(localStorage.getItem(k)||'[]'); if(Array.isArray(a)) a.forEach(f=>{ if(f&&f.req&&typeof f.req==='object') o.push(f); }); }catch(e){} }); return o; }
 /** فاکتوری که به این ردیف وصل شده (با شناسه ردیف؛ اگر شناسه عوض شده: نام + دستگاه + تاریخ درخواست) */
 function fxOf(r){ const L=fxList(); if(!L.length) return null; let id=''; try{ if(typeof kIdOf==='function') id=kIdOf(r); }catch(e){}
   return L.find(f=>(id && f.req.rid===id) || (f.req.item===fxN(r.item) && f.req.dev===fxN(r.unit) && f.req.date===fxN(r.date)))||null; }

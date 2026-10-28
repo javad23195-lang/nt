@@ -385,7 +385,10 @@ const nkey=s=>norm(s).replace(/\s+/g,'');
 function near1(a,b){ if(a===b) return true; const la=a.length, lb=b.length; if(Math.min(la,lb)<6 || Math.abs(la-lb)>1) return false;
   let i=0; while(i<la && i<lb && a[i]===b[i]) i++; if(la===lb){ if(/\d/.test(a[i]+b[i])) return false; return a.slice(i+1)===b.slice(i+1); }
   const [x,y]=la>lb?[a,b]:[b,a]; if(/\d/.test(x[i])) return false; return x.slice(i+1)===y.slice(i); }
-const FK='nt_factor_v1', LK='nt_factor_lex_v1', NK='nt_factor_learn_v1', CK='nt_factor_cfg_v1', PK='nt_factor_rep_v1', RK='nt_kharid9_v1';
+/* مأمور خرید (نهبندان / تهران): فاکتورها و گزارش مالی هر مأمور جدا (agent.js) */
+const AG=(()=>{ try{ if(parent.ntAg) return parent.ntAg.cur(); }catch(e){} try{ return localStorage.getItem('ntk_ag')==='th'?'th':'nb'; }catch(e){ return 'nb'; } })();
+const agK=k=>AG==='th'?k.replace(/_v1$/,'_th_v1'):k;
+const FK=agK('nt_factor_v1'), LK='nt_factor_lex_v1', NK='nt_factor_learn_v1', CK='nt_factor_cfg_v1', PK=agK('nt_factor_rep_v1'), RK='nt_kharid9_v1';
 function LS(k,d){ try{ const v=JSON.parse(localStorage.getItem(k)||'null'); return v==null?d:v; }catch(e){ return d; } }
 function put(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } }
 function lsl(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:v; }catch(e){ return d; } }
@@ -883,7 +886,7 @@ const ICO={store:'<path d="M3 10l2-6h14l2 6M4 10h16M5 10v10h14V10M10 20v-5h4v5"/
 const ico=k=>`<span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24">${ICO[k]||''}</svg></span>`;
 /* ============ تایپ آزاد با فهرست کشویی (همه خانه‌های .cb) ============
    هر نام تازه بعد از ثبت خودکار به فهرست اضافه می‌شود (lexAdd). نوشتارهای یک نام یکی می‌شوند (canon). */
-const BOXK='nt_kbox_v1';
+const BOXK=agK('nt_kbox_v1');
 const boxAll=()=>{ const a=LS(BOXK,[]); return Array.isArray(a)?a.filter(x=>x&&x.id&&x.name):[]; };
 /** اقلام باکس سندپرداز برای شرح کالا: باز، یا خریده‌شده با همین فاکتور */
 function boxChoices(){ return boxAll().filter(x=>!x.gone && (!x.st || (x.st==='me' && x.fac && x.fac.id===editId)))

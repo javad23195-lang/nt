@@ -365,14 +365,15 @@ window.ntNav={paint,openSheet,closeSheet,badgeOf,barTabs,vis};
    کار فوری تازه (نوبت آب، قلم ضروری، خدمات بی‌شماره، پیش‌فاکتور منتظر تایید شما) یک بار اعلان می‌شود. هیچ اطلاعاتی بیرون نمی‌رود. */
 (function(){ const J=k=>{ try{ return JSON.parse(localStorage.getItem(k)||'null'); }catch(e){ return null; } };
   const sees=n=>{ try{ return !window.ntSync || ntSync.canSee(n); }catch(e){ return true; } };
+  const JA=k=>{ const o=[]; let A=['nb']; try{ if(window.ntAg) A=ntAg.allowed(); }catch(e){} A.forEach(a=>{ const v=J(a==='th'?k.replace(/_v1$/,'_th_v1'):k); if(Array.isArray(v)) o.push(...v); }); return o; };
   function keys(){ const K=[], T=[];
     try{ const W=J('nt_kwater_v1')||{}, tr=(Array.isArray(W.trips)?W.trips:[]).map(t=>t&&t.d).filter(Boolean).sort(), last=tr[tr.length-1]||'';
       if(sees('آب شیرین')){ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZone:'Asia/Tehran',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()), g=t=>+p.find(x=>x.type===t).value;
         const dn=s=>{ const m=/^(\d{4})\/(\d{1,2})\/(\d{1,2})/.exec(String(s||'')); if(!m) return null; const y=+m[1], mo=+m[2], d=+m[3]; return (y-1)*365+Math.floor((y-1)*8/33)+(mo<=6?(mo-1)*31:186+(mo-7)*30)+d; };
         const gap=g('month')<=6?(+W.a||2):(+W.b||3), td=g('year')+'/'+g('month')+'/'+g('day'); if(!last || dn(td)-dn(last)>=gap){ K.push('w|'+td); T.push('نوبت آوردن آب شیرین است'); } } }catch(e){}
-    try{ if(sees('باکس سندپرداز')) (J('nt_kbox_v1')||[]).forEach(x=>{ if(x&&x.imp&&!x.st&&!x.gone){ K.push('b|'+x.id); T.push('قلم ضروری: '+String(x.name||'').slice(0,40)); } }); }catch(e){}
-    try{ if(sees('خدمات تدارکات')) (J('nt_ksvc_v1')||[]).forEach(x=>{ if(x&&!x.done&&!x.no){ K.push('s|'+x.id); T.push('خدمات بدون شماره: '+String(x.title||'').slice(0,40)); } }); }catch(e){}
-    try{ const ap=!window.ntSync || !ntSync.canApprove || ntSync.canApprove(); if(ap && sees('پیش‌فاکتور')) (J('nt_kpre_v1')||[]).forEach(x=>{ if(x&&x.st==='wait'){ K.push('p|'+x.id); T.push('پیش‌فاکتور منتظر تایید: '+String(x.title||'').slice(0,40)); } }); }catch(e){}
+    try{ if(sees('باکس سندپرداز')) JA('nt_kbox_v1').forEach(x=>{ if(x&&x.imp&&!x.st&&!x.gone){ K.push('b|'+x.id); T.push('قلم ضروری: '+String(x.name||'').slice(0,40)); } }); }catch(e){}
+    try{ if(sees('خدمات تدارکات')) JA('nt_ksvc_v1').forEach(x=>{ if(x&&!x.done&&!x.no){ K.push('s|'+x.id); T.push('خدمات بدون شماره: '+String(x.title||'').slice(0,40)); } }); }catch(e){}
+    try{ const ap=!window.ntSync || !ntSync.canApprove || ntSync.canApprove(); if(ap && sees('پیش‌فاکتور')) JA('nt_kpre_v1').forEach(x=>{ if(x&&x.st==='wait'){ K.push('p|'+x.id); T.push('پیش‌فاکتور منتظر تایید: '+String(x.title||'').slice(0,40)); } }); }catch(e){}
     return {K,T}; }
   async function check(){ try{ if(localStorage.getItem('ntui_notify')!=='1' || typeof Notification==='undefined' || Notification.permission!=='granted') return;
       if(window.ntLocked || document.body.classList.contains('ntlocked')) return;

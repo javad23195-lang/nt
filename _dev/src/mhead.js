@@ -128,8 +128,15 @@ function fill(){
   let h=`<div class="dh">${lg?`<img src="${esc(lg.getAttribute('src')||'')}" alt="">`:''}<div><small>${esc(co?co.textContent:'')}</small><b>${esc(un?un.textContent:'')}</b>${who?`<span>${esc(who)}</span>`:''}</div>
     <button type="button" class="dx" data-a="close" aria-label="بستن منو">${ic('close',22)}</button></div><h4>بخش‌ها</h4>`;
   try{ if(window.ntWs) h+=ntWs.drw(); }catch(e){}
-  DOCS.forEach((doc,k)=>{ if(!vis(k)) return; const bg=badge(doc.name);
-    h+=`<button type="button" class="di${k===i?' on':''}" data-t="${k}"${k===i?' aria-current="page"':''}>${ic(TABICON[doc.name]||'doc',24)}<span>${esc(doc.name)}</span>${bg?`<span class="b">${esc(fa(bg))}</span>`:''}</button>`; });
+  const item=(k,ag,on,bg)=>`<button type="button" class="di${on?' on':''}" data-t="${k}"${ag?` data-ag="${ag}"`:''}${on?' aria-current="page"':''}>${ic(TABICON[DOCS[k].name]||'doc',24)}<span>${esc(DOCS[k].name)}</span>${bg?`<span class="b">${esc(fa(bg))}</span>`:''}</button>`;
+  /* بخش خرید با دو مأمور (agent.js): «میز خرید» بالا، بعد گروه هر مأمور با زبانه‌های خودش */
+  const AGW=document.body.classList.contains('ws-kh') && window.ntAg ? ntAg : null, AGT=['لیست خرید','پیش‌فاکتور','فاکتور خرید'];
+  if(AGW){ const A=AGW.allowed(), a=AGW.cur();
+    DOCS.forEach((doc,k)=>{ if(!vis(k) || AGT.indexOf(doc.name)>-1) return; h+=item(k,'',k===i,badge(doc.name)); });
+    A.forEach(g=>{ const ks=AGT.map(n=>DOCS.findIndex(d=>d.name===n)).filter(k=>k>-1&&vis(k)); if(!ks.length) return;
+      if(A.length>1) h+=`<div class="dg"><i class="${g}" aria-hidden="true"></i>مأمور ${esc(AGW.name(g))}</div>`;
+      ks.forEach(k=>{ h+=item(k,g,k===i&&g===a,g===a?badge(DOCS[k].name):''); }); }); }
+  else DOCS.forEach((doc,k)=>{ if(!vis(k)) return; h+=item(k,'',k===i,badge(doc.name)); });
   const th=$('ntThBtn'), thx=th&&th.querySelector('.tx')?th.querySelector('.tx').textContent:'';
   const sy=$('ntSyBtn'), syx=sy&&sy.querySelector('.tx')?sy.querySelector('.tx').textContent:'';
   h+='<h4>ابزارها</h4>';
@@ -144,7 +151,7 @@ function fill(){
 function onDrw(e){ const b=e.target.closest('button'); if(!b) return;
   if(b.dataset.a==='close'){ close(); return; }
   if(b.dataset.a==='ws'){ close(); try{ ntWs.toggle(); }catch(x){} return; }
-  if(b.dataset.t!==undefined){ close(); try{ show(+b.dataset.t); }catch(x){} return; }
+  if(b.dataset.t!==undefined){ close(); try{ if(b.dataset.ag && window.ntAg) ntAg.set(b.dataset.ag); }catch(x){} try{ show(+b.dataset.t); }catch(x){} return; }
   if(b.dataset.a){ const t=$(b.dataset.a); if(b.dataset.keep){ if(t) t.click(); setTimeout(fill,60); return; } close(); if(t) setTimeout(()=>t.click(),30); } }
 let last=null;
 function open(){ if(document.body.classList.contains('ntdrw')) return; last=document.activeElement; fill(); document.body.classList.add('ntdrw'); if($('ntHam')) $('ntHam').setAttribute('aria-expanded','true');

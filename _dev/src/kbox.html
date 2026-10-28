@@ -223,10 +223,10 @@ details.up .bd{padding:0 16px 16px}
 </div>
 <script>
 /*KH_COMMON_JS*/
-const BK='nt_kbox_v1', WK='nt_kweek_v1', AK='nt_kwater_v1', SK='nt_ksvc_v1';
+const BK=agK('nt_kbox_v1'), WK='nt_kweek_v1', AK='nt_kwater_v1', SK=agK('nt_ksvc_v1'), PRK=agK('nt_kpre_v1');
 /* هر قسمت یک فرم با دسترسی جدا (ntSync: «باکس سندپرداز»، «خرید هفتگی»، «آب شیرین»، «خدمات تدارکات») */
 const FORM={box:'باکس سندپرداز',week:'خرید هفتگی',water:'آب شیرین',svc:'خدمات تدارکات'};
-const SEE={}, W={}; Object.keys(FORM).forEach(k=>{ SEE[k]=canSeeT(FORM[k]); W[k]=SEE[k] && canWT(FORM[k]); });
+const SEE={}, W={}; Object.keys(FORM).forEach(k=>{ SEE[k]=canSeeT(FORM[k]) && !(AG==='th' && (k==='week'||k==='water')); W[k]=SEE[k] && canWT(FORM[k]); });
 const PANES=Object.keys(FORM).filter(k=>SEE[k]);
 Object.keys(FORM).forEach(k=>{ const b=document.querySelector(`#seg [data-p="${k}"]`); if(b) b.hidden=!SEE[k]; const p=$('p_'+k); if(p && !W[k]) p.classList.add('ro'); if(p && !SEE[k]) p.hidden=true; });
 if(PANES.length<2) $('seg').hidden=true;
@@ -270,7 +270,7 @@ const unitOf=(x,U)=>unitGuess(x,U).u;
 const unitChoices=U=>[...new Set([NT_U,'فنی تعمیرات','برق','انبار','آزمایشگاه','اداری','تولید'].concat(Object.values(U||unitsGet()).filter(Boolean)))];
 let uOpen='';
 /* خرید ← فاکتور ← رسید انبار: رسید، نقدی/اعتباری و فروشنده فقط در «فاکتور خرید» نوشته می‌شوند؛ باکس فقط وضعیت را نشان می‌دهد */
-const FAC=()=>{ const a=LS('nt_factor_v1',[]); return Array.isArray(a)?a:[]; };
+const FAC=()=>{ const a=LS(agK('nt_factor_v1'),[]); return Array.isArray(a)?a:[]; };
 let FM=new Map();
 const facOf=x=>x&&x.fac&&x.fac.id?FM.get(x.fac.id)||null:null;
 const rsOf=x=>{ const f=facOf(x); if(f&&f.rasid) return {n:String(f.rasid),d:f.rasidDate||''}; return x.rs||null; };
@@ -310,7 +310,7 @@ const ST={me:'خریدم',teh:'مأمور تهران',x:'لازم نیست'};
 const isOpen=x=>!x.st && !x.gone;
 /* پیوند با «پیش‌فاکتور»: قلم‌هایی که در استعلام جاری یا تاییدشده هستند (استعلام ردشده قلم را آزاد می‌کند) */
 const canPre=W.box && canWT('پیش‌فاکتور'), sel=new Set();
-function preMap(){ const P=LS('nt_kpre_v1',[]), m=new Map(); (Array.isArray(P)?P:[]).forEach(iq=>{ if(!iq||!Array.isArray(iq.items)||iq.st==='no') return; const d=iq.dec||{};
+function preMap(){ const P=LS(PRK,[]), m=new Map(); (Array.isArray(P)?P:[]).forEach(iq=>{ if(!iq||!Array.isArray(iq.items)||iq.st==='no') return; const d=iq.dec||{};
   iq.items.forEach(it=>{ if(!it||!it.bx) return; let sup=''; if(iq.st==='ok'){ const qid=d.mode==='sup'?d.sup:(d.per&&d.per[it.id]); const Q=(iq.quotes||[]).find(q=>q.id===qid); if(!qid) return; sup=Q?Q.sup:''; } m.set(it.bx,{iq:iq.id,st:iq.st||'',sup,title:iq.title}); }); }); return m; }
 let PM=new Map();
 /** عددهای زبانه‌ها و زیرعنوان سربرگ */
@@ -402,10 +402,10 @@ function drawSel(){ const B=box(); [...sel].forEach(id=>{ if(!B.some(y=>y.id===i
 $('bSelCp').innerHTML=ico('copy')+'کپی'; $('bSelXl').innerHTML=ico('filechk')+'اکسل'; $('bSelSh').innerHTML=SHR+'اشتراک'; $('bSelGo').innerHTML=ico('docm')+'استعلام';
 $('bSelX').addEventListener('click',()=>{ sel.clear(); drawBox(); });
 $('bSelRow').addEventListener('click',e=>{ if(!e.target.closest('#bAll')) return; const L=window.__bL||[]; const allOn=L.length&&L.every(i=>sel.has(i)); if(allOn) L.forEach(i=>sel.delete(i)); else L.forEach(i=>sel.add(i)); drawBox(); });
-$('bSelGo').addEventListener('click',()=>{ const A=box().filter(x=>sel.has(x.id)&&preOk(x)); if(!A.length) return; const P=LS('nt_kpre_v1',[]), L=Array.isArray(P)?P:[];
+$('bSelGo').addEventListener('click',()=>{ const A=box().filter(x=>sel.has(x.id)&&preOk(x)); if(!A.length) return; const P=LS(PRK,[]), L=Array.isArray(P)?P:[];
   const id=uid('p'); L.push({id,title:'استعلام '+fa(TODAY)+(A.length===1?' — '+A[0].name:''),date:TODAY,by:myName(),quotes:[],st:'',
     items:A.slice(0,60).map(x=>({id:uid('i'),t:clean(x.name,120),q:parseAmt(x.qty)??'',u:clean(x.unit,15),code:clean(x.code,30),bx:x.id}))});
-  if(!put('nt_kpre_v1',L)){ say('bMsg2','ذخیره نشد','bad'); return; } sel.clear(); drawBox(); lss('ntp_open',id); goTab('پیش‌فاکتور','ntp_pane','open'); });
+  if(!put(PRK,L)){ say('bMsg2','ذخیره نشد','bad'); return; } sel.clear(); drawBox(); lss('ntp_open',id); goTab('پیش‌فاکتور','ntp_pane','open'); });
 function facTags(x){ const f=facOf(x), r=rsOf(x); let h='';
   if(f) h+=`<span class="tag ok">فاکتور ${f.no?esc(fa(f.no)):'بدون شماره'}${f.kind?'، '+esc(f.kind):''}${f.sup?'، '+esc(f.sup):''}</span>`;
   else if(x.fac) h+=`<span class="tag ok">فاکتور ${x.fac.no?esc(fa(x.fac.no)):'ثبت شد'}</span>`;
@@ -542,7 +542,7 @@ const S=segInit('seg','ntk_pane',PANES.length?PANES:['box'],p=>{ if(DRAW[p]) DRA
 window.addEventListener('message',e=>{ if(e.source===parent && e.data && e.data.nt==='show'){ counts(); const f=lsl('ntk_bf',bF); if(f!==bF){ bF=f; if(S.cur==='box') drawBox(); } } });
 $('goImp').addEventListener('click',()=>{ if(!SEE.box) return; bF='imp'; lss('ntk_bf','imp'); S.set('box'); });
 $('goWater').addEventListener('click',()=>{ if(!SEE.water) return; S.set('water'); });
-window.addEventListener('storage',e=>{ if(!e.key||[BK,WK,AK,SK,'nt_khadamat_v1','nt_kpre_v1'].includes(e.key)){ if(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return; S.set(S.cur); } });
+window.addEventListener('storage',e=>{ if(!e.key||[BK,WK,AK,SK,'nt_khadamat_v1',PRK].includes(e.key)){ if(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return; S.set(S.cur); } });
 </script>
 </body>
 </html>

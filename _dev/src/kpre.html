@@ -123,7 +123,7 @@ details.ed summary{min-height:48px;display:flex;align-items:center;font-weight:9
 <div id="fv" hidden><img alt="پیوست پیش‌فاکتور"><button type="button" class="btn s" id="fvX">بستن</button></div>
 <script>
 /*KH_COMMON_JS*/
-const PK='nt_kpre_v1', FK='nt_kpre_files_v1', WK='nt_kweek_v1';
+const PK=agK('nt_kpre_v1'), FK=agK('nt_kpre_files_v1'), WK='nt_kweek_v1', BXK=agK('nt_kbox_v1');
 const TAB='پیش‌فاکتور', canW=canWT(TAB), AP=canAppr();
 if(!canW) document.body.classList.add('ro');
 const all=()=>{ const a=LS(PK,[]); return Array.isArray(a)?a.filter(x=>x&&x.id&&Array.isArray(x.items)):[]; };
@@ -165,7 +165,7 @@ $('nSave').addEventListener('click',()=>{ const T=clean($('nT').value,80)||('ا�
   $('nT').value=''; $('nI').value=''; $('nSup').value=''; nReset(); say('nMsg',''); nSel.clear(); OPEN.add(id); S.set('open'); });
 /* اقلام باز باکس سندپرداز که در استعلام جاری یا تاییدشده‌ای نیستند */
 const nSel=new Set();
-function freeBox(){ if(!canSeeT('باکس سندپرداز')) return []; const B=LS('nt_kbox_v1',[]), used=new Set(); all().forEach(iq=>{ if(iq.st!=='no') iq.items.forEach(it=>{ if(it.bx) used.add(it.bx); }); });
+function freeBox(){ if(!canSeeT('باکس سندپرداز')) return []; const B=LS(BXK,[]), used=new Set(); all().forEach(iq=>{ if(iq.st!=='no') iq.items.forEach(it=>{ if(it.bx) used.add(it.bx); }); });
   return (Array.isArray(B)?B:[]).filter(x=>x&&x.id&&x.name&&!x.st&&!x.gone&&!used.has(x.id)).sort((a,b)=>(b.imp?1:0)-(a.imp?1:0)); }
 function drawNBox(){ const F=freeBox(), q=norm($('nBoxQ').value).split(' ').filter(Boolean); $('nBoxW').hidden=!F.length||!canW; $('nBoxN').textContent=nSel.size?fa(nSel.size)+' انتخاب':'';
   const L=q.length?F.filter(x=>{ const h=norm([x.name,x.code,x.memo].join(' ')); return q.every(w=>h.indexOf(w)>-1); }):F;
@@ -205,7 +205,7 @@ function decHTML(iq){ const dec=iq.dec||{};
   if(iq.st==='ok'){ const q=id=>(iq.quotes.find(x=>x.id===id)||{}).sup||'?';
     const lines=dec.mode==='sup'?[`همه اقلام از <b>${esc(q(dec.sup))}</b>`]:iq.items.map(it=>dec.per&&dec.per[it.id]?`${esc(it.t)}: <b>${esc(q(dec.per[it.id]))}</b>`:`${esc(it.t)}: <span class="na">خرید نشود</span>`);
     return `<div class="dec"><h3>تایید شد — ${esc(dec.by||'')} ${fa(dec.at||'')}</h3>${lines.join('<br>')}${dec.note?`<div class="hint">${esc(dec.note)}</div>`:''}
-      ${canW&&canWT('خرید هفتگی')&&!iq.inList?`<button type="button" class="btn s g" data-tolist="${esc(iq.id)}" style="margin-top:8px">افزودن به لیست خرید هفتگی</button>`:(iq.inList?'<div class="hint">به لیست خرید هفتگی اضافه شد.</div>':'')}</div>`; }
+      ${AG!=='th'&&canW&&canWT('خرید هفتگی')&&!iq.inList?`<button type="button" class="btn s g" data-tolist="${esc(iq.id)}" style="margin-top:8px">افزودن به لیست خرید هفتگی</button>`:(iq.inList?'<div class="hint">به لیست خرید هفتگی اضافه شد.</div>':'')}</div>`; }
   if(iq.st==='no') return `<div class="dec"><h3>رد شد — ${esc(dec.by||'')} ${fa(dec.at||'')}</h3>${dec.note?esc(dec.note):''}</div>`;
   if(iq.st==='wait' && AP && iq.quotes.length) return `<div class="dec"><h3>تصمیم مدیر</h3><p class="hint">یک فروشنده برای همه اقلام، یا روی خانه قیمت هر قلم بزنید تا فروشنده همان قلم انتخاب شود.</p>
       <div class="chips">${iq.quotes.map(q=>`<button type="button" class="cp sm" data-apsup="${esc(q.id)}">همه از ${esc(q.sup)}</button>`).join('')}</div>
@@ -316,7 +316,7 @@ window.addEventListener('message',e=>{ if(e.source===parent && e.data && e.data.
 $('nBoxI').outerHTML=ico('archive'); $('nBoxC').innerHTML=ico('chevd',20);
 document.addEventListener('click',e=>{ if(e.target.closest('[data-gonew]')) $('goNew').click(); });
 $('goNew').addEventListener('click',()=>{ S.set('new'); try{ $('nT').focus(); }catch(e){} });
-window.addEventListener('storage',e=>{ if(!e.key||[PK,FK,'nt_kbox_v1'].includes(e.key)){ if(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return; drawAll(); } });
+window.addEventListener('storage',e=>{ if(!e.key||[PK,FK,BXK].includes(e.key)){ if(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return; drawAll(); } });
 </script>
 </body>
 </html>

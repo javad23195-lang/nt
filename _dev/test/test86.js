@@ -1,0 +1,74 @@
+// بخش خرید دو تکه: مأمور نهبندان و مأمور تهران (اطلاعات جدا، منوی دو گروهی، دسترسی هر سیستم)
+// همه نام‌ها ساختگی است.
+const {chromium}=require('playwright'); const http=require('http'), fs=require('fs'), path=require('path');
+const HTML=fs.readFileSync(path.join(__dirname,'..','out.html'));
+let fails=0; const ok=(c,m)=>{ console.log((c?'  ok  ':'  FAIL ')+m); if(!c) fails++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+(async()=>{
+  const web=http.createServer((q,r)=>{ r.writeHead(200,{'Content-Type':'text/html; charset=utf-8'}); r.end(HTML); }); await new Promise(r=>web.listen(0,r));
+  const br=await chromium.launch({executablePath:process.env.CHROMIUM||undefined});
+  const run=async(cfg,extra)=>{ const c=await br.newContext({locale:'fa-IR',viewport:{width:390,height:844}});
+    await c.grantPermissions(['clipboard-read','clipboard-write'],{origin:`http://localhost:${web.address().port}`});
+    await c.addInitScript(([cfg,extra])=>{ if(localStorage.getItem('__s')) return; localStorage.setItem('__s','1'); localStorage.setItem('ntws_test','1');
+      if(cfg) localStorage.setItem('ntsync_cfg_v1',JSON.stringify(cfg)); Object.keys(extra||{}).forEach(k=>localStorage.setItem(k,JSON.stringify(extra[k]))); },[cfg,extra]);
+    const p=await c.newPage(); const errs=[]; p.on('pageerror',e=>{ if(!/Unexpected token '<'/.test(String(e))) errs.push(String(e)); });
+    await p.goto(`http://localhost:${web.address().port}/nt/s.html`); await p.waitForFunction(()=>window.ntSync&&window.ntNav&&window.ntWs,null,{timeout:15000});
+    await p.addStyleTag({content:'.sydlg,.sybd,#ntPin{display:none!important}'}); await p.evaluate(()=>{ window.ntLocked=false; document.body.classList.remove('ntlocked','ntpin'); try{ ntBoot(); }catch(e){} }); await sleep(1500);
+    return {c,p,errs}; };
+  const frameOf=async(p,n)=>{ const i=await p.evaluate(n=>DOCS.findIndex(d=>d.name===n),n); return (await p.$$('iframe'))[i].contentFrame(); };
+  const go=async(p,t)=>{ await p.evaluate(t=>window.postMessage({nt:'go',tab:t},'*'),t); await sleep(900); };
+  const visTabs=p=>p.evaluate(()=>DOCS.filter((d,i)=>!tabs[i].hidden).map(d=>d.name));
+  const LSg=(p,k)=>p.evaluate(k=>JSON.parse(localStorage.getItem(k)||'null'),k);
+  const BX=(id,name)=>({id,name,code:'1'+id.length,qty:'2',unit:'عدد',imp:1,seen:'1405/08/01',need:'1405/08/01'});
+  const seed={nt_kbox_v1:[BX('n1','کالای نمونه نهبندان')],nt_kbox_th_v1:[BX('t1','کالای نمونه تهران')]};
+
+  console.log('۱) سیستم مدیر: دو مأمور، اطلاعات جدا');
+  let {c,p,errs}=await run({mode:'w'},seed);
+  await p.click('#ntWs [data-ws="kh"]'); await sleep(1500);
+  ok(await p.evaluate(()=>ntAg.allowed().join()==='nb,th' && ntAg.cur()==='nb'),'هر دو مأمور؛ جاری = نهبندان');
+  await go(p,'لیست خرید'); let f=await frameOf(p,'لیست خرید'); await f.click('#seg [data-p="box"]').catch(()=>{}); await f.evaluate(()=>{ const b=document.querySelector('#bF [data-f="open"]'); if(b) b.click(); }); await sleep(300);
+  let T=await f.evaluate(()=>document.getElementById('bList').innerText);
+  ok(/کالای نمونه نهبندان/.test(T) && !/کالای نمونه تهران/.test(T),'باکس نهبندان: فقط قلم نهبندان');
+  ok(await f.evaluate(()=>!document.querySelector('#seg [data-p="week"]').hidden && !document.querySelector('#seg [data-p="water"]').hidden),'نهبندان: خرید هفتگی و آب شیرین هست');
+  ok(/مأمور نهبندان/.test(await p.evaluate(()=>document.getElementById('ntAgC').innerText)),'برچسب بالای صفحه: مأمور نهبندان');
+  await p.click('#ntAgC'); await sleep(1200); f=await frameOf(p,'لیست خرید'); await f.evaluate(()=>{ const b=document.querySelector('#bF [data-f="open"]'); if(b) b.click(); }); await sleep(300);
+  T=await f.evaluate(()=>document.getElementById('bList').innerText);
+  ok(await p.evaluate(()=>ntAg.cur()==='th' && /مأمور تهران/.test(document.getElementById('ntAgC').innerText)),'زدن برچسب: رفتن به مأمور تهران');
+  ok(/کالای نمونه تهران/.test(T) && !/کالای نمونه نهبندان/.test(T),'باکس تهران: فقط قلم تهران');
+  ok(await f.evaluate(()=>document.querySelector('#seg [data-p="week"]').hidden && document.querySelector('#seg [data-p="water"]').hidden && !document.querySelector('#seg [data-p="svc"]').hidden),'تهران: خرید هفتگی و آب شیرین نیست؛ خدمات هست');
+
+  console.log('۲) پیش‌فاکتور و فاکتور تهران در کلید جدا');
+  await go(p,'پیش‌فاکتور'); f=await frameOf(p,'پیش‌فاکتور');
+  await f.click('#seg [data-p="new"]'); await f.fill('#nT','استعلام تهران'); const R=await f.$$('#nRows .nr'); await R[0].$('[data-n=t]').then(e=>e.fill('کالای آزمایشی')); await f.click('#nSave'); await sleep(400);
+  ok((await LSg(p,'nt_kpre_th_v1')||[]).length===1 && !(await LSg(p,'nt_kpre_v1')||[]).length,'استعلام تهران در nt_kpre_th_v1');
+  await go(p,'فاکتور خرید'); f=await frameOf(p,'فاکتور خرید');
+  ok(await f.evaluate(()=>FK==='nt_factor_th_v1' && BOXK==='nt_kbox_th_v1' && PK==='nt_factor_rep_th_v1'),'فاکتور تهران: کلیدهای جدا');
+
+  console.log('۳) منوی ☰: دو گروه');
+  await p.evaluate(()=>ntMHead.open()); await sleep(300);
+  const G=await p.evaluate(()=>[...document.querySelectorAll('#ntDrw .dg')].map(x=>x.innerText.trim()));
+  ok(G.length===2 && /مأمور نهبندان/.test(G[0]) && /مأمور تهران/.test(G[1]),'دو گروه: '+G.join(' | '));
+  ok(await p.evaluate(()=>{ const on=document.querySelector('#ntDrw .di.on'); return on && on.dataset.ag==='th' && /فاکتور خرید/.test(on.innerText); }),'زبانه فعال در گروه تهران');
+  await p.evaluate(()=>{ const b=[...document.querySelectorAll('#ntDrw .di[data-ag="nb"]')].find(x=>/پیش‌فاکتور/.test(x.innerText)); b.click(); }); await sleep(1200);
+  ok(await p.evaluate(()=>ntAg.cur()==='nb' && DOCS[tabs.findIndex(t=>t.classList.contains('on'))].name==='پیش‌فاکتور'),'زدن «پیش‌فاکتور» نهبندان: مأمور و زبانه عوض شد');
+  f=await frameOf(p,'پیش‌فاکتور'); await f.click('#seg [data-p="open"]'); await sleep(200);
+  ok(!/استعلام تهران/.test(await f.evaluate(()=>document.body.innerText)),'پیش‌فاکتور نهبندان: استعلام تهران دیده نمی‌شود');
+
+  console.log('۴) میز خرید: خلاصه مأمور دیگر');
+  await go(p,'میز خرید'); f=await frameOf(p,'میز خرید'); await sleep(300);
+  ok(/مأمور تهران/.test(await f.evaluate(()=>document.getElementById('dOther').innerText)) && /قلم ضروری/.test(await f.evaluate(()=>document.getElementById('dOther').innerText)),'میز نهبندان: کارت «مأمور تهران» با قلم ضروری');
+  await f.click('#dOther [data-ag]'); await sleep(1200);
+  ok(await p.evaluate(()=>ntAg.cur()==='th'),'زدن کارت: رفتن به مأمور تهران');
+  ok(!errs.length,'بدون خطای صفحه '+errs.join(' | ').slice(0,300)); await c.close();
+
+  console.log('۵) سیستم «فقط مأمور تهران»');
+  ({c,p,errs}=await run({mode:'w',uid:'u_t',uname:'کاربر آزمایشی',ag:'th'},Object.assign({},seed,{ntk_ag:'nb'})));
+  await p.evaluate(()=>{ try{ ntWs.set('kh',{}); }catch(e){} }); await sleep(1200);
+  ok(await p.evaluate(()=>ntAg.allowed().join()==='th' && ntAg.cur()==='th'),'فقط تهران (حتی اگر قبلاً نهبندان انتخاب شده بود)');
+  ok(await p.evaluate(()=>{ const c=document.getElementById('ntAgC'); return c.disabled && !c.classList.contains('sw') && /مأمور تهران/.test(c.innerText); }),'برچسب بدون دکمه عوض کردن');
+  ok(await p.evaluate(()=>!ntAg.set('nb') && ntAg.cur()==='th'),'رفتن به نهبندان ممکن نیست');
+  await p.evaluate(()=>ntMHead.open()); await sleep(300);
+  ok(await p.evaluate(()=>!document.querySelector('#ntDrw .dg') && !document.querySelector('#ntDrw .di[data-ag="nb"]')),'منو: گروه نهبندان نیست');
+  ok(!errs.length,'بدون خطای صفحه '+errs.join(' | ').slice(0,300)); await c.close();
+  await br.close(); web.close(); console.log(fails?`\n${fails} FAIL`:'\nALL OK'); process.exit(fails?1:0);
+})().catch(e=>{ console.error(e); process.exit(1); });

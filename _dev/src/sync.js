@@ -41,14 +41,14 @@ const TABKEYS={
   'برون‌سپاری':['nt_outsrc_v1'],
   'مدیریت':[],
   'تردد و اضافه‌کار':['nt_staff_v1','nt_ezafe_v1','nt_tarad_v1'],
-  'فاکتور خرید':['nt_factor_v1','nt_factor_lex_v1','nt_factor_learn_v1','nt_factor_cfg_v1','nt_factor_rep_v1'],
+  'فاکتور خرید':['nt_factor_v1','nt_factor_th_v1','nt_factor_rep_th_v1','nt_factor_lex_v1','nt_factor_learn_v1','nt_factor_cfg_v1','nt_factor_rep_v1'],
   'میز خرید':[],
   'لیست خرید':[],
-  'باکس سندپرداز':['nt_kbox_v1','nt_kunits_v1'],
+  'باکس سندپرداز':['nt_kbox_v1','nt_kbox_th_v1','nt_kunits_v1'],
   'خرید هفتگی':['nt_kweek_v1'],
   'آب شیرین':['nt_kwater_v1'],
-  'خدمات تدارکات':['nt_ksvc_v1'],
-  'پیش‌فاکتور':['nt_kpre_v1','nt_kpre_files_v1'],
+  'خدمات تدارکات':['nt_ksvc_v1','nt_ksvc_th_v1'],
+  'پیش‌فاکتور':['nt_kpre_v1','nt_kpre_files_v1','nt_kpre_th_v1','nt_kpre_files_th_v1'],
   'برنامه هفتگی انبار':['nt_oil_v1','nt_stock_v1','nt_wplan_v1']
 };
 /* «لیست خرید» یک زبانه است با چهار فرم که هر کدام دسترسی جدا دارد. کاربر قدیمی (فقط «لیست خرید» تنظیم شده): همان دسترسی برای هر چهار فرم */
@@ -63,7 +63,7 @@ const PRESET={'توقف شیفت':'w','دفترچه قرائت':'w'};
 const DRIVER={'توقف شیفت':'w','دفترچه قرائت':'w','ثبت مشکلات':'w'};
 const devList=()=>{ try{ return (window.ntQr && ntQr.DEVS || []).map(d=>d.name); }catch(e){ return []; } };
 /* نام بخش‌ها برای پیام‌ها */
-const LABEL={nt_oil_v1:'جدول روغن دستگاه‌ها',nt_stock_v1:'موجودی انبار (سندپرداز)',nt_wplan_v1:'برنامه هفتگی انبار',nt_kbox_v1:'باکس خرید سندپرداز',nt_kunits_v1:'واحد درخواست‌کننده‌ها',nt_kweek_v1:'لیست خرید هفتگی',nt_kwater_v1:'آب شیرین',nt_ksvc_v1:'خدمات (خرید)',nt_kpre_v1:'پیش‌فاکتور',nt_kpre_files_v1:'پیوست پیش‌فاکتور',nt_factor_v1:'فاکتور خرید',nt_factor_lex_v1:'فهرست پیشنهاد فاکتور',nt_factor_learn_v1:'اتصال فاکتور و درخواست',nt_factor_cfg_v1:'تنظیم فاکتور',nt_factor_rep_v1:'گزارش مالی خرید',nt_tarad_v1:'بررسی تردد',nt_staff_v1:'افراد (تردد)',nt_ezafe_v1:'اضافه‌کار و مأموریت',nt_anbar_out_v1:'خروج انبار',nt_anbar_in_v1:'ورود انبار',nt_kharid9_v1:'درخواست خرید',nt_moshkel_v1:'مشکلات',nt_sh8_v1:'شناسنامه',
+const LABEL={nt_kbox_th_v1:'باکس خرید سندپرداز (تهران)',nt_ksvc_th_v1:'خدمات تدارکات (تهران)',nt_kpre_th_v1:'پیش‌فاکتور (تهران)',nt_kpre_files_th_v1:'پیوست پیش‌فاکتور (تهران)',nt_factor_th_v1:'فاکتور خرید (تهران)',nt_factor_rep_th_v1:'گزارش مالی فاکتور (تهران)',nt_oil_v1:'جدول روغن دستگاه‌ها',nt_stock_v1:'موجودی انبار (سندپرداز)',nt_wplan_v1:'برنامه هفتگی انبار',nt_kbox_v1:'باکس خرید سندپرداز',nt_kunits_v1:'واحد درخواست‌کننده‌ها',nt_kweek_v1:'لیست خرید هفتگی',nt_kwater_v1:'آب شیرین',nt_ksvc_v1:'خدمات (خرید)',nt_kpre_v1:'پیش‌فاکتور',nt_kpre_files_v1:'پیوست پیش‌فاکتور',nt_factor_v1:'فاکتور خرید',nt_factor_lex_v1:'فهرست پیشنهاد فاکتور',nt_factor_learn_v1:'اتصال فاکتور و درخواست',nt_factor_cfg_v1:'تنظیم فاکتور',nt_factor_rep_v1:'گزارش مالی خرید',nt_tarad_v1:'بررسی تردد',nt_staff_v1:'افراد (تردد)',nt_ezafe_v1:'اضافه‌کار و مأموریت',nt_anbar_out_v1:'خروج انبار',nt_anbar_in_v1:'ورود انبار',nt_kharid9_v1:'درخواست خرید',nt_moshkel_v1:'مشکلات',nt_sh8_v1:'شناسنامه',
   nt_khadamat_v1:'خدمات',nt_daftar_v1:'قرائت',nt_prog_v1:'برنامه روزانه',nt_today_todo_v1:'یادداشت',nt_tavaqof_v1:'توقف شیفت',nt_outsrc_v1:'برون‌سپاری'};
 /* شناسه ردیف در لیست‌هایی که هر ردیف باید یکتا باشد */
 const IDF={nt_daftar_v1:e=>(e && typeof e==='object' && e.dev && e.date)?e.dev+'|'+e.date:null};
@@ -744,13 +744,14 @@ function checkMe(){
   const me=U[cfg.uid];
   if(!me || me.off){ revoke(); return false; }
   const a=isObj(me.acl)?me.acl:null, dv=Array.isArray(me.dev)&&me.dev.length?me.dev:null;
-  const dp=typeof me.dept==='string'?me.dept.slice(0,40):'';
-  if(J(a)!==J(acl()) || (me.name||'')!==(cfg.uname||'') || J(dv)!==J(cfg.devs||null) || !!me.nopin!==!!cfg.nopin || dp!==(cfg.dept||'') || !!me.appr!==!!cfg.appr){
+  const dp=typeof me.dept==='string'?me.dept.slice(0,40):'', ag=(me.ag==='nb'||me.ag==='th')?me.ag:'';
+  if(J(a)!==J(acl()) || (me.name||'')!==(cfg.uname||'') || J(dv)!==J(cfg.devs||null) || !!me.nopin!==!!cfg.nopin || dp!==(cfg.dept||'') || !!me.appr!==!!cfg.appr || ag!==(cfg.ag||'')){
     if(me.appr) cfg.appr=1; else delete cfg.appr;
     if(a) cfg.acl=a; else delete cfg.acl;
     if(me.nopin) cfg.nopin=1; else delete cfg.nopin;
     if(dv) cfg.devs=dv; else delete cfg.devs;
     if(dp) cfg.dept=dp; else delete cfg.dept;
+    if(ag) cfg.ag=ag; else delete cfg.ag;
     cfg.uname=me.name||''; lsSet(CFG,cfg);
     toast('دسترسی این سیستم تغییر کرد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),900);
     return false;
@@ -852,7 +853,7 @@ function viewUsers(){
     ${ids.length?ids.map(id=>{ const u=U[id], s=S[id];
       return `<div class="syuser${u.off?' off':''}" data-id="${esc(id)}">
         <b>${esc(u.name||'بدون نام')}${u.off?'<span class="sychip">قطع شده</span>':''}</b>
-        <small>${Array.isArray(u.dev)&&u.dev.length?'راننده — فقط '+esc(u.dev.join('، ')):esc(accText(isObj(u.acl)?u.acl:null))+(u.dept?' — بخش '+esc(u.dept):'')}</small>
+        <small>${Array.isArray(u.dev)&&u.dev.length?'راننده — فقط '+esc(u.dev.join('، ')):esc(accText(isObj(u.acl)?u.acl:null))+(u.dept?' — بخش '+esc(u.dept):'')+(u.ag?' — مأمور '+(u.ag==='th'?'تهران':'نهبندان'):'')}</small>
         <small>آخرین اتصال: ${s&&s.at?esc(fmtAt(s.at))+(s.dev?' ('+esc(s.dev)+')':''):'هنوز وصل نشده'}</small>
         <div class="syub"><button type="button" data-act="code">کد اتصال</button><button type="button" data-act="edit">دسترسی</button><button type="button" data-act="off">${u.off?'وصل دوباره':'قطع دسترسی'}</button><button type="button" class="warn" data-act="del">حذف</button></div>
       </div>`; }).join(''):'<p>هنوز کاربری ساخته نشده است. برای هر همکار یا هر سیستم، یک کاربر بسازید.</p>'}
@@ -900,6 +901,9 @@ function viewUserEdit(id){
       <div id="syAclList" ${lim?'':'hidden'}>
         ${aclRows(a)}
       </div></div>
+    <div class="sycard" id="syAgCard"><h3>مأمور خرید</h3>
+      <label>اطلاعات کدام مأمور خرید را ببیند؟<select id="syUAg" style="display:block;width:100%;margin-top:3px"><option value="">— هر دو (نهبندان و تهران) —</option><option value="nb" ${u&&u.ag==='nb'?'selected':''}>فقط مأمور نهبندان</option><option value="th" ${u&&u.ag==='th'?'selected':''}>فقط مأمور تهران</option></select></label>
+      <small>در بخش خرید: باکس سندپرداز، خدمات، پیش‌فاکتور و فاکتور هر مأمور جداست.</small></div>
     <div class="sycard"><h3>تایید پیش‌فاکتور</h3>
       <label class="chk"><input type="checkbox" id="syUAppr" ${u&&u.appr?'checked':''}>این کاربر پیش‌فاکتورهای بخش خرید را تایید یا رد می‌کند (مدیر)</label>
       <small>سیستم مدیر اصلی همیشه می‌تواند تایید کند.</small></div>
@@ -912,7 +916,7 @@ function viewUserEdit(id){
   /* مأمور خرید: فقط «فاکتور خرید» = ثبت؛ بقیه پنهان → هنگام باز شدن فقط بخش خرید (ws.js) */
   on('syUBuy',()=>{ const r=document.querySelector('input[name="syAcc"][value="lim"]'); if(r) r.checked=true; $('syAclList').hidden=false;
     document.querySelectorAll('#syAclList select').forEach(x=>{ x.value=(x.dataset.n==='میز خرید'||KHFORMS.includes(x.dataset.n))?'w':'h'; }); msg('همه فرم‌های بخش خرید = ثبت؛ بقیه پنهان. هر فرمی را که لازم نیست «پنهان» کنید. پایین صفحه «ساخت کاربر» یا «ذخیره» را بزنید.'); const t=[...document.querySelectorAll('#syAclList select')].find(x=>x.dataset.n==='میز خرید'); if(t) try{ t.scrollIntoView({block:'center'}); }catch(e){} });
-  const dvSync=()=>{ $('syAccCard').hidden=!!$('syUDev').value; $('syDeptCard').hidden=!!$('syUDev').value; }; $('syUDev').addEventListener('change',dvSync); dvSync();
+  const dvSync=()=>{ $('syAccCard').hidden=!!$('syUDev').value; $('syDeptCard').hidden=!!$('syUDev').value; $('syAgCard').hidden=!!$('syUDev').value; }; $('syUDev').addEventListener('change',dvSync); dvSync();
   on('syUSave',()=>{
     const name=$('syUName').value.trim().replace(/\s+/g,' ');
     if(!name){ msg('نام کاربر را بنویسید',true); return; }
@@ -931,6 +935,7 @@ function viewUserEdit(id){
     if(ac) X[nid].acl=ac; else delete X[nid].acl;
     if(dev) X[nid].dev=[dev]; else delete X[nid].dev;
     const dept=dev?'':$('syUDept').value; if(dept) X[nid].dept=dept.slice(0,40); else delete X[nid].dept;
+    const ag=dev?'':$('syUAg').value; if(ag==='nb'||ag==='th') X[nid].ag=ag; else delete X[nid].ag;
     if($('syUNoPin').checked) X[nid].nopin=1; else delete X[nid].nopin;
     if(!dev && $('syUAppr').checked) X[nid].appr=1; else delete X[nid].appr;
     usersSet(X);
@@ -1474,6 +1479,6 @@ function touch(keys){
 }
 function myName(){ try{ const u=cfg.uid && usersGet(); return (u && u[cfg.uid] && u[cfg.uid].name)||''; }catch(e){ return ''; } }
 window.ntSync={state:()=>({phase,note,stage,busy,mode:mode(),at:(st()||{}).at||''}),fmtAt,khForms:()=>KHFORMS.filter(n=>tabAcc(n)!=='h'),formLabel:n=>FLABEL[n]||n,T,lockNow,canLock:()=>pinNeeded(),get cfg(){ return cfg; },st,sync,collect,hashOf,mergeAll,baseGet,outgoing,usersGet,seenGet,canSee:n=>tabAcc(n)!=='h',
-  canWriteTab:n=>mode()!=='v' && tabAcc(n)==='w',touch,myName,myDevs,myDept:()=>(cfg.uid && mode()==='w' && typeof cfg.dept==='string')?cfg.dept:'',canApprove:()=>isAdmin() || (!!cfg.uid && mode()==='w' && !!cfg.appr),get pinLocked(){ return pinLocked; }};
+  canWriteTab:n=>mode()!=='v' && tabAcc(n)==='w',touch,myName,myDevs,myDept:()=>(cfg.uid && mode()==='w' && typeof cfg.dept==='string')?cfg.dept:'',myAg:()=>(cfg.uid && (cfg.ag==='nb'||cfg.ag==='th'))?cfg.ag:'',canApprove:()=>isAdmin() || (!!cfg.uid && mode()==='w' && !!cfg.appr),get pinLocked(){ return pinLocked; }};
 init();
 })();
