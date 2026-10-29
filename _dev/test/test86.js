@@ -45,7 +45,13 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   await p.click('#ntAgC'); await sleep(1200); f=await frameOf(p,'لیست خرید'); await f.evaluate(()=>{ const b=document.querySelector('#bF [data-f="open"]'); if(b) b.click(); }); await sleep(300);
   T=await f.evaluate(()=>document.getElementById('bList').innerText);
   ok(await p.evaluate(()=>ntAg.cur()==='th' && /مأمور تهران/.test(document.getElementById('ntAgC').innerText)),'زدن برچسب: رفتن به مأمور تهران');
-  ok(/کالای نمونه تهران/.test(T) && /کالای نمونه نهبندان/.test(T) && await f.evaluate(()=>/از باکس نهبندان/.test(document.querySelector('.bx[data-id="tn-n1"]').innerText) && !document.querySelector('[data-st="teh"]') && !document.querySelector('#bF [data-f="teh"]')),'باکس تهران: قلم خودش + قلم فرستاده از نهبندان؛ دکمه «مأمور تهران» نیست');
+  ok(/کالای نمونه تهران/.test(T) && /کالای نمونه نهبندان/.test(T) && await f.evaluate(()=>/از نهبندان/.test(document.querySelector('.bx[data-id="tn-n1"] .fr').innerText) && !document.querySelector('[data-st="teh"]') && !document.querySelector('#bF [data-f="teh"]') && /مأمور نهبندان/.test(document.querySelector('.bx[data-id="t1"] [data-st="nbd"]').innerText)),'باکس تهران: قلم فرستاده از نهبندان با نشان پررنگ؛ دکمه «مأمور نهبندان»');
+  console.log('۱-ج) «مأمور نهبندان» در باکس تهران');
+  await f.click('.bx[data-id="t1"] [data-st="nbd"]'); await sleep(300);
+  ok((await LSg(p,'nt_kbox_v1')).some(x=>x.id==='nt-t1' && x.mv==='th' && x.name==='کالای نمونه تهران') && (await LSg(p,'nt_kbox_th_v1')).find(x=>x.id==='t1').st==='nbd','قلم تهران: نسخه در باکس نهبندان؛ در تهران «مأمور نهبندان»');
+  await f.click('.bx[data-id="tn-n2"] [data-st="nbd"]'); await sleep(300);
+  const n2=(await LSg(p,'nt_kbox_v1')).find(x=>x.id==='n2');
+  ok(!(await LSg(p,'nt_kbox_th_v1')).some(x=>x.id==='tn-n2') && !n2.st && n2.back && n2.back.from==='th','قلم آمده از نهبندان: با «مأمور نهبندان» برگشت (در تهران پاک، در نهبندان دوباره باز)');
   await f.click('.bx[data-id="tn-n1"] [data-st="me"]'); await sleep(300);
   ok(await f.evaluate(()=>document.querySelector('#seg [data-p="week"]').hidden && document.querySelector('#seg [data-p="water"]').hidden && !document.querySelector('#seg [data-p="svc"]').hidden),'تهران: خرید هفتگی و آب شیرین نیست؛ خدمات هست');
 
@@ -68,7 +74,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
   console.log('۴) میز خرید: خلاصه مأمور دیگر');
   await go(p,'میز خرید'); f=await frameOf(p,'میز خرید'); await sleep(300);
-  ok(/مأمور تهران/.test(await f.evaluate(()=>document.getElementById('dOther').innerText)) && /قلم ضروری/.test(await f.evaluate(()=>document.getElementById('dOther').innerText)),'میز نهبندان: کارت «مأمور تهران» با قلم ضروری');
+  ok(/مأمور تهران/.test(await f.evaluate(()=>document.getElementById('dOther').innerText)),'میز نهبندان: کارت «مأمور تهران»');
   await f.click('#dOther [data-ag]'); await sleep(1200);
   ok(await p.evaluate(()=>ntAg.cur()==='th'),'زدن کارت: رفتن به مأمور تهران');
   ok(!errs.length,'بدون خطای صفحه '+errs.join(' | ').slice(0,300)); await c.close();
