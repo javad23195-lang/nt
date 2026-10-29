@@ -88,6 +88,19 @@ const CSS=`
 .qrdev .hist{font-size:.82rem;margin:0 0 10px}
 .qrdev .hist h3{margin:8px 0 4px}
 .qrdev .hist div{padding:4px 0;border-top:1px solid #E3E8ED}
+.qrdev .dck{display:flex;align-items:center;gap:10px;background:#FFF1CF;border:2px solid #E3A51A;border-radius:12px;padding:10px 12px;margin:0 0 10px}
+.qrdev .dck div{flex:1;min-width:0}.qrdev .dck b{display:block;font-size:.95rem}.qrdev .dck span{font-size:.8rem;color:#6B5418}
+.qrdev .dck button{flex:none;width:auto;margin:0;min-height:44px;padding:0 14px;background:#0B5C7A;border-color:#0B5C7A;color:#fff;font-weight:800}
+.qrdev .dck.ok{background:#E6F4EA;border-color:#1E7F4F}.qrdev .dck.ok span{color:#1E5E3A}.qrdev .dck.ok button{background:#fff;color:#1E5E3A;border-color:#1E7F4F}
+.qrdev .ckh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 4px}.qrdev .ckh small{color:#51606E}
+.qrdev .ckh button{width:auto;margin:0;min-height:40px;padding:0 12px;border:1.5px dashed #1E7F4F;color:#1E5E3A;font-weight:800;background:#fff}
+.qrdev .cki{border-top:1px solid #E3E8ED;padding:8px 0}
+.qrdev .cki .t{font-weight:800;font-size:.95rem}.qrdev .cki .t small{display:inline;color:#51606E;font-weight:400;font-size:.78rem;margin-inline-start:6px}
+.qrdev .yn{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.qrdev .yn button{margin:0;min-height:46px;font-size:.9rem;font-weight:700}
+.qrdev .yn button[aria-pressed="true"].ok{background:#E6F4EA;border-color:#1E7F4F;color:#1E5E3A}
+.qrdev .yn button[aria-pressed="true"].bad{background:#FBE3DF;border-color:#A32018;color:#A32018}
+.qrdev .cki input{margin-top:6px}.qrdev .cki input[hidden]{display:none!important}
 .qrdev .warn{background:#FFF1DB;color:#7A4300;border-radius:10px;padding:8px 10px;font-size:.86rem;font-weight:700;margin:0 0 10px}
 .qrlist{max-height:46vh;overflow:auto;border:1px solid #D5DCE3;border-radius:10px;padding:4px 10px;margin:0 0 10px}
 #ntQrCam{width:100%;min-height:260px;background:#17212B;border-radius:12px;overflow:hidden;margin:0 0 10px}
@@ -155,6 +168,8 @@ function home(id){
   const lf=(window.ntFluid && canSee('دفترچه قرائت'))?ntFluid.lastFuel(LS('nt_fluid_v1',[])||[],dev.name,jStr(jNow())):null;
   if(window.ntFluid && canSee('دفترچه قرائت')) kv+=`<span>آخرین سوخت</span><b>${lf?fuelWhen(lf):'ثبت نشده'}</b>`;
   const oldStop=os && os.day!==jStr(jNow());
+  const DC=window.ntDChk, dcNow=DC?DC.now():null, dcRec=(DC&&canSee('دفترچه قرائت'))?DC.get(LS('nt_dchk_v1',[]),dev.name,dcNow.d,dcNow.sh):null;
+  if(DC && canSee('دفترچه قرائت')){ const nb=DC.bads(dcRec).length; kv+=`<span>چک روزانه</span><b class="${dcRec?(nb?'stop':'run'):'stop'}">${dcRec?'انجام شد'+(dcRec.at?' ساعت '+fa(dcRec.at):'')+(nb?' — '+fa(nb)+' مشکل':''):'شیفت '+esc(dcNow.sh)+' انجام نشده'}</b>`; }
   if(canSee('ثبت مشکلات')) kv+=`<span>مشکل باز</span><b class="${open.length?'stop':''}">${open.length?fa(open.length)+' — '+esc(String(open[open.length-1].desc||'').slice(0,40)):'ندارد'}</b>`;
   let acts='', sub='';
   const IC={read:'<path d="M12 13l4-4M4 14a8 8 0 1 1 16 0"/><circle cx="12" cy="13" r="1.4"/>',fuel:'<path d="M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M3 21h14M15 9h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0V8l-3-3"/><path d="M7 7h6v4H7z"/>',
@@ -176,9 +191,9 @@ function home(id){
   const tabOk=n=>{ try{ if(document.body.classList.contains('ntdriver')) return false; const i=DOCS.findIndex(d=>d.name===n); return i>-1 && tabs[i] && !tabs[i].hidden; }catch(e){ return false; } };
   if(tabOk('عکس‌ها')) sub+='<button type="button" id="qrPhoto">عکس تازه</button>';
   sub+='<button type="button" id="qrHist">سوابق</button>';
-  view(dev.name,`${devIco(dev.name,'qrico')}${kv?'<div class="kv">'+kv+'</div>':''}${myDevs()?svcCard(dev):''}${oldStop&&canW('توقف شیفت')?`<div class="warn">توقف از روز ${fa(os.day)} هنوز باز است. اگر دستگاه کار می‌کند، «پایان توقف» را بزنید و روز راه افتادن را بنویسید.</div>`:''}<div class="acts">${acts}</div><div class="subacts">${sub}</div><button type="button" id="qrClose">بستن</button>`);
+  view(dev.name,`${devIco(dev.name,'qrico')}${kv?'<div class="kv">'+kv+'</div>':''}${myDevs()?svcCard(dev):''}${DC&&canW('دفترچه قرائت')?(dcRec?`<div class="dck ok"><div><b>چک روزانه شیفت ${esc(dcNow.sh)} انجام شد</b><span>${esc(dcRec.by||'')}${dcRec.at?' ساعت '+fa(dcRec.at):''}</span></div><button type="button" id="qrChk">دیدن</button></div>`:`<div class="dck"><div><b>چک روزانه شیفت ${esc(dcNow.sh)} انجام نشده</b><span>پیش از روشن کردن دستگاه</span></div><button type="button" id="qrChk">شروع چک</button></div>`):''}${oldStop&&canW('توقف شیفت')?`<div class="warn">توقف از روز ${fa(os.day)} هنوز باز است. اگر دستگاه کار می‌کند، «پایان توقف» را بزنید و روز راه افتادن را بنویسید.</div>`:''}<div class="acts">${acts}</div><div class="subacts">${sub}</div><button type="button" id="qrClose">بستن</button>`);
   on('qrRead',()=>readForm(dev)); on('qrFuel',()=>fuelTap(dev,fuelToday)); on('qrFuelDel',()=>fuelUndo(dev,myFuel)); on('qrOil',()=>fuelForm(dev)); on('qrStop',()=>stopForm(dev)); on('qrRun',()=>runForm(dev));
-  on('qrWStart',()=>workStart(dev)); on('qrWEnd',()=>workEnd(dev)); on('qrProb',()=>probForm(dev)); on('qrHist',()=>hist(dev)); on('qrClose',close);
+  on('qrWStart',()=>workStart(dev)); on('qrWEnd',()=>workEnd(dev)); on('qrProb',()=>probForm(dev)); on('qrHist',()=>hist(dev)); on('qrClose',close); on('qrChk',()=>chkForm(dev));
   on('qrPhoto',()=>{ window.ntPhotoDraft={dev:dev.name}; close(); try{ window.postMessage({nt:'go',tab:'عکس‌ها'},'*'); }catch(e){} });
   on('qrOut',()=>{ window.ntOutsrcDraft={dev:dev.name}; close(); try{ window.postMessage({nt:'go',tab:'برون‌سپاری'},'*'); }catch(e){} });
   setTimeout(()=>{ try{ const b=$('ntQrBody').querySelector('.acts button'); if(b) b.focus(); }catch(e){} },50);
@@ -384,6 +399,38 @@ function workEnd(dev){
   on('qrBack',()=>home(dev.id));
 }
 
+/* ---------- چک روزانه (dchk.js) ---------- */
+function chkForm(dev){ const DC=window.ntDChk; if(!DC) return;
+  const T=DC.now(), all=LS('nt_dchk_v1',[]), old=DC.get(all,dev.name,T.d,T.sh), IT=DC.items(dev.name), r=Object.assign({},old&&old.r), n=Object.assign({},old&&old.n);
+  const lab=it=>it.d==='dn'?['انجام شد','نشد']:['سالم','مشکل دارد'];
+  const row=it=>{ const L=lab(it), v=r[it.k]; return `<div class="cki" data-k="${esc(it.k)}"><div class="t">${esc(it.t)}${it.h?'<small>'+esc(it.h)+'</small>':''}</div>
+    <div class="yn"><button type="button" class="ok" data-v="ok" aria-pressed="${v==='ok'}">${L[0]}</button><button type="button" class="bad" data-v="${it.d==='dn'?'no':'bad'}" aria-pressed="${v==='bad'||v==='no'}">${L[1]}</button></div>
+    ${it.d==='dn'?'':`<input type="text" data-n="${esc(it.k)}" maxlength="120" placeholder="چه مشکلی؟ (مثلاً: ۱۰ لیتر کم است)" value="${esc(n[it.k]||'')}" ${v==='bad'?'':'hidden'} style="direction:rtl;text-align:right">`}</div>`; };
+  view('چک روزانه — '+dev.name,`<div class="ckh"><small>${fa(T.d)}، شیفت ${esc(T.sh)}</small><button type="button" id="qrAllOk">همه سالم</button></div>
+    ${IT.map(row).join('')}<div class="symsg" id="qrMsg"></div>
+    <button type="button" class="go" id="qrSave">${old?'ذخیره تغییر':'ثبت چک روزانه'}</button>${back(dev)}
+    <small style="display:block;margin-top:6px;color:#51606E">«مشکل دارد» خودکار در «ثبت مشکلات» می‌رود.</small>`);
+  const box=$('ntQrBody');
+  const setV=(el,v)=>{ el.querySelectorAll('.yn button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v))); const i=el.querySelector('input[data-n]'); if(i){ i.hidden=v!=='bad'; if(v==='bad') try{ i.focus(); }catch(e){} } };
+  box.querySelectorAll('.cki').forEach(el=>el.querySelector('.yn').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setV(el,b.dataset.v); }));
+  on('qrAllOk',()=>box.querySelectorAll('.cki').forEach(el=>setV(el,'ok')));
+  on('qrSave',()=>{ const msg=$('qrMsg'), R={}, N={}; let miss=0;
+    box.querySelectorAll('.cki').forEach(el=>{ const b=el.querySelector('.yn button[aria-pressed="true"]'), k=el.dataset.k; if(!b){ miss++; return; } R[k]=b.dataset.v; const i=el.querySelector('input[data-n]'); if(R[k]==='bad' && i && i.value.trim()) N[k]=i.value.trim().slice(0,120); });
+    if(miss){ msg.className='symsg bad'; msg.textContent=fa(miss)+' مورد هنوز انتخاب نشده'; return; }
+    const tm=new Date(), at=p2(tm.getHours())+':'+p2(tm.getMinutes()), A=Array.isArray(all)?all.slice():[], id=DC.idOf(dev.name,T.d,T.sh);
+    const rec={id,dev:dev.name,d:T.d,sh:T.sh,at,by:who(),r:R}; if(Object.keys(N).length) rec.n=N;
+    const k0=A.findIndex(x=>x&&x.id===id); if(k0>-1) A[k0]=rec; else A.push(rec);
+    if(!LSset('nt_dchk_v1',A)){ msg.className='symsg bad'; msg.textContent='ذخیره نشد'; return; }
+    const keys=['nt_dchk_v1'];
+    /* مشکل تازه (که در چک قبلی همین شیفت نبود) → ثبت مشکلات */
+    const nw=IT.filter(it=>R[it.k]==='bad' && !(old && old.r && old.r[it.k]==='bad'));
+    if(nw.length && canW('ثبت مشکلات')){ const j=jNow(), o=LS('nt_moshkel_v1',null), bx=(o && Array.isArray(o.rows))?o:{row:(o&&o.row)||5,rows:[]};
+      nw.forEach(it=>bx.rows.push({y:j.y,m:j.m,d:j.d,mn:MONTHS[j.m-1],dev:dev.name,sys:it.sys,desc:'چک روزانه: '+it.t+(N[it.k]?' — '+N[it.k]:''),sev:'متوسط',cur:'در حال کار',part:'خیر',state:'باز',fix:'',src:'چک روزانه'}));
+      if(LSset('nt_moshkel_v1',bx)) keys.push('nt_moshkel_v1'); }
+    touch(keys); toast(nw.length?'چک ثبت شد — '+fa(nw.length)+' مشکل به «ثبت مشکلات» رفت':'چک روزانه ثبت شد'); home(dev.id); });
+  on('qrBack',()=>home(dev.id));
+}
+
 /* ---------- ثبت مشکل ---------- */
 function probForm(dev){
   const os=openStop(dev);
@@ -416,6 +463,8 @@ function hist(dev){
   let h='';
   if(canSee('دفترچه قرائت')) h+=part('قرائت‌ها',readings(dev).slice(-6).reverse().map(x=>`<div>${fa(x.date)} — <b>${sep(x.val)}</b> ${esc(x.unit||'')}</div>`));
   if(canSee('توقف شیفت')) h+=part('توقف‌ها',stopsOf(dev).slice(-6).reverse().map(({day,sh,s})=>`<div>${fa(day)} ${esc(sh)} — ${fa(s.from)} تا ${s.to?fa(s.to):'<b class="stop">هنوز متوقف</b>'} — ${esc(s.cause)}</div>`));
+  if(canSee('دفترچه قرائت') && window.ntDChk){ const DC=window.ntDChk, I={}; DC.items(dev.name).forEach(it=>{ I[it.k]=it.t; });
+    h+=part('چک روزانه',DC.list(LS('nt_dchk_v1',[])).filter(x=>DC.nk(x.dev)===DC.nk(dev.name)).sort((a,b)=>(a.d+a.sh).localeCompare(b.d+b.sh)).slice(-8).reverse().map(x=>{ const B=DC.bads(x); return `<div>${fa(x.d)} ${esc(x.sh)} — ${esc(x.by||'')} ${B.length?'<b class="stop">'+B.map(k=>esc(I[k]||k)).join('، ')+'</b>':'<b class="run">سالم</b>'}</div>`; })); }
   if(canSee('ثبت مشکلات')) h+=part('مشکلات باز',probsOf(dev).filter(r=>r.state!=='بسته').slice(-6).reverse().map(r=>`<div>${fa(rDate(r))} — ${esc(r.sys||'')}: ${esc(r.desc||'')} <small style="display:inline">(${esc(r.sev||'')})</small></div>`));
   if(canSee('انبار')) h+=part('خروج انبار',outsOf(dev).slice(-8).reverse().map(r=>`<div>${fa(rDate(r))} — ${esc(r.item||'')} × ${fa(r.qty)}${r.svc?' <small style="display:inline">('+esc(r.svcName||'تعویض روغن')+')</small>':''}</div>`));
   view('سوابق — '+dev.name,h+back(dev));
