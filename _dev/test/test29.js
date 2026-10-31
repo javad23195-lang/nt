@@ -50,12 +50,12 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   async function newUser(p,name,accFn){
     if(await dlgText(p)==='') await p.click('#ntSyBtn');
     if(await p.locator('#syUsers').count()) await p.click('#syUsers');
-    await p.click('#syUNew'); await p.fill('#syUName',name); if(accFn) await accFn(p); await p.click('#syUSave');
+    await p.click('#syUNew'); await p.fill('#syUName',name); await p.click('[data-sec="pm"]'); await p.evaluate(()=>document.querySelectorAll('#syAclList .syacr').forEach(r=>{ const v={'توقف شیفت':'w','دفترچه قرائت':'w'}[r.dataset.n]||'h'; r.querySelector('[data-v="'+v+'"]').click(); })); if(accFn) await accFn(p); await p.click('#syUSave');
     await p.waitForSelector('#syLink');
     const link=await p.inputValue('#syLink'), pin=(await p.locator('#syPinOut').innerText()).replace(/\D/g,'');
     return {link,pin,code:link.split('#join=')[1]};
   }
-  const setAcc=(tabName,v)=>async p=>{ await p.selectOption(`#syAclList select[data-n="${tabName}"]`,v); };
+  const setAcc=(tabName,v)=>async p=>{ await p.click(`#syAclList .syacr[data-n="${tabName}"] [data-v="${v}"]`); };
   const seedA={nt_anbar_out_v1:JSON.stringify({row:720,rows:[{date:JT.s,y:JT.y,m:JT.m,d:JT.d,dev:'WA470',item:'روغن دیزل اتوماتیک 50-20',qty:20,why:'مورد نیاز WA470',cond:''}]}),
                nt_daftar_v1:JSON.stringify([{dev:'لودر ZL50',unit:'ساعت',val:15094,date:'1405/07/13'}])};
 

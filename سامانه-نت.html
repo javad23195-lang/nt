@@ -345,6 +345,40 @@ input.ntsec.show{-webkit-text-security:none}
 #ntPin button.eye .x{display:none}#ntPin button.eye.on .x{display:inline}
 .pinlk.pinem{width:auto;height:124px;overflow:visible}
 @media (max-height:640px){ .pinlk.pinem{height:92px} }
+
+/* کاربر جدید (طرح ۱۴۰۵/۰۸/۰۹) */
+.sybox .sytype{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 10px}
+.sybox .sytype button{margin:0;min-height:76px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:14px;border-color:#D5DCE3;font-weight:800}
+.sybox .sytype button small{font-weight:500;font-size:.74rem}
+.sybox .sytype svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sybox .sytype button[aria-pressed="true"]{background:#FFF3D6;border:2px solid #17212B}
+.sybox .syreq{border:1.6px solid #17212B;background:#fff}
+.sybox .syreqi{font-style:normal;font-size:.68rem;background:#17212B;color:#fff;border-radius:8px;padding:1px 8px;margin-inline-start:6px;vertical-align:middle}
+.sybox .sysec{display:flex;align-items:center;gap:10px;text-align:start;margin:7px 0 0;min-height:56px;padding:6px 10px;border-radius:14px;border-color:#DCE2E8;background:#F7F9FA;font-weight:800}
+.sybox .sysec .ic{flex:none;width:36px;height:36px;border-radius:10px;background:#E8ECEF;display:grid;place-items:center}
+.sybox .sysec .ic svg{width:20px;height:20px;fill:none;stroke:#17212B;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sybox .sysec .t{flex:1;min-width:0}.sybox .sysec .t small{font-size:.72rem;font-weight:500}
+.sybox .sysec em{flex:none;font-style:normal;font-size:.74rem;font-weight:800;color:#7A4D00}.sybox .sysec em.n{color:#51606E}
+.sybox .sysec .rd{flex:none;width:18px;height:18px;border-radius:50%;border:2px solid #9AA8B5}
+.sybox .sysec[aria-pressed="true"]{background:#FFF3D6;border:2px solid #E3A51A}
+.sybox .sysec[aria-pressed="true"] .ic{background:#17212B}.sybox .sysec[aria-pressed="true"] .ic svg{stroke:#fff}
+.sybox .sysec[aria-pressed="true"] .rd{border:6px solid #17212B}
+.sybox .sykhg{margin:10px 0 0;padding:6px 10px 10px;border:1.5px dashed #C3CBD3;border-radius:14px}
+.sybox .sykhg>b{font-size:.8rem;color:#51606E}
+.sybox .sydv{display:flex;align-items:center;gap:8px;margin:0;padding:8px 2px;border-top:1px solid #E3E8ED;font-size:.86rem;font-weight:700}
+.sybox .sydv input{width:18px;height:18px;flex:none}.sybox .sydv em{margin-inline-start:auto;font-style:normal;color:#51606E}
+.sybox .sydv.all{border-top:0}
+.sybox .syaccm{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0 2px}.sybox .syaccm .chk{margin:0}
+.sybox .sygh{margin:12px 0 2px;font-size:.78rem;font-weight:900;color:#51606E}
+.sybox .syacr{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #E3E8ED;font-size:.86rem}
+.sybox .syacr>span:first-child{flex:1;min-width:0;font-weight:700}
+.sybox .syseg{flex:none;display:flex;background:#E8ECEF;border-radius:10px;padding:3px;gap:2px}
+.sybox .syseg button{width:auto;margin:0;min-height:34px;padding:0 10px;border:0;background:transparent;font-size:.8rem;font-weight:700;color:#51606E;border-radius:8px}
+.sybox .syseg button[aria-pressed="true"]{background:#fff;color:#17212B;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.sybox .syseg button[data-v="w"][aria-pressed="true"]{background:#17212B;color:#fff}
+.sybox .syfoot{position:sticky;bottom:-16px;margin:0 -16px -16px;padding:10px 16px 14px;background:#fff;border-top:1px solid #E3E8ED}
+.sybox .syfoot small{text-align:center;margin-bottom:6px}
+.sybox .sycard[hidden]{display:none}
 </style>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://api.github.com https://raw.githubusercontent.com https://cdn.jsdelivr.net http://localhost:* http://127.0.0.1:*; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self' blob: mediastream:; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <script>window.addEventListener("message",function(e){ if(e.origin!==location.origin && location.origin!=="null"){ e.stopImmediatePropagation(); } },true);</script>
@@ -352,8 +386,8 @@ input.ntsec.show{-webkit-text-security:none}
 <meta name="theme-color" content="#0B5C7A">
 <link rel="apple-touch-icon" href="lib/icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="nt-build" content="4dc9ec20b7e81510">
-<meta name="nt-ver" content="1405.08.07">
+<meta name="nt-build" content="a79ab762431f5e66">
+<meta name="nt-ver" content="1405.08.09">
 </head>
 <body>
 
@@ -613,7 +647,9 @@ const k=s=>String(s??'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)
 function of(name){ const n=k(name); const g=GROUPS.find(g=>g.m.some(x=>n.indexOf(k(x))>-1)); return g?g.n:'سایر'; }
 /* بخش این سیستم (از تنظیم کاربر توسط مدیر): '' = همه بخش‌ها */
 function my(){ try{ return (window.ntSync && ntSync.myDept && ntSync.myDept())||''; }catch(e){ return ''; } }
-function mine(name){ const d=my(); if(!d) return true; const g=GROUPS.find(g=>g.n===d); return !!(g&&g.all) || of(name)===d; }
+/* دستگاه‌هایی که مدیر برای این کاربر انتخاب کرده (u.sees): فقط همان‌ها */
+function sees(){ try{ return (window.ntSync && ntSync.mySees && ntSync.mySees())||null; }catch(e){ return null; } }
+function mine(name){ const S=sees(); if(S && S.length) return S.some(x=>k(x)===k(name)); const d=my(); if(!d) return true; const g=GROUPS.find(g=>g.n===d); return !!(g&&g.all) || of(name)===d; }
 window.ntDept={groups:()=>GROUPS.map(g=>g.n),of,my,mine};
 })();
 
@@ -1364,13 +1400,15 @@ function checkMe(){
   if(!me || me.off){ revoke(); return false; }
   const a=isObj(me.acl)?me.acl:null, dv=Array.isArray(me.dev)&&me.dev.length?me.dev:null;
   const dp=typeof me.dept==='string'?me.dept.slice(0,40):'', ag=(me.ag==='nb'||me.ag==='th')?me.ag:'';
-  if(J(a)!==J(acl()) || (me.name||'')!==(cfg.uname||'') || J(dv)!==J(cfg.devs||null) || !!me.nopin!==!!cfg.nopin || dp!==(cfg.dept||'') || !!me.appr!==!!cfg.appr || ag!==(cfg.ag||'')){
+  const sv=Array.isArray(me.sees)&&me.sees.length?me.sees.map(String).slice(0,60):null;
+  if(J(a)!==J(acl()) || (me.name||'')!==(cfg.uname||'') || J(dv)!==J(cfg.devs||null) || !!me.nopin!==!!cfg.nopin || dp!==(cfg.dept||'') || !!me.appr!==!!cfg.appr || ag!==(cfg.ag||'') || J(sv)!==J(cfg.sees||null)){
     if(me.appr) cfg.appr=1; else delete cfg.appr;
     if(a) cfg.acl=a; else delete cfg.acl;
     if(me.nopin) cfg.nopin=1; else delete cfg.nopin;
     if(dv) cfg.devs=dv; else delete cfg.devs;
     if(dp) cfg.dept=dp; else delete cfg.dept;
     if(ag) cfg.ag=ag; else delete cfg.ag;
+    if(sv) cfg.sees=sv; else delete cfg.sees;
     cfg.uname=me.name||''; lsSet(CFG,cfg);
     toast('دسترسی این سیستم تغییر کرد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),900);
     return false;
@@ -1472,7 +1510,7 @@ function viewUsers(){
     ${ids.length?ids.map(id=>{ const u=U[id], s=S[id];
       return `<div class="syuser${u.off?' off':''}" data-id="${esc(id)}">
         <b>${esc(u.name||'بدون نام')}${u.off?'<span class="sychip">قطع شده</span>':''}</b>
-        <small>${Array.isArray(u.dev)&&u.dev.length?'راننده — فقط '+esc(u.dev.join('، ')):esc(accText(isObj(u.acl)?u.acl:null))+(u.dept?' — بخش '+esc(u.dept):'')+(u.ag?' — مأمور '+(u.ag==='th'?'تهران':'نهبندان'):'')}</small>
+        <small>${Array.isArray(u.dev)&&u.dev.length?'راننده — فقط '+esc(u.dev.join('، ')):esc(accText(isObj(u.acl)?u.acl:null))+(secLabel(secGuess(u))?' — '+esc(secLabel(secGuess(u))):(u.dept?' — بخش '+esc(u.dept):''))+(Array.isArray(u.sees)&&u.sees.length?' — '+fa(u.sees.length)+' دستگاه':'')}</small>
         <small>آخرین اتصال: ${s&&s.at?esc(fmtAt(s.at))+(s.dev?' ('+esc(s.dev)+')':''):'هنوز وصل نشده'}</small>
         <div class="syub"><button type="button" data-act="code">کد اتصال</button><button type="button" data-act="edit">دسترسی</button><button type="button" data-act="off">${u.off?'وصل دوباره':'قطع دسترسی'}</button><button type="button" class="warn" data-act="del">حذف</button></div>
       </div>`; }).join(''):'<p>هنوز کاربری ساخته نشده است. برای هر همکار یا هر سیستم، یک کاربر بسازید.</p>'}
@@ -1491,70 +1529,123 @@ function viewUsers(){
   on('syURef',async()=>{ lock(true); await sync({manual:true}); viewUsers(); });
   on('syBack',viewMain);
 }
-/** ردیف‌های دسترسی: زبانه‌های نت، بعد «بخش خرید» با هر فرم جدا (چهار فرم «لیست خرید» جدا) */
-function aclRows(a){ const KHT=['میز خرید','لیست خرید','پیش‌فاکتور','فاکتور خرید'];
+/* ---- کاربر جدید (طرح ۱۴۰۵/۰۸/۰۹): نوع کاربر، بخش الزامی، دستگاه‌هایی که می‌بیند، دسترسی سه‌تایی ----
+   بخش‌ها: تولید، استخراج، نگهداری و تعمیرات، تدارکات (مأمور نهبندان / مأمور تهران / هر دو)، انبار.
+   ذخیره: u.sec، u.dept (تولید/استخراج/نگهداری)، u.ag (nb/th)، u.sees (دستگاه‌های انتخاب‌شده؛ خالی = همه دستگاه‌های بخش)، u.acl */
+const KHL=['میز خرید','باکس سندپرداز','خرید هفتگی','آب شیرین','خدمات تدارکات','پیش‌فاکتور','فاکتور خرید'];
+const SICO={prod:'<path d="M3 21V10l5 3V10l5 3V5h4l1 16zM3 21h18"/>',mine:'<path d="M3 20h18M5 20l4-7 3 3 3-6 4 10"/><path d="M14 4l3 3"/>',
+  pm:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3 17.8V21h3.2l6.3-6.3a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',kh:'<path d="M3 4h2l2.4 11h11L21 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/>',
+  anbar:'<path d="M3 9l9-5 9 5v11H3z"/><path d="M8 20v-6h8v6"/>'};
+const SECS=[{k:'prod',n:'تولید',dept:'تولید',ic:'prod'},{k:'mine',n:'استخراج',dept:'استخراج',ic:'mine'},{k:'pm',n:'نگهداری و تعمیرات',dept:'نگهداری و تعمیرات',ic:'pm',all:1},
+  {k:'kh_nb',n:'مأمور نهبندان',kh:1,ag:'nb',sub:'باکس، هفتگی، آب، خدمات، پیش‌فاکتور، فاکتور'},{k:'kh_th',n:'مأمور تهران',kh:1,ag:'th',sub:'باکس، خدمات، پیش‌فاکتور، فاکتور'},
+  {k:'kh_all',n:'هر دو مأمور',kh:1,ag:'',sub:'سرپرست تدارکات'},{k:'anbar',n:'انبار',ic:'anbar'}];
+const secOf=k=>SECS.find(x=>x.k===k)||null;
+const secLabel=k=>{ const x=secOf(k); return !x?'':(x.kh?'تدارکات — '+x.n:x.n); };
+/** نام ردیف‌های دسترسی: زبانه‌های نت + فرم‌های بخش خرید (هر فرم جدا) */
+function aclNames(){ const KHT=['میز خرید','لیست خرید','پیش‌فاکتور','فاکتور خرید'], has=n=>DOCS.some(d=>d.name===n);
+  const nt=DOCS.filter(d=>KHT.indexOf(d.name)<0).map(d=>d.name), kh=[];
+  if(has('میز خرید')) kh.push('میز خرید'); if(has('لیست خرید')) SUBF['لیست خرید'].forEach(n=>kh.push(n)); ['پیش‌فاکتور','فاکتور خرید'].forEach(n=>{ if(has(n)) kh.push(n); });
+  return {nt,kh}; }
+/** دسترسی پیش‌فرض هر بخش */
+function secAcl(k){ const N=aclNames(), all=N.nt.concat(N.kh), a={}; all.forEach(n=>{ a[n]='h'; });
+  const set=(n,v)=>{ if(all.indexOf(n)>-1) a[n]=v; };
+  if(k==='prod'||k==='mine'){ set('امروز','r'); set('مدیریت','r'); ['توقف شیفت','دفترچه قرائت','ثبت مشکلات'].forEach(n=>set(n,'w')); }
+  else if(k==='pm') N.nt.forEach(n=>set(n,'w'));
+  else if(/^kh_/.test(k)){ N.kh.forEach(n=>set(n,'w')); set('درخواست خرید','r'); if(k==='kh_th'){ set('خرید هفتگی','h'); set('آب شیرین','h'); } }
+  else if(k==='anbar'){ set('انبار','w'); set('برنامه هفتگی انبار','w'); set('درخواست خرید','r'); }
+  return a; }
+/** بخش کاربر قدیمی (بدون u.sec): از مأمور خرید، بخش دستگاه‌ها یا دسترسی خرید */
+function secGuess(u){ if(!u) return ''; if(secOf(u.sec)) return u.sec; if(u.ag==='nb') return 'kh_nb'; if(u.ag==='th') return 'kh_th';
+  const d={'تولید':'prod','استخراج':'mine','نگهداری و تعمیرات':'pm'}[u.dept]; if(d) return d;
+  if(isObj(u.acl) && KHL.some(n=>u.acl[n]==='w')) return 'kh_all'; return ''; }
+const secDevs=k=>{ const x=secOf(k); if(!x||!x.dept) return []; const L=devList(); return x.all?L:L.filter(n=>{ try{ return window.ntDept && ntDept.of(n)===x.dept; }catch(e){ return false; } }); };
+function aclRows(a){ const N=aclNames(), L={h:'پنهان',r:'دیدن',w:'ثبت'}, LAB={'خدمات تدارکات':'خدمات (تدارکات)'};
   const val=n=>a[n]||(n==='مدیریت'&&a['امروز'])||(PARENT[n]&&a[PARENT[n]])||'h';
-  const row=(n,lab,sub)=>`<div class="syrow"${sub?' style="padding-inline-start:14px"':''}><span>${esc(lab||n)}</span><select data-n="${esc(n)}" aria-label="دسترسی ${esc(lab||n)}">
-    ${[['w','ثبت'],['r','فقط مشاهده'],['h','پنهان']].map(o=>`<option value="${o[0]}" ${val(n)===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></div>`;
-  let h=DOCS.filter(d=>KHT.indexOf(d.name)<0).map(d=>row(d.name)).join('');
-  const kh=[]; if(DOCS.some(d=>d.name==='میز خرید')) kh.push(row('میز خرید'));
-  SUBF['لیست خرید'].forEach(n=>kh.push(row(n,'لیست خرید ← '+(FLABEL[n]||n),1)));
-  ['پیش‌فاکتور','فاکتور خرید'].forEach(n=>{ if(DOCS.some(d=>d.name===n)) kh.push(row(n)); });
-  if(kh.length) h+=`<div style="margin:12px 0 4px;font-weight:800;font-size:.9rem">بخش خرید (هر فرم جدا)</div>`+kh.join('');
-  return h; }
+  const row=n=>`<div class="syacr" data-n="${esc(n)}"><span>${esc(LAB[n]||n)}</span><span class="syseg" role="group" aria-label="دسترسی ${esc(n)}">${['h','r','w'].map(v=>`<button type="button" data-v="${v}" aria-pressed="${val(n)===v}">${L[v]}</button>`).join('')}</span></div>`;
+  return `<div class="sygh" data-g="kh">بخش خرید</div>${N.kh.map(row).join('')}<div class="sygh" data-g="nt">بخش نت</div>${N.nt.map(row).join('')}`; }
 function viewUserEdit(id){
-  const U=usersGet()||{}, u=id?U[id]:null, cur=u&&isObj(u.acl)?u.acl:null, lim=u?!!cur:true, a=cur||PRESET;
+  const U=usersGet()||{}, u=id?U[id]:null, cur=u&&isObj(u.acl)?u.acl:null, isDrv=!!(u&&Array.isArray(u.dev)&&u.dev.length), lim=u?!!cur:true;
+  let sec=isDrv?'':secGuess(u); const a=cur&&!isDrv?cur:(sec?secAcl(sec):PRESET);
+  const sees=new Set(u&&Array.isArray(u.sees)?u.sees:[]);
+  const secBtn=x=>`<button type="button" class="sysec" data-sec="${x.k}" aria-pressed="${sec===x.k}"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">${SICO[x.kh?'kh':x.ic]}</svg></span><span class="t">${esc(x.n)}${x.sub?`<small>${esc(x.sub)}</small>`:''}</span>${x.kh?'':`<em class="${x.dept?'':'n'}">${x.all?'همه دستگاه‌ها':x.dept?fa(secDevs(x.k).length)+' دستگاه':'بدون دستگاه'}</em>`}<i class="rd" aria-hidden="true"></i></button>`;
   dlg(u?'دسترسی کاربر':'کاربر جدید',`
     <div class="symsg" id="syMsg"></div>
-    <label>نام کاربر یا سیستم<input id="syUName" type="text" autocomplete="off" maxlength="40" value="${esc(u?u.name:'')}" placeholder="مثلاً: استخراج — شیفت صبح" style="direction:rtl;text-align:right"></label>
-    <div class="sycard"><h3>راننده (فقط یک دستگاه)</h3>
-      <label>دستگاه<select id="syUDev" style="display:block;width:100%;margin-top:3px"><option value="">— کاربر عادی (همه دستگاه‌ها) —</option>${devList().map(n=>`<option ${u&&Array.isArray(u.dev)&&u.dev[0]===n?'selected':''}>${esc(n)}</option>`).join('')}</select></label>
-      <small>راننده هیچ زبانه‌ای نمی‌بیند؛ فقط صفحه دستگاه خودش: ثبت قرائت، شروع و پایان توقف، ثبت مشکل.</small></div>
-    <div class="sycard" id="syDeptCard"><h3>بخش</h3>
-      <label>دستگاه‌های کدام بخش را ببیند؟<select id="syUDept" style="display:block;width:100%;margin-top:3px"><option value="">— همه بخش‌ها —</option>${((window.ntDept&&ntDept.groups())||[]).map(n=>`<option ${u&&u.dept===n?'selected':''}>${esc(n)}</option>`).join('')}</select></label>
-      <small>در «امروز» و «مدیریت» (ناوگان، خط زمان، نیاز به توجه و کارت‌های خلاصه) فقط دستگاه‌های همین بخش دیده می‌شود.</small></div>
-    <div class="sycard" id="syAccCard"><h3>دسترسی</h3>
-      <label class="chk"><input type="radio" name="syAcc" value="lim" ${lim?'checked':''}>محدود — فقط زبانه‌های انتخاب‌شده</label>
-      <label class="chk"><input type="radio" name="syAcc" value="full" ${lim?'':'checked'}>کامل — همه زبانه‌ها (ثبت در همه)</label>
-      <div style="margin:10px 0 4px"><small style="display:block;margin-bottom:4px">نمونه آماده (همه زبانه‌ها را یک‌جا تنظیم می‌کند):</small><button type="button" id="syUBuy" style="display:block;width:100%;margin:0">مأمور خرید — فقط بخش خرید</button></div>
-      <div id="syAclList" ${lim?'':'hidden'}>
-        ${aclRows(a)}
-      </div></div>
-    <div class="sycard" id="syAgCard"><h3>مأمور خرید</h3>
-      <label>اطلاعات کدام مأمور خرید را ببیند؟<select id="syUAg" style="display:block;width:100%;margin-top:3px"><option value="">— هر دو (نهبندان و تهران) —</option><option value="nb" ${u&&u.ag==='nb'?'selected':''}>فقط مأمور نهبندان</option><option value="th" ${u&&u.ag==='th'?'selected':''}>فقط مأمور تهران</option></select></label>
-      <small>در بخش خرید: باکس سندپرداز، خدمات، پیش‌فاکتور و فاکتور هر مأمور جداست.</small></div>
-    <div class="sycard"><h3>تایید پیش‌فاکتور</h3>
+    <div class="sycard"><h3>نوع کاربر</h3><div class="sytype" role="group" aria-label="نوع کاربر">
+      <button type="button" id="syTPer" aria-pressed="${!isDrv}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>شخص<small>کارمند، مهندس، مأمور</small></button>
+      <button type="button" id="syTDrv" aria-pressed="${isDrv}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17V9h9l3 4h4a2 2 0 0 1 2 2v2"/><circle cx="7" cy="17.5" r="2"/><circle cx="17" cy="17.5" r="2"/></svg>راننده / اپراتور<small>فقط یک دستگاه</small></button></div>
+      <label>نام کاربر<input id="syUName" type="text" autocomplete="off" maxlength="40" value="${esc(u?u.name:'')}" placeholder="مثلاً: مأمور خرید تهران" style="direction:rtl;text-align:right"></label></div>
+    <div class="sycard" id="syDrvCard"><h3>دستگاه راننده</h3>
+      <label>دستگاه<select id="syUDev" style="display:block;width:100%;margin-top:3px"><option value="">— دستگاه را انتخاب کنید —</option>${devList().map(n=>`<option ${isDrv&&u.dev[0]===n?'selected':''}>${esc(n)}</option>`).join('')}</select></label>
+      <small>راننده هیچ زبانه‌ای نمی‌بیند؛ فقط صفحه دستگاه خودش: ثبت قرائت، توقف، سوخت، چک روزانه و ثبت مشکل.</small></div>
+    <div class="sycard syreq" id="sySecCard"><h3>بخش <i class="syreqi">الزامی</i></h3><small>دستگاه‌ها و دسترسی‌ها از همین بخش می‌آیند.</small>
+      ${SECS.filter(x=>!x.kh&&x.k!=='anbar').map(secBtn).join('')}
+      <div class="sykhg"><b>تدارکات (خرید)</b>${SECS.filter(x=>x.kh).map(secBtn).join('')}</div>
+      ${secBtn(secOf('anbar'))}</div>
+    <div class="sycard" id="syDevCard"><h3>دستگاه‌هایی که می‌بیند</h3><small>هیچ‌کدام را نزنید یعنی همه دستگاه‌های بخش.</small><div id="syDevL"></div></div>
+    <div class="sycard" id="syAccCard"><h3>دسترسی</h3><small id="syAccSub">پیش‌فرض بخش گذاشته می‌شود؛ هر ردیف را می‌توانید عوض کنید.</small>
+      <div class="syaccm"><label class="chk"><input type="radio" name="syAcc" value="lim" ${lim?'checked':''}>محدود</label><label class="chk"><input type="radio" name="syAcc" value="full" ${lim?'':'checked'}>کامل — همه زبانه‌ها</label></div>
+      <div id="syAclList" ${lim?'':'hidden'}>${aclRows(a)}</div></div>
+    <div class="sycard" id="syApCard"><h3>تایید پیش‌فاکتور</h3>
       <label class="chk"><input type="checkbox" id="syUAppr" ${u&&u.appr?'checked':''}>این کاربر پیش‌فاکتورهای بخش خرید را تایید یا رد می‌کند (مدیر)</label>
       <small>سیستم مدیر اصلی همیشه می‌تواند تایید کند.</small></div>
     <div class="sycard"><h3>رمز ورود</h3>
       <label class="chk"><input type="checkbox" id="syUNoPin" ${u&&u.nopin?'checked':''}>بدون رمز ورود — فقط برای سیستم مشترکی که از محل کار بیرون نمی‌رود</label>
       <small>بقیه سیستم‌ها هر بار که سامانه باز می‌شود و بعد از ۳۰ دقیقه بی‌کاری، رمز ورود می‌خواهند.</small></div>
-    <button type="button" class="go" id="syUSave">${u?'ذخیره':'ساخت کاربر و کد اتصال'}</button>
-    <button type="button" id="syBack">انصراف</button>`);
-  document.querySelectorAll('input[name="syAcc"]').forEach(r=>r.addEventListener('change',()=>{ $('syAclList').hidden=document.querySelector('input[name="syAcc"]:checked').value!=='lim'; }));
-  /* مأمور خرید: فقط «فاکتور خرید» = ثبت؛ بقیه پنهان → هنگام باز شدن فقط بخش خرید (ws.js) */
-  on('syUBuy',()=>{ const r=document.querySelector('input[name="syAcc"][value="lim"]'); if(r) r.checked=true; $('syAclList').hidden=false;
-    document.querySelectorAll('#syAclList select').forEach(x=>{ x.value=(x.dataset.n==='میز خرید'||KHFORMS.includes(x.dataset.n))?'w':'h'; }); msg('همه فرم‌های بخش خرید = ثبت؛ بقیه پنهان. هر فرمی را که لازم نیست «پنهان» کنید. پایین صفحه «ساخت کاربر» یا «ذخیره» را بزنید.'); const t=[...document.querySelectorAll('#syAclList select')].find(x=>x.dataset.n==='میز خرید'); if(t) try{ t.scrollIntoView({block:'center'}); }catch(e){} });
-  const dvSync=()=>{ $('syAccCard').hidden=!!$('syUDev').value; $('syDeptCard').hidden=!!$('syUDev').value; $('syAgCard').hidden=!!$('syUDev').value; }; $('syUDev').addEventListener('change',dvSync); dvSync();
+    <div class="syfoot"><small id="sySum"></small><button type="button" class="go" id="syUSave">${u?'ذخیره':'ساخت کاربر و کد اتصال'}</button>
+    <button type="button" id="syBack">انصراف</button></div>`);
+  let drv=isDrv;
+  const B=$('ntSyBody'), full=()=>document.querySelector('input[name="syAcc"]:checked').value==='full';
+  const segVal=n=>{ const b=B.querySelector(`.syacr[data-n="${CSS.escape(n)}"] button[aria-pressed="true"]`); return b?b.dataset.v:'h'; };
+  const setSeg=(row,v)=>row.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v)));
+  function devs(){ const L=secDevs(sec), el=$('syDevL'); const allOn=!L.some(n=>sees.has(n));
+    el.innerHTML=`<label class="sydv all"><input type="checkbox" data-all ${allOn?'checked':''}>همه دستگاه‌های ${esc(secLabel(sec))}<em>${fa(L.length)}</em></label>`+L.map(n=>`<label class="sydv"><input type="checkbox" data-dv="${esc(n)}" ${sees.has(n)?'checked':''}>${esc(n)}</label>`).join(''); }
+  function sum(){ const s=$('sySum'); if(!s) return; if(drv){ s.textContent='راننده — '+($('syUDev').value||'دستگاه انتخاب نشده'); return; }
+    let w=0, r=0; if(!full()) B.querySelectorAll('.syacr').forEach(x=>{ const v=segVal(x.dataset.n); if(v==='w') w++; else if(v==='r') r++; });
+    const L=secDevs(sec), dv=L.filter(n=>sees.has(n)).length;
+    s.textContent=['شخص',sec?secLabel(sec):'بخش انتخاب نشده',secOf(sec)&&secOf(sec).dept?(dv?fa(dv)+' دستگاه':'همه دستگاه‌ها'):'',full()?'دسترسی کامل':fa(w)+' ثبت، '+fa(r)+' دیدن'].filter(Boolean).join('، '); }
+  function paint(){ $('syTPer').setAttribute('aria-pressed',String(!drv)); $('syTDrv').setAttribute('aria-pressed',String(drv));
+    $('syDrvCard').hidden=!drv; ['sySecCard','syAccCard','syApCard'].forEach(k=>{ $(k).hidden=drv; });
+    const x=secOf(sec); $('syDevCard').hidden=drv||!x||!x.dept; if(!$('syDevCard').hidden) devs();
+    B.querySelectorAll('.sysec').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sec===sec)));
+    /* گروه بخش خرید اول، اگر بخش تدارکات است */
+    const L=$('syAclList'), kh=B.querySelector('.sygh[data-g="kh"]'), nt=B.querySelector('.sygh[data-g="nt"]');
+    if(L && kh && nt){ const rows=[...L.querySelectorAll('.syacr')], K=rows.filter(r=>KHL.indexOf(r.dataset.n)>-1), T=rows.filter(r=>KHL.indexOf(r.dataset.n)<0);
+      const ord=x&&x.kh?[kh,...K,nt,...T]:[nt,...T,kh,...K]; ord.forEach(e=>L.appendChild(e)); }
+    $('syAccSub').textContent=x?'پیش‌فرض «'+secLabel(sec)+'» گذاشته شد؛ هر ردیف را می‌توانید عوض کنید.':'اول بخش را انتخاب کنید؛ دسترسی پیش‌فرض همان بخش گذاشته می‌شود.';
+    sum(); }
+  on('syTPer',()=>{ drv=false; paint(); }); on('syTDrv',()=>{ drv=true; paint(); });
+  $('syUDev').addEventListener('change',()=>{ if($('syUDev').value) drv=true; paint(); });
+  B.querySelectorAll('.sysec').forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.sec; if(k===sec) return; sec=k; sees.clear();
+    const A=secAcl(k); B.querySelectorAll('.syacr').forEach(r=>setSeg(r,A[r.dataset.n]||'h'));
+    const lr=document.querySelector('input[name="syAcc"][value="lim"]'); if(lr) lr.checked=true; $('syAclList').hidden=false; paint(); }));
+  $('syAclList').addEventListener('click',e=>{ const b=e.target.closest('.syseg button'); if(!b) return; setSeg(b.closest('.syacr'),b.dataset.v); sum(); });
+  $('syDevL').addEventListener('change',e=>{ const c=e.target; if(c.dataset.all!==undefined){ if(c.checked) sees.clear(); }
+    else if(c.dataset.dv){ if(c.checked) sees.add(c.dataset.dv); else sees.delete(c.dataset.dv); } devs(); sum(); });
+  document.querySelectorAll('input[name="syAcc"]').forEach(r=>r.addEventListener('change',()=>{ $('syAclList').hidden=full(); sum(); }));
+  paint();
   on('syUSave',()=>{
     const name=$('syUName').value.trim().replace(/\s+/g,' ');
     if(!name){ msg('نام کاربر را بنویسید',true); return; }
     const X=usersGet()||{};
     if(Object.keys(X).some(k=>k!==id && (X[k].name||'')===name)){ msg('کاربری با همین نام هست. نام دیگری بنویسید.',true); return; }
-    let ac=null; const dev=$('syUDev').value;
+    const dev=drv?$('syUDev').value:'';
+    if(drv && !dev){ msg('دستگاه راننده را انتخاب کنید',true); return; }
+    if(!drv && !secOf(sec)){ msg('بخش کاربر را انتخاب کنید',true); try{ $('sySecCard').scrollIntoView({block:'center'}); }catch(e){} return; }
+    let ac=null;
     if(dev) ac=Object.assign({},DRIVER);
-    else if(document.querySelector('input[name="syAcc"]:checked').value==='lim'){
+    else if(!full()){
       ac={}; let vis=0;
-      document.querySelectorAll('#syAclList select').forEach(s=>{ ac[s.dataset.n]=s.value; if(s.value!=='h') vis++; });
+      B.querySelectorAll('.syacr').forEach(r=>{ const v=segVal(r.dataset.n); ac[r.dataset.n]=v; if(v!=='h') vis++; });
       ac['لیست خرید']=SUBF['لیست خرید'].map(n=>ac[n]||'h').reduce((x,y)=>RANK[y]>RANK[x]?y:x,'h');
-      if(!vis){ msg('حداقل یک زبانه باید «ثبت» یا «فقط مشاهده» باشد',true); return; }
+      if(!vis){ msg('حداقل یک زبانه باید «ثبت» یا «دیدن» باشد',true); return; }
     }
-    const nid=id || ('u'+Date.now().toString(36)+Math.random().toString(36).slice(2,6));
+    const nid=id || ('u'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)), x=secOf(sec);
     X[nid]=Object.assign({},X[nid]||{id:nid,made:new Date().toISOString()},{name});
     if(ac) X[nid].acl=ac; else delete X[nid].acl;
     if(dev) X[nid].dev=[dev]; else delete X[nid].dev;
-    const dept=dev?'':$('syUDept').value; if(dept) X[nid].dept=dept.slice(0,40); else delete X[nid].dept;
-    const ag=dev?'':$('syUAg').value; if(ag==='nb'||ag==='th') X[nid].ag=ag; else delete X[nid].ag;
+    ['sec','dept','ag','sees'].forEach(k=>{ delete X[nid][k]; });
+    if(!dev && x){ X[nid].sec=x.k; if(x.dept) X[nid].dept=x.dept; if(x.ag) X[nid].ag=x.ag;
+      const sv=secDevs(x.k).filter(n=>sees.has(n)); if(x.dept && sv.length) X[nid].sees=sv.slice(0,60); }
     if($('syUNoPin').checked) X[nid].nopin=1; else delete X[nid].nopin;
     if(!dev && $('syUAppr').checked) X[nid].appr=1; else delete X[nid].appr;
     usersSet(X);
@@ -2098,7 +2189,7 @@ function touch(keys){
 }
 function myName(){ try{ const u=cfg.uid && usersGet(); return (u && u[cfg.uid] && u[cfg.uid].name)||''; }catch(e){ return ''; } }
 window.ntSync={state:()=>({phase,note,stage,busy,mode:mode(),at:(st()||{}).at||''}),fmtAt,khForms:()=>KHFORMS.filter(n=>tabAcc(n)!=='h'),formLabel:n=>FLABEL[n]||n,T,lockNow,canLock:()=>pinNeeded(),get cfg(){ return cfg; },st,sync,collect,hashOf,mergeAll,baseGet,outgoing,usersGet,seenGet,canSee:n=>tabAcc(n)!=='h',
-  canWriteTab:n=>mode()!=='v' && tabAcc(n)==='w',touch,myName,myDevs,myDept:()=>(cfg.uid && mode()==='w' && typeof cfg.dept==='string')?cfg.dept:'',myAg:()=>(cfg.uid && (cfg.ag==='nb'||cfg.ag==='th'))?cfg.ag:'',canApprove:()=>isAdmin() || (!!cfg.uid && mode()==='w' && !!cfg.appr),get pinLocked(){ return pinLocked; }};
+  canWriteTab:n=>mode()!=='v' && tabAcc(n)==='w',touch,myName,myDevs,myDept:()=>(cfg.uid && mode()==='w' && typeof cfg.dept==='string')?cfg.dept:'',mySees:()=>(cfg.uid && Array.isArray(cfg.sees) && cfg.sees.length)?cfg.sees.slice():null,myAg:()=>(cfg.uid && (cfg.ag==='nb'||cfg.ag==='th'))?cfg.ag:'',canApprove:()=>isAdmin() || (!!cfg.uid && mode()==='w' && !!cfg.appr),get pinLocked(){ return pinLocked; }};
 init();
 })();
 </script>

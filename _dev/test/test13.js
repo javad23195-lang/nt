@@ -27,7 +27,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   await waitFor(()=>!!S.tags['nt-data']); await settle(A);
   if(await dlgText(A)==='') await A.click('#ntSyBtn'); await A.click('#syUsers'); await A.click('#syUNew');
   ok(await A.locator('#syUDev option').count()===18,'فهرست دستگاه‌ها در فرم کاربر (۱۷ + کاربر عادی)');
-  await A.fill('#syUName','راننده ZL50'); await A.selectOption('#syUDev','لودر ZL50');
+  await A.fill('#syUName','راننده ZL50'); await A.click('#syTDrv'); await A.selectOption('#syUDev','لودر ZL50');
   ok(await A.locator('#syAccCard').isHidden(),'با انتخاب دستگاه، جدول دسترسی پنهان می‌شود');
   await A.click('#syUSave'); await A.waitForSelector('#syLink');
   const link=await A.inputValue('#syLink'), pin=(await A.locator('#syPinOut').innerText()).replace(/\D/g,'');
@@ -60,7 +60,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
   console.log('3) مدیر راننده را کاربر عادی (استخراج) می‌کند');
   await A.click('#ntSyBtn'); await A.click('#syUsers'); await A.locator('.syuser',{hasText:'راننده ZL50'}).locator('[data-act="edit"]').click();
-  await A.selectOption('#syUDev',''); await A.click('#syUSave'); await waitFor(()=>synced(A));
+  await A.click('#syTPer'); await A.click('[data-sec="mine"]'); await A.click('#syUSave'); await waitFor(()=>synced(A));
   await waitFor(async()=>{ try{ await D.evaluate(()=>ntSync.sync({manual:true})); }catch(e){} return D.evaluate(()=>!ntSync.myDevs()); },25000); await settle(D);
   ok(await D.evaluate(()=>!document.body.classList.contains('ntdriver') && [...document.querySelectorAll('.tab')].some(t=>!t.hidden)),'حالا زبانه‌های مجاز دیده می‌شود (کاربر عادی)');
   for(const p of [A,D]) ok(p.errs.length===0,'بدون خطای اسکریپت '+p.errs.join(' / '));

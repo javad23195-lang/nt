@@ -30,7 +30,7 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   async function addStop(p,i,note){ await tab(p,'توقف شیفت'); const f=fr(p); await f.locator('#bNew').click(); await f.locator('#fPick button').nth(i).click();
     await f.locator('#fFrom').fill('08:1'+i); await f.locator('#fWhy button').first().click(); if(note) await f.locator('#fNote').fill(note); await f.locator('#fSave').click(); }
   async function newUser(p,name){ if(await dlgText(p)==='') await p.click('#ntSyBtn'); if(await p.locator('#syUsers').count()) await p.click('#syUsers');
-    await p.click('#syUNew'); await p.fill('#syUName',name); await p.click('#syUSave'); await p.waitForSelector('#syLink');
+    await p.click('#syUNew'); await p.fill('#syUName',name); await p.click('[data-sec="pm"]'); await p.evaluate(()=>document.querySelectorAll('#syAclList .syacr').forEach(r=>{ const v={'توقف شیفت':'w','دفترچه قرائت':'w'}[r.dataset.n]||'h'; r.querySelector('[data-v="'+v+'"]').click(); })); await p.click('#syUSave'); await p.waitForSelector('#syLink');
     const link=await p.inputValue('#syLink'), pin=(await p.locator('#syPinOut').innerText()).replace(/\D/g,''); await p.click('#syBack'); await p.click('#syBack'); await p.click('#syClose'); return {link,pin}; }
   const synced=async p=>{ const s=JSON.parse(await ls(p,'ntsync_state_v1')||'{}'); return s.sha===S.tags['nt-data'] && s.hash===await p.evaluate(()=>ntSync.hashOf(ntSync.outgoing(ntSync.collect(),ntSync.baseGet()||{}))); };
 

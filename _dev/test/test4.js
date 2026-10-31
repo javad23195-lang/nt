@@ -24,7 +24,7 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   await B.click('#syOther'); await B.fill('#syPv','mine1405'); await B.click('#syStartV');
   ok(await waitFor(async()=>((await ls(B,'nt_daftar_v1'))||'').includes('15094')),'نسخه قبلی: مشاهده‌کننده اطلاعات را گرفت');
   await sleep(1500); await A.waitForFunction(()=>window.ntSync && ntBooted);
-  await A.click('#ntSyBtn'); await A.click('#syUsers'); await A.click('#syUNew'); await A.fill('#syUName','استخراج'); await A.click('#syUSave'); await A.waitForSelector('#syLink');
+  await A.click('#ntSyBtn'); await A.click('#syUsers'); await A.click('#syUNew'); await A.fill('#syUName','استخراج'); if(await A.locator('[data-sec="pm"]').count()) await A.click('[data-sec="pm"]'); await A.evaluate(()=>document.querySelectorAll('#syAclList .syacr').forEach(r=>{ const v={'توقف شیفت':'w','دفترچه قرائت':'w'}[r.dataset.n]||'h'; r.querySelector('[data-v="'+v+'"]').click(); })); await A.click('#syUSave'); await A.waitForSelector('#syLink');
   const link=await A.inputValue('#syLink'), pin=(await A.locator('#syPinOut').innerText()).replace(/\D/g,''); await A.click('#syBack'); await A.click('#syBack'); await A.click('#syClose');
   await sleep(2500);
   const X=await mk(null); await X.goto(link); await X.reload(); await X.waitForFunction(()=>window.ntSync);

@@ -49,12 +49,12 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   async function newUser(p,name,accFn){
     if(await dlgText(p)==='') await p.click('#ntSyBtn');
     if(await p.locator('#syUsers').count()) await p.click('#syUsers');
-    await p.click('#syUNew'); await p.fill('#syUName',name); if(accFn) await accFn(p); await p.click('#syUSave');
+    await p.click('#syUNew'); await p.fill('#syUName',name); await p.click('[data-sec="pm"]'); await p.evaluate(()=>document.querySelectorAll('#syAclList .syacr').forEach(r=>{ const v={'توقف شیفت':'w','دفترچه قرائت':'w'}[r.dataset.n]||'h'; r.querySelector('[data-v="'+v+'"]').click(); })); if(accFn) await accFn(p); await p.click('#syUSave');
     await p.waitForSelector('#syLink');
     const link=await p.inputValue('#syLink'), pin=(await p.locator('#syPinOut').innerText()).replace(/\D/g,'');
     return {link,pin,code:link.split('#join=')[1]};
   }
-  const setAcc=(tabName,v)=>async p=>{ await p.selectOption(`#syAclList select[data-n="${tabName}"]`,v); };
+  const setAcc=(tabName,v)=>async p=>{ await p.click(`#syAclList .syacr[data-n="${tabName}"] [data-v="${v}"]`); };
   const seedA={nt_anbar_out_v1:JSON.stringify({row:720,rows:[{date:JT.s,y:JT.y,m:JT.m,d:JT.d,dev:'WA470',item:'روغن دیزل اتوماتیک 50-20',qty:20,why:'مورد نیاز WA470',cond:''}]}),
                nt_daftar_v1:JSON.stringify([{dev:'لودر ZL50',unit:'ساعت',val:15094,date:'1405/07/13'}])};
 
@@ -186,8 +186,8 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   ok(await visTabs(X)==='دفترچه قرائت,انبار,توقف شیفت' && await has(X,'nt_daftar_v1','15200'),'با کد تازه دوباره وصل شد');
 
   console.log('8-ب) مأمور خرید: فقط بخش خرید');
-  const uB=await newUser(A,'مأمور خرید',async p=>{ await p.click('#syUBuy'); if(process.env.SHOTU){ await p.evaluate(()=>document.getElementById('syUBuy').scrollIntoView({block:'center'})); await p.screenshot({path:process.env.SHOTU}); } });
-  ok(await A.evaluate(()=>{ const u=Object.values(JSON.parse(localStorage.getItem('nt_users_v1')).users).find(x=>x.name==='مأمور خرید'); const K=['فاکتور خرید','میز خرید','لیست خرید','باکس سندپرداز','خرید هفتگی','آب شیرین','خدمات تدارکات','پیش‌فاکتور']; return !!u && K.every(k=>u.acl[k]==='w') && Object.keys(u.acl).filter(k=>u.acl[k]!=='h').length===8; }),'دکمه «مأمور خرید»: همه فرم‌های خرید (هر فرم جدا) = ثبت');
+  const uB=await newUser(A,'مأمور خرید',async p=>{ await p.click('[data-sec="kh_all"]'); await p.click('#syAclList .syacr[data-n="درخواست خرید"] [data-v="h"]'); if(process.env.SHOTU){ await p.evaluate(()=>document.getElementById('sySecCard').scrollIntoView({block:'center'})); await p.screenshot({path:process.env.SHOTU}); } });
+  ok(await A.evaluate(()=>{ const u=Object.values(JSON.parse(localStorage.getItem('nt_users_v1')).users).find(x=>x.name==='مأمور خرید'); const K=['فاکتور خرید','میز خرید','لیست خرید','باکس سندپرداز','خرید هفتگی','آب شیرین','خدمات تدارکات','پیش‌فاکتور']; return !!u && K.every(k=>u.acl[k]==='w') && Object.keys(u.acl).filter(k=>u.acl[k]!=='h').length===8; }),'بخش «تدارکات — هر دو مأمور»: همه فرم‌های خرید (هر فرم جدا) = ثبت');
   await A.click('#syBack'); await A.click('#syBack'); await A.click('#syClose'); await waitFor(()=>synced(A));
   let Bq=await ctx(null,null,null,uB.link);
   await waitFor(async()=>(await dlgText(Bq)).includes('رمز ۶ رقمی')); await Bq.fill('#syPin',uB.pin); await Bq.click('#syJoin'); await settle(Bq);

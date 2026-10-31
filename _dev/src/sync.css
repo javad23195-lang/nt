@@ -219,3 +219,37 @@ input.ntsec.show{-webkit-text-security:none}
 #ntPin button.eye .x{display:none}#ntPin button.eye.on .x{display:inline}
 .pinlk.pinem{width:auto;height:124px;overflow:visible}
 @media (max-height:640px){ .pinlk.pinem{height:92px} }
+
+/* کاربر جدید (طرح ۱۴۰۵/۰۸/۰۹) */
+.sybox .sytype{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 10px}
+.sybox .sytype button{margin:0;min-height:76px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:14px;border-color:#D5DCE3;font-weight:800}
+.sybox .sytype button small{font-weight:500;font-size:.74rem}
+.sybox .sytype svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sybox .sytype button[aria-pressed="true"]{background:#FFF3D6;border:2px solid #17212B}
+.sybox .syreq{border:1.6px solid #17212B;background:#fff}
+.sybox .syreqi{font-style:normal;font-size:.68rem;background:#17212B;color:#fff;border-radius:8px;padding:1px 8px;margin-inline-start:6px;vertical-align:middle}
+.sybox .sysec{display:flex;align-items:center;gap:10px;text-align:start;margin:7px 0 0;min-height:56px;padding:6px 10px;border-radius:14px;border-color:#DCE2E8;background:#F7F9FA;font-weight:800}
+.sybox .sysec .ic{flex:none;width:36px;height:36px;border-radius:10px;background:#E8ECEF;display:grid;place-items:center}
+.sybox .sysec .ic svg{width:20px;height:20px;fill:none;stroke:#17212B;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sybox .sysec .t{flex:1;min-width:0}.sybox .sysec .t small{font-size:.72rem;font-weight:500}
+.sybox .sysec em{flex:none;font-style:normal;font-size:.74rem;font-weight:800;color:#7A4D00}.sybox .sysec em.n{color:#51606E}
+.sybox .sysec .rd{flex:none;width:18px;height:18px;border-radius:50%;border:2px solid #9AA8B5}
+.sybox .sysec[aria-pressed="true"]{background:#FFF3D6;border:2px solid #E3A51A}
+.sybox .sysec[aria-pressed="true"] .ic{background:#17212B}.sybox .sysec[aria-pressed="true"] .ic svg{stroke:#fff}
+.sybox .sysec[aria-pressed="true"] .rd{border:6px solid #17212B}
+.sybox .sykhg{margin:10px 0 0;padding:6px 10px 10px;border:1.5px dashed #C3CBD3;border-radius:14px}
+.sybox .sykhg>b{font-size:.8rem;color:#51606E}
+.sybox .sydv{display:flex;align-items:center;gap:8px;margin:0;padding:8px 2px;border-top:1px solid #E3E8ED;font-size:.86rem;font-weight:700}
+.sybox .sydv input{width:18px;height:18px;flex:none}.sybox .sydv em{margin-inline-start:auto;font-style:normal;color:#51606E}
+.sybox .sydv.all{border-top:0}
+.sybox .syaccm{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0 2px}.sybox .syaccm .chk{margin:0}
+.sybox .sygh{margin:12px 0 2px;font-size:.78rem;font-weight:900;color:#51606E}
+.sybox .syacr{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #E3E8ED;font-size:.86rem}
+.sybox .syacr>span:first-child{flex:1;min-width:0;font-weight:700}
+.sybox .syseg{flex:none;display:flex;background:#E8ECEF;border-radius:10px;padding:3px;gap:2px}
+.sybox .syseg button{width:auto;margin:0;min-height:34px;padding:0 10px;border:0;background:transparent;font-size:.8rem;font-weight:700;color:#51606E;border-radius:8px}
+.sybox .syseg button[aria-pressed="true"]{background:#fff;color:#17212B;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.sybox .syseg button[data-v="w"][aria-pressed="true"]{background:#17212B;color:#fff}
+.sybox .syfoot{position:sticky;bottom:-16px;margin:0 -16px -16px;padding:10px 16px 14px;background:#fff;border-top:1px solid #E3E8ED}
+.sybox .syfoot small{text-align:center;margin-bottom:6px}
+.sybox .sycard[hidden]{display:none}

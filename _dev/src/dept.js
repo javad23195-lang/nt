@@ -9,6 +9,8 @@ const k=s=>String(s??'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)
 function of(name){ const n=k(name); const g=GROUPS.find(g=>g.m.some(x=>n.indexOf(k(x))>-1)); return g?g.n:'سایر'; }
 /* بخش این سیستم (از تنظیم کاربر توسط مدیر): '' = همه بخش‌ها */
 function my(){ try{ return (window.ntSync && ntSync.myDept && ntSync.myDept())||''; }catch(e){ return ''; } }
-function mine(name){ const d=my(); if(!d) return true; const g=GROUPS.find(g=>g.n===d); return !!(g&&g.all) || of(name)===d; }
+/* دستگاه‌هایی که مدیر برای این کاربر انتخاب کرده (u.sees): فقط همان‌ها */
+function sees(){ try{ return (window.ntSync && ntSync.mySees && ntSync.mySees())||null; }catch(e){ return null; } }
+function mine(name){ const S=sees(); if(S && S.length) return S.some(x=>k(x)===k(name)); const d=my(); if(!d) return true; const g=GROUPS.find(g=>g.n===d); return !!(g&&g.all) || of(name)===d; }
 window.ntDept={groups:()=>GROUPS.map(g=>g.n),of,my,mine};
 })();

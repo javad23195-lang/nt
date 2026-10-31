@@ -115,7 +115,7 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   await B.evaluate(()=>ntQr.home('KIPOR')); ok(await B.locator('#qrStop').count()===0 && await B.locator('#qrRead').count()===1,'ژنراتور (دستگاه غیر تولید): بدون دکمه توقف');
   console.log('6) کاربر محدود (استخراج: فقط توقف و قرائت)');
   await B.evaluate(()=>{ document.getElementById('ntQrDlg').hidden=true; }); await B.click('#ntSyBtn'); await B.click('#syUsers');
-  await B.click('#syUNew'); await B.fill('#syUName','استخراج'); await B.click('#syUSave'); await B.waitForSelector('#syLink');
+  await B.click('#syUNew'); await B.fill('#syUName','استخراج'); await B.click('[data-sec="pm"]'); await B.evaluate(()=>document.querySelectorAll('#syAclList .syacr').forEach(r=>{ const v={'توقف شیفت':'w','دفترچه قرائت':'w'}[r.dataset.n]||'h'; r.querySelector('[data-v="'+v+'"]').click(); })); await B.click('#syUSave'); await B.waitForSelector('#syLink');
   const link=await B.inputValue('#syLink'), pin=(await B.locator('#syPinOut').innerText()).replace(/\D/g,'');
   await B.click('#syBack'); await B.click('#syBack'); await B.click('#syClose'); await waitFor(()=>synced(B));
   const X=await ctx(null,link);

@@ -29,7 +29,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   await A.waitForFunction(()=>window.ntLocked===false); await A.click('#ntSyBtn'); if(await A.locator('#syOther').count()) await A.click('#syOther');
   await A.waitForSelector('#syTok'); await A.fill('#syTok',S.goodToken); await A.fill('#syP1','mine1405'); await A.fill('#syP2','mine1405'); await A.click('#syStartW');
   await waitFor(()=>!!S.tags['nt-data']); await settle(A);
-  if(await dlgText(A)==='') await A.click('#ntSyBtn'); await A.click('#syUsers'); await A.click('#syUNew'); await A.fill('#syUName','استخراج'); await A.click('#syUSave'); await A.waitForSelector('#syLink');
+  if(await dlgText(A)==='') await A.click('#ntSyBtn'); await A.click('#syUsers'); await A.click('#syUNew'); await A.fill('#syUName','استخراج'); await A.click('[data-sec="pm"]'); await A.evaluate(()=>document.querySelectorAll('#syAclList .syacr').forEach(r=>{ const v={'توقف شیفت':'w','دفترچه قرائت':'w'}[r.dataset.n]||'h'; r.querySelector('[data-v="'+v+'"]').click(); })); await A.click('#syUSave'); await A.waitForSelector('#syLink');
   const link=await A.inputValue('#syLink'), pin=(await A.locator('#syPinOut').innerText()).replace(/\D/g,'');
   await A.click('#syBack'); await A.click('#syBack'); await A.click('#syClose'); await waitFor(()=>synced(A));
   const X=await ctx(link); await waitFor(async()=>(await dlgText(X)).includes('رمز ۶ رقمی')); await X.fill('#syPin',pin); await X.click('#syJoin'); await settle(X);

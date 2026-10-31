@@ -50,12 +50,12 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   async function newUser(p,name,accFn){
     if(await dlgText(p)==='') await p.click('#ntSyBtn');
     if(await p.locator('#syUsers').count()) await p.click('#syUsers');
-    await p.click('#syUNew'); await p.fill('#syUName',name); if(accFn) await accFn(p); await p.click('#syUSave');
+    await p.click('#syUNew'); await p.fill('#syUName',name); await p.click('[data-sec="pm"]'); await p.evaluate(()=>document.querySelectorAll('#syAclList .syacr').forEach(r=>{ const v={'توقف شیفت':'w','دفترچه قرائت':'w'}[r.dataset.n]||'h'; r.querySelector('[data-v="'+v+'"]').click(); })); if(accFn) await accFn(p); await p.click('#syUSave');
     await p.waitForSelector('#syLink');
     const link=await p.inputValue('#syLink'), pin=(await p.locator('#syPinOut').innerText()).replace(/\D/g,'');
     return {link,pin,code:link.split('#join=')[1]};
   }
-  const setAcc=(tabName,v)=>async p=>{ await p.selectOption(`#syAclList select[data-n="${tabName}"]`,v); };
+  const setAcc=(tabName,v)=>async p=>{ await p.click(`#syAclList .syacr[data-n="${tabName}"] [data-v="${v}"]`); };
   const J=ago=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZone:'Asia/Tehran',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(Date.now()-ago*864e5)); const g=t=>p.find(x=>x.type===t).value; return `${g('year')}/${g('month')}/${g('day')}`; };
   const seed={nt_sh8_v1:JSON.stringify({rows:[{dev:'لودر ZL50',type:'شیلنگ باد',st:J(0),reg:J(0),desc:'تعویض شیلنگ',rep:'تعمیرکار نمونه',sup:'فروشنده نمونه',costA:'5000000',costK:'3000000',hasA:true,hasK:true}]}),
     nt_moshkel_v1:JSON.stringify({row:5,rows:[{y:1405,m:7,d:10,dev:'لودر ZL50',sys:'سیستم هیدرولیک',desc:'نشت جک',sev:'بالا',state:'منتظر قطعه'}]}),
