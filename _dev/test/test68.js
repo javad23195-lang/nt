@@ -13,8 +13,8 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
     const P=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZone:'Asia/Tehran',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()), g=t=>P.find(x=>x.type===t).value;
     const d=g('year')+'/'+g('month')+'/'+g('day');
     localStorage.setItem('nt_anbar_out_v1',JSON.stringify({row:720,rows:[
-      {date:d,y:+g('year'),m:+g('month'),d:+g('day'),dev:'لودر کوماتسو WA470',item:'الکترود آزمایشی ۷۰۱۸ قطر ۴',qty:5,why:'مورد نیاز WA470',cond:''},
-      {date:d,y:+g('year'),m:+g('month'),d:+g('day'),dev:'لودر ZL50',item:'الکترود آزمایشی ۷۰۱۸ قطر ۴',qty:2,why:'مورد نیاز ZL50',cond:''}]})); });
+      {date:d,y:+g('year'),m:+g('month'),d:+g('day'),dev:'لودر کوماتسو WA470',item:'الکترود آزمایشی ۷۰۱۸ قطر ۴',qty:5,why:'مورد نیاز WA470',cond:'',doc:'1'},
+      {date:d,y:+g('year'),m:+g('month'),d:+g('day'),dev:'لودر ZL50',item:'الکترود آزمایشی ۷۰۱۸ قطر ۴',qty:2,why:'مورد نیاز ZL50',cond:'',doc:'1'}]})); });
   const IDX=await p.evaluate(()=>DOCS.findIndex(d=>d.name==='انبار'));
   await p.evaluate(i=>show(i),IDX); await sleep(1800);
   const fr=await (await p.$$('iframe'))[IDX].contentFrame();

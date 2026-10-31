@@ -35,7 +35,7 @@ const TABKEYS={
   'ثبت مشکلات':['nt_moshkel_v1','nt_mk_desc_v1','nt_mk_sys_v1'],
   'شناسنامه':['nt_sh8_v1','nt_sh8_reps_v1','nt_sh8_sups_v1','nt_sh_desc_v1','nt_sh_part_v1','nt_sh_from_v1','nt_khadamat_v1'],
   'خدمات':['nt_khadamat_v1','nt_kh_act_v1','nt_kh_part_v1','nt_daftar_v1'],
-  'انبار':['nt_anbar_out_v1','nt_anbar_in_v1','nt_anbar_sent_v1','nt_anbar_codes_v1','nt_anbar_sum_v1'],
+  'انبار':['nt_stock_v1','nt_anbar_out_v1','nt_anbar_in_v1','nt_anbar_sent_v1','nt_anbar_codes_v1','nt_anbar_sum_v1'],
   'درخواست خرید':['nt_kharid9_v1','nt_kharid9_hist_v1','nt_kharid_cat_v1','nt_kr_unit_v1','nt_anbar_in_v1'],
   'توقف شیفت':['nt_tavaqof_v1'],
   'برون‌سپاری':['nt_outsrc_v1'],
@@ -746,7 +746,8 @@ function checkMe(){
   const a=isObj(me.acl)?me.acl:null, dv=Array.isArray(me.dev)&&me.dev.length?me.dev:null;
   const dp=typeof me.dept==='string'?me.dept.slice(0,40):'', ag=(me.ag==='nb'||me.ag==='th')?me.ag:'';
   const sv=Array.isArray(me.sees)&&me.sees.length?me.sees.map(String).slice(0,60):null;
-  if(J(a)!==J(acl()) || (me.name||'')!==(cfg.uname||'') || J(dv)!==J(cfg.devs||null) || !!me.nopin!==!!cfg.nopin || dp!==(cfg.dept||'') || !!me.appr!==!!cfg.appr || ag!==(cfg.ag||'') || J(sv)!==J(cfg.sees||null)){
+  const sc=typeof me.sec==='string'?me.sec.slice(0,12):'';
+  if(J(a)!==J(acl()) || (me.name||'')!==(cfg.uname||'') || J(dv)!==J(cfg.devs||null) || !!me.nopin!==!!cfg.nopin || dp!==(cfg.dept||'') || !!me.appr!==!!cfg.appr || ag!==(cfg.ag||'') || J(sv)!==J(cfg.sees||null) || sc!==(cfg.sec||'')){
     if(me.appr) cfg.appr=1; else delete cfg.appr;
     if(a) cfg.acl=a; else delete cfg.acl;
     if(me.nopin) cfg.nopin=1; else delete cfg.nopin;
@@ -754,6 +755,7 @@ function checkMe(){
     if(dp) cfg.dept=dp; else delete cfg.dept;
     if(ag) cfg.ag=ag; else delete cfg.ag;
     if(sv) cfg.sees=sv; else delete cfg.sees;
+    if(sc) cfg.sec=sc; else delete cfg.sec;
     cfg.uname=me.name||''; lsSet(CFG,cfg);
     toast('دسترسی این سیستم تغییر کرد — سامانه دوباره باز می‌شود'); setTimeout(()=>location.reload(),900);
     return false;
@@ -1534,6 +1536,6 @@ function touch(keys){
 }
 function myName(){ try{ const u=cfg.uid && usersGet(); return (u && u[cfg.uid] && u[cfg.uid].name)||''; }catch(e){ return ''; } }
 window.ntSync={state:()=>({phase,note,stage,busy,mode:mode(),at:(st()||{}).at||''}),fmtAt,khForms:()=>KHFORMS.filter(n=>tabAcc(n)!=='h'),formLabel:n=>FLABEL[n]||n,T,lockNow,canLock:()=>pinNeeded(),get cfg(){ return cfg; },st,sync,collect,hashOf,mergeAll,baseGet,outgoing,usersGet,seenGet,canSee:n=>tabAcc(n)!=='h',
-  canWriteTab:n=>mode()!=='v' && tabAcc(n)==='w',touch,myName,myDevs,myDept:()=>(cfg.uid && mode()==='w' && typeof cfg.dept==='string')?cfg.dept:'',mySees:()=>(cfg.uid && Array.isArray(cfg.sees) && cfg.sees.length)?cfg.sees.slice():null,myAg:()=>(cfg.uid && (cfg.ag==='nb'||cfg.ag==='th'))?cfg.ag:'',canApprove:()=>isAdmin() || (!!cfg.uid && mode()==='w' && !!cfg.appr),get pinLocked(){ return pinLocked; }};
+  canWriteTab:n=>mode()!=='v' && tabAcc(n)==='w',touch,myName,myDevs,myDept:()=>(cfg.uid && mode()==='w' && typeof cfg.dept==='string')?cfg.dept:'',mySec:()=>(cfg.uid && typeof cfg.sec==='string')?cfg.sec:'',mySees:()=>(cfg.uid && Array.isArray(cfg.sees) && cfg.sees.length)?cfg.sees.slice():null,myAg:()=>(cfg.uid && (cfg.ag==='nb'||cfg.ag==='th'))?cfg.ag:'',canApprove:()=>isAdmin() || (!!cfg.uid && mode()==='w' && !!cfg.appr),get pinLocked(){ return pinLocked; }};
 init();
 })();
