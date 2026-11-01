@@ -29,13 +29,13 @@ const ITEMS={
   airtank:{t:'باد مخزن ترمز',h:'تخلیه آب مخزن باد',sys:'سیستم بادی'},
   chain:{t:'زنجیر و چنگال',h:'ترک و سایش',sys:'پاکت واتصالات'}};
 const TYPES=[
-  [/wa470|zl50|لودر/,['oil','cool','hyd','air','water','grease','tires','teeth','leak','safe']],
-  [/pc290|pc400|بیل/,['oil','cool','hyd','air','water','grease','track','teeth','leak','safe']],
-  [/gd705|گریدر/,['oil','cool','hyd','air','water','grease','tires','blade','leak','safe']],
+  [/wa470|zl50|لودر/,['oil','cool','hyd','air','water','belt','grease','tires','teeth','leak','safe']],
+  [/pc290|pc400|بیل/,['oil','cool','hyd','air','water','belt','grease','track','teeth','leak','safe']],
+  [/gd705|گریدر/,['oil','cool','hyd','air','water','belt','grease','tires','blade','leak','safe']],
   [/لیفتراک/,['oil','cool','hyd','tires','chain','leak','safe']],
   [/ژنراتور|kva|کیپور/,['oil','cool','air','water','belt','batt','leak']],
   [/زامیاد|کاپرا|نیسان|سیترا|مینیبوس/,['oil','cool','tires','brake','lights','leak']],
-  [/کامیون|trs|مایلر|2624/,['oil','cool','air','water','tires','airtank','hyd','leak','lights','brake']]];
+  [/کامیون|trs|مایلر|2624/,['oil','cool','air','water','belt','tires','airtank','hyd','leak','lights','brake']]];
 /** موردهای چک یک دستگاه: [{k,t,h,d,sys}] */
 function items(dev){ const d=nk(dev), hit=TYPES.find(x=>x[0].test(d)), L=hit?hit[1]:['oil','cool','hyd','tires','leak','safe'];
   return L.map(k=>Object.assign({k},ITEMS[k])); }

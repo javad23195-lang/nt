@@ -191,7 +191,7 @@ function home(id){
   const tabOk=n=>{ try{ if(document.body.classList.contains('ntdriver')) return false; const i=DOCS.findIndex(d=>d.name===n); return i>-1 && tabs[i] && !tabs[i].hidden; }catch(e){ return false; } };
   if(tabOk('عکس‌ها')) sub+='<button type="button" id="qrPhoto">عکس تازه</button>';
   sub+='<button type="button" id="qrHist">سوابق</button>';
-  view(dev.name,`${devIco(dev.name,'qrico')}${kv?'<div class="kv">'+kv+'</div>':''}${myDevs()?svcCard(dev):''}${DC&&canW('دفترچه قرائت')?(dcRec?`<div class="dck ok"><div><b>چک روزانه شیفت ${esc(dcNow.sh)} انجام شد</b><span>${esc(dcRec.by||'')}${dcRec.at?' ساعت '+fa(dcRec.at):''}</span></div><button type="button" id="qrChk">دیدن</button></div>`:`<div class="dck"><div><b>چک روزانه شیفت ${esc(dcNow.sh)} انجام نشده</b><span>پیش از روشن کردن دستگاه</span></div><button type="button" id="qrChk">شروع چک</button></div>`):''}${oldStop&&canW('توقف شیفت')?`<div class="warn">توقف از روز ${fa(os.day)} هنوز باز است. اگر دستگاه کار می‌کند، «پایان توقف» را بزنید و روز راه افتادن را بنویسید.</div>`:''}<div class="acts">${acts}</div><div class="subacts">${sub}</div><button type="button" id="qrClose">بستن</button>`);
+  view(dev.name,`${devIco(dev.name,'qrico')}${kv?'<div class="kv">'+kv+'</div>':''}${myDevs()?svcCard(dev):''}${beltCard(dev)}${DC&&canW('دفترچه قرائت')?(dcRec?`<div class="dck ok"><div><b>چک روزانه شیفت ${esc(dcNow.sh)} انجام شد</b><span>${esc(dcRec.by||'')}${dcRec.at?' ساعت '+fa(dcRec.at):''}</span></div><button type="button" id="qrChk">دیدن</button></div>`:`<div class="dck"><div><b>چک روزانه شیفت ${esc(dcNow.sh)} انجام نشده</b><span>پیش از روشن کردن دستگاه</span></div><button type="button" id="qrChk">شروع چک</button></div>`):''}${oldStop&&canW('توقف شیفت')?`<div class="warn">توقف از روز ${fa(os.day)} هنوز باز است. اگر دستگاه کار می‌کند، «پایان توقف» را بزنید و روز راه افتادن را بنویسید.</div>`:''}<div class="acts">${acts}</div><div class="subacts">${sub}</div><button type="button" id="qrClose">بستن</button>`);
   on('qrRead',()=>readForm(dev)); on('qrFuel',()=>fuelTap(dev,fuelToday)); on('qrFuelDel',()=>fuelUndo(dev,myFuel)); on('qrOil',()=>fuelForm(dev)); on('qrStop',()=>stopForm(dev)); on('qrRun',()=>runForm(dev));
   on('qrWStart',()=>workStart(dev)); on('qrWEnd',()=>workEnd(dev)); on('qrProb',()=>probForm(dev)); on('qrHist',()=>hist(dev)); on('qrClose',close); on('qrChk',()=>chkForm(dev));
   on('qrPhoto',()=>{ window.ntPhotoDraft={dev:dev.name}; close(); try{ window.postMessage({nt:'go',tab:'عکس‌ها'},'*'); }catch(e){} });
@@ -399,6 +399,12 @@ function workEnd(dev){
   on('qrBack',()=>home(dev.id));
 }
 
+/* ---------- تسمه‌های دستگاه (belts.js) ---------- */
+function beltNote(dev,k){ if(k!=='belt' || !window.ntBelt) return ''; const L=ntBelt.of(dev.name); if(!L.length) return '';
+  return ' — تسمه لازم: '+L.map(x=>x.t.replace(/^تسمه\s*/,'')+' '+x.code+(x.n>1?' × '+x.n:'')+(x.stock?(x.stock.q>=x.n?' (انبار: '+x.stock.q+')':' (در انبار نیست)'):'')).join('، '); }
+function beltCard(dev){ if(!window.ntBelt || !(canSee('دفترچه قرائت')||canSee('انبار'))) return ''; const L=ntBelt.of(dev.name); if(!L.length) return '';
+  return `<div class="svc"><h3>تسمه‌ها</h3>${L.map(x=>{ const s=x.stock, c=!s?'':(s.q>=x.n?'g':(s.q>0?'o':'r'));
+    return `<div class="svr ${c}"><i></i><b>${esc(x.t.replace(/^تسمه\s*/,''))}: <bdi>${esc(x.code)}</bdi>${x.n>1?' × '+fa(x.n):''}</b><span>${!s?'':(s.q>=x.n?'انبار: '+fa(s.q):(s.q>0?'انبار: '+fa(s.q)+' (کم)':'در انبار نیست'))}</span></div>`; }).join('')}</div>`; }
 /* ---------- چک روزانه (dchk.js) ---------- */
 function chkForm(dev){ const DC=window.ntDChk; if(!DC) return;
   const T=DC.now(), all=LS('nt_dchk_v1',[]), old=DC.get(all,dev.name,T.d,T.sh), IT=DC.items(dev.name), r=Object.assign({},old&&old.r), n=Object.assign({},old&&old.n);
@@ -425,7 +431,7 @@ function chkForm(dev){ const DC=window.ntDChk; if(!DC) return;
     /* مشکل تازه (که در چک قبلی همین شیفت نبود) → ثبت مشکلات */
     const nw=IT.filter(it=>R[it.k]==='bad' && !(old && old.r && old.r[it.k]==='bad'));
     if(nw.length && canW('ثبت مشکلات')){ const j=jNow(), o=LS('nt_moshkel_v1',null), bx=(o && Array.isArray(o.rows))?o:{row:(o&&o.row)||5,rows:[]};
-      nw.forEach(it=>bx.rows.push({y:j.y,m:j.m,d:j.d,mn:MONTHS[j.m-1],dev:dev.name,sys:it.sys,desc:'چک روزانه: '+it.t+(N[it.k]?' — '+N[it.k]:''),sev:'متوسط',cur:'در حال کار',part:'خیر',state:'باز',fix:'',src:'چک روزانه'}));
+      nw.forEach(it=>bx.rows.push({y:j.y,m:j.m,d:j.d,mn:MONTHS[j.m-1],dev:dev.name,sys:it.sys,desc:'چک روزانه: '+it.t+(N[it.k]?' — '+N[it.k]:'')+beltNote(dev,it.k),sev:'متوسط',cur:'در حال کار',part:'خیر',state:'باز',fix:'',src:'چک روزانه'}));
       if(LSset('nt_moshkel_v1',bx)) keys.push('nt_moshkel_v1'); }
     touch(keys); toast(nw.length?'چک ثبت شد — '+fa(nw.length)+' مشکل به «ثبت مشکلات» رفت':'چک روزانه ثبت شد'); home(dev.id); });
   on('qrBack',()=>home(dev.id));
