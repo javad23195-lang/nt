@@ -74,7 +74,8 @@ python3 add_svc_months.py "$T/b49k.html" "$T/b49l.html"
 python3 add_svc_insp.py "$T/b49l.html" "$T/b49m.html"
 python3 add_dchk.py "$T/b49m.html" "$T/b49n.html"
 python3 add_an_flow.py "$T/b49n.html" "$T/b49o.html"
-python3 add_belts.py "$T/b49o.html" "$T/b49.html"
+python3 add_belts.py "$T/b49o.html" "$T/b49p.html"
+python3 add_money.py "$T/b49p.html" "$T/b49.html"
 python3 build.py "$T/b49.html" ../out.html
 python3 fix_hover.py ../out.html
 python3 stamp.py ../out.html

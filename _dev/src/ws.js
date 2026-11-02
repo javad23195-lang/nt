@@ -10,6 +10,14 @@ const $=id=>document.getElementById(id);
 const KH=['میز خرید','لیست خرید','پیش‌فاکتور','فاکتور خرید'];
 const wsOf=n=>KH.indexOf(n)>-1?'kh':'nt';
 const NAME={nt:'نت',kh:'خرید'};
+/* هر واحد بخش جدای خودش (sync.js: u.secs). نام و شرح کارت «نت» از اولین واحد غیر تدارکات کاربر؛
+   کاربری که در بخش خرید هیچ ثبتی ندارد (مدیریت کل) همان بخش را با نام «مبلغ‌ها» می‌بیند. */
+const UNIT={pm:['واحد نگهداری و تعمیرات','توقف، قرائت، سرویس و خرابی دستگاه‌ها'],prod:['کارخانه','دستگاه‌های کارخانه: توقف شیفت، قرائت و چک روزانه، ثبت مشکل'],
+  mine:['استخراج','دستگاه‌های استخراج: توقف شیفت، قرائت و چک روزانه، ثبت مشکل'],anbar:['انبار','موجودی، ورود و خروج، برنامه هفتگی'],boss:['مدیریت','خلاصه همه واحدها؛ فقط دیدن']};
+const mySecs=()=>{ try{ return window.ntSync&&ntSync.mySecs?ntSync.mySecs():[]; }catch(e){ return []; } };
+function ntUnit(){ const k=mySecs().find(x=>UNIT[x]); return k?UNIT[k]:null; }
+const khRO=()=>{ try{ return !!window.ntSync && KH.every(n=>!ntSync.canWriteTab(n)) && !(ntSync.khForms&&ntSync.khForms().some(n=>ntSync.canWriteTab(n))); }catch(e){ return false; } };
+const wsName=w=>w==='kh'?(khRO()?'مبلغ‌ها':'تدارکات'):((ntUnit()||[])[0]||'نت');
 const can=n=>{ try{ return !window.ntSync || ntSync.canSee(n); }catch(e){ return true; } };
 const has=w=>DOCS.some(d=>wsOf(d.name)===w && can(d.name));
 const ss=(k,v)=>{ try{ if(v===undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k,v); }catch(e){ return null; } };
@@ -31,8 +39,8 @@ function apply(){
   const b=document.body; if(!b.classList.contains('ws-'+cur)){ b.classList.remove('ws-nt','ws-kh'); b.classList.add('ws-'+cur); } ['ntKSet','ntKQuick'].forEach(id=>{ const e=$(id); if(e) e.hidden=cur!=='kh'; });
   const one=cur==='kh' && khSolo(); if(b.classList.contains('ntkh1')!==one) b.classList.toggle('ntkh1',one);
   /* نام واحد در سربرگ و منوی کناری */
-  document.querySelectorAll('.topbar .brand .un').forEach(e=>{ if(e.dataset.u0===undefined) e.dataset.u0=e.textContent; const t=cur==='kh'?'واحد تدارکات':e.dataset.u0; if(e.textContent!==t) e.textContent=t; });
-  const sw=$('ntWsBtn'); if(sw){ sw.hidden=!both(); const o=cur==='nt'?'kh':'nt'; const t=cur==='kh'?'تغییر واحد':'رفتن به بخش «'+NAME[o]+'»'; if(sw.dataset.t!==t){ sw.dataset.t=t; sw.innerHTML=ico('swap')+'<span>'+t+'</span>'; } }
+  document.querySelectorAll('.topbar .brand .un').forEach(e=>{ if(e.dataset.u0===undefined) e.dataset.u0=e.textContent; const U=ntUnit(), t=cur==='kh'?(khRO()?'مبلغ‌ها':'واحد تدارکات'):(U?U[0]:e.dataset.u0); if(e.textContent!==t) e.textContent=t; });
+  const sw=$('ntWsBtn'); if(sw){ sw.hidden=!both(); const o=cur==='nt'?'kh':'nt'; const t='رفتن به بخش «'+wsName(o)+'»'; if(sw.dataset.t!==t){ sw.dataset.t=t; sw.innerHTML=ico('swap')+'<span>'+t+'</span>'; } }
 }
 /* آیکن‌های صفحه انتخاب (طرح تازه): خطی، سرمه‌ای */
 const WS_I={nt:'<svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.1-3.1a5 5 0 01-6.6 6.6L7.6 19.4a2 2 0 01-2.9-2.9l6.6-6.6a5 5 0 016.6-6.6z"/><path d="M3 5.5L5.5 3l4 4-2.5 2.5zM13.5 14.5l6.5 6.5"/></svg>',
@@ -165,14 +173,14 @@ function chooser(){
   if(!who && co) who=String(co.textContent||'').trim().split(/\s+/)[0]||'';
   const draw=()=>{ if(el.hidden) return;
     const sb=$('ntSyBtn'), sl=sb&&sb.querySelector('.l'), slt=sl?sl.textContent.trim():'', syt=slt?(/همگام/.test(slt)?slt:'همگام '+slt):'';
-    const last=ls('ntws_last')==='kh'?'kh':'nt', unN=(un&&(un.dataset.u0||un.textContent))||'واحد نگهداری و تعمیرات';
+    const last=ls('ntws_last')==='kh'?'kh':'nt', U=ntUnit(), unN=U?U[0]:((un&&(un.dataset.u0||un.textContent))||'واحد نگهداری و تعمیرات'), unD=U?U[1]:'توقف، قرائت، سرویس و خرابی دستگاه‌ها';
     const N=ntRows(); let K=[]; try{ K=khRows(); }catch(e){} let kn=0; try{ kn=K.length; }catch(e){}
     const rows={}; let i=0;
     const row=(w,o)=>{ const id='r'+(i++); rows[id]=o; return `<button type="button" class="wr" data-wr="${id}" data-w="${w}"><span class="ri"><svg viewBox="0 0 24 24" aria-hidden="true">${RI[o.ic]||''}</svg></span><span class="rt"><b>${esc(o.t)}</b>${o.s?`<span><bdi>${esc(o.s)}</bdi></span>`:''}</span><span class="cv">${CHEV}</span></button>`; };
     const card=(w,name,desc,n,lab,R)=>`<div class="wb${last===w?' last':''}"><div class="wh"><span class="ic">${WS_I[w]}</span><span class="tx">${last===w?'<span class="lt">آخرین واحدی که باز کردید</span>':''}<b>${esc(name)}</b><span class="d">${esc(desc)}</span></span></div>
-      <span class="wn${n?'':' z'}">${n?fa(n)+' '+lab:'کار فوری نیست'}</span>${R.map(o=>row(w,o)).join('')}<span class="we"><button type="button" data-ws="${w}">ورود به ${esc(name)} ${ARR}</button></span></div>`;
+      ${lab?`<span class="wn${n?'':' z'}">${n?fa(n)+' '+lab:'کار فوری نیست'}</span>`:'<span class="wn z" style="color:#0B5A7A">فقط دیدن</span>'}${R.map(o=>row(w,o)).join('')}<span class="we"><button type="button" data-ws="${w}">ورود به ${esc(name)} ${ARR}</button></span></div>`;
     const html=`<div class="wbody"><div class="wtop"><div class="tt"><b id="ntWsT">سلام${who?'، '+esc(who):''}</b><small>کدام واحد را باز کنیم؟</small></div>${syt?`<span class="wsy${/نشد|نیست/.test(slt)?' bad':''}"><i></i>${esc(syt)}</span>`:''}</div>
-      <div class="wc">${card('nt',unN,'توقف، قرائت، سرویس و خرابی دستگاه‌ها',Math.max(N.n,N.R.length),'نیاز به توجه',N.R)}${card('kh','واحد تدارکات','لیست خرید، پیش‌فاکتور و فاکتور خرید',kn,'کار فوری',K)}</div></div>`;
+      <div class="wc">${card('nt',unN,unD,Math.max(N.n,N.R.length),'نیاز به توجه',N.R)}${khRO()?card('kh','مبلغ‌ها','پیش‌فاکتورها و فاکتورهای خرید، هر دو مأمور؛ فقط دیدن',0,'',[]):card('kh','واحد تدارکات','لیست خرید، پیش‌فاکتور و فاکتور خرید',kn,'کار فوری',K)}</div></div>`;
     if(el._h!==html){ el._h=html; el._rows=rows; el.innerHTML=html; } };
   el.hidden=false; draw();
   /* خلاصه «امروز» ممکن است کمی بعد برسد: تا وقتی صفحه باز است، هر ۲ ثانیه تازه شود */
@@ -208,6 +216,7 @@ try{ if(typeof window.pending==='function'){ const P0=window.pending; const sees
   b.addEventListener('click',()=>set(cur==='nt'?'kh':'nt')); })();
 apply();
 setInterval(tick,700); setTimeout(tick,50);
-window.ntWs={khUrgent,get cur(){ return cur; },set,both,has,wsOf,toggle:()=>set(cur==='nt'?'kh':'nt'),chooser,
-  drw:()=>both()?`<button type="button" class="di ws" data-a="ws">${ico('swap')}<span>رفتن به بخش «${NAME[cur==='nt'?'kh':'nt']}»</span></button>`:''};
+const esc2=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+window.ntWs={khUrgent,wsName,get cur(){ return cur; },set,both,has,wsOf,toggle:()=>set(cur==='nt'?'kh':'nt'),chooser,
+  drw:()=>both()?`<button type="button" class="di ws" data-a="ws">${ico('swap')}<span>رفتن به بخش «${esc2(wsName(cur==='nt'?'kh':'nt'))}»</span></button>`:''};
 })();

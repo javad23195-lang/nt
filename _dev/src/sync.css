@@ -253,3 +253,9 @@ input.ntsec.show{-webkit-text-security:none}
 .sybox .syfoot{position:sticky;bottom:-16px;margin:0 -16px -16px;padding:10px 16px 14px;background:#fff;border-top:1px solid #E3E8ED}
 .sybox .syfoot small{text-align:center;margin-bottom:6px}
 .sybox .sycard[hidden]{display:none}
+/* چند واحد (چک‌باکس) و نقش */
+.sybox .sysec .rd{border-radius:6px}
+.sybox .sysec[aria-pressed="true"] .rd{border:2px solid #17212B;background:#17212B url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12l5 5 9-10' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat}
+.sybox .syrole{display:grid;grid-template-columns:repeat(3,1fr);margin:6px 0 6px}
+.sybox .syrole button{min-height:44px;font-size:.88rem}
+.sybox .syrole button[aria-pressed="true"]{background:#17212B;color:#fff}

@@ -28,10 +28,10 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
   console.log('۱) فرم: بخش الزامی');
   await open();
-  ok(await A.evaluate(()=>document.querySelectorAll('.sysec').length===7 && document.querySelectorAll('.sykhg .sysec').length===3),'۷ گزینه بخش؛ تدارکات با سه گزینه (نهبندان، تهران، هر دو)');
-  ok(/تولید/.test(await dlgText(A)) && /۳ دستگاه/.test(await dlgText(A)) && /۵ دستگاه/.test(await dlgText(A)) && /همه دستگاه‌ها/.test(await dlgText(A)),'تعداد دستگاه هر بخش از سامانه: تولید ۳، استخراج ۵، نگهداری همه');
+  ok(await A.evaluate(()=>document.querySelectorAll('.sysec').length===8 && document.querySelectorAll('.sykhg .sysec').length===3),'۸ گزینه واحد (با مدیریت کل)؛ تدارکات با سه گزینه (نهبندان، تهران، هر دو)');
+  ok(/کارخانه/.test(await dlgText(A)) && /۳ دستگاه/.test(await dlgText(A)) && /۵ دستگاه/.test(await dlgText(A)) && /همه دستگاه‌ها/.test(await dlgText(A)),'تعداد دستگاه هر بخش از سامانه: تولید ۳، استخراج ۵، نگهداری همه');
   await A.fill('#syUName','مأمور آزمایشی تهران'); await A.click('#syUSave'); await sleep(200);
-  ok(/بخش کاربر را انتخاب کنید/.test(await dlgText(A)),'بدون بخش: پیام');
+  ok(/واحد کاربر را انتخاب کنید/.test(await dlgText(A)),'بدون واحد: پیام');
 
   console.log('۲) تدارکات — مأمور تهران');
   await A.click('[data-sec="kh_th"]'); await sleep(100);
@@ -60,7 +60,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   ok(await A.evaluate(()=>document.querySelector('[data-sec="mine"]').getAttribute('aria-pressed')==='true' && document.querySelectorAll('#syDevL [data-dv]:checked').length===2),'ویرایش: بخش و دستگاه‌های قبلی');
   await A.click('#syTDrv'); ok(await A.evaluate(()=>document.getElementById('sySecCard').hidden && document.getElementById('syAccCard').hidden && !document.getElementById('syDrvCard').hidden),'راننده: فقط دستگاه');
   await A.click('#syUSave'); await sleep(150); ok(/دستگاه راننده را انتخاب کنید/.test(await dlgText(A)),'راننده بدون دستگاه: پیام');
-  await A.click('#syTPer'); await A.click('[data-sec="kh_all"]'); await A.click('#syUSave'); await sleep(300);
+  await A.click('#syTPer'); await A.click('[data-sec="mine"]'); await A.click('[data-sec="kh_all"]'); await A.click('#syUSave'); await sleep(300);
   U=Object.values(await users(A)).find(u=>u.name==='سرپرست آزمایشی');
   ok(U.sec==='kh_all' && !U.ag && !U.sees && !U.dept,'تغییر بخش به «هر دو مأمور»: دستگاه‌ها و dept پاک شد');
 

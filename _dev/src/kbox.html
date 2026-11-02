@@ -254,9 +254,9 @@ const PHK='nt_kbox_ph_v1', SEENK='ntk_nt_seen';
 function phAll(){ const o=LS(PHK,{}); return o&&typeof o==='object'&&!Array.isArray(o)?o:{}; }
 function phKey(x){ return x&&(x.ph||x.id); }
 const thOpen=new Set(); let phFor='', thEd=null, thDel='';
-const SECN={prod:'واحد تولید',mine:'واحد استخراج',pm:'واحد نگهداری و تعمیرات',anbar:'انبار'};
+const SECN={prod:'کارخانه',mine:'واحد استخراج',pm:'واحد نگهداری و تعمیرات',anbar:'انبار',boss:'مدیریت کل'};
 function myRole(){ let sc=''; try{ sc=(parent.ntSync&&parent.ntSync.mySec&&parent.ntSync.mySec())||''; }catch(e){}
-  if(/^kh_/.test(sc)) return {k:'kh',n:sc==='kh_all'?'تدارکات':'مأمور '+AGN[AG]}; if(SECN[sc]) return {k:'u',n:SECN[sc]}; return {k:'u',n:'مدیر سامانه'}; }
+  if(/^kh_/.test(sc)) return {k:'kh',n:sc==='kh_all'?'تدارکات':'مأمور '+AGN[AG]}; if(SECN[sc]){ let ro=''; try{ ro=(parent.ntSync.myRole&&parent.ntSync.myRole())||''; }catch(e){} return {k:'u',n:({m:'مدیر ',s:'سرپرست '}[ro]||'')+SECN[sc]}; } return {k:'u',n:'مدیر سامانه'}; }
 function seenAll(){ try{ const o=JSON.parse(localStorage.getItem(SEENK)||'{}'); return o&&typeof o==='object'?o:{}; }catch(e){ return {}; } }
 
 /*KH_COMMON_JS*/

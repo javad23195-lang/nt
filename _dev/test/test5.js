@@ -186,7 +186,7 @@ const JT=(()=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:
   ok(await visTabs(X)==='دفترچه قرائت,انبار,توقف شیفت' && await has(X,'nt_daftar_v1','15200'),'با کد تازه دوباره وصل شد');
 
   console.log('8-ب) مأمور خرید: فقط بخش خرید');
-  const uB=await newUser(A,'مأمور خرید',async p=>{ await p.click('[data-sec="kh_all"]'); await p.click('#syAclList .syacr[data-n="درخواست خرید"] [data-v="h"]'); if(process.env.SHOTU){ await p.evaluate(()=>document.getElementById('sySecCard').scrollIntoView({block:'center'})); await p.screenshot({path:process.env.SHOTU}); } });
+  const uB=await newUser(A,'مأمور خرید',async p=>{ await p.click('[data-sec="pm"]'); await p.click('[data-sec="kh_all"]'); await p.click('#syAclList .syacr[data-n="درخواست خرید"] [data-v="h"]'); if(process.env.SHOTU){ await p.evaluate(()=>document.getElementById('sySecCard').scrollIntoView({block:'center'})); await p.screenshot({path:process.env.SHOTU}); } });
   ok(await A.evaluate(()=>{ const u=Object.values(JSON.parse(localStorage.getItem('nt_users_v1')).users).find(x=>x.name==='مأمور خرید'); const K=['فاکتور خرید','میز خرید','لیست خرید','باکس سندپرداز','خرید هفتگی','آب شیرین','خدمات تدارکات','پیش‌فاکتور']; return !!u && K.every(k=>u.acl[k]==='w') && Object.keys(u.acl).filter(k=>u.acl[k]!=='h').length===8; }),'بخش «تدارکات — هر دو مأمور»: همه فرم‌های خرید (هر فرم جدا) = ثبت');
   await A.click('#syBack'); await A.click('#syBack'); await A.click('#syClose'); await waitFor(()=>synced(A));
   let Bq=await ctx(null,null,null,uB.link);
