@@ -65,8 +65,13 @@ details.up .bd{padding:0 16px 16px}
 .bx .msgx.kh{background:#E6F0F4;border-color:#BCD6E2;margin-inline-start:auto}
 .bx .msgx small{display:block;font-size:.72rem;font-weight:900;color:#7A4D00}.bx .msgx.kh small{color:#0B5A7A}
 .bx .msgx.nw{box-shadow:inset 3px 0 0 var(--bad)}
+.bx .msgx .mym{display:flex;gap:4px;justify-content:flex-end;margin-top:2px}
+.bx .msgx .mym button{border:0;background:none;font:inherit;font-size:.74rem;font-weight:800;color:var(--dim);min-height:32px;min-width:44px;padding:0 6px;cursor:pointer;border-radius:8px}
+.bx .msgx .mym button.dl{color:var(--bad)}.bx .msgx .mym button.sure{background:var(--bad);color:#fff}
+.bx .msgx em{font-style:normal;font-weight:600;color:var(--dim)}
+.bx .msgx.ed{outline:2px solid var(--nv);outline-offset:1px}
 .bx .thm{border:0;background:none;font:inherit;font-size:.8rem;font-weight:800;color:var(--dim);min-height:32px;cursor:pointer;padding:0}
-.bx .thi{display:grid;grid-template-columns:auto 1fr auto;gap:6px;margin-top:8px;align-items:center}
+.bx .thi{display:grid;grid-template-columns:auto 1fr auto auto;gap:6px;margin-top:8px;align-items:center}
 .bx .thi .in{margin:0;min-height:44px}
 .bx .thi button{min-height:44px;border-radius:12px;border:1px solid var(--line);background:#fff;font:inherit;font-weight:800;padding:0 12px;cursor:pointer;color:var(--ink)}
 .bx .thi button.go{background:var(--nv);border-color:var(--nv);color:#fff}
@@ -248,7 +253,7 @@ details.up .bd{padding:0 16px 16px}
 const PHK='nt_kbox_ph_v1', SEENK='ntk_nt_seen';
 function phAll(){ const o=LS(PHK,{}); return o&&typeof o==='object'&&!Array.isArray(o)?o:{}; }
 function phKey(x){ return x&&(x.ph||x.id); }
-const thOpen=new Set(); let phFor='';
+const thOpen=new Set(); let phFor='', thEd=null, thDel='';
 const SECN={prod:'واحد تولید',mine:'واحد استخراج',pm:'واحد نگهداری و تعمیرات',anbar:'انبار'};
 function myRole(){ let sc=''; try{ sc=(parent.ntSync&&parent.ntSync.mySec&&parent.ntSync.mySec())||''; }catch(e){}
   if(/^kh_/.test(sc)) return {k:'kh',n:sc==='kh_all'?'تدارکات':'مأمور '+AGN[AG]}; if(SECN[sc]) return {k:'u',n:SECN[sc]}; return {k:'u',n:'مدیر سامانه'}; }
@@ -485,6 +490,11 @@ $('bList').addEventListener('click',e=>{ const b=e.target.closest('button'); if(
   if(b.hasAttribute('data-thm')){ const id=b.closest('.bx').dataset.id; if(thOpen.has(id)) thOpen.delete(id); else thOpen.add(id); ntSeen(id); drawBox(); return; }
   if(b.hasAttribute('data-shr')||b.hasAttribute('data-sel')){} else if(!W.box) return;
   if(b.hasAttribute('data-ntgo')){ ntSend(b.closest('.bx')); return; }
+  if(b.hasAttribute('data-nte')){ thEd={id:b.closest('.bx').dataset.id,m:b.closest('[data-mid]').dataset.mid}; thDel=''; drawBox(); const i=document.querySelector(`.bx[data-id="${CSS.escape(thEd.id)}"] [data-nti]`); if(i){ i.focus(); i.select(); } return; }
+  if(b.hasAttribute('data-ntc')){ thEd=null; drawBox(); return; }
+  if(b.hasAttribute('data-ntd')){ const id=b.closest('.bx').dataset.id, mid=b.closest('[data-mid]').dataset.mid;
+    if(thDel!==mid){ thDel=mid; drawBox(); return; }
+    thDel=''; if(thEd&&thEd.m===mid) thEd=null; setItem(id,x=>{ x.nt=(x.nt||[]).filter(y=>y.id!==mid); }); drawBox(); return; }
   if(b.hasAttribute('data-ph')){ phFor=b.closest('.bx').dataset.id; $('bPhF').click(); return; } const c=b.closest('.bx'); if(!c) return; const id=c.dataset.id;
   if(b.hasAttribute('data-sel')){ if(sel.has(id)) sel.delete(id); else sel.add(id); drawBox(); return; }
   if(b.hasAttribute('data-shr')){ const x=box().find(y=>y.id===id); if(x) shareText(supText([x]),'bMsg2'); return; }
@@ -605,10 +615,13 @@ function ntSeen(id){ try{ const A=box(), x=A.find(y=>y.id===id); const L=x&&Arra
 function phHTML(x){ const P=phAll()[phKey(x)]; return P&&P.d?`<button type="button" class="phx" data-phv aria-label="عکس قطعه ${esc(x.name)}"><img alt="" src="data:${esc(P.t||'image/webp')};base64,${esc(P.d)}"></button>`:''; }
 function thrHTML(x){ const L=Array.isArray(x.nt)?x.nt.filter(m=>m&&m.t):[]; if(!L.length && !W.box) return '';
   const s=seenAll()[x.id]||0, me=myName(), open=thOpen.has(x.id), V=open?L:L.slice(-2);
-  const msg=m=>`<div class="msgx${m.k==='kh'?' kh':''}${(m.ts||0)>s&&(!me||m.by!==me)?' nw':''}"><small>${esc(m.r||'')}${m.by?' — '+esc(m.by):''}${m.at?' — '+esc(fa(m.at)):''}</small>${esc(m.t)}</div>`;
+  const R=myRole(), mine=m=>W.box && m.id && m.r===R.n && m.k===R.k && (m.by||'')===(me||''), ed=thEd&&thEd.id===x.id?thEd.m:'';
+  const msg=m=>`<div class="msgx${m.k==='kh'?' kh':''}${(m.ts||0)>s&&(!me||m.by!==me)?' nw':''}${ed&&ed===m.id?' ed':''}" data-mid="${esc(m.id||'')}"><small>${esc(m.r||'')}${m.by?' — '+esc(m.by):''}${m.at?' — '+esc(fa(m.at)):''}</small>${esc(m.t)}${m.ed?' <em>(اصلاح شد)</em>':''}${mine(m)?`<div class="mym"><button type="button" data-nte>اصلاح</button><button type="button" class="dl${thDel===m.id?' sure':''}" data-ntd>${thDel===m.id?'حذف شود؟':'حذف'}</button></div>`:''}</div>`;
+  const edT=ed?((L.find(m=>m.id===ed)||{}).t||''):'';
   return `<div class="thr">${L.length>V.length?`<button type="button" class="thm" data-thm>${fa(L.length-V.length)} پیام قبلی را ببینید</button>`:''}${V.map(msg).join('')}${open&&L.length>2?'<button type="button" class="thm" data-thm>جمع کردن</button>':''}
-    ${W.box?`<div class="thi"><button type="button" data-ph aria-label="عکس قطعه">${ico('camera',20)||'عکس'}</button><input class="in" data-nti maxlength="200" placeholder="${myRole().k==='kh'?'جواب به مدیر واحد…':'توضیح برای مأمور…'}" aria-label="توضیح برای ${esc(x.name)}"><button type="button" class="go" data-ntgo>فرستادن</button></div>`:''}</div>`; }
+    ${W.box?`<div class="thi"><button type="button" data-ph aria-label="عکس قطعه">${ico('camera',20)||'عکس'}</button><input class="in" data-nti maxlength="200" value="${esc(edT)}" placeholder="${myRole().k==='kh'?'جواب به مدیر واحد…':'توضیح برای مأمور…'}" aria-label="توضیح برای ${esc(x.name)}">${ed?'<button type="button" data-ntc>لغو</button>':''}<button type="button" class="go" data-ntgo>${ed?'ذخیره':'فرستادن'}</button></div>`:''}</div>`; }
 function ntSend(card){ const id=card.dataset.id, i=card.querySelector('[data-nti]'), t=clean(i?i.value:'',200); if(!t){ if(i) i.focus(); return; }
+  if(thEd && thEd.id===id){ const mid=thEd.m; thEd=null; setItem(id,x=>{ const m=(x.nt||[]).find(y=>y.id===mid); if(m && m.t!==t){ m.t=t; m.ed=1; } }); drawBox(); return; }
   const r=myRole(), d=new Date(), at=TODAY+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
   setItem(id,x=>{ const L=Array.isArray(x.nt)?x.nt:[]; if(!L.length && x.memo) L.push({id:uid('m'),t:clean(x.memo,200),r:'توضیح مهم',at:'',ts:1}); L.push({id:uid('m'),t,by:myName(),r:r.n,k:r.k,at,ts:Date.now()}); x.nt=L.slice(-40); });
   ntSeen(id); drawBox(); }

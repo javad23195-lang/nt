@@ -36,12 +36,24 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   let B=await LSg(p,'nt_kbox_v1'), x=B.find(y=>y.id==='n1');
   ok(x.imp && x.nt.length===1 && x.nt[0].r==='واحد نگهداری و تعمیرات' && x.nt[0].by==='مدیر آزمایشی' && x.nt[0].k==='u' && /طرح چینی/.test(x.nt[0].t) && !/[<>]/.test(x.nt[0].t),'پیام مدیر واحد ذخیره شد (نقش، نام، بدون < >)');
 
+  console.log('۱ب) اصلاح و حذف پیام خود');
+  await f.fill('.bx[data-id="n1"] [data-nti]','پیام اشتباه'); await f.press('.bx[data-id="n1"] [data-nti]','Enter'); await sleep(150);
+  await f.click('.bx[data-id="n1"] .msgx:first-of-type [data-nte]'); await sleep(100);
+  ok(await f.evaluate(()=>/طرح چینی/.test(document.querySelector('.bx[data-id="n1"] [data-nti]').value) && /ذخیره/.test(document.querySelector('.bx[data-id="n1"] [data-ntgo]').textContent)),'«اصلاح»: متن در کادر، دکمه «ذخیره»');
+  await f.fill('.bx[data-id="n1"] [data-nti]','<img src=x onerror=window.__z=1>اصل باشد، طرح چینی نخرید، کوماتسو'); await f.click('.bx[data-id="n1"] [data-ntgo]'); await sleep(150);
+  x=(await LSg(p,'nt_kbox_v1')).find(y=>y.id==='n1');
+  ok(x.nt.length===2 && /کوماتسو$/.test(x.nt[0].t) && x.nt[0].ed===1 && x.nt[0].ts && await f.evaluate(()=>/اصلاح شد/.test(document.querySelector('.bx[data-id="n1"] .thr').innerText)),'پیام اصلاح شد و «(اصلاح شد)» دارد');
+  const del=()=>f.evaluate(()=>{ const m=[...document.querySelectorAll('.bx[data-id="n1"] .msgx')].find(e=>/پیام اشتباه/.test(e.innerText)); m.querySelector('[data-ntd]').click(); });
+  await del(); await sleep(100); ok((await LSg(p,'nt_kbox_v1')).find(y=>y.id==='n1').nt.length===2 && await f.evaluate(()=>/حذف شود؟/.test(document.querySelector('.bx[data-id="n1"] .thr').innerText)),'حذف: اول می‌پرسد');
+  await del(); await sleep(150); x=(await LSg(p,'nt_kbox_v1')).find(y=>y.id==='n1'); ok(x.nt.length===1 && !/پیام اشتباه/.test(JSON.stringify(x.nt)),'بار دوم: پیام حذف شد');
+
   console.log('۲) مأمور: در ضروری می‌بیند و جواب می‌دهد');
   await role('kh_nb','مأمور آزمایشی'); f=await reopen();
   ok(await f.evaluate(()=>/توضیح تازه \(۱\)/.test(document.getElementById('bF').innerText)),'فیلتر «توضیح تازه (۱)»');
   await f.evaluate(()=>document.querySelector('#bF [data-f="imp"]').click()); await sleep(200);
   let T=await f.evaluate(()=>document.querySelector('.bx[data-id="n1"] .thr').innerText);
   ok(/واحد نگهداری و تعمیرات — مدیر آزمایشی/.test(T) && /طرح چینی نخرید/.test(T) && await f.evaluate(()=>!!document.querySelector('.bx[data-id="n1"] .msgx.nw')) && /جواب به مدیر واحد/.test(await f.evaluate(()=>document.querySelector('.bx[data-id="n1"] [data-nti]').placeholder)),'مأمور در «ضروری» پیام تازه را می‌بیند');
+  ok(await f.evaluate(()=>!document.querySelector('.bx[data-id="n1"] [data-nte],.bx[data-id="n1"] [data-ntd]')),'مأمور پیام مدیر را اصلاح یا حذف نمی‌کند');
   await f.fill('.bx[data-id="n1"] [data-nti]','اصل سه روز دیگر می‌رسد'); await f.click('.bx[data-id="n1"] [data-ntgo]'); await sleep(200);
   x=(await LSg(p,'nt_kbox_v1')).find(y=>y.id==='n1');
   ok(x.nt.length===2 && x.nt[1].k==='kh' && x.nt[1].r==='مأمور نهبندان','جواب مأمور (نقش مأمور نهبندان)');
