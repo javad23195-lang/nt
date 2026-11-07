@@ -317,7 +317,7 @@ const canFac=()=>W.box&&canWT('فاکتور خرید');
 const buyNow=new Set();
 function goFactor(o){ try{ localStorage.setItem('ntf_intent',JSON.stringify(o)); }catch(e){} goTab('فاکتور خرید','ntf_pane','add'); }
 /* ستون‌های خروجی سندپرداز (نام ستون، نه شماره، تا جابه‌جایی ستون مهم نباشد) */
-const COLS={y:'سال مالی',no:'شماره',row:'ردیف',code:'کد کالا',name:'شرح کالا',qty:'مقدار',unit:'واحد',need:'تاریخ نیاز',why:'دلیل نیاز',note:'ملاحظات',date:'تاریخ',desc:'توضیحات',req:'درخواست کننده'};
+const COLS={y:'سال مالی',no:'شماره',py:'سال مبنا پدر',pno:'ش.مبنا پدر',row:'ردیف',code:'کد کالا',name:'شرح کالا',qty:'مقدار',unit:'واحد',need:'تاریخ نیاز',why:'دلیل نیاز',note:'ملاحظات',date:'تاریخ',desc:'توضیحات',req:'درخواست کننده'};
 const colKey=s=>nkey(s);
 async function importBox(file,src){ src=src==='sabt'?'sabt':'mamur';
   if(!parent.ntReport||!parent.ntReport.readAoa) throw new Error('lib');
@@ -329,18 +329,35 @@ async function importBox(file,src){ src=src==='sabt'?'sabt':'mamur';
   const v=(r,k)=>ix[k]<0?'':clean(lat(r[ix[k]]==null?'':r[ix[k]]),k==='name'?160:200);
   const rows=A.slice(hi+1).filter(r=>Array.isArray(r) && v(r,'name'));
   if(rows.length>3000) throw new Error('big');
-  const cur=box(), map=new Map(cur.map(x=>[x.id,x])), seen=new Set(); let nw=0, back=0;
+  const cur=box(), map=new Map(cur.map(x=>[x.id,x])), alias=new Map(cur.filter(x=>x.rid).map(x=>[x.rid,x])), seen=new Set(); let nw=0, back=0, moved=0;
   rows.forEach((r,i)=>{ const id=[src==='sabt'?'sb':'sp',v(r,'y')||'0',v(r,'no')||'0',v(r,'row')||String(i+1),v(r,'code')].join('-'); if(seen.has(id)) return; seen.add(id);
     const f={code:v(r,'code'),name:v(r,'name'),qty:v(r,'qty'),unit:v(r,'unit'),need:normDate(v(r,'need'))||v(r,'need'),why:v(r,'why'),note:v(r,'note'),date:normDate(v(r,'date'))||v(r,'date'),desc:v(r,'desc'),req:v(r,'req'),no:v(r,'no')};
-    if(src==='sabt') f.src='sabt'; const o=map.get(id); if(o){ Object.assign(o,f); if(o.gone){ delete o.gone; back++; } o.seen=TODAY; } else { map.set(id,Object.assign({id,add:TODAY,seen:TODAY},f)); nw++; } });
-  let gone=0; map.forEach(o=>{ if(srcOf(o)===src && !o.mv && !seen.has(o.id) && !o.gone && !o.st){ o.gone=TODAY; gone++; } });
+    if(src==='sabt') f.src='sabt'; else if(v(r,'pno')){ f.pno=v(r,'pno'); if(v(r,'py')) f.py=v(r,'py'); }
+    let o=map.get(id)||alias.get(id), abs=false;
+    /* قلمی که در «ثبت» بود و حالا شماره گزارش گرفته: همان قلم (با توضیح، عکس، ضروری و پیوندها) به «گزارش مأمور» می‌رود، نه قلم تازه */
+    if(!o && f.pno){ const s=regMatch(map,f); if(s){ o=s; o.rid=id; o.qno=o.no; delete o.src; abs=true; moved++; } }
+    else if(o && f.pno) regDup(map,o,f);
+    if(o){ Object.assign(o,f); if(o.gone && !o.dup){ delete o.gone; if(!abs) back++; } o.seen=TODAY; } else { map.set(id,Object.assign({id,add:TODAY,seen:TODAY},f)); nw++; } });
+  let gone=0; map.forEach(o=>{ if(srcOf(o)===src && !o.mv && !seen.has(o.rid||o.id) && !o.gone && !o.st && !o.dup){ o.gone=TODAY; gone++; } });
+  /* «ثبت» بدون این قلم: اگر در «گزارش مأمور» با همین درخواست هست، رفته نیست */
+  if(src==='sabt') map.forEach(o=>{ if(o.gone===TODAY && srcOf(o)==='sabt'){ const m=[...map.values()].find(y=>srcOf(y)==='mamur' && regSame(o,y)); if(m){ regDup(map,m,m,o); gone--; } } });
   const out=[...map.values()]; if(!put(BK,out)) throw new Error('save');
-  return {n:seen.size,nw,gone,back}; }
+  return {n:seen.size,nw,gone,back,moved}; }
+/* پیوند «ثبت» ← «گزارش مأمور»: شماره درخواست (ش.مبنا پدر) + کد کالا (+ سال) */
+const yOf=x=>x.y||String(x.id||'').split('-')[1]||'';
+const regSame=(s,m)=>srcOf(s)==='sabt' && !s.dup && m.pno && String(s.no)===String(m.pno) && nkey(s.code)===nkey(m.code) && (!m.py||!yOf(s)||String(m.py)===String(yOf(s)));
+function regMatch(map,f){ for(const s of map.values()) if(regSame(s,f)) return s; return null; }
+/** قلم قدیمی «ثبت» که برایش قلم جدا در «گزارش مأمور» ساخته شده بود: ضروری، توضیح و عکس به قلم گزارش می‌رود و از «رفته از باکس» بیرون می‌آید */
+function regDup(map,m,f,s0){ const s=s0||[...map.values()].find(y=>y!==m && regSame(y,f)); if(!s) return;
+  if(s.imp && !m.imp) m.imp=s.imp; if(s.memo && !m.memo) m.memo=s.memo;
+  if(Array.isArray(s.nt)&&s.nt.length){ const ids=new Set((m.nt||[]).map(x=>x.id)); m.nt=(m.nt||[]).concat(s.nt.filter(x=>!ids.has(x.id))).sort((a,b)=>(a.ts||0)-(b.ts||0)).slice(-40); }
+  if(!m.ph && phAll()[phKey(s)] && !phAll()[phKey(m)]) m.ph=phKey(s);
+  s.dup=m.id; s.gone=s.gone||TODAY; delete s.imp; }
 
 $('bFile').addEventListener('change',async()=>{ const f=$('bFile').files&&$('bFile').files[0]; $('bFile').value=''; if(!f||!W.box) return;
   if(f.size>8e6){ say('bMsg','فایل خیلی بزرگ است','bad'); return; }
   say('bMsg','در حال خواندن…');
-  try{ const r=await importBox(f,bSrc); say('bMsg',`${fa(r.n)} قلم در فایل: ${fa(r.nw)} تازه${r.gone?'، '+fa(r.gone)+' قلم دیگر در باکس نیست':''}${r.back?'، '+fa(r.back)+' قلم دوباره برگشت':''}`,'ok'); bF='open'; drawBox(); }
+  try{ const r=await importBox(f,bSrc); say('bMsg',`${fa(r.n)} قلم در فایل: ${fa(r.nw)} تازه${r.moved?'، '+fa(r.moved)+' قلم از «ثبت» با شماره گزارش آمد':''}${r.gone?'، '+fa(r.gone)+' قلم دیگر در باکس نیست':''}${r.back?'، '+fa(r.back)+' قلم دوباره برگشت':''}`,'ok'); bF='open'; drawBox(); }
   catch(e){ say('bMsg',e&&e.message==='lib'?'برای بار اول اینترنت لازم است (کتابخانه اکسل)':'این فایل خروجی باکس سندپرداز نیست (ستون «شرح کالا» و «مقدار» پیدا نشد)','bad'); } });
 let bF=lsl('ntk_bf','imp'), bU=lsl('ntk_bu','');
 const ST={me:'خریدم',teh:'مأمور تهران',nbd:'مأمور نهبندان',x:'لازم نیست'};
@@ -361,7 +378,7 @@ function sendBack(id){ const A=box(), k=A.findIndex(y=>y.id===id); if(k<0) retur
 /* قلم‌هایی که پیش از دو تکه شدن «مأمور تهران» خورده‌اند: یک بار به باکس تهران فرستاده می‌شوند */
 if(AG==='nb' && W.box) try{ const T0=oBox(); box().forEach(x=>{ if(x.st==='teh' && !x.mv && !x.gone && !T0.some(y=>y&&y.id==='tn-'+x.id)) sendTo(x,true); }); }catch(e){}
 const otherSt=x=>{ if(x.st!==SEND) return ''; const y=oBox().find(z=>z&&z.id===PRE+x.id), n=AGN[OA]; return !y?'':(y.st==='me'?n+': خریده شد':y.st==='x'?n+': لازم نیست':'در باکس '+n); };
-const isOpen=x=>!x.st && !x.gone;
+const isOpen=x=>!x.st && !x.gone && !x.dup;
 /* پیوند با «پیش‌فاکتور»: قلم‌هایی که در استعلام جاری یا تاییدشده هستند (استعلام ردشده قلم را آزاد می‌کند) */
 const canPre=W.box && canWT('پیش‌فاکتور'), sel=new Set();
 function preMap(){ const P=LS(PRK,[]), m=new Map(); (Array.isArray(P)?P:[]).forEach(iq=>{ if(!iq||!Array.isArray(iq.items)||iq.st==='no') return; const d=iq.dec||{};
@@ -372,7 +389,7 @@ function counts(){ const A=box(), W0=waterState(), S=svcs();
   const imp=A.filter(x=>x.imp&&isOpen(x)).length, open=A.filter(isOpen).length, nr=S.filter(s=>!s.done&&!s.no).length;
   $('nBox').textContent=imp?fa(imp):''; $('nWater').textContent=W0.cls==='due'?'۱':''; $('nSvc').textContent=nr?fa(nr):''; $('nWeek').textContent='';
   khSub(SEE.box?(A.length?fa(open)+' قلم باز در باکس':'باکس سندپرداز هنوز بارگذاری نشده'):'امروز '+fa(TODAY)); }
-function drawBox(){ FM=new Map(FAC().filter(r=>r&&r.id).map(r=>[r.id,r])); const ALL=box(), A=ALL.filter(x=>srcOf(x)===bSrc), q=norm($('bQ').value).split(' ').filter(Boolean), U=unitsGet(); PM=preMap();
+function drawBox(){ FM=new Map(FAC().filter(r=>r&&r.id).map(r=>[r.id,r])); const ALL=box(), A=ALL.filter(x=>srcOf(x)===bSrc&&!x.dup), q=norm($('bQ').value).split(' ').filter(Boolean), U=unitsGet(); PM=preMap();
   /* دو باکس: گزارش مأمور / ثبت */
   $('bSrc').innerHTML=Object.keys(SRC).map(k=>`<button type="button" data-src="${k}" aria-pressed="${k===bSrc}">${SRC[k]} (${fa(ALL.filter(x=>srcOf(x)===k&&isOpen(x)).length)})</button>`).join('');
   const c={nw:A.filter(x=>ntNew(x)>0).length,imp:A.filter(x=>x.imp&&isOpen(x)).length,open:A.filter(isOpen).length,fac:A.filter(waitFac).length,rcv:A.filter(waitRcv).length,[SEND]:A.filter(x=>x.st===SEND).length,done:A.filter(x=>x.st&&x.st!==SEND).length,gone:A.filter(x=>x.gone&&!x.st).length};
@@ -384,7 +401,7 @@ function drawBox(){ FM=new Map(FAC().filter(r=>r&&r.id).map(r=>[r.id,r])); const
   $('bUpI').innerHTML=ico(last?'filechk':'upload'); $('bUpT').textContent=!last?'فایل باکس '+sn+' هنوز بارگذاری نشده':(ds?'فایل باکس '+sn+' '+fa(ds)+' روز پیش بارگذاری شد':'فایل باکس '+sn+' امروز بارگذاری شد');
   $('bLast').textContent=last?'آخرین فایل: '+fa(last):'خروجی اکسل باکس '+sn+' از سندپرداز';
   if(!last && $('bUp').dataset.t!==bSrc){ $('bUp').open=true; $('bUp').dataset.t=bSrc; }
-  let L=A.filter(x=>bF==='nw'?ntNew(x)>0:bF==='imp'?(x.imp&&isOpen(x)):bF==='open'?isOpen(x):bF==='fac'?waitFac(x):bF==='rcv'?waitRcv(x):bF===SEND?x.st===SEND:bF==='done'?(x.st&&x.st!==SEND):(x.gone&&!x.st));
+  let L=A.filter(x=>bF==='nw'?ntNew(x)>0:bF==='imp'?(x.imp&&isOpen(x)):bF==='open'?isOpen(x):bF==='fac'?waitFac(x):bF==='rcv'?waitRcv(x):bF===SEND?x.st===SEND:bF==='done'?(x.st&&x.st!==SEND):(x.gone&&!x.st&&!x.dup));
   if(q.length) L=L.filter(x=>{ const h=norm([x.name,x.code,x.why,x.note,x.desc,x.req,x.memo,(Array.isArray(x.nt)?x.nt.map(m=>m.t).join(' '):''),unitOf(x,U)].join(' ')); return q.every(w=>h.indexOf(w)>-1); });
   /* واحد درخواست‌کننده: شمارش از همین فهرست؛ «بی‌واحد» = درخواست‌کننده‌ای که واحدش نوشته نشده */
   const uc=new Map(); let un=0; L.forEach(x=>{ const u=unitOf(x,U); if(u) uc.set(u,(uc.get(u)||0)+1); else un++; });
@@ -468,7 +485,7 @@ function facTags(x){ const f=facOf(x), r=rsOf(x); let h='';
   return h; }
 function bxHTML(x,U){ const d=daysSince(x.need||x.date), texts=[...new Set([x.why,x.note,x.desc].map(t=>clean(t,200)).filter(Boolean))];
   const pm=PM.get(x.id), preTag=pm?(pm.st==='ok'?`<span class="tag sp">پیش‌فاکتور تایید شد${pm.sup?': از '+esc(pm.sup):''}</span>`:`<span class="tag wa">${pm.st==='wait'?'پیش‌فاکتور: منتظر تایید':'در استعلام پیش‌فاکتور'}</span>`):'';
-  const tS=otherSt(x), stTag=(x.back&&!x.st&&AGN[x.back.from]?`<span class="tag wa">برگشت از ${esc(AGN[x.back.from])}${x.back.d?' '+fa(x.back.d):''}</span>`:'')+(x.st?`<span class="tag ${x.st===SEND?'wa':(x.st==='x'?'bad':'ok')}">${esc(ST[x.st])}${x.stAt?' '+fa(x.stAt):''}</span>${tS?`<span class="tag">${esc(tS)}</span>`:''}`:(x.gone?`<span class="tag">از باکس رفته ${fa(x.gone)}</span>`:''))+preTag
+  const tS=otherSt(x), stTag=(x.rid&&x.qno?`<span class="tag">از ثبت، درخواست ${esc(fa(x.qno))}</span>`:'')+(x.back&&!x.st&&AGN[x.back.from]?`<span class="tag wa">برگشت از ${esc(AGN[x.back.from])}${x.back.d?' '+fa(x.back.d):''}</span>`:'')+(x.st?`<span class="tag ${x.st===SEND?'wa':(x.st==='x'?'bad':'ok')}">${esc(ST[x.st])}${x.stAt?' '+fa(x.stAt):''}</span>${tS?`<span class="tag">${esc(tS)}</span>`:''}`:(x.gone?`<span class="tag">از باکس رفته ${fa(x.gone)}</span>`:''))+preTag
     +(x.st==='me'?facTags(x):'');
   const u=unitOf(x,U), U2=U||unitsGet();
   const need=x.need?`<span class="nd${d!=null&&d>0&&isOpen(x)?' old':''}">نیاز ${fa(x.need)}${d!=null&&d>0&&isOpen(x)?' ('+fa(d)+' روز گذشته)':''}</span>`:'';
