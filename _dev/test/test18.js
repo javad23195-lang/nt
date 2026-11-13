@@ -26,7 +26,7 @@ const hm=m=>{ m=((m%1440)+1440)%1440; return pad(Math.floor(m/60))+':'+pad(m%60)
   const P=await boot((jk,nm)=>({nt_tavaqof_v1:{}}));
   let r=await TL(P);
   ok(!r.hidden && r.rows.length===8,'کارت با ۸ ردیف دیده می‌شود');
-  ok(/(روز کاری|اضافه‌کار) · /.test(r.sub),'عنوان بازه: '+r.sub);
+  ok(/(روز کاری|اضافه‌کار)، /.test(r.sub),'عنوان بازه: '+r.sub);
   ok(await P.evaluate(()=>frames[0].contentDocument.querySelectorAll('#tlSh button').length===2 && frames[0].contentDocument.querySelectorAll('#tlSh button[aria-pressed="true"]').length===1),'۲ دکمه (روز کاری، اضافه‌کار)، یکی انتخاب‌شده');
 
   console.log('2) منطق با زمان ثابت');

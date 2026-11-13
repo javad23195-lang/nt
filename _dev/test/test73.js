@@ -53,7 +53,7 @@ const J=ago=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZo
   const h=await fr.evaluate(()=>[...document.querySelectorAll('#fl2 button')].filter(b=>b.getClientRects().length).every(b=>b.getBoundingClientRect().height>=44));
   ok(h,'همه دکمه‌های ناوگان دست‌کم ۴۴ پیکسل');
   ok(await fr.evaluate(()=>{ flRender(); return document.querySelector('#fl2 .fr2').classList.contains('on'); }),'باز بودن ردیف بعد از تازه‌سازی می‌ماند');
-  ok(/اجرت و قطعه،|از (فروردین|اردیبهشت|خرداد|تیر|مرداد|شهریور|مهر|آبان|آذر|دی|بهمن|اسفند)/.test(kp.cost||''),'هزینه: «اجرت و قطعه · ماه» یا مقایسه با نام ماه قبل — '+kp.cost);
+  ok(/اجرت و قطعه،|از (فروردین|اردیبهشت|خرداد|تیر|مرداد|شهریور|مهر|آبان|آذر|دی|بهمن|اسفند)/.test(kp.cost||''),'هزینه: «اجرت و قطعه، ماه» یا مقایسه با نام ماه قبل — '+kp.cost);
   ok(errs.length===0,'بدون خطا '+errs.join('|'));
   await c.close();
 

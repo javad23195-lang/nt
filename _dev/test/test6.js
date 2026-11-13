@@ -1,4 +1,4 @@
-// پایداری: GitHub با نام برچسب نسخه قبلی را می‌دهد · درمان سیستمی که قبلاً عقب مانده · ارسال هنگام خروج از صفحه
+// پایداری: GitHub با نام برچسب نسخه قبلی را می‌دهد، درمان سیستمی که قبلاً عقب مانده، ارسال هنگام خروج از صفحه
 const {chromium}=require('playwright'); const http=require('http'), fs=require('fs');
 const {make}=require('./fakegh.js');
 const HTML=fs.readFileSync(require('path').join(__dirname,'..','out.html'));

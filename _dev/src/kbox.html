@@ -18,6 +18,12 @@ details.up summary .tx{flex:1;min-width:0}
 details.up summary b{display:block;font-size:1rem;font-weight:900}
 details.up summary span.s{display:block;font-size:.86rem;color:#4E5864}
 details.up summary .cv{color:#4E5864;transition:transform .2s}
+/* فایل تازه است (کمتر از یک هفته): یک خط کوچک، تا اقلام زودتر دیده شوند */
+details.up:not(.no):not([open]){margin-top:10px;border-radius:14px}
+details.up:not(.no):not([open]) summary{min-height:44px;padding:4px 14px;gap:8px}
+details.up:not(.no):not([open]) summary .fi svg{width:20px;height:20px}
+details.up:not(.no):not([open]) summary b{font-size:.86rem;font-weight:800}
+details.up:not(.no):not([open]) summary span.s{display:none}
 details.up[open] summary .cv{transform:rotate(180deg)}
 details.up .bd{padding:0 16px 16px}
 .bx{background:#fff;border:1px solid var(--rule);border-radius:18px;margin-top:12px;overflow:hidden}
@@ -410,7 +416,7 @@ function drawBox(){ FM=new Map(FAC().filter(r=>r&&r.id).map(r=>[r.id,r])); const
   $('bF').innerHTML=F.map(([k,n])=>`<button type="button" class="cp" data-f="${k}" aria-pressed="${k===bF}">${n} (${fa(c[k])})</button>`).join('')+(c.imp?`<button type="button" class="cp" id="bCopy">${ico('copy',18)} کپی ضروری‌ها</button>`:'');
   const last=A.map(x=>x.seen||'').sort().pop(); const ds=last?daysSince(last):null, sn='«'+SRC[bSrc]+'»';
   $('bUp').classList.toggle('no',!last||ds>7);
-  $('bUpI').innerHTML=ico(last?'filechk':'upload'); $('bUpT').textContent=!last?'فایل باکس '+sn+' هنوز بارگذاری نشده':(ds?'فایل باکس '+sn+' '+fa(ds)+' روز پیش بارگذاری شد':'فایل باکس '+sn+' امروز بارگذاری شد');
+  $('bUpI').innerHTML=ico(last?'filechk':'upload'); $('bUpT').textContent=!last?'فایل باکس '+sn+' هنوز بارگذاری نشده':(ds>7?'فایل باکس '+sn+' '+fa(ds)+' روز پیش بارگذاری شد':'فایل '+sn+': '+(ds?fa(ds)+' روز پیش':'امروز'));
   $('bLast').textContent=last?'آخرین فایل: '+fa(last):'خروجی اکسل باکس '+sn+' از سندپرداز';
   if(!last && $('bUp').dataset.t!==bSrc){ $('bUp').open=true; $('bUp').dataset.t=bSrc; }
   let L=A.filter(x=>bF==='nw'?ntNew(x)>0:bF==='imp'?(x.imp&&isOpen(x)):bF==='open'?isOpen(x):bF==='fac'?waitFac(x):bF==='rcv'?waitRcv(x):bF===SEND?x.st===SEND:bF==='done'?(x.st&&x.st!==SEND):(x.gone&&!x.st&&!x.dup));

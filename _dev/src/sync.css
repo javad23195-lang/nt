@@ -266,3 +266,10 @@ input.ntsec.show{-webkit-text-security:none}
 .sybox .symem.warn{background:#FFF8E6;border-color:#E8C46A}.sybox .symem.warn .symembar i{background:#C77700}
 .sybox .symem.bad{background:#FDECEA;border-color:#E9A39D}.sybox .symem.bad .symembar i{background:#B3261E}
 .sybox .symem details{margin-top:4px}.sybox .symem summary{cursor:pointer;color:#51606E;font-weight:700;min-height:32px;display:flex;align-items:center}
+/* نوار وضعیت همگام‌سازی: در گوشی کارت داخل سربرگ؛ در کامپیوتر کارت شناور بالای صفحه (نه روی منوی کنار). دکمه همیشه خوانا. */
+body .topbar .sybar button{background:#fff!important;color:inherit!important;border:1px solid currentColor!important;border-radius:16px!important;min-height:36px;padding:0 14px;font-weight:800}
+body.ntnav .topbar .sybar{margin:8px 0 0;border:1px solid;border-radius:12px;padding:6px 10px 6px 6px}
+@media (min-width:1000px){
+  body .topbar .sybar{position:fixed;top:12px;left:16px;right:auto;z-index:60;width:auto;max-width:460px;margin:0;border:1px solid;border-radius:12px;
+    padding:8px 10px 8px 12px;box-shadow:0 6px 20px rgba(27,36,48,.16);font-size:.82rem;line-height:1.6}
+}

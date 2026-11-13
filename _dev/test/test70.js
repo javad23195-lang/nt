@@ -19,7 +19,7 @@ const J=ago=>{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{timeZo
   ok(t.bad==='۲' && t.stop==='۳' && t.svc==='۳','کاشی‌ها: خراب ۲، متوقف ۳، سرویس گذشته ۳ — '+JSON.stringify(t));
   const rows=()=>fr.evaluate(()=>[...document.querySelectorAll('#atList .ar')].map(b=>b.className+'|'+b.innerText.replace(/\s+/g,' ')));
   let R=await rows();
-  ok(R.some(r=>/k-bad/.test(r) && /PC290/.test(r) && /خراب/.test(r) && /از ساعت ۰۶:۳۰/.test(r)),'کارت دستگاه: نام، «خراب»، «از ساعت ۰۶:۳۰ · … توقف»');
+  ok(R.some(r=>/k-bad/.test(r) && /PC290/.test(r) && /خراب/.test(r) && /از ساعت ۰۶:۳۰/.test(r)),'کارت دستگاه: نام، «خراب»، «از ساعت ۰۶:۳۰، … توقف»');
   ok(R.filter(r=>/k-svc/.test(r)).length===2 && R.some(r=>/TRS01/.test(r)&&/روغن موتور، فیلتر/.test(r)),'سرویس گذشته: یک کارت برای هر دستگاه (TRS01 با دو سرویس)');
   await fr.click('#tiBox .ti-bad'); await sleep(300); R=await rows();
   ok(R.length===2 && R.every(r=>/k-bad/.test(r)),'کاشی «خراب»: فقط ۲ دستگاه خراب');
