@@ -120,6 +120,39 @@ details.up .bd{padding:0 16px 16px}
 .selrow{display:flex;justify-content:space-between;align-items:center;margin:12px 2px 0;font-size:.86rem;color:#4E5864}
 .selrow button{border:0;background:none;font:inherit;font-weight:900;color:var(--nv);min-height:36px;cursor:pointer}
 #bSel #bSelX,#bBuy #bBuyX{background:transparent;border:1.5px solid var(--nv);color:var(--nv);padding:0 14px}
+/* کامپیوتر: نمای جدول (ستون‌های هم‌تراز؛ همان کارت با چیدمان ردیفی؛ پیام‌ها، عکس و توضیح زیر ردیف) */
+.bview,.bhd{display:none}
+@media (min-width:1000px){
+.bview{display:inline-flex;gap:4px;padding:3px;border-radius:12px;background:#ECE9E3;margin-top:12px}
+.bview button{min-height:34px;padding:0 16px;border:0;border-radius:9px;background:none;font:inherit;font-size:.84rem;font-weight:800;color:#5E6670;cursor:pointer}
+.bview button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(21,33,44,.1)}
+body.tbl .wrap{max-width:1120px}
+body.tbl .bhd:not([hidden]){display:grid;grid-template-columns:44px minmax(0,1fr) 70px 190px 330px 36px;column-gap:12px;padding:10px 17px 4px 11px;font-size:.74rem;font-weight:800;color:#8C9198}
+body.tbl #bList .bx{display:grid;grid-template-columns:44px minmax(0,1fr) 70px 190px 330px 36px;column-gap:12px;align-items:center;margin-top:6px;padding:8px 10px;border-radius:12px}
+body.tbl #bList .bx .r1{display:contents}
+body.tbl #bList .bx .st{grid-column:1;grid-row:1;width:40px;height:40px;border-radius:10px}
+body.tbl #bList .bx .st svg{width:20px;height:20px}
+body.tbl #bList .bx .tx{grid-column:2;grid-row:1}
+body.tbl #bList .bx .bn{font-size:.96rem}
+body.tbl #bList .bx .mt,body.tbl #bList .bx .nd{font-size:.8rem}
+body.tbl #bList .bx .q{grid-column:3;grid-row:1;font-size:1.05rem;padding:4px 6px}
+body.tbl #bList .bx .tg{grid-column:4;grid-row:1;padding:0}
+body.tbl #bList .bx .acts{grid-column:5;grid-row:1;display:flex;gap:6px;margin:0;border:0}
+body.tbl #bList .bx .acts button{flex:1;flex-direction:row;min-height:38px;padding:0 6px;gap:4px;font-size:.78rem;border:1px solid var(--rule)!important;border-radius:10px;white-space:nowrap}
+body.tbl #bList .bx .acts button svg{width:16px;height:16px}
+body.tbl #bList .bx .shr{grid-column:6;grid-row:1}
+body.tbl #bList .bx>:not(.r1):not(.tg):not(.acts):not(.thr):not(.memo){grid-column:2/-1;margin-inline:0;padding-inline:0}
+body.tbl #bList .bx .why{padding-top:4px;font-size:.86rem;color:#4E5864}
+body.tbl #bList .bx .memo,body.tbl #bList .bx .thr,body.tbl #bList .bx .uch{margin-top:6px}
+body.tbl #bList .est{grid-column:1/-1}
+body.tbl #bList .bx .thr{grid-column:2/5;border-top:0;padding-top:0;margin-top:6px}
+body.tbl #bList .bx .memo{grid-column:5/-1;align-self:end;margin-top:6px}
+body.tbl #bList .bx .thi{margin-top:6px}
+body.tbl #bList .bx .thi .in,body.tbl #bList .bx .thi button{min-height:38px;font-size:.86rem}
+body.tbl #bList .bx .memo .in,body.tbl #bList .bx .memo div{min-height:38px;padding:7px 12px;font-size:.84rem;border-radius:10px}
+body.tbl #bList .bx .msgx{font-size:.84rem;padding:4px 10px}
+body.tbl .bhd:has(+#bList:not(:has(.bx))){display:none}
+}
 @media (min-width:900px){ #bSel,#bBuy{position:sticky;bottom:12px;inset-inline:auto;margin-top:12px} }
 /* هفتگی */
 .wh{display:flex;align-items:baseline;gap:8px}
@@ -198,7 +231,9 @@ details.up .bd{padding:0 16px 16px}
   <div class="chips scroll" id="bU" role="group" aria-label="واحد درخواست‌کننده" style="margin-top:10px"></div>
   <div class="msg" id="bMsg2" role="status"></div>
   <input type="file" id="bPhF" accept="image/*" hidden><div id="bPhV" hidden role="dialog" aria-label="عکس قطعه"><img alt="عکس قطعه"><button type="button" class="x">بستن</button><button type="button" class="d">حذف عکس</button></div>
+  <div class="bview" role="group" aria-label="نمایش لیست"><button type="button" data-v="tbl">جدول</button><button type="button" data-v="card">کارت</button></div>
   <div class="selrow" id="bSelRow"></div>
+  <div class="bhd" aria-hidden="true"><span></span><span>کالا</span><span>مقدار</span><span>وضعیت</span><span>کار</span><span></span></div>
   <div id="bList"></div>
   <details class="card w-only" id="bUnitsW" style="margin-top:16px"><summary style="font-weight:900;cursor:pointer;min-height:40px;display:flex;align-items:center">واحد درخواست‌کننده‌ها&nbsp;<small id="bUnitsN" style="color:#4E5864"></small></summary>
     <p class="hint">برای هر درخواست‌کننده، واحدش را بنویسید یا از فهرست انتخاب کنید. کسی که برای دیگران ثبت می‌کند (مثل انبار) را خالی بگذارید؛ واحد از «دلیل نیاز» پیدا می‌شود. فقط در اطلاعات رمزشده ذخیره می‌شود.</p>
@@ -552,6 +587,11 @@ $('bF').addEventListener('click',async e=>{ if(e.target.closest('#bCopy')){ cons
     const ok=await copyText(t); say('bMsg2',ok?fa(L.length)+' قلم کپی شد؛ در پیام‌رسان بچسبانید':'کپی نشد',ok?'ok':'bad'); return; }
   const b=e.target.closest('[data-f]'); if(!b) return; bF=b.dataset.f; lss('ntk_bf',bF); drawBox(); });
 $('bQ').addEventListener('input',drawBox);
+/* نمای جدول / کارت (فقط کامپیوتر؛ فقط روی همین دستگاه) */
+function bView(v){ v=v==='card'?'card':'tbl'; document.body.classList.toggle('tbl',v==='tbl'); document.querySelectorAll('.bview [data-v]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===v))); }
+bView(lsl('ntk_bview','tbl'));
+document.querySelector('.bview').addEventListener('click',e=>{ const b=e.target.closest('[data-v]'); if(!b) return; lss('ntk_bview',b.dataset.v); bView(b.dataset.v); });
+
 
 /* ============ هفتگی ============ */
 const weeks=()=>{ const a=LS(WK,[]); return Array.isArray(a)?a.filter(w=>w&&w.id&&Array.isArray(w.items)):[]; };
