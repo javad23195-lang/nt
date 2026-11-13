@@ -1,0 +1,54 @@
+const {chromium}=require('playwright'); const http=require('http'), fs=require('fs');
+const HTML=fs.readFileSync(require('path').join(__dirname,'..','out.html')); const {make}=require('./fakegh.js');
+const LIST=(process.env.NT_READINGS?fs.readFileSync(process.env.NT_READINGS,'utf8'):(console.log('NT_READINGS را تنظیم کنید (فایل لیست قرائت، قالب «کپی کل دفترچه»)'),process.exit(0)));
+let fails=0; const ok=(c,m)=>{ console.log((c?'  ok  ':'  FAIL ')+m); if(!c) fails++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+(async()=>{
+  const G=make(); await new Promise(r=>G.srv.listen(0,r)); const GH='http://localhost:'+G.srv.address().port;
+  const web=http.createServer((q,r)=>{ r.writeHead(200,{'Content-Type':'text/html; charset=utf-8'}); r.end(HTML); }); await new Promise(r=>web.listen(0,r));
+  const br=await chromium.launch({executablePath:process.env.CHROMIUM||undefined});
+  const c=await br.newContext({viewport:{width:420,height:820},locale:'fa-IR'});
+  await c.addInitScript((GH)=>{ window.NTSYNC_TEST={api:GH,raw:GH};
+    if(!localStorage.getItem('__s')){ localStorage.setItem('__s','1');
+      localStorage.setItem('nt_daftar_v1',JSON.stringify([{dev:'لودر ZL50',unit:'ساعت',val:14850,date:'1405/06/10'},{dev:'لودر ZL50',unit:'ساعت',val:15000,date:'1405/06/31'}])); } },GH);
+  const p=await c.newPage(); const errs=[]; p.on('pageerror',e=>errs.push(String(e)));
+  await p.goto(`http://localhost:${web.address().port}/nt/s.html`); await p.waitForFunction(()=>window.ntSync && ntBooted);
+  const i=await p.evaluate(()=>DOCS.findIndex(d=>d.name==='دفترچه قرائت')); await p.evaluate(i=>show(i),i);
+  const f=p.frameLocator('iframe.on');
+  await f.locator('details.fold > summary').click();
+  await f.locator('#bImp').click();
+  ok(await f.locator('#impTxt').isVisible(),'کادر چسباندن باز شد');
+  await f.locator('#impTxt').fill(LIST);
+  let info=await f.locator('#impInfo').innerText(); console.log('     ',info.replace(/\n/g,' | '));
+  ok(info.includes('۸۹') ,'هر ۸۹ خط فایل شما خوانده شد');
+  ok(info.includes('۸۸ جدید') && info.includes('۱ با عدد متفاوت'),'۸۸ جدید و ۱ عدد متفاوت (ZL50 در 06/31)');
+  ok(!info.includes('خوانده نشد'),'هیچ خطی رد نشد (نام همه دستگاه‌ها درست است)');
+  await p.screenshot({path:require('path').join(require('os').tmpdir(),'imp-preview.png')});
+  await f.locator('#impGo').click(); await sleep(300);
+  let log=JSON.parse(await p.evaluate(()=>localStorage.getItem('nt_daftar_v1')));
+  ok(log.length===90,'دفترچه: ۹۰ قرائت (۲ قبلی + ۸۸ جدید) — '+log.length);
+  ok(log.some(x=>x.dev==='لودر ZL50'&&x.date==='1405/06/10'&&x.val===14850),'قرائت قبلی که در لیست نبود، باقی ماند');
+  ok(log.find(x=>x.dev==='لودر ZL50'&&x.date==='1405/06/31').val===15005,'عدد متفاوت جایگزین شد (15000 → 15005)');
+  ok(log.every(x=>typeof x.val==='number' && /^\d{4}\/\d\d\/\d\d$/.test(x.date) && x.unit),'قالب همه ردیف‌ها درست است');
+  const src=LIST.trim().split(/\r?\n/).slice(1).map(l=>l.split('\t'));
+  ok(src.every(r=>log.some(x=>x.dev===r[0]&&x.unit===r[1]&&x.val===+r[2]&&x.date===r[3])),'همه ۸۹ ردیف فایل، دقیق در دفترچه هست');
+  ok((await f.locator('#mHist').innerText())==='۹۰','شمارنده «در دفترچه» = ۹۰');
+  // کارت دستگاه: آخرین قرائت و تاریخچه
+  const card=f.locator('.dev',{hasText:'لودر کوماتسو WA470'});
+  ok((await card.locator('details.hist summary').innerText()).includes('۸'),'تاریخچه WA470: ۸ قرائت');
+  await p.screenshot({path:require('path').join(require('os').tmpdir(),'imp-done.png')});
+  // دوباره همان لیست → همه تکراری
+  await f.locator('#bImp').click(); await f.locator('#impTxt').fill(LIST);
+  info=await f.locator('#impInfo').innerText();
+  ok(info.includes('۰ جدید') && info.includes('۸۹ تکراری') && await f.locator('#impGo').isDisabled(),'چسباندن دوباره: همه تکراری، دکمه غیرفعال');
+  // جداکننده فاصله، رقم فارسی، خط خراب، دستگاه ناشناس
+  await f.locator('#impTxt').fill('لودر ZL50 ساعت ۱۵۱۲۰ ۱۴۰۵/۰۷/۱۵\nکامیون TRS01    کیلومتر    3800    1405-07-15\nدستگاه ناشناس\tساعت\t12\t1405/07/15\nلودر ZL50\tساعت\tabc\t1405/07/16\nلودر ZL50\tساعت\t15130\t1405/13/40');
+  info=await f.locator('#impInfo').innerText(); console.log('     ',info.replace(/\n/g,' | '));
+  ok(info.includes('۲ جدید') && info.includes('۳ خط خوانده نشد'),'فاصله ساده و رقم فارسی پذیرفته شد؛ ۳ خط خراب گزارش شد');
+  await f.locator('#impGo').click(); await sleep(300);
+  log=JSON.parse(await p.evaluate(()=>localStorage.getItem('nt_daftar_v1')));
+  ok(log.length===92 && log.some(x=>x.dev==='لودر ZL50'&&x.val===15120&&x.date==='1405/07/15') && log.some(x=>x.dev==='کامیون TRS01'&&x.val===3800&&x.date==='1405/07/15'),'۲ ردیف درست اضافه شد، خط‌های خراب اضافه نشد');
+  ok(errs.length===0,'بدون خطای اسکریپت '+errs.join(' / '));
+  console.log(fails?`\n${fails} مورد ناموفق`:'\nهمه موارد موفق');
+  await br.close(); web.close(); G.srv.close(); process.exit(fails?1:0);
+})().catch(e=>{ console.error('CRASH',e); process.exit(2); });

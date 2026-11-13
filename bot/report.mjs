@@ -1,0 +1,141 @@
+// گزارش روزانه نت → تلگرام و بله.
+// فقط می‌خواند؛ هیچ‌چیز در مخزن نمی‌نویسد. رمز اطلاعات (NT_PASS) فقط در GitHub Secrets است.
+import fs from 'node:fs'; import vm from 'node:vm'; import { webcrypto as crypto } from 'node:crypto'; import zlib from 'node:zlib';
+import path from 'node:path'; import { fileURLToPath } from 'node:url';
+const HERE=path.dirname(fileURLToPath(import.meta.url));
+const E=process.env, OWNER='javad23195-lang', REPO='nt', TAG='nt-data', FILE='nt-data.json';
+const DRY=E.DRY==='1';
+
+/* ---------- باز کردن اطلاعات (همان روش sync.js) ---------- */
+const b64=s=>Uint8Array.from(Buffer.from(s,'base64'));
+const normPass=p=>String(p||'').trim().replace(/[۰-۹]/g,d=>String(d.charCodeAt(0)-0x06F0)).replace(/[٠-٩]/g,d=>String(d.charCodeAt(0)-0x0660));
+async function open(w,pass){
+  const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(normPass(pass)),'PBKDF2',false,['deriveBits']);
+  const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:b64(w.salt),iterations:150000,hash:'SHA-256'},km,256);
+  const key=await crypto.subtle.importKey('raw',bits,'AES-GCM',false,['decrypt']);
+  let pt; try{ pt=Buffer.from(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(w.iv)},key,b64(w.data))); }catch(e){ throw new Error('رمز اطلاعات درست نیست (NT_PASS)'); }
+  if(w.gz) pt=zlib.gunzipSync(pt);
+  const o=JSON.parse(pt.toString('utf8')); if(!o||!o.keys) throw new Error('فایل داده خراب است');
+  return o;
+}
+async function load(){
+  if(E.NT_SOURCE_FILE) return JSON.parse(fs.readFileSync(E.NT_SOURCE_FILE,'utf8'));
+  /* بعد از انتقال به مخزن خصوصی: NT_DATA_TOKEN (کلید فقط‌همان مخزن) در GitHub Secrets؛ مخزن پیش‌فرض: <مالک>/nt-data */
+  const priv=!!E.NT_DATA_TOKEN, repo=priv?(E.NT_DATA_REPO||OWNER+'/nt-data'):OWNER+'/'+REPO;
+  const hdr={'Accept':'application/vnd.github.raw+json'}; const tk=priv?E.NT_DATA_TOKEN:E.GITHUB_TOKEN; if(tk) hdr.Authorization='Bearer '+tk;
+  let r=await fetch(`https://api.github.com/repos/${repo}/contents/${FILE}?ref=${TAG}`,{headers:hdr,signal:AbortSignal.timeout(30000)});
+  if(!r.ok && !priv) r=await fetch(`https://raw.githubusercontent.com/${repo}/${TAG}/${FILE}`,{signal:AbortSignal.timeout(30000)});
+  if(!r.ok) throw new Error('فایل داده از GitHub خوانده نشد ('+r.status+')');
+  return JSON.parse(await r.text());
+}
+
+/* ---------- تاریخ شمسی (به وقت تهران) ---------- */
+const p2=n=>String(n).padStart(2,'0');
+function jalali(d){
+  const p=Object.fromEntries(new Intl.DateTimeFormat('en-US-u-ca-persian-nu-latn',{timeZone:'Asia/Tehran',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d).map(x=>[x.type,x.value]));
+  return `${p.year}/${p2(p.month)}/${p2(p.day)}`;
+}
+const MONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const nice=s=>{ const [y,m,d]=s.split('/').map(Number); return `${d} ${MONTHS[m-1]}`; };
+const latin=s=>String(s==null?'':s).replace(/[۰-۹]/g,d=>'0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]).replace(/[٠-٩]/g,d=>'0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
+const normDay=s=>{ const m=/^(1[34]\d{2})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/.exec(latin(s).trim()); return m?`${m[1]}/${p2(+m[2])}/${p2(+m[3])}`:''; };
+const FA=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+const hm=min=>{ min=Math.round(min); const h=Math.floor(min/60), m=min%60; return h&&m?`${FA(h)} ساعت و ${FA(m)} دقیقه`:h?`${FA(h)} ساعت`:`${FA(m)} دقیقه`; };
+
+/* ---------- ساخت گزارش ---------- */
+export function buildReport(keys,now){
+  const store=keys, ls={getItem:k=>(typeof store[k]==='string'?store[k]:null)};
+  const win={}; vm.runInNewContext(fs.readFileSync(path.join(HERE,'..','_dev','src','stops.js'),'utf8'),{window:win,localStorage:ls,JSON,Set,Math,String,Number,Object,Array});
+  const today=jalali(now), yest=jalali(new Date(now.getTime()-864e5));
+  const L=[`گزارش نت — ${FA(nice(today))}`,''];
+
+  // دیروز: توقف‌ها (همان قاعده نمودار و گزارش اکسل)
+  const stops=win.ntStops.list(yest,yest);
+  L.push(`دیروز (${FA(nice(yest))}):`);
+  if(!stops.length) L.push('• توقفی ثبت نشده');
+  else{
+    const sum=a=>a.reduce((s,x)=>s+(x.min||0),0), by=c=>stops.filter(x=>x.cls===c);
+    L.push(`• توقف: ${FA(stops.length)} مورد، ${hm(sum(stops))}`);
+    const per={}; stops.forEach(x=>{ (per[x.dev]=per[x.dev]||{m:0,c:{}}); per[x.dev].m+=x.min||0; per[x.dev].c[x.cause]=(per[x.dev].c[x.cause]||0)+(x.min||0); });
+    const top=Object.entries(per).sort((a,b)=>b[1].m-a[1].m)[0];
+    const cause=Object.entries(top[1].c).sort((a,b)=>b[1]-a[1])[0][0];
+    L.push(`• بیشترین توقف: ${top[0]} (${hm(top[1].m)}، ${cause})`);
+    L.push(`• خرابی: ${FA(by('em').length)} — سرویس: ${FA(by('pm').length)} — سالم ولی کار نکرد: ${FA(by('idle').length)}`);
+    const open=stops.filter(x=>x.min===null); if(open.length) L.push(`• هنوز متوقف: ${open.map(x=>x.dev).join('، ')}`);
+  }
+
+  // برنامه روزانه
+  let db={}; try{ db=JSON.parse(store.nt_prog_v1||'{}')||{}; }catch(e){}
+  const day=d=>{ const k=Object.keys(db).find(x=>normDay(x)===d); return (k&&db[k])||{}; };
+  const dT=day(today), dY=day(yest);
+  const tasks=(dT.tasks||[]).filter(t=>t&&t.dev&&(t.prog||t.act));
+  L.push('','امروز (برنامه روزانه):');
+  if(!tasks.length) L.push('• برنامه امروز هنوز ثبت نشده');
+  else{ L.push(`• ${FA(tasks.length)} کار برنامه‌ریزی شده`); tasks.slice(0,6).forEach(t=>L.push(`  - ${t.dev}: ${String(t.prog||t.act).slice(0,60)}`)); if(tasks.length>6) L.push(`  و ${FA(tasks.length-6)} کار دیگر`); }
+  const left=(dY.tasks||[]).filter(t=>t&&t.dev&&t.prog&&!t.done);
+  if(left.length){ L.push(`• ${FA(left.length)} کار دیروز انجام نشده:`); left.slice(0,5).forEach(t=>L.push(`  - ${t.dev}: ${String(t.prog).slice(0,60)}`)); }
+  const faults=[...(dT.faults||[]),...(dY.faults||[])].filter(f=>f&&f.dev&&f.fdesc);
+  if(faults.length){ L.push('','خرابی‌های ثبت‌شده:'); faults.slice(0,6).forEach(f=>L.push(`• ${f.dev}: ${String(f.fdesc).slice(0,60)}${f.pri?' (اولویت '+FA(f.pri)+')':''}`)); }
+  // فاکتور برون‌سپاری: کارهای باز و دیرکرد (بیش از ۳ روز بعد از پایان یا شروع کار)
+  try{
+    const jobs=JSON.parse(store.nt_outsrc_v1||'[]'); const open=(Array.isArray(jobs)?jobs:[]).filter(j=>j&&j.id&&(!(j.steps&&j.steps.fin)||(Array.isArray(j.more)&&j.more.some(x=>x&&x.id&&!(x.steps&&x.steps.fin)))));
+    if(open.length){
+      const j2g=dy=>{ const m=/^(\d{4})\/(\d{2})\/(\d{2})$/.exec(dy||''); if(!m) return null; let jy=+m[1]-979, jm=+m[2]-1, jd=+m[3]-1; let n=365*jy+Math.floor(jy/33)*8+Math.floor(((jy%33)+3)/4); for(let i=0;i<jm;i++) n+=i<6?31:30; n+=jd; return n; };
+      const t0=j2g(today);
+      const one=(rcRaw,baseRaw)=>{ const rc=normDay(rcRaw||''), b=rc||normDay(baseRaw||''), g=b?j2g(b):null; return {rc:!!rc,d:(g===null||t0===null)?0:t0-g-(rc?1:3)}; };
+      const late=open.map(j=>{ const c=[]; if(!(j.steps&&j.steps.fin)) c.push(Object.assign(one(j.steps&&j.steps.rcv,j.ws||j.bd),{x:false}));
+        (Array.isArray(j.more)?j.more:[]).filter(x=>x&&x.id&&!(x.steps&&x.steps.fin)).forEach(x=>c.push(Object.assign(one(x.steps&&x.steps.rcv,x.d),{x:true})));
+        const w=c.sort((a,b)=>b.d-a.d)[0]||{d:0}; return Object.assign({j},w); }).filter(x=>x.d>0).sort((a,b)=>b.d-a.d);
+      L.push('',`فاکتور برون‌سپاری: ${FA(open.length)} کار باز${late.length?` — ${FA(late.length)} دیرکرد`:''}`);
+      late.slice(0,3).forEach(x=>L.push(`  - ${String(x.j.dev).slice(0,40)}: ${x.rc?(x.x?'فاکتور دیگر رسیده، در سندپرداز ثبت کنید':'فاکتور رسیده، در سندپرداز ثبت کنید'):(x.x?'فاکتور دیگر مانده، بگیرید':'فاکتور را از پیمانکار بگیرید')} (${FA(x.d)} روز دیرکرد)`));
+    }
+  }catch(e){}
+  // خدمت چاپ‌نشده: خدمت ۱۴ روز اخیر که برگه‌اش هنوز چاپ نشده (همان قاعده زبانه «خدمات»)
+  try{
+    const kd=JSON.parse(store.nt_khadamat_v1||'{}'), rows=Array.isArray(kd.rows)?kd.rows:[];
+    const t=today.split('/').map(Number), tj=t[0]*372+(t[1]-1)*31+t[2];
+    const np=rows.filter(r=>r&&!r.pr&&Math.abs(tj-((+r.y)*372+((+r.m)-1)*31+(+r.d)))<=14);
+    if(np.length){ L.push('',`خدمت چاپ‌نشده: ${FA(np.length)} مورد`); np.slice(0,4).forEach(r=>L.push(`  - ${String(r.dev||'').slice(0,40)}: ${String(r.act||'').slice(0,50)}`)); }
+  }catch(e){}
+  // خرابی تکراری: همان دستگاه و همان نوع فعالیت، ۲ بار یا بیشتر در ۳۰ روز (فقط روز بعد از ثبت تعمیر تکراری)
+  try{
+    const w2={}; vm.runInNewContext(fs.readFileSync(path.join(HERE,'..','_dev','src','repeat.js'),'utf8'),{window:w2,globalThis:w2,String,Math,Object,Array});
+    const sh=JSON.parse(store.nt_sh8_v1||'{}'), y=w2.ntRepeat.dn(yest);
+    const R=w2.ntRepeat.find(Array.isArray(sh.rows)?sh.rows:[],{days:30}).filter(x=>x.reg===y);
+    if(R.length){ L.push('','⚠ خرابی تکراری:'); R.slice(0,5).forEach(x=>{ L.push(`• ${String(x.dev).slice(0,40)} — ${String(x.type).slice(0,30)}: ${FA(x.n)} بار در ${FA(x.gap)} روز`);
+      x.list.forEach(l=>L.push(`  - ${FA(l.date)}${l.rep?' — '+l.rep.slice(0,40):''}`)); }); }
+  }catch(e){}
+  // روز اول هر ماه: هزینه تعمیرات ماه قبل از شناسنامه (ماه = تاریخ ارسال)، ۵ دستگاه پرهزینه
+  try{
+    const [ty,tm,td]=today.split('/').map(Number);
+    if(td===1){
+      const w3={}; vm.runInNewContext(fs.readFileSync(path.join(HERE,'..','_dev','src','cost.js'),'utf8'),{window:w3,globalThis:w3,String,Math,Object,Array,isFinite});
+      const py=tm===1?ty-1:ty, pm=tm===1?12:tm-1, sh=JSON.parse(store.nt_sh8_v1||'{}');
+      const C=w3.ntCost.month(Array.isArray(sh.rows)?sh.rows:[],py,pm), N=n=>FA(Math.round(n).toLocaleString('en-US'));
+      L.push('',`هزینه تعمیرات ${MONTHS[pm-1]} ${FA(py)} (از شناسنامه):`);
+      if(!C.sum) L.push('• هزینه‌ای ثبت نشده');
+      else{ L.push(`• جمع: ${N(C.sum)} ریال — اجرت ${N(C.a)}، خرید ${N(C.k)}`);
+        L.push('• پرهزینه‌ترین دستگاه‌ها:'); C.devs.slice(0,5).forEach((x,i)=>L.push(`  ${FA(i+1)}. ${String(x.dev).slice(0,40)} — ${N(x.sum)} (${FA(x.n)} فاکتور)`)); }
+    }
+  }catch(e){}
+  return L.join('\n').slice(0,3800);
+}
+
+/* ---------- ارسال ---------- */
+async function send(name,base,token,chat,text){
+  const r=await fetch(`${base}/bot${token}/sendMessage`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({chat_id:chat,text}),signal:AbortSignal.timeout(30000)});
+  const j=await r.json().catch(()=>null);
+  if(!r.ok||!(j&&j.ok)) throw new Error(`${name}: خطا ${r.status}`);
+  console.log(name+': فرستاده شد');
+}
+if(process.argv[1]===fileURLToPath(import.meta.url)){
+  if(!E.NT_PASS){ console.log('Secret کم است: NT_PASS'); process.exit(1); }
+  const text=buildReport((await open(await load(),E.NT_PASS)).keys,E.NT_NOW?new Date(E.NT_NOW):new Date());
+  if(DRY){ console.log(text); process.exit(0); }
+  const jobs=[]; let fail=0;
+  if(E.TELEGRAM_TOKEN&&E.TELEGRAM_CHAT) jobs.push(send('تلگرام','https://api.telegram.org',E.TELEGRAM_TOKEN,E.TELEGRAM_CHAT,text));
+  if(E.BALE_TOKEN&&E.BALE_CHAT) jobs.push(send('بله','https://tapi.bale.ai',E.BALE_TOKEN,E.BALE_CHAT,text));
+  if(!jobs.length){ console.log('هیچ مقصدی تنظیم نشده'); process.exit(1); }
+  for(const r of await Promise.allSettled(jobs)) if(r.status==='rejected'){ fail++; console.log(String(r.reason.message||r.reason)); }
+  process.exit(fail===jobs.length?1:0);
+}

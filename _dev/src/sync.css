@@ -1,0 +1,268 @@
+/* ---------- اطلاعات مشترک (همگام‌سازی) ---------- */
+.tabrow{display:flex;align-items:flex-start;gap:6px}
+.tabrow .tabs{flex:1;min-width:0}
+.sybtn{flex:none;min-height:40px;display:flex;align-items:center;gap:6px;border:1px solid #D5DCE3;background:#fff;color:#17212B;
+  font:inherit;font-size:.78rem;font-weight:500;padding:0 11px;border-radius:20px;cursor:pointer;white-space:nowrap}
+.sybtn .d{width:9px;height:9px;border-radius:50%;background:#9AA8B5;flex:none}
+.sybtn.ok .d{background:#1E8E5A}
+.sybtn.busy .d{background:#C77A1A}
+.sybtn.err .d{background:#C0392B}
+.sybtn.err{border-color:#C0392B;color:#8E2219;font-weight:700}
+.sybtn svg{flex:none;color:#51606E}
+@media (max-width:560px){ .sybtn{padding:0 9px;gap:5px} .sybtn .tx{display:none} }
+.sybtn:focus-visible{outline:2px solid #0B5C7A;outline-offset:2px}
+.sybar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 -12px;padding:6px 12px;font-size:.8rem;line-height:1.6;
+  background:#E6F1F5;color:#0B4A63;border-top:1px solid #C5DCE5}
+.sybar[hidden]{display:none}
+.sybar.err{background:#FBE9E7;color:#8E2219;border-top-color:#E8B4AE}
+.sybar.new{background:#FFF1DB;color:#7A4300;border-top-color:#E0A75E}
+.sybar span{flex:1;min-width:0}
+.sybar button{flex:none;min-height:30px;border:1px solid currentColor;background:#fff;color:inherit;font:inherit;font-size:.78rem;font-weight:700;
+  padding:0 12px;border-radius:15px;cursor:pointer}
+.sybar button[hidden]{display:none}
+.sydlg{position:fixed;inset:0;z-index:80;background:rgba(23,33,43,.45);display:flex;align-items:flex-start;justify-content:center;
+  padding:calc(14px + env(safe-area-inset-top)) 10px 14px;overflow:auto}
+.sydlg[hidden]{display:none}
+@media (prefers-reduced-motion:no-preference){ .sydlg:not([hidden]){animation:syDim .18s ease-out} .sydlg:not([hidden]) .sybox{animation:syRise .22s cubic-bezier(.23,1,.32,1)}
+  @keyframes syDim{from{background:rgba(23,33,43,0)}} @keyframes syRise{from{opacity:0;transform:translateY(14px) scale(.98)}} }
+.sybox{width:100%;max-width:480px;background:#fff;color:#17212B;border-radius:16px;padding:16px;box-shadow:0 14px 40px rgba(23,33,43,.35);
+  font-size:.92rem;line-height:1.8}
+.sybox h2{margin:0 0 8px;font-size:1.05rem;font-weight:800}
+.sybox h3{margin:0 0 4px;font-size:.95rem;font-weight:800;color:#0B5C7A}
+.sybox p{margin:0 0 10px}
+.sybox .sycard{border:1px solid #D5DCE3;border-radius:12px;padding:12px;margin:0 0 10px;background:#F7F9FA}
+.sybox label{display:block;font-size:.82rem;font-weight:700;margin:0 0 8px}
+.sybox input[type=password],.sybox input[type=text]{display:block;width:100%;min-height:44px;margin-top:3px;border:1px solid #9AA8B5;border-radius:10px;
+  padding:0 10px;font:inherit;font-size:.95rem;background:#fff;color:#17212B;direction:ltr;text-align:left}
+.sybox input:focus-visible{outline:2px solid #0B5C7A;outline-offset:1px}
+.sybox .chk{display:flex;align-items:center;gap:8px;font-weight:500}
+.sybox .chk input{width:18px;height:18px}
+.sybox button{display:block;width:100%;min-height:46px;border-radius:10px;font:inherit;font-size:.95rem;font-weight:700;cursor:pointer;margin:0 0 8px;
+  background:#fff;border:1px solid #9AA8B5;color:#17212B}
+.sybox button.go{background:#0B5C7A;border-color:#0B5C7A;color:#fff}
+.sybox button.warn{border-color:#C0392B;color:#8E2219}
+.sybox button:disabled{opacity:.55;cursor:default}
+.sybox button:focus-visible{outline:2px solid #17212B;outline-offset:2px}
+.sybox .symsg{font-size:.86rem;font-weight:700;margin:0 0 10px;padding:8px 10px;border-radius:10px;background:#E6F1F5;color:#0B4A63}
+.sybox .symsg:empty{display:none}
+.sybox .symsg.bad{background:#FBE9E7;color:#8E2219}
+.sybox .sykv{font-size:.84rem;background:#F7F9FA;border:1px solid #D5DCE3;border-radius:10px;padding:8px 10px;margin:0 0 10px}
+.sybox .sykv b{display:block}
+.sybox small{display:block;font-size:.78rem;color:#51606E;font-weight:500;line-height:1.7}
+.sytoast{position:fixed;z-index:90;bottom:calc(16px + env(safe-area-inset-bottom));inset-inline:12px;margin:0 auto;max-width:440px;
+  background:#17212B;color:#fff;border-radius:12px;padding:10px 14px;font-size:.88rem;line-height:1.7;text-align:center;box-shadow:0 8px 24px rgba(23,33,43,.35)}
+.sytoast[hidden]{display:none}
+.sytoast.bad{background:#8E2219}
+.tab[hidden]{display:none}
+.sybox .syrow{display:flex;align-items:center;gap:8px;padding:4px 0;border-top:1px solid #E3E8ED;font-size:.86rem}
+.sybox .syrow:first-child{border-top:0}
+.sybox .syrow span{flex:1;min-width:0;font-weight:700}
+.sybox select{flex:none;min-height:38px;border:1px solid #9AA8B5;border-radius:8px;background:#fff;color:#17212B;font:inherit;font-size:.86rem;padding:0 8px}
+.sybox #syAclList{margin-top:8px}
+.sybox #syAclList[hidden]{display:none}
+.sybox .chk input[type=radio]{width:18px;height:18px}
+.sybox textarea{display:block;width:100%;margin-top:3px;border:1px solid #9AA8B5;border-radius:10px;padding:8px 10px;font:inherit;font-size:.8rem;line-height:1.5;
+  background:#fff;color:#17212B;direction:ltr;text-align:left;resize:vertical;word-break:break-all;font-family:ui-monospace,Menlo,Consolas,monospace}
+.sybox textarea:focus-visible{outline:2px solid #0B5C7A;outline-offset:1px}
+.sybox label[hidden]{display:none}
+.sybox .syuser{border:1px solid #D5DCE3;border-radius:12px;padding:10px 12px;margin:0 0 10px;background:#F7F9FA}
+.sybox .syuser.off{background:#FBF1F0;border-color:#E8B4AE}
+.sybox .syuser b{display:flex;align-items:center;gap:8px;font-size:.95rem;font-weight:800}
+.sybox .sychip{font-size:.72rem;font-weight:700;background:#A32018;color:#fff;border-radius:10px;padding:1px 8px}
+.sybox .syub{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.sybox .syub button{margin:0;min-height:40px;font-size:.84rem}
+.sybox .sypin{margin:4px 0 10px;padding:10px;border:2px solid #0B5C7A;border-radius:12px;background:#E6F0F4;text-align:center;font-size:.85rem;font-weight:700}
+.sybox .sypin b{display:block;font-size:1.7rem;font-weight:800;letter-spacing:.12em;font-variant-numeric:tabular-nums;color:#0B5C7A}
+.sybox details.sycard>summary{cursor:pointer;font-size:.92rem;font-weight:800;color:#8E2219;min-height:32px}
+.sybox details.sycard[open]>summary{margin-bottom:6px}
+body.ntlocked .tabs{visibility:hidden}
+body.ntlocked iframe{display:none!important}
+body.ntlocked .load{padding:0 20px;text-align:center;font-size:1rem;font-weight:700}
+@media print{ .sybar,.sydlg,.sytoast,.sybtn{display:none!important} }
+body.ntdriver .tabs{visibility:hidden}
+body.ntdriver .load{display:none!important}
+body.ntdriver iframe{display:none!important}
+
+@media (min-width:900px){ .tabs{flex-wrap:wrap;overflow:visible;padding-top:6px} .tabs{gap:4px} .tab{padding:0 9px;gap:5px;font-size:.9rem} }
+@media (min-width:900px) and (max-width:1500px){ .tab .i{display:none} .tab{padding:0 11px} }
+
+/* نوار بالای کامپیوتر: همان تیره و زرد گوشی */
+@media (min-width:900px){
+  .topbar{background:#1B2430;border-bottom:3px solid #E6A52E}
+  .tab{background:rgba(255,255,255,.07);color:#E8EDF2;border-color:rgba(255,255,255,.2)}
+  .tab .i{color:#AEB9C5}
+  .tab.on{background:#E6A52E;border-color:#E6A52E;color:#1B2430}
+  .tab.on .i{color:#1B2430}
+  .tab .n{background:#C0392B;color:#fff}
+  .tab.on .n{background:#1B2430;color:#fff;border:0}
+  .tab:focus-visible{outline-color:#fff}
+  .topbar button:not(.tab){background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:14px}
+  .topbar button:not(.tab) svg{stroke:#fff;color:#fff}
+}
+/* نوارهای وضعیت کوچک‌تر + عددهای زبانه‌ها آرام (قرمز فقط برای کار فوری، نه شمار لیست‌ها) */
+.sybar{padding:3px 12px;font-size:.74rem;line-height:1.4;gap:8px}
+.sybar button{min-height:24px;padding:0 10px}
+.ntnb .b,.ntmr .b{background:#5B6773!important}
+/* بازبینی دسترس‌پذیری: هدف لمسی ۴۴ پیکسل و متن حداقل ۱۲ پیکسل در نوار بالا و پایین */
+#ntQrScan,#ntSyBtn{min-height:44px;min-width:44px}
+.ntnb{font-size:12px!important}
+#today{font-size:12px}
+.sybox .sybk{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid #E3E8EC}
+.sybox .sybk span{font-variant-numeric:tabular-nums}
+.sybox .sybk button{width:auto!important;margin:0!important;min-height:44px;padding:0 14px}
+.sybox .syst{margin:6px 0 8px;padding-inline-start:20px;font-size:.82rem;line-height:1.7;color:#3D4852}
+.sybox .syst li{margin-bottom:4px}
+/* رمز ورود */
+body.ntpin iframe,body.ntpin .tabs,body.ntpin .ntnav,body.ntpin main{visibility:hidden!important}
+#ntPin{position:fixed;inset:0;z-index:200;background:#17212B;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:max(48px,env(safe-area-inset-top)) 16px 24px}
+#ntPin[hidden]{display:none}
+#ntPin .pinbox{width:100%;max-width:360px;background:#fff;color:#17212B;border-radius:16px;padding:22px 18px;text-align:center}
+#ntPin .pinic,#ntPinFx .pinic{line-height:1;display:flex;justify-content:center}
+#ntPin,#ntPinFx{background:radial-gradient(120% 70% at 85% 0%,rgba(11,92,122,.55),transparent 60%),radial-gradient(90% 60% at 0% 100%,rgba(230,165,46,.18),transparent 60%),#17212B}
+#ntPin{flex-direction:column;align-items:center;justify-content:flex-start}
+.pinbr{display:flex;align-items:center;gap:10px;margin:0 0 16px;color:#fff;font-weight:800;font-size:.95rem}
+.pinbr img{width:40px;height:40px;background:#fff;border-radius:50%;padding:3px;box-sizing:border-box}
+.pinbr img:not([src]),.pinbr img[src=""]{display:none}
+.pinlk{width:58px;height:66px;overflow:visible}
+.pinlk .sh{fill:none;stroke:#8A97A3;stroke-width:7;stroke-linecap:round;transform-box:fill-box;transform-origin:100% 100%;transition:transform .45s cubic-bezier(.3,1.6,.5,1),stroke .3s}
+.pinlk .bd{fill:#0B5C7A;transition:fill .3s}
+.pinlk .kh{fill:#E6A52E;transition:opacity .2s}
+.pinlk .ck{fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40}
+#ntPinFx{position:fixed;inset:0;z-index:201;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:max(48px,env(safe-area-inset-top)) 16px 24px;pointer-events:none}
+#ntPinFx .pinbox{width:100%;max-width:360px;background:#fff;color:#17212B;border-radius:16px;padding:22px 18px;text-align:center}
+#ntPinFx h2{margin:8px 0 6px;font-size:1.15rem}#ntPinFx p{margin:0 0 12px;font-size:.88rem;color:#3D4852;line-height:1.7}
+#ntPinFx label{display:block;text-align:start;font-size:.85rem;font-weight:700;margin:0 0 10px}
+#ntPinFx input{display:block;width:100%;box-sizing:border-box;margin-top:4px;min-height:52px;border:1px solid #9AA6AF;border-radius:10px;background:#fff}
+#ntPinFx button{display:block;width:100%;min-height:48px;margin-top:8px;border-radius:10px;border:1px solid #C3CDD5;background:#fff;font:inherit;font-weight:700;color:#17212B}
+#ntPinFx button.go{background:#1E7F4F;border-color:#1E7F4F;color:#fff}#ntPinFx button.lnk{border:0;background:none;color:#1F5F99}
+#ntPinFx #pinFg,#ntPinFx .symsg:empty{display:none}
+#ntPinFx .pinlk .sh{transform:translateY(-9px) rotate(26deg);stroke:#1E7F4F}
+#ntPinFx .pinlk .bd{fill:#1E7F4F}#ntPinFx .pinlk .kh{opacity:0}
+#ntPinFx .pinlk .ck{stroke-dashoffset:0;transition:stroke-dashoffset .35s .15s ease-out}
+#ntPin.wait .pinbox,#ntPin.wait .pinbr{opacity:0}
+@media (prefers-reduced-motion:no-preference){
+  #ntPin.in .pinbr{animation:pinFade .5s ease-out both}
+  #ntPin.in .pinbox{animation:pinUp .5s .06s cubic-bezier(.2,.9,.25,1.15) both}
+  #ntPin.in .pinlk{animation:pinDrop .7s .25s cubic-bezier(.3,1.5,.5,1) both}
+  #ntPin.in .pinlk .sh{animation:pinRattle .5s .95s ease-in-out}
+  #ntPin .pinlk .kh{animation:pinGlow 2.2s 1.2s ease-in-out infinite}
+  #ntPin .pinlk.tick{animation:pinTick .18s ease-out}
+  #ntPin .pinbox.bad{animation:pinShake .45s ease-in-out}
+  #ntPin .pinbox.bad .pinlk .bd{fill:#B3261E}
+  #ntPin .pinbox.bad .pinlk .sh{animation:pinRattle .45s ease-in-out}
+  #ntPin{background-size:160% 160%,160% 160%,auto;animation:pinBg 14s ease-in-out infinite alternate}
+  #ntPinFx.ok .pinbox{animation:pinAway .55s .5s cubic-bezier(.5,0,.75,0) forwards}
+  #ntPinFx.ok{animation:pinBgOut .45s .65s ease-in forwards}
+  #ntPinFx.ok .pinbr{animation:pinBgOut .3s .5s forwards}
+  @keyframes pinFade{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+  @keyframes pinUp{from{opacity:0;transform:translateY(40px) scale(.96)}to{opacity:1;transform:none}}
+  @keyframes pinDrop{0%{opacity:0;transform:translateY(-26px) scale(.7)}100%{opacity:1;transform:none}}
+  @keyframes pinRattle{0%,100%{transform:none}25%{transform:rotate(-7deg)}50%{transform:rotate(6deg)}75%{transform:rotate(-3deg)}}
+  @keyframes pinGlow{0%,100%{opacity:1}50%{opacity:.45}}
+  @keyframes pinTick{50%{transform:scale(.92)}}
+  @keyframes pinShake{0%,100%{transform:none}20%{transform:translateX(-12px)}40%{transform:translateX(10px)}60%{transform:translateX(-7px)}80%{transform:translateX(4px)}}
+  @keyframes pinBg{from{background-position:0% 0%,100% 100%,0 0}to{background-position:100% 30%,0% 60%,0 0}}
+  @keyframes pinAway{to{opacity:0;transform:translateY(-30px) scale(.9)}}
+  @keyframes pinBgOut{to{opacity:0}}
+}
+#ntPin h2{margin:8px 0 6px;font-size:1.15rem}
+#ntPin p{margin:0 0 12px;font-size:.88rem;color:#3D4852;line-height:1.7}
+#ntPin label{display:block;text-align:start;font-size:.85rem;font-weight:700;margin:0 0 10px}
+#ntPin input{display:block;width:100%;box-sizing:border-box;margin-top:4px;min-height:52px;font-size:1.5rem;text-align:center;letter-spacing:.4em;border:1px solid #9AA6AF;border-radius:10px;font-family:inherit;direction:ltr}
+#ntPin input:focus{outline:3px solid #1F5F99;outline-offset:1px}
+#ntPin button{display:block;width:100%;min-height:48px;margin-top:8px;border-radius:10px;border:1px solid #C3CDD5;background:#fff;font:inherit;font-size:1rem;font-weight:700;cursor:pointer;color:#17212B}
+#ntPin button.go{background:#0B5C7A;border-color:#0B5C7A;color:#fff}
+#ntPin button.warn{border-color:#E0A39C;color:#A32018}
+#ntPin button.lnk{border:0;background:none;color:#1F5F99;font-weight:500;text-decoration:underline;min-height:44px}
+#ntPin small{display:block;font-size:.8rem;color:#3D4852;line-height:1.7;margin-top:6px;text-align:start}
+#ntPin .symsg{margin-bottom:8px}
+
+input.ntsec{-webkit-text-security:disc}
+input.ntsec.show{-webkit-text-security:none}
+.sylog{padding:8px 0;border-top:1px solid #E3E8ED;font-size:.86rem;line-height:1.7}
+.sylog .sylt{display:block;font-size:.74rem;color:#51606E}
+.sylog small{display:block;color:#3D4852;overflow-wrap:anywhere}
+#syLogL{max-height:60vh;overflow:auto;margin:8px 0}
+/* صفحه رمز ورود — سبک سرمه‌ای + کهربایی، پس‌زمینه سایه دستگاه‌های خودمان (pinDeco در sync.js) */
+#ntPin,#ntPinFx{background:radial-gradient(90% 45% at 50% 0%,rgba(46,82,128,.35),transparent 70%),linear-gradient(180deg,#0F1B2B 0%,#0C1726 60%,#0A1320 100%);padding-top:max(52px,calc(env(safe-area-inset-top) + 28px))}
+.pinbg{position:fixed;left:0;right:0;bottom:0;height:46vh;pointer-events:none;z-index:0;overflow:hidden}
+.pinbg i{position:absolute;display:block;opacity:.16}
+.pinbg i svg{display:block;width:100%;height:auto}
+.pinbg i svg *{fill:#5F86B3!important;stroke:none!important}
+.pinbg i.a{left:-6vw;bottom:5vh;width:60vw}
+.pinbg i.b{right:-10vw;bottom:2.5vh;width:58vw}
+.pinbg i.c{left:28vw;bottom:-1vh;width:34vw;opacity:.1}
+@media (min-width:700px){ .pinbg{height:60vh} .pinbg i.a{left:calc(50% - 640px);bottom:6vh;width:520px} .pinbg i.b{right:calc(50% - 660px);bottom:3vh;width:500px} .pinbg i.c{left:calc(50% - 150px);bottom:-1vh;width:300px} }
+.pinbg .gr{position:absolute;left:0;bottom:0;width:100%;height:12vh}
+.pinbg .gr path{fill:#1A2D45;opacity:.75}
+#ntPin .pinbr,#ntPin .pinbox,#ntPinFx .pinbr,#ntPinFx .pinbox{position:relative;z-index:1}
+.pinbr{flex-direction:column;gap:12px;margin:0 0 22px;font-size:1.12rem}
+.pinbr img{width:84px;height:84px;padding:7px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.pinbr::after{content:"";width:58px;height:4px;border-radius:4px;background:#E6A52E;margin-top:2px}
+#ntPin::after{content:"";position:relative;z-index:1;flex:none;width:46px;height:4px;border-radius:4px;background:#E6A52E;margin-top:16px}
+#ntPin .pinbox,#ntPinFx .pinbox{border-radius:22px;padding:28px 22px 18px;box-shadow:0 20px 50px rgba(0,0,0,.45)}
+.pinlk{width:64px;height:74px}
+.pinlk .sh{stroke:#13304A;stroke-width:7.5}
+.pinlk .bd{fill:#13304A}
+.pinlk .kh{fill:#E6A52E}
+#ntPin h2,#ntPinFx h2{font-size:1.35rem;font-weight:800;color:#13304A;margin:14px 0 4px}
+#ntPin p,#ntPinFx p{color:#6B7783;margin-bottom:18px}
+#ntPin label,#ntPinFx label{color:#13304A;position:relative}
+#ntPin input,#ntPinFx input{min-height:56px;border:2px solid #D5DCE3;border-radius:14px;background:#fff;font-size:1.6rem;padding:0 52px;transition:border-color .15s,box-shadow .15s}
+#ntPin input:focus{outline:0;border-color:#E6A52E;box-shadow:0 0 0 4px rgba(230,165,46,.2)}
+#ntPin button,#ntPinFx button{border-radius:14px;min-height:52px}
+#ntPin button.go,#ntPinFx button.go{background:#13304A;border-color:#13304A;color:#fff;font-size:1.05rem}
+#ntPin button.lnk{color:#13304A;font-weight:600}
+#ntPin button.eye,#ntPinFx button.eye{position:absolute;right:6px;bottom:6px;width:44px;min-height:44px;height:44px;margin:0;padding:0;border:0;background:none;display:grid;place-items:center;color:#13304A;border-radius:10px}
+#ntPin button.eye svg,#ntPinFx button.eye svg{width:24px;height:24px}
+#ntPin button.eye:focus-visible{outline:3px solid #E6A52E}
+#ntPin button.eye .x{display:none}#ntPin button.eye.on .x{display:inline}
+.pinlk.pinem{width:auto;height:124px;overflow:visible}
+@media (max-height:640px){ .pinlk.pinem{height:92px} }
+
+/* کاربر جدید (طرح ۱۴۰۵/۰۸/۰۹) */
+.sybox .sytype{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 10px}
+.sybox .sytype button{margin:0;min-height:76px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:14px;border-color:#D5DCE3;font-weight:800}
+.sybox .sytype button small{font-weight:500;font-size:.74rem}
+.sybox .sytype svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sybox .sytype button[aria-pressed="true"]{background:#FFF3D6;border:2px solid #17212B}
+.sybox .syreq{border:1.6px solid #17212B;background:#fff}
+.sybox .syreqi{font-style:normal;font-size:.68rem;background:#17212B;color:#fff;border-radius:8px;padding:1px 8px;margin-inline-start:6px;vertical-align:middle}
+.sybox .sysec{display:flex;align-items:center;gap:10px;text-align:start;margin:7px 0 0;min-height:56px;padding:6px 10px;border-radius:14px;border-color:#DCE2E8;background:#F7F9FA;font-weight:800}
+.sybox .sysec .ic{flex:none;width:36px;height:36px;border-radius:10px;background:#E8ECEF;display:grid;place-items:center}
+.sybox .sysec .ic svg{width:20px;height:20px;fill:none;stroke:#17212B;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sybox .sysec .t{flex:1;min-width:0}.sybox .sysec .t small{font-size:.72rem;font-weight:500}
+.sybox .sysec em{flex:none;font-style:normal;font-size:.74rem;font-weight:800;color:#7A4D00}.sybox .sysec em.n{color:#51606E}
+.sybox .sysec .rd{flex:none;width:18px;height:18px;border-radius:50%;border:2px solid #9AA8B5}
+.sybox .sysec[aria-pressed="true"]{background:#FFF3D6;border:2px solid #E3A51A}
+.sybox .sysec[aria-pressed="true"] .ic{background:#17212B}.sybox .sysec[aria-pressed="true"] .ic svg{stroke:#fff}
+.sybox .sysec[aria-pressed="true"] .rd{border:6px solid #17212B}
+.sybox .sykhg{margin:10px 0 0;padding:6px 10px 10px;border:1.5px dashed #C3CBD3;border-radius:14px}
+.sybox .sykhg>b{font-size:.8rem;color:#51606E}
+.sybox .sydv{display:flex;align-items:center;gap:8px;margin:0;padding:8px 2px;border-top:1px solid #E3E8ED;font-size:.86rem;font-weight:700}
+.sybox .sydv input{width:18px;height:18px;flex:none}.sybox .sydv em{margin-inline-start:auto;font-style:normal;color:#51606E}
+.sybox .sydv.all{border-top:0}
+.sybox .syaccm{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0 2px}.sybox .syaccm .chk{margin:0}
+.sybox .sygh{margin:12px 0 2px;font-size:.78rem;font-weight:900;color:#51606E}
+.sybox .syacr{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #E3E8ED;font-size:.86rem}
+.sybox .syacr>span:first-child{flex:1;min-width:0;font-weight:700}
+.sybox .syseg{flex:none;display:flex;background:#E8ECEF;border-radius:10px;padding:3px;gap:2px}
+.sybox .syseg button{width:auto;margin:0;min-height:34px;padding:0 10px;border:0;background:transparent;font-size:.8rem;font-weight:700;color:#51606E;border-radius:8px}
+.sybox .syseg button[aria-pressed="true"]{background:#fff;color:#17212B;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.sybox .syseg button[data-v="w"][aria-pressed="true"]{background:#17212B;color:#fff}
+.sybox .syfoot{position:sticky;bottom:-16px;margin:0 -16px -16px;padding:10px 16px 14px;background:#fff;border-top:1px solid #E3E8ED}
+.sybox .syfoot small{text-align:center;margin-bottom:6px}
+.sybox .sycard[hidden]{display:none}
+/* چند واحد (چک‌باکس) و نقش */
+.sybox .sysec .rd{border-radius:6px}
+.sybox .sysec[aria-pressed="true"] .rd{border:2px solid #17212B;background:#17212B url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12l5 5 9-10' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat}
+.sybox .syrole{display:grid;grid-template-columns:repeat(3,1fr);margin:6px 0 6px}
+.sybox .syrole button{min-height:44px;font-size:.88rem}
+.sybox .syrole button[aria-pressed="true"]{background:#17212B;color:#fff}
+/* نشانگر حافظه */
+.sybox .symem{font-size:.8rem;background:#F7F9FA;border:1px solid #D5DCE3;border-radius:10px;padding:8px 10px;margin:0 0 10px;line-height:1.7}
+.sybox .symem .symembar{height:8px;border-radius:4px;background:#E3E8EC;overflow:hidden;margin-bottom:6px}
+.sybox .symem .symembar i{display:block;height:100%;background:#1E7F4F}
+.sybox .symem.warn{background:#FFF8E6;border-color:#E8C46A}.sybox .symem.warn .symembar i{background:#C77700}
+.sybox .symem.bad{background:#FDECEA;border-color:#E9A39D}.sybox .symem.bad .symembar i{background:#B3261E}
+.sybox .symem details{margin-top:4px}.sybox .symem summary{cursor:pointer;color:#51606E;font-weight:700;min-height:32px;display:flex;align-items:center}

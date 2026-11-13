@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="4 40 600 255">
+ <g transform="translate(610 0) scale(-1 1)">
+ <ellipse cx="310" cy="284" rx="285" ry="7" fill="#17212B" opacity=".14"/>
+ <!-- تیغه وسط و دایره -->
+ <path d="M248 118 V196 M304 118 V196" stroke="#8A97A3" stroke-width="7" stroke-linecap="round"/>
+ <path d="M248 118 V150 M304 118 V150" stroke="#51606E" stroke-width="9" stroke-linecap="round"/>
+ <rect x="206" y="186" width="140" height="14" rx="7" fill="#C98A10"/>
+ <path d="M200 214 L350 202 L356 240 L206 258 Q196 236 200 214 Z" fill="#2A3540"/>
+ <path d="M206 258 L356 240 L357 246 L207 264 Z" fill="#17212B"/>
+ <!-- بدنه موتور عقب -->
+ <path d="M44 148 H186 V218 H30 V162 Q30 148 44 148 Z" fill="#E9A321"/>
+ <path d="M30 208 H186 V218 H30 Z" fill="#C98A10"/>
+ <rect x="36" y="160" width="14" height="40" rx="3" fill="#2A3540"/>
+ <rect x="74" y="122" width="9" height="28" rx="3" fill="#2A3540"/>
+ <!-- کابین -->
+ <rect x="106" y="56" width="114" height="10" rx="3" fill="#17212B"/>
+ <path d="M112 64 H214 L224 160 H112 Z" fill="#2A3540"/>
+ <path d="M120 72 H160 V150 H120 Z" fill="#0B5C7A"/>
+ <path d="M166 72 H207 L215 150 H166 Z" fill="#0B5C7A"/>
+ <path d="M172 78 L182 78 L176 120 L170 120 Z" fill="#fff" opacity=".28"/>
+ <!-- شاسی گردن‌دار -->
+ <path d="M186 150 L272 110 H492 Q512 110 516 126 L520 152 H482 L474 138 H300 L222 180 H186 Z" fill="#E9A321"/>
+ <path d="M300 138 H474 L478 146 H304 Z" fill="#C98A10"/>
+ <!-- تیغه جلو -->
+ <path d="M510 140 L556 196" stroke="#C98A10" stroke-width="16" stroke-linecap="round"/>
+ <path d="M548 182 L582 174 Q596 214 590 252 L558 262 Q566 222 548 182 Z" fill="#E9A321"/>
+ <path d="M558 262 L590 252 L592 260 L560 270 Z" fill="#2A3540"/>
+ <!-- چرخ‌ها -->
+ <circle cx="70" cy="240" r="40" fill="#17212B"/><circle cx="70" cy="240" r="20" fill="#E9A321"/><circle cx="70" cy="240" r="7" fill="#2A3540"/>
+ <circle cx="152" cy="240" r="40" fill="#17212B"/><circle cx="152" cy="240" r="20" fill="#E9A321"/><circle cx="152" cy="240" r="7" fill="#2A3540"/>
+ <circle cx="472" cy="232" r="48" fill="#17212B"/><circle cx="472" cy="232" r="24" fill="#E9A321"/><circle cx="472" cy="232" r="8" fill="#2A3540"/>
+ </g>
+</svg>

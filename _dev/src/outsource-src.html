@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FFFFFF">
+<title>لیست برون‌سپاری</title>
+<style>
+:root{--bg:#EEF1F4;--card:#FFFFFF;--ink:#17212B;--dim:#51606E;--rule:#D5DCE3;--line:#9AA8B5;--acc:#0B5C7A;--ok:#17663F;--okbg:#E4F2EA;--wbg:#FFF1DB;--wink:#7A4300;--wline:#E0A75E;--del:#A32018;--delbg:#FBE5E2}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:"Vazirmatn","IRANSans","Segoe UI",Tahoma,sans-serif;font-size:16px;line-height:1.7;padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px}
+header{background:transparent;border:0;padding:14px 0 12px;padding-top:calc(14px + env(safe-area-inset-top))}
+h1{margin:0;font-size:1.25rem;font-weight:800;line-height:1.4}
+.sub{margin:0;font-size:.85rem;color:var(--dim)}
+.bar{display:flex;gap:8px;margin-top:12px}
+.btn{min-height:48px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:700}
+.btn.p{background:var(--acc);border-color:var(--acc);color:#fff;flex:1}
+.btn.s{min-height:40px;padding:0 12px;font-size:.88rem}
+.btn.d{color:var(--del);border-color:var(--del)}
+.seg{display:flex;gap:2px;padding:2px;background:#DDE3E9;border-radius:12px;margin-top:10px}
+.seg button{flex:1;min-height:44px;border:0;border-radius:10px;background:transparent;color:var(--dim);font-size:.95rem}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:700;box-shadow:0 1px 2px rgba(23,33,43,.12)}
+.chip{display:inline-flex;align-items:center;min-height:26px;padding:0 10px;border-radius:14px;background:#F3F5F7;border:1px solid var(--rule);font-size:.8rem;font-weight:700}
+.chip.w{background:var(--wbg);border-color:var(--wline);color:var(--wink)}
+.chip.r{background:var(--delbg);border-color:var(--del);color:var(--del)}
+.chip.g{background:var(--okbg);border-color:#9CCBB0;color:var(--ok)}
+.empty{border:1px dashed var(--line);border-radius:14px;padding:22px 16px;text-align:center;color:var(--dim);margin-top:16px}
+.empty b{display:block;color:var(--ink)}
+.jb{background:var(--card);border:1px solid var(--rule);border-radius:14px;padding:12px 14px;margin-top:12px}
+.jb.od{border-color:var(--del);border-inline-start:5px solid var(--del)}
+.jb.dn{opacity:.78}
+.jb h3{margin:0;font-size:1.02rem;font-weight:800;line-height:1.5;overflow-wrap:anywhere}
+.jb p{margin:2px 0 0;font-size:.92rem;overflow-wrap:anywhere}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.stp{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.sp{min-height:52px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:.8rem;font-weight:700;line-height:1.35;padding:4px}
+.sp small{display:block;font-weight:400;color:var(--dim);font-size:.7rem}
+.sp.done{background:var(--okbg);border-color:#9CCBB0;color:var(--ok)}
+.sp.next{border:2px solid var(--acc)}
+.sp:disabled{opacity:.55;cursor:default}
+.nx{margin-top:8px;font-size:.88rem;font-weight:700}
+.nx.w{color:var(--wink)}
+.acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.xs{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.xr{border:1px solid var(--rule);border-radius:12px;padding:8px 10px;background:#FAFBFC}
+.xr.od{border-color:var(--wline);background:var(--wbg)}.xr.dn{opacity:.75}
+.xh{display:flex;align-items:center;gap:8px}.xh b{flex:none;font-size:.9rem}
+.xn{flex:1;min-width:0;min-height:40px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:15px}
+.xd{flex:none;min-width:40px;min-height:40px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--del)}
+.xd.arm{background:var(--del);color:#fff;border-color:var(--del);font-weight:800;padding:0 8px}
+.xst{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.xa{align-self:flex-start}
+.sheet{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+.sheet h4{margin:10px 0 2px;font-size:.9rem;color:var(--acc)}
+.row{display:flex;align-items:center;gap:8px;min-height:40px;border-bottom:1px solid #EEF1F4}
+.row .l{flex:none;width:34%;font-size:.8rem;color:var(--dim)}
+.row .v{flex:1;min-width:0;font-weight:700;overflow-wrap:anywhere}
+.row .v.no{color:var(--del);font-weight:400}
+.cp{flex:none;min-height:36px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:.8rem}
+.dlg{position:fixed;inset:0;background:rgba(18,25,33,.55);z-index:50;display:none;align-items:flex-end;justify-content:center}
+.dlg.on{display:flex}
+.box{background:var(--card);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:14px 16px calc(20px + env(safe-area-inset-bottom))}
+.box h2{margin:0 0 6px;font-size:1.1rem}
+.fld{display:flex;flex-direction:column;gap:4px;margin-top:10px}
+.fld>label{font-size:.82rem;font-weight:700;color:var(--dim)}
+.in{min-height:48px;width:100%;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-size:16px}
+textarea.in{padding:10px 14px;min-height:70px;line-height:1.7}
+.in.bad{border-color:var(--del);border-width:2px}
+.hint{font-size:.8rem;color:var(--dim)}
+.err{color:var(--del);font-weight:700;font-size:.85rem;min-height:1.2em;margin-top:8px}
+details.more{margin-top:12px}
+details.more>summary{min-height:44px;display:flex;align-items:center;font-weight:700;color:var(--acc);cursor:pointer}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.toast{position:fixed;inset-inline:16px;bottom:calc(24px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;background:#1B2430;color:#fff;padding:12px 16px;border-radius:12px;font-weight:700;display:none;z-index:60}
+.toast.on{display:block}.toast.bad{background:var(--del)}
+
+/* ---------- جلسه سندپرداز: همه قدم‌های معوق، گروه‌بندی‌شده بر اساس مرحله ---------- */
+#oSess[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.sg{margin-top:16px}
+.sg h2{margin:0 0 6px;font-size:1.02rem;display:flex;align-items:center;gap:8px}
+.sg h2 .chip{font-weight:400}
+.sc{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:12px 14px;margin-top:8px}
+.sc h3{margin:0;font-size:1rem;line-height:1.5;overflow-wrap:anywhere}
+.sc h3 small{font-weight:400;color:var(--dim)}
+.sc .fl2{display:grid;gap:5px;margin-top:8px}
+.sc .fr{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;padding:2px 10px;text-align:start;background:#fff;border:1px solid var(--rule);border-radius:8px}
+.sc .fr:disabled{background:#FAFAFA}
+.sc .fr .l{flex:none;width:36%;font-size:.78rem;color:var(--dim)}
+.sc .fr .v{flex:1;min-width:0;font-weight:700;overflow-wrap:anywhere}
+.sc .fr .v.no{color:var(--del);font-weight:400}
+.sc .fr .k{flex:none;font-size:.74rem;color:var(--acc);font-weight:700}
+.sc .row2{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.sc .go{min-height:44px;padding:0 18px;border-radius:10px;border:0;background:var(--acc);color:#fff;font-weight:700}
+.sc .wn{font-size:.84rem;font-weight:700;color:var(--wink);flex:1}
+@media (min-width:960px){ .sg{max-width:760px;margin-inline:auto} .sc .fl2{grid-template-columns:1fr 1fr} }
+/* ---------- کامپیوتر: لیست + برگه کنار هم ---------- */
+.app{display:none}
+@media (min-width:960px){
+  header .wrap{max-width:1400px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  header .hd{flex:1;min-width:260px}
+  header .bar,header .seg{margin-top:0}
+  header .bar .btn.p{flex:none;min-width:140px}
+  header .seg{min-width:200px}
+  main.wrap{max-width:1400px;padding:0 20px}
+  .app{display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:20px;align-items:start;margin-top:16px}
+  .lst{background:var(--card);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
+  .lh,.rw{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1.1fr) 150px minmax(0,1fr) 88px;gap:12px;align-items:center;padding:0 16px}
+  .lh{min-height:38px;background:#F3F5F7;border-bottom:1px solid var(--rule);font-size:.78rem;font-weight:700;color:var(--dim)}
+  .rw{width:100%;min-height:62px;text-align:start;background:transparent;border:0;border-bottom:1px solid #EEF1F4;border-inline-start:4px solid transparent}
+  .rw:hover{background:#F8FAFB}
+  .rw[aria-selected="true"]{background:#EAF3F7;border-inline-start-color:var(--acc)}
+  .rw.od{border-inline-start-color:var(--del)}
+  .rw.dn .rb{opacity:.7}
+  .rw .dv{font-weight:800;line-height:1.4;overflow-wrap:anywhere}
+  .rw .dv small{display:block;font-weight:400;color:var(--dim);font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rw .vn,.rw .nx2{font-size:.9rem;overflow-wrap:anywhere}
+  .rw .nx2{color:var(--dim)}
+  .rb{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;direction:rtl}
+  .rb i{height:8px;border-radius:2px;background:#D5DCE3}
+  .rb i.d{background:var(--ok)}
+  .rb i.c{background:var(--acc)}
+  .rw .lt{font-size:.8rem;font-weight:800;color:var(--del);text-align:end}
+  .rw .lt.g{color:var(--ok)}
+  .pane{position:sticky;top:12px;background:var(--card);border:1px solid var(--rule);border-radius:12px;max-height:calc(100vh - 24px);overflow:auto}
+  .ph{padding:16px 18px 12px;border-bottom:1px solid var(--rule)}
+  .ph h2{margin:0;font-size:1.15rem;line-height:1.5;overflow-wrap:anywhere}
+  .ph p{margin:2px 0 0;color:var(--dim);font-size:.92rem;overflow-wrap:anywhere}
+  .ph .meta{margin-top:8px}
+  .ph .acts{margin-top:10px}
+  .trk{list-style:none;margin:0;padding:6px 0 10px}
+  .ts{position:relative;padding:10px 18px 10px 18px;border-inline-start:4px solid transparent}
+  .ts.cur{background:#F4F9FB;border-inline-start-color:var(--acc)}
+  .tt{display:flex;align-items:center;gap:10px;min-height:36px}
+  .tt .mk{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:.82rem;font-weight:800;border:2px solid var(--line);color:var(--dim);background:#fff}
+  .ts.done .mk{background:var(--ok);border-color:var(--ok);color:#fff}
+  .ts.cur .mk{border-color:var(--acc);color:var(--acc)}
+  .tt b{flex:1;font-size:.98rem}
+  .ts.lock b{color:var(--dim);font-weight:500}
+  .tt .dt{font-size:.8rem;color:var(--ok);font-weight:700}
+  .tt .go{min-height:36px;padding:0 14px;border-radius:8px;border:0;background:var(--acc);color:#fff;font-weight:700}
+  .tt .go.u{background:transparent;color:var(--dim);border:1px solid var(--line);font-weight:500}
+  .ts .fl{margin:4px 0 2px 0;padding-inline-start:38px}
+  .fr{display:flex;align-items:center;gap:8px;width:100%;min-height:42px;padding:2px 10px;text-align:start;background:#fff;border:1px solid var(--rule);border-radius:8px;margin-top:5px}
+  .fr:hover:not(:disabled){border-color:var(--acc)}
+  .fr:disabled{background:#FAFAFA}
+  .fr .l{flex:none;width:36%;font-size:.78rem;color:var(--dim)}
+  .fr .v{flex:1;min-width:0;font-weight:700;overflow-wrap:anywhere}
+  .fr .v.no{color:var(--del);font-weight:400}
+  .fr .k{flex:none;font-size:.74rem;color:var(--acc);font-weight:700}
+  .ts .wn{margin:6px 0 0;padding-inline-start:38px;font-size:.84rem;font-weight:700;color:var(--wink)}
+  .pe{padding:40px 20px;text-align:center;color:var(--dim)}
+  #list.narrowonly{display:block}
+}
+@media (min-width:960px){ .jb{display:none} }
+@media (prefers-reduced-motion:no-preference){ .rw,.fr{transition:background-color .12s,border-color .12s} }
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="hd"><h1>لیست برون‌سپاری</h1>
+  <p class="sub">یادآور فاکتور تعمیر بیرونی: گرفتن فاکتور از پیمانکار و ثبت آن در سندپرداز.</p></div>
+  <div class="bar"><button type="button" class="btn p" id="oNew">+ کار تازه</button></div>
+  <div class="seg" id="seg"><button type="button" data-f="open" aria-pressed="true">باز</button><button type="button" data-f="all" aria-pressed="false">همه</button></div>
+</div></header>
+<main class="wrap" id="list"></main>
+
+<div class="dlg" id="dlg" role="dialog" aria-modal="true" aria-labelledby="dH"><div class="box">
+  <h2 id="dH">کار تازه</h2>
+  <div class="fld"><label for="fDev">دستگاه</label><input class="in" id="fDev" list="dlDev" autocomplete="off"><datalist id="dlDev"></datalist><div class="hint" id="hStop"></div></div>
+  <div class="fld"><label for="fVen">پیمانکار (اگر می‌دانید؛ می‌توانید بعداً بنویسید)</label><input class="in" id="fVen" list="dlVen" autocomplete="off"><datalist id="dlVen"></datalist></div>
+  <div class="fld"><label for="fDesc">شرح کار</label><textarea class="in" id="fDesc"></textarea></div>
+  <div class="fld"><label for="fWs">تاریخ شروع کار (مثل 1405/07/19)</label><input class="in" id="fWs" inputmode="numeric" autocomplete="off" dir="ltr"></div>
+  <details class="more" id="fMore"><summary>اطلاعات بیشتر (می‌توانید بعداً بنویسید)</summary>
+    <div class="fld"><label for="fEq">کد تجهیز در سندپرداز</label><input class="in" id="fEq" autocomplete="off" dir="ltr"></div>
+    <div class="g2"><div class="fld"><label for="fBd">تاریخ خرابی</label><input class="in" id="fBd" inputmode="numeric" autocomplete="off" dir="ltr"></div>
+      <div class="fld"><label for="fBt">ساعت خرابی</label><input class="in" id="fBt" type="time" dir="ltr"></div></div>
+    <div class="fld"><label for="fWe">تاریخ پایان کار</label><input class="in" id="fWe" inputmode="numeric" autocomplete="off" dir="ltr"></div>
+    <div class="fld"><label for="fCause">کد علت خرابی</label><input class="in" id="fCause" list="dlCause" autocomplete="off"><datalist id="dlCause"></datalist></div>
+    <div class="fld"><label for="fAct">کد فعالیت (اقدام خرابی)</label><input class="in" id="fAct" list="dlAct" autocomplete="off"><datalist id="dlAct"></datalist></div>
+    <div class="fld"><label for="fSvc">کد خدمات (مثل N034)</label><input class="in" id="fSvc" list="dlSvc" autocomplete="off"><datalist id="dlSvc"></datalist></div>
+    <div class="fld"><label for="fAmt">مبلغ (ریال)</label><input class="in" id="fAmt" inputmode="numeric" autocomplete="off" dir="ltr"></div>
+    <div class="fld"><label for="fInv">شماره فاکتور</label><input class="in" id="fInv" autocomplete="off" dir="ltr"></div>
+  </details>
+  <div class="err" id="fErr" role="alert"></div>
+  <div class="acts"><button type="button" class="btn p" id="fSave">ذخیره</button><button type="button" class="btn" id="fCancel">بستن</button></div>
+</div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+'use strict';
+const KEY='nt_outsrc_v1';
+const $=id=>document.getElementById(id);
+const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const lat=s=>String(s==null?'':s).replace(/[۰-۹]/g,d=>'0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]).replace(/[٠-٩]/g,d=>'0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
+const p2=n=>String(n).padStart(2,'0');
+const dkey=s=>lat(s).replace(/[يى]/g,'ی').replace(/ك/g,'ک').replace(/[‌\s\-_]+/g,'').toLowerCase();
+function LS(k,def){ try{ const v=JSON.parse(localStorage.getItem(k)); return v==null?def:v; }catch(e){ return def; } }
+function LSset(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+let _t=null;
+function say(t,bad){ const el=$('toast'); el.textContent=t; el.className='toast on'+(bad?' bad':''); clearTimeout(_t); _t=setTimeout(()=>el.className='toast',2800); }
+function nd(s){ const m=/^(1[34]\d{2})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/.exec(lat(s).trim()); if(!m) return ''; const mo=+m[2], d=+m[3]; if(mo<1||mo>12||d<1||d>31) return ''; return `${m[1]}/${p2(mo)}/${p2(d)}`; }
+function jNow(){ try{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()); const g=t=>p.find(x=>x.type===t).value; return `${g('year')}/${g('month')}/${g('day')}`; }catch(e){ return ''; } }
+function j2g(dy){ const m=/^(\d{4})\/(\d{2})\/(\d{2})$/.exec(dy||''); if(!m) return null;
+  let jy=+m[1]-979, jm=+m[2]-1, jd=+m[3]-1;
+  let n=365*jy+Math.floor(jy/33)*8+Math.floor(((jy%33)+3)/4); for(let i=0;i<jm;i++) n+=i<6?31:30; n+=jd;
+  let g=n+79, gy=1600+400*Math.floor(g/146097); g%=146097; let leap=true;
+  if(g>=36525){ g--; gy+=100*Math.floor(g/36524); g%=36524; if(g>=365) g++; else leap=false; }
+  gy+=4*Math.floor(g/1461); g%=1461; if(g>=366){ leap=false; g--; gy+=Math.floor(g/365); g%=365; }
+  const ml=[31,leap?29:28,31,30,31,30,31,31,30,31,30,31]; let gm=0; while(gm<12 && g>=ml[gm]){ g-=ml[gm]; gm++; }
+  return [gy,gm+1,g+1]; }
+/** چند روز از آن تاریخ شمسی گذشته (null = تاریخ نامعلوم) */
+function daysSince(dy){ const g=j2g(dy); if(!g) return null; const a=Date.UTC(g[0],g[1]-1,g[2]), n=new Date(); const b=Date.UTC(n.getFullYear(),n.getMonth(),n.getDate()); return Math.round((b-a)/864e5); }
+
+/* مرحله‌ها به ترتیب فرایند سندپرداز. need = چیزهایی که پیش از آن مرحله باید نوشته شده باشد */
+const STEPS=[
+  {k:'rcv',n:'فاکتور رسید',need:[]},
+  {k:'fin',n:'ثبت در سندپرداز',need:[]}];
+/* یادآور: بدون فاکتور بیش از ۳ روز بعد از شروع کار؛ فاکتور رسیده ولی ثبت‌نشده بیش از ۱ روز */
+function nxText(j,st){ return st.k==='rcv'?'گرفتن فاکتور از '+(j.ven||'پیمانکار'):'ثبت فاکتور در سندپرداز'; }
+const LAST_LATE=3;   // بیشتر از این تعداد روز بعد از پایان کار، بدون فاکتور = دیرکرد
+
+let jobs=LS(KEY,[]); if(!Array.isArray(jobs)) jobs=[];
+let filter='open', editId='', openSheet=new Set(), armDel='';
+function save(){ LSset(KEY,jobs); }
+function reload(){ const d=LS(KEY,[]); if(Array.isArray(d)){ jobs=d; render(); } }
+const P=()=>{ try{ return parent; }catch(e){ return null; } };
+const who=()=>{ try{ return (P().ntSync && P().ntSync.myName && P().ntSync.myName())||''; }catch(e){ return ''; } };
+function missing(j,st){ return st.need.filter(x=>!String(j[x[0]]||'').trim()).map(x=>x[1]); }
+function doneN(j){ let n=0; STEPS.forEach(s=>{ if(j.steps&&j.steps[s.k]) n++; }); return n; }
+/* «یک فاکتور دیگر مانده»: فاکتورهای بعدی همان کار در j.more = [{id, note, d (تاریخ افزودن), steps:{rcv,fin}}] */
+const xs=j=>Array.isArray(j&&j.more)?j.more.filter(x=>x&&x.id):[];
+const xOpen=x=>!(x.steps&&x.steps.fin);
+const isDone=j=>!!(j.steps&&j.steps.fin)&&!xs(j).some(xOpen);
+function lateOne(rc,base){ const d=daysSince(rc||base||''); return d===null?0:Math.max(0,d-(rc?1:LAST_LATE)); }
+function nextLabel(j){ const nxt=STEPS.find(s=>!(j.steps&&j.steps[s.k])); if(nxt) return nxText(j,nxt);
+  const x=xs(j).find(xOpen); if(!x) return 'تمام شد'; return (x.steps&&x.steps.rcv)?'ثبت فاکتور دیگر در سندپرداز':'گرفتن فاکتور دیگر'+(x.note?' ('+x.note+')':''); }
+let armX='';
+function xHtml(j){
+  const L=xs(j);
+  return `<div class="xs">${L.map((x,k)=>{ const rc=x.steps&&x.steps.rcv, fn=x.steps&&x.steps.fin, lt=fn?0:lateOne(rc,x.d);
+    return `<div class="xr${fn?' dn':''}${lt?' od':''}"><div class="xh"><b>فاکتور ${fa(k+2)}</b><input class="xn" data-xn="${esc(x.id)}" data-id="${esc(j.id)}" value="${esc(x.note||'')}" placeholder="از کی؟ (اختیاری)" aria-label="فاکتور از کی"><button type="button" class="xd${armX===x.id?' arm':''}" data-xdel="${esc(x.id)}" data-id="${esc(j.id)}" aria-label="حذف این فاکتور">${armX===x.id?'حذف؟':'✕'}</button></div>
+      <div class="xst"><button type="button" class="sp ${rc?'done':'next'}" data-xst="rcv" data-xid="${esc(x.id)}" data-id="${esc(j.id)}" aria-pressed="${rc?'true':'false'}">${rc?'✓ ':''}فاکتور رسید<small>${rc?esc(fa(rc)):'ثبت شد؟'}</small></button><button type="button" class="sp ${fn?'done':(rc?'next':'')}" data-xst="fin" data-xid="${esc(x.id)}" data-id="${esc(j.id)}" ${!rc&&!fn?'disabled':''} aria-pressed="${fn?'true':'false'}">${fn?'✓ ':''}ثبت در سندپرداز<small>${fn?esc(fa(fn)):(rc?'ثبت شد؟':'')}</small></button></div>${lt?`<div class="nx w">${fa(lt)} روز دیرکرد</div>`:''}</div>`; }).join('')}
+    <button type="button" class="btn s xa" data-xadd="${esc(j.id)}">+ یک فاکتور دیگر مانده</button></div>`; }
+function xAdd(id){ const j=jobs.find(x=>x.id===id); if(!j) return; j.more=xs(j); j.more.push({id:'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,4),note:'',d:jNow(),steps:{}}); save(); render(); say('فاکتور دیگر اضافه شد؛ یادآور دوباره روشن است');
+  setTimeout(()=>{ try{ const a=$('list').querySelectorAll('.xn[data-id="'+CSS.escape(id)+'"]'); a[a.length-1].focus(); }catch(e){} },50); }
+function xStep(id,xid,k){ const j=jobs.find(x=>x.id===id), x=j&&xs(j).find(y=>y.id===xid); if(!x) return; x.steps=x.steps||{};
+  if(x.steps[k]){ if(k==='rcv'&&x.steps.fin){ say('اول «ثبت در سندپرداز» را بردارید',true); return; } delete x.steps[k]; save(); render(); say('برداشته شد'); return; }
+  if(k==='fin'&&!x.steps.rcv){ say('اول «فاکتور رسید» را ثبت کنید',true); return; }
+  x.steps[k]=jNow(); save(); render(); say(k==='rcv'?'«فاکتور رسید» ثبت شد':'«ثبت در سندپرداز» ثبت شد'); }
+function xDel(id,xid){ if(armX!==xid){ armX=xid; render(); setTimeout(()=>{ if(armX===xid){ armX=''; render(); } },3000); return; }
+  const j=jobs.find(x=>x.id===id); if(j){ j.more=xs(j).filter(y=>y.id!==xid); } armX=''; save(); render(); say('حذف شد'); }
+/** پایه شمارش دیرکرد: پایان کار، وگرنه شروع کار، وگرنه تاریخ خرابی */
+function lateDays(j){ if(isDone(j)) return 0; let m=0; if(!(j.steps&&j.steps.fin)) m=lateOne(j.steps&&j.steps.rcv,j.ws||j.bd); xs(j).filter(xOpen).forEach(x=>{ m=Math.max(m,lateOne(x.steps&&x.steps.rcv,x.d)); }); return m; }
+const isLate=j=>lateDays(j)>0;
+
+function renderNarrow(){
+  const L=$('list'), arr=jobs.filter(j=>j&&j.id).slice().sort((a,b)=>(isDone(a)-isDone(b))||(lateDays(b)-lateDays(a))||String(b.ws||'').localeCompare(String(a.ws||'')));
+  const open=arr.filter(j=>!isDone(j)), shown=filter==='open'?open:arr;
+  if(!shown.length){ L.innerHTML=`<div class="empty"><b>${filter==='open'?'کار باز نیست':'هنوز کاری ثبت نشده'}</b>با «+ کار تازه» شروع کنید.</div>`; return; }
+  L.innerHTML=shown.map(j=>{
+    const dn=isDone(j), late=isLate(j), nxt=STEPS.find(s=>!(j.steps&&j.steps[s.k])), n=doneN(j);
+    const meta=[`<span class="chip${dn?' g':''}">${fa(n)} از ${fa(STEPS.length)} مرحله</span>`];
+    if(late) meta.push(`<span class="chip r">${fa(lateDays(j))} روز دیرکرد</span>`);
+    if(j.bd) meta.push(`<span class="chip">خرابی ${fa(j.bd)}${j.bt?' '+fa(j.bt):''}</span>`);
+    if(j.ws) meta.push(`<span class="chip">کار ${fa(j.ws)}${j.we?' تا '+fa(j.we):''}</span>`);
+    if(j.amt) meta.push(`<span class="chip">${fa(Number(lat(j.amt).replace(/[^\d]/g,'')||0).toLocaleString('en-US'))} ریال</span>`);
+    let prev=true;
+    const sp=STEPS.map(s=>{ const dt=j.steps&&j.steps[s.k];
+      const cls=dt?'done':(!dt&&prev?'next':''); const lock=!dt&&!prev; if(!dt) prev=false;
+      return `<button type="button" class="sp ${cls}" data-st="${s.k}" data-id="${esc(j.id)}" ${lock?'disabled':''} aria-pressed="${dt?'true':'false'}">${dt?'✓ ':''}${esc(s.n)}<small>${dt?esc(fa(dt)):(lock?'':'ثبت شد؟')}</small></button>`; }).join('');
+    let nx='';
+    if(!dn){ nx=`<div class="nx${isLate(j)?' w':''}">${esc(nextLabel(j))}</div>`; }
+    const sh=openSheet.has(j.id)?sheetHtml(j):'';
+    return `<section class="jb${late?' od':''}${dn?' dn':''}" data-id="${esc(j.id)}">
+      <h3>${esc(j.dev)} <span class="chip">${esc(j.ven||'پیمانکار نامعلوم')}</span></h3>
+      <p>${esc(j.desc||'')}</p><div class="meta">${meta.join('')}</div>
+      <div class="stp">${sp}</div>${xHtml(j)}${nx}
+      <div class="acts"><button type="button" class="btn s" data-a="edit" data-id="${esc(j.id)}">ویرایش</button>
+        <button type="button" class="btn s d" data-a="del" data-id="${esc(j.id)}">${armDel===j.id?'مطمئنید؟ دوباره بزنید':'حذف'}</button></div>${sh}</section>`; }).join('');
+}
+function rowH(l,v){ const t=String(v||'').trim(); return `<div class="row"><span class="l">${esc(l)}</span><span class="v${t?'':' no'}">${t?esc(lat(t)):'ننوشته‌اید'}</span><button type="button" class="cp" data-copy="${esc(lat(t))}" ${t?'':'disabled'}>کپی</button></div>`; }
+function stepFields(j,k){
+  const bdt=[j.bd,j.bt].filter(Boolean).join(' ');
+  return {ann:[['تجهیز',j.eq||j.dev],['تاریخ و ساعت خرابی',bdt],['شرح',j.desc]],
+    chk:[['کد علت خرابی',j.cause],['کد فعالیت',j.act]],
+    ord:[['کد خدمات',j.svc],['پیمانکار',j.ven],['شرح کار',j.desc]],
+    rcv:[],fin:[['پیمانکار',j.ven],['مبلغ (ریال)',j.amt],['شماره فاکتور',j.inv],['شرح',j.desc]]}[k]||[]; }
+function sheetHtml(j){
+  const bdt=[j.bd,j.bt].filter(Boolean).join(' ');
+  return `<div class="sheet"><div class="hint">این مقدارها را در هر مرحله سندپرداز بگذارید (اعداد انگلیسی کپی می‌شود).</div>
+  <h4>۱ اعلام خرابی</h4>${rowH('تجهیز',j.eq||j.dev)}${rowH('تاریخ و ساعت خرابی',bdt)}${rowH('شرح',j.desc)}
+  <h4>۲ بررسی خرابی</h4>${rowH('کد علت خرابی',j.cause)}${rowH('کد فعالیت',j.act)}
+  <h4>۳ دستور تعمیر برون‌سپاری</h4>${rowH('کد خدمات',j.svc)}${rowH('پیمانکار',j.ven)}${rowH('شرح کار',j.desc)}
+  <h4>۴ ارسال و استرداد کالا</h4>${rowH('تاریخ ارسال',j.ws)}
+  <h4>۵ گزارش</h4>${rowH('تاریخ پایان کار',j.we)}
+  <h4>۶ فاکتور</h4>${rowH('مبلغ (ریال)',j.amt)}${rowH('شماره فاکتور',j.inv)}</div>`; }
+
+
+/* ---------- نمایش کامپیوتر ---------- */
+const wide=()=>{ try{ return matchMedia('(min-width:960px)').matches; }catch(e){ return false; } };
+let sel='';
+function sorted(){ return jobs.filter(j=>j&&j.id).slice().sort((a,b)=>(isDone(a)-isDone(b))||(lateDays(b)-lateDays(a))||String(b.ws||'').localeCompare(String(a.ws||''))); }
+function shownJobs(){ const a=sorted(); return filter==='open'?a.filter(j=>!isDone(j)):a; }
+function paneHtml(j){
+  if(!j) return '<div class="pe">یک کار را از لیست انتخاب کنید.</div>';
+  const late=isLate(j), dn=isDone(j), nxt=STEPS.find(s=>!(j.steps&&j.steps[s.k]));
+  const meta=[`<span class="chip${dn?' g':''}">${fa(doneN(j))} از ${fa(STEPS.length)} مرحله</span>`];
+  if(late) meta.push(`<span class="chip r">${fa(lateDays(j))} روز دیرکرد</span>`);
+  if(j.ws) meta.push(`<span class="chip">کار ${fa(j.ws)}${j.we?' تا '+fa(j.we):''}</span>`);
+  const lastDone=[...STEPS].reverse().find(s=>j.steps&&j.steps[s.k]);
+  const trk=STEPS.map((s,i)=>{ const dt=j.steps&&j.steps[s.k], cur=nxt&&nxt.k===s.k, lock=!dt&&!cur, m=missing(j,s);
+    const act=dt?(lastDone&&lastDone.k===s.k?`<button type="button" class="go u" data-st="${s.k}" data-id="${esc(j.id)}">برگرداندن</button>`:''):
+      (cur?(m.length?`<button type="button" class="go" data-a="edit" data-id="${esc(j.id)}">تکمیل اطلاعات</button>`:`<button type="button" class="go" data-st="${s.k}" data-id="${esc(j.id)}">ثبت شد</button>`):'');
+    const rows=(dt&&!cur)?'':stepFields(j,s.k).map(r=>{ const t=String(r[1]||'').trim(); return `<button type="button" class="fr" data-copy="${esc(lat(t))}" ${t?'':'disabled'}><span class="l">${esc(r[0])}</span><span class="v${t?'':' no'}">${t?esc(lat(t)):'ننوشته‌اید'}</span><span class="k">${t?'کپی':''}</span></button>`; }).join('');
+    return `<li class="ts${dt?' done':''}${cur?' cur':''}${lock?' lock':''}"><div class="tt"><span class="mk" aria-hidden="true">${dt?'✓':fa(i+1)}</span><b>${esc(s.n)}</b>${dt?`<span class="dt">${esc(fa(dt))}</span>`:''}${act}</div>${rows?`<div class="fl">${rows}</div>`:''}${cur&&m.length?`<p class="wn">اول بنویسید: ${esc(m.join('، '))}</p>`:''}</li>`; }).join('');
+  return `<div class="ph"><h2>${esc(j.dev)}</h2><p>${esc(j.ven||'پیمانکار نامعلوم')} — ${esc(j.desc||'')}</p><div class="meta">${meta.join('')}</div>
+    <div class="acts"><button type="button" class="btn s" data-a="edit" data-id="${esc(j.id)}">ویرایش</button><button type="button" class="btn s d" data-a="del" data-id="${esc(j.id)}">${armDel===j.id?'مطمئنید؟ دوباره بزنید':'حذف'}</button></div></div><ol class="trk">${trk}</ol>${xHtml(j)}`; }
+function renderWide(){
+  const L=$('list'), arr=shownJobs();
+  if(!arr.some(j=>j.id===sel)) sel=arr.length?arr[0].id:'';
+  const cur=arr.find(j=>j.id===sel);
+  const rows=arr.map(j=>{ const dn=isDone(j), late=isLate(j), nxt=STEPS.find(s=>!(j.steps&&j.steps[s.k])), segs=STEPS.map(s=>`<i class="${j.steps&&j.steps[s.k]?'d':(nxt&&nxt.k===s.k?'c':'')}"></i>`).join('');
+    return `<button type="button" class="rw${late?' od':''}${dn?' dn':''}" data-sel="${esc(j.id)}" aria-selected="${j.id===sel?'true':'false'}"><span class="dv">${esc(j.dev)}<small>${esc(j.desc||'')}</small></span><span class="vn">${esc(j.ven||'—')}</span><span class="rb" aria-label="${fa(doneN(j))} از ${fa(STEPS.length)} مرحله">${segs}</span><span class="nx2">${dn?'تمام شد':esc(nextLabel(j))}</span><span class="lt${dn?' g':''}">${late?fa(lateDays(j))+' روز دیرکرد':(dn?'✓':'')}</span></button>`; }).join('');
+  L.innerHTML=`<div class="app"><div class="lst"><div class="lh"><span>دستگاه</span><span>پیمانکار</span><span>پیشرفت</span><span>قدم بعد</span><span></span></div>${rows||`<div class="pe"><b>${filter==='open'?'کار باز نیست':'هنوز کاری ثبت نشده'}</b><br>با «+ کار تازه» شروع کنید.</div>`}</div><aside class="pane" aria-label="برگه سندپرداز">${paneHtml(cur)}</aside></div>`;
+}
+let sess=false;
+function renderSession(){
+  const L=$('list'), open=jobs.filter(j=>j&&j.id&&!isDone(j)); let out='', n=0;
+  STEPS.forEach((st,i)=>{ const js=open.filter(j=>{ const nx=STEPS.find(x=>!(j.steps&&j.steps[x.k])); return nx&&nx.k===st.k; });
+    if(!js.length) return; n+=js.length;
+    out+=`<section class="sg"><h2>${fa(i+1)} ${esc(st.n)} <span class="chip">${fa(js.length)} کار</span></h2>`+js.map(j=>{ const m=missing(j,st);
+      const fl=stepFields(j,st.k).map(r=>{ const t=String(r[1]||'').trim(); return `<button type="button" class="fr" data-copy="${esc(lat(t))}" ${t?'':'disabled'}><span class="l">${esc(r[0])}</span><span class="v${t?'':' no'}">${t?esc(lat(t)):'ننوشته‌اید'}</span><span class="k">${t?'کپی':''}</span></button>`; }).join('');
+      const late=isLate(j)?`<span class="chip r">${fa(lateDays(j))} روز دیرکرد</span>`:'';
+      return `<div class="sc"><h3>${esc(j.dev)} <small>— ${esc(j.ven||'پیمانکار نامعلوم')}</small> ${late}</h3><div class="fl2">${fl}</div>
+        <div class="row2">${m.length?`<span class="wn">اول بنویسید: ${esc(m.join('، '))}</span><button type="button" class="go" data-a="edit" data-id="${esc(j.id)}">تکمیل اطلاعات</button>`:`<button type="button" class="go" data-st="${st.k}" data-id="${esc(j.id)}">در سندپرداز زدم، ثبت شد</button>`}</div></div>`; }).join('')+'</section>'; });
+  L.innerHTML=n?`<div class="hint" style="margin-top:14px">همه قدم‌های بعدی، گروه‌بندی‌شده بر اساس صفحه سندپرداز. هر گروه را پشت سر هم بزنید.</div>${out}`:'<div class="empty"><b>قدم معوقی نیست</b>همه کارهای باز تمام شده‌اند.</div>';
+}
+function render(){ if(sess) return renderSession(); wide()?renderWide():renderNarrow(); }
+try{ matchMedia('(min-width:960px)').addEventListener('change',render); }catch(e){}
+document.addEventListener('keydown',e=>{ if(!wide()||$('dlg').classList.contains('on')) return; if(e.key!=='ArrowDown'&&e.key!=='ArrowUp') return;
+  const t=e.target; if(t&&/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return; const a=shownJobs(); if(!a.length) return;
+  const i=Math.max(0,a.findIndex(j=>j.id===sel)), n=Math.min(a.length-1,Math.max(0,i+(e.key==='ArrowDown'?1:-1))); if(n===i) return; e.preventDefault(); sel=a[n].id; armDel=''; render();
+  try{ const b=$('list').querySelector('.rw[aria-selected="true"]'); b&&b.focus({preventScroll:false}); }catch(x){} });
+
+/* ---------- فرم ---------- */
+function devNames(){ try{ const d=(P().ntQr&&P().ntQr.DEVS||[]).map(x=>x.name); if(d.length) return d; }catch(e){} try{ return P().ntStops.TRACKED.slice(); }catch(e){ return []; } }
+function uniq(f){ const s=new Set(); jobs.forEach(j=>{ const v=j&&j[f]; if(v) s.add(v); }); return [...s]; }
+function fillLists(){
+  const mk=(id,a)=>{ $(id).innerHTML=a.map(x=>`<option value="${esc(x)}">`).join(''); };
+  mk('dlDev',devNames()); mk('dlVen',uniq('ven')); mk('dlCause',uniq('cause')); mk('dlAct',uniq('act')); mk('dlSvc',uniq('svc'));
+}
+/** آخرین خرابی ثبت‌شده همین دستگاه در «توقف شیفت» (۶۰ روز گذشته) */
+function lastBreak(dev){
+  try{ const S=P().ntStops; if(!S||!dev) return null; const to=jNow(); const g=j2g(to); if(!g) return null;
+    const dt=new Date(g[0],g[1]-1,g[2]-60); let from; try{ const p=new Intl.DateTimeFormat('en-u-ca-persian-nu-latn',{year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(dt); const q=t=>p.find(x=>x.type===t).value; from=`${q('year')}/${q('month')}/${q('day')}`; }catch(e){ return null; }
+    const r=S.list(from,to,{prog:false}).filter(x=>dkey(x.dev)===dkey(dev)&&x.cls==='em'&&x.from); return r.length?r[r.length-1]:null; }catch(e){ return null; } }
+function devHint(){ const d=$('fDev').value.trim(), eqj=jobs.slice().reverse().find(j=>j&&dkey(j.dev)===dkey(d)&&j.eq);
+  if(eqj && !$('fEq').value && !editId) $('fEq').value=eqj.eq;
+  const b=lastBreak(d), el=$('hStop');
+  if(b){ el.textContent='آخرین خرابی ثبت‌شده: '+fa(b.day)+' ساعت '+fa(b.from); el.dataset.day=b.day; el.dataset.t=b.from; if(!editId){ if(!$('fBd').value) $('fBd').value=b.day; if(!$('fBt').value) $('fBt').value=b.from; } }
+  else{ el.textContent=''; delete el.dataset.day; delete el.dataset.t; } }
+const F=['fDev','fVen','fDesc','fWs','fEq','fBd','fBt','fWe','fCause','fAct','fSvc','fAmt','fInv'];
+const MAP={fDev:'dev',fVen:'ven',fDesc:'desc',fWs:'ws',fEq:'eq',fBd:'bd',fBt:'bt',fWe:'we',fCause:'cause',fAct:'act',fSvc:'svc',fAmt:'amt',fInv:'inv'};
+function openForm(id){
+  editId=id||''; fillLists(); const j=id?jobs.find(x=>x.id===id):null;
+  F.forEach(f=>{ $(f).value=j?(j[MAP[f]]||''):''; $(f).classList.remove('bad'); });
+  if(!j) $('fWs').value=jNow();
+  $('dH').textContent=j?'ویرایش کار':'کار تازه'; $('fErr').textContent=''; $('fMore').open=!!j; $('hStop').textContent='';
+  $('dlg').classList.add('on'); devHint(); try{ $('fDev').focus(); }catch(e){}
+}
+function closeForm(){ $('dlg').classList.remove('on'); editId=''; }
+function saveForm(){
+  const v={}; F.forEach(f=>{ v[MAP[f]]=lat($(f).value).trim(); });
+  v.dev=$('fDev').value.trim(); v.ven=$('fVen').value.trim(); v.desc=$('fDesc').value.trim();
+  ['cause','act','svc'].forEach(k=>{ v[k]=$({cause:'fCause',act:'fAct',svc:'fSvc'}[k]).value.trim(); });
+  F.forEach(f=>$(f).classList.remove('bad'));
+  const bad=[]; const need=(f,m)=>{ if(!$(f).value.trim()){ bad.push(f); return m; } return ''; };
+  let e=need('fDev','دستگاه را بنویسید')||need('fDesc','شرح کار را بنویسید');
+  ['fWs','fBd','fWe'].forEach(f=>{ const t=$(f).value.trim(); if(!e && t){ const n=nd(t); if(!n){ bad.push(f); e='تاریخ را مثل 1405/07/19 بنویسید'; } else v[MAP[f]]=n; } else if(!t) v[MAP[f]]=''; });
+  if(!e && v.bt && !/^\d{2}:\d{2}$/.test(v.bt)){ bad.push('fBt'); e='ساعت درست نیست'; }
+  if(!e && v.amt && !/^[\d,٬]+$/.test(v.amt)){ bad.push('fAmt'); e='مبلغ را فقط با رقم بنویسید'; }
+  if(!e && v.ws && v.we && v.we<v.ws){ bad.push('fWe'); e='پایان کار نباید پیش از شروع باشد'; }
+  if(e){ bad.forEach(f=>$(f).classList.add('bad')); $('fErr').textContent=e; try{ $(bad[0]).focus(); }catch(x){} return; }
+  if(v.amt) v.amt=v.amt.replace(/[,٬]/g,'');
+  if(editId){ const j=jobs.find(x=>x.id===editId); if(j) Object.assign(j,v); }
+  else{ const nj=Object.assign({id:'o'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),steps:{},by:who(),ts:Date.now()},v); jobs.push(nj); sel=nj.id; }
+  save(); closeForm(); render(); say('ذخیره شد');
+}
+function toggleStep(id,k){
+  const j=jobs.find(x=>x.id===id); if(!j) return; j.steps=j.steps||{};
+  if(j.steps[k]){ const i=STEPS.findIndex(s=>s.k===k); if(STEPS.slice(i+1).some(s=>j.steps[s.k])){ say('اول مرحله‌های بعدی را بردارید',true); return; } delete j.steps[k]; save(); render(); return; }
+  const i=STEPS.findIndex(s=>s.k===k); const prev=STEPS.slice(0,i).find(s=>!j.steps[s.k]);
+  if(prev){ say('اول «'+prev.n+'» را ثبت کنید',true); return; }
+  const m=missing(j,STEPS[i]); if(m.length){ say('اول بنویسید: '+m.join('، '),true); openForm(id); $('fMore').open=true; return; }
+  j.steps[k]=jNow(); save(); render(); say('«'+STEPS[i].n+'» ثبت شد');
+}
+function copy(t){ const done=()=>say('کپی شد'); try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(done,()=>fb()); return; } }catch(e){} fb();
+  function fb(){ try{ const a=document.createElement('textarea'); a.value=t; a.style.position='fixed'; a.style.opacity='0'; document.body.appendChild(a); a.select(); document.execCommand('copy'); a.remove(); done(); }catch(e){ say('کپی نشد',true); } } }
+
+$('oNew').addEventListener('click',()=>openForm());
+/** «نیاز به تعمیر بیرونی» از صفحه دستگاه: فرم تازه با دستگاه پر */
+function consumeDraft(){ try{ const d=parent.ntOutsrcDraft; if(!d||!d.dev) return; parent.ntOutsrcDraft=null; sess=false; openForm(); $('fDev').value=String(d.dev); devHint(); try{ $('fVen').focus(); }catch(e){} }catch(e){} }
+$('fCancel').addEventListener('click',closeForm);
+$('fSave').addEventListener('click',saveForm);
+$('fDev').addEventListener('input',devHint); $('fDev').addEventListener('change',devHint);
+$('dlg').addEventListener('click',e=>{ if(e.target===$('dlg')) closeForm(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && $('dlg').classList.contains('on')) closeForm(); });
+$('seg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; filter=b.dataset.f; document.querySelectorAll('#seg button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false')); render(); });
+$('list').addEventListener('click',e=>{
+  const r=e.target.closest('[data-sel]'); if(r){ sel=r.dataset.sel; armDel=''; render(); try{ $('list').querySelector('.rw[aria-selected="true"]').focus(); }catch(x){} return; }
+  const c=e.target.closest('[data-copy]'); if(c){ copy(c.dataset.copy); return; }
+  const xa=e.target.closest('[data-xadd]'); if(xa){ xAdd(xa.dataset.xadd); return; }
+  const xt=e.target.closest('[data-xst]'); if(xt){ xStep(xt.dataset.id,xt.dataset.xid,xt.dataset.xst); return; }
+  const xd=e.target.closest('[data-xdel]'); if(xd){ xDel(xd.dataset.id,xd.dataset.xdel); return; }
+  if(e.target.closest('.xn')) return;
+  const s=e.target.closest('[data-st]'); if(s){ toggleStep(s.dataset.id,s.dataset.st); return; }
+  const a=e.target.closest('[data-a]'); if(!a) return; const id=a.dataset.id;
+  if(a.dataset.a==='sheet'){ openSheet.has(id)?openSheet.delete(id):openSheet.add(id); armDel=''; render(); }
+  else if(a.dataset.a==='edit'){ openForm(id); }
+  else if(a.dataset.a==='del'){ if(armDel===id){ jobs=jobs.filter(x=>x.id!==id); armDel=''; save(); render(); say('حذف شد'); } else{ armDel=id; render(); setTimeout(()=>{ if(armDel===id){ armDel=''; render(); } },4000); } }
+});
+window.addEventListener('message',e=>{ if(!e||!e.data||e.data.nt!=='show') return; if($('dlg').classList.contains('on')) return; reload(); consumeDraft(); });
+$('list').addEventListener('change',e=>{ const n=e.target.closest('.xn'); if(!n) return; const j=jobs.find(x=>x.id===n.dataset.id), x=j&&xs(j).find(y=>y.id===n.dataset.xn); if(!x) return; x.note=n.value.trim().slice(0,60); save(); });
+render(); setTimeout(consumeDraft,300);
+</script>
+</body>
+</html>

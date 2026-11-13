@@ -1,0 +1,30 @@
+// ردیف دکمه‌های فیلتر (.chips.scroll): کشیدن با موس و چرخ موس به چپ و راست؛ کشیدن دکمه را نمی‌زند، ضربه ساده می‌زند.
+const {chromium}=require('playwright'); const http=require('http'), fs=require('fs'), path=require('path');
+const HTML=fs.readFileSync(path.join(__dirname,'..','out.html'));
+let fails=0; const ok=(c,m)=>{ console.log((c?'  ok  ':'  FAIL ')+m); if(!c) fails++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+(async()=>{
+  const web=http.createServer((q,r)=>{ r.writeHead(200,{'Content-Type':'text/html; charset=utf-8'}); r.end(HTML); }); await new Promise(r=>web.listen(0,r));
+  const br=await chromium.launch({executablePath:process.env.CHROMIUM||undefined});
+  const c=await br.newContext({locale:'fa-IR',viewport:{width:390,height:844}});
+  await c.addInitScript(()=>{ if(localStorage.getItem('__s')) return; localStorage.setItem('__s','1'); localStorage.setItem('ntws_test','1'); localStorage.setItem('ntsync_cfg_v1','{"mode":"w"}'); localStorage.setItem('ntk_bf','open'); localStorage.setItem('ntk_pane','box');
+    localStorage.setItem('nt_kbox_v1',JSON.stringify([{id:'a',name:'قلم نمونه',qty:'1',unit:'عدد',seen:'1405/08/01'}])); });
+  const p=await c.newPage(); const errs=[]; p.on('pageerror',e=>{ if(!/Unexpected token '<'/.test(String(e))) errs.push(String(e)); });
+  await p.goto(`http://localhost:${web.address().port}/nt/s.html`); await p.waitForFunction(()=>window.ntWs,null,{timeout:15000});
+  await p.addStyleTag({content:'.sybd,#ntPin,#ntSyDlg{display:none!important}'}); await p.evaluate(()=>{ window.ntLocked=false; document.body.classList.remove('ntlocked','ntpin'); try{ ntBoot(); }catch(e){} }); await sleep(1200);
+  await p.click('#ntWs [data-ws="kh"]'); await sleep(900); await p.evaluate(()=>window.postMessage({nt:'go',tab:'لیست خرید'},'*')); await sleep(1300);
+  const i=await p.evaluate(()=>DOCS.findIndex(d=>d.name==='لیست خرید')); const fh=(await p.$$('iframe'))[i]; const f=await fh.contentFrame();
+  ok(await f.evaluate(()=>{ const e=document.getElementById('bF'); return e.scrollWidth>e.clientWidth; }),'ردیف فیلتر بیشتر از عرض صفحه است');
+  const box=await (await f.$('#bF')).boundingBox(), y=box.y+box.height/2;
+  await p.mouse.move(box.x+60,y); await p.mouse.down(); await p.mouse.move(box.x+120,y,{steps:4}); await p.mouse.move(box.x+260,y,{steps:6}); await p.mouse.up(); await sleep(200);
+  const sl=await f.evaluate(()=>document.getElementById('bF').scrollLeft);
+  ok(sl!==0,'کشیدن با موس: ردیف جابه‌جا شد ('+sl+')');
+  ok(await f.evaluate(()=>document.querySelector('#bF [aria-pressed="true"]').dataset.f)==='open','کشیدن فیلتر را عوض نکرد');
+  await f.evaluate(()=>{ document.getElementById('bF').scrollLeft=0; });
+  await p.mouse.move(box.x+box.width-80,y); await p.mouse.wheel(0,200); await sleep(200);
+  ok(await f.evaluate(()=>document.getElementById('bF').scrollLeft)!==0,'چرخ موس: ردیف به چپ رفت');
+  await f.evaluate(()=>{ document.getElementById('bF').scrollLeft=0; }); await f.click('#bF [data-f="imp"]'); await sleep(200);
+  ok(await f.evaluate(()=>document.querySelector('#bF [aria-pressed="true"]').dataset.f)==='imp','ضربه ساده هنوز فیلتر را عوض می‌کند');
+  ok(!errs.length,'بدون خطا '+errs.join('|').slice(0,200));
+  await br.close(); web.close(); console.log(fails?`\n${fails} FAIL`:'\nALL OK'); process.exit(fails?1:0);
+})().catch(e=>{ console.error(e); process.exit(1); });

@@ -1,0 +1,60 @@
+import sys
+src, out = sys.argv[1], sys.argv[2]
+s=open(src,encoding='utf-8').read()
+css=open('sync.css',encoding='utf-8').read()
+js=open('uicons.js',encoding='utf-8').read()+'\n'+open('pinlock.js',encoding='utf-8').read()+'\n'+open('dept.js',encoding='utf-8').read()+'\n'+open('sync.js',encoding='utf-8').read()
+def rep(a,b,n=1):
+    global s
+    assert s.count(a)==n, (a[:60], s.count(a))
+    s=s.replace(a,b)
+# 1) css
+rep("</style>\n</head>", css+"</style>\n</head>")
+# امنیت: سیاست محتوا (اطلاعات فقط به GitHub فرستاده می‌شود) و نپذیرفتن پیام از سایت‌های دیگر
+CSP="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://api.github.com https://raw.githubusercontent.com https://cdn.jsdelivr.net http://localhost:* http://127.0.0.1:*; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self' blob: mediastream:; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'"
+rep("</head>", '<meta http-equiv="Content-Security-Policy" content="'+CSP+'">\n<script>window.addEventListener("message",function(e){ if(e.origin!==location.origin && location.origin!=="null"){ e.stopImmediatePropagation(); } },true);</script>\n</head>')
+rep("</head>", '<link rel="manifest" href="manifest.webmanifest">\n<meta name="theme-color" content="#0B5C7A">\n<link rel="apple-touch-icon" href="lib/icon-180.png">\n<meta name="apple-mobile-web-app-capable" content="yes">\n</head>')
+# 2) دکمه و نوار وضعیت
+rep('  <div class="tabs" id="tabs"></div>\n',
+    '  <div class="tabrow"><div class="tabs" id="tabs"></div><button type="button" class="sybtn" id="ntSyBtn"><span class="d"></span><span class="tx">اطلاعات مشترک</span></button></div>\n'
+    '  <div class="sybar" id="ntSyBar" hidden><span id="ntSyBarT"></span><button type="button" id="ntSyBarB" hidden></button></div>\n')
+rep('<div class="stage" id="stage">',
+    '<div class="sydlg" id="ntSyDlg" role="dialog" aria-modal="true" aria-labelledby="ntSyH" hidden><div class="sybox"><h2 id="ntSyH"></h2><div id="ntSyBody"></div></div></div>\n'
+    '<div class="sytoast" id="ntSyToast" role="status" aria-live="polite" hidden></div>\n'
+    '<div class="stage" id="stage">')
+# 3) شروع: در حالت مشاهده، اول اطلاعات مشترک گرفته می‌شود
+rep("show(start);\nbadges();\nsetTimeout(()=>{ try{ if(!frames[0].dataset.loaded){",
+    "let ntBooted=false;\n"
+    "function ntBoot(){ if(ntBooted || window.ntLocked) return; ntBooted=true; if(active<0) show(start); badges(); }\n"
+    "setTimeout(ntBoot,6000);   // اگر بخش اطلاعات مشترک پاسخ نداد، سامانه باز هم باز شود\n"
+    "setTimeout(function f(){ if(!ntBooted){ setTimeout(f,800); return; } try{ if(!frames[0].dataset.loaded){")
+rep("frames[0].dataset.loaded='1'; } }catch(e){} },1500);\nsetInterval(badges,3000);",
+    "frames[0].dataset.loaded='1'; } }catch(e){} },1500);\nsetInterval(()=>{ if(ntBooted) badges(); },3000);")
+# 4) یادآورها در حالت مشاهده نشان داده نمی‌شود
+rep("function alCheck(){\n", "function alCheck(){\n  if(window.ntViewer || window.ntLocked){ alHide(); return; }\n")
+# 4b) نشان روی زبانه «توقف شیفت»: دستگاه‌هایی که امروز هنوز متوقف‌اند
+rep("    const key=KEYMAP[name]; if(!key) return 0;",
+    "    if(name==='توقف شیفت'){ const o=JSON.parse(localStorage.getItem('nt_tavaqof_v1')||'{}'), K=todayKey(); let n=0;\n"
+    "      Object.keys(o||{}).forEach(k=>{ if(k.indexOf(K+'|')===0) ((o[k]&&o[k].stops)||[]).forEach(x=>{ if(!x.to) n++; }); }); return n; }\n"
+    "    if(name==='برون‌سپاری'){ try{ const a=JSON.parse(localStorage.getItem('nt_outsrc_v1')||'[]'); return (Array.isArray(a)?a:[]).filter(j=>j&&j.id&&(!(j.steps&&j.steps.fin)||(Array.isArray(j.more)&&j.more.some(x=>x&&x.id&&!(x.steps&&x.steps.fin))))).length; }catch(e){ return 0; } }\n"
+    "    const key=KEYMAP[name]; if(!key) return 0;")
+# 4c) زبانه «امروز» اگر پنهان است، پشت صحنه باز نشود
+rep("setTimeout(function f(){ if(!ntBooted){ setTimeout(f,800); return; } try{ if(!frames[0].dataset.loaded){",
+    "setTimeout(function f(){ if(!ntBooted){ setTimeout(f,800); return; } try{ if(!frames[0].dataset.loaded && !tabs[0].hidden){")
+
+# 5) بخش همگام‌سازی
+stp=open('stops.js',encoding='utf-8').read()
+rpt=open('report.js',encoding='utf-8').read()
+qr=open('qr.js',encoding='utf-8').read()
+ch=open('charts.js',encoding='utf-8').read()
+pw=open('pwa.js',encoding='utf-8').read()
+nv=open('nav.js',encoding='utf-8').read()
+import base64,re as _re
+LOGO_BIG='data:image/png;base64,'+base64.b64encode(open('logo_big.png','rb').read()).decode()
+LOGO_SM='data:image/png;base64,'+base64.b64encode(open('logo_sm.png','rb').read()).decode()
+# لوگوی تازه (طرح ۱۴۰۵/۰۸/۰۲): جای لوگوی قبلی بالای منو + لوگوی بزرگ صفحه آغاز
+_n=len(_re.findall(r'<img class="lg" src="data:image/png;base64,[A-Za-z0-9+/=]+"',s)); assert _n==1,_n
+s=_re.sub(r'<img class="lg" src="data:image/png;base64,[A-Za-z0-9+/=]+"','<img class="lg" src="'+LOGO_SM+'"',s)
+extra='window.NT_LOGO_BIG="'+LOGO_BIG+'";\n'+''.join(open(f,encoding='utf-8').read()+'\n' for f in ['icons.js','svc.js','dchk.js','belts.js','cost.js','repeat.js','fluid.js','ai.js','dev.js','theme.js','exit.js','menu.js','dedup.js','invoice.js','hmmask.js','agent.js','mhead.js','ws.js','splash.js','xlstyle.js'])
+rep("\n</script>\n</body>\n</html>", "\n</script>\n<script>\n"+js+"</script>\n<script>\n"+stp+"</script>\n<script>\n"+rpt+"</script>\n<script>\n"+qr+"</script>\n<script>\n"+ch+"</script>\n<script>\n"+pw+"</script>\n<script>\n"+nv+"</script>\n<script>\n"+extra+"</script>\n</body>\n</html>")
+open(out,'w',encoding='utf-8').write(s)
+print('built',len(s))

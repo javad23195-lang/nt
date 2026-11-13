@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="5 15 530 550">
+ <ellipse cx="265" cy="550" rx="205" ry="8" fill="#17212B" opacity=".14"/>
+ <!-- شنی -->
+ <rect x="84" y="460" width="362" height="86" rx="43" fill="#17212B"/>
+ <rect x="120" y="478" width="290" height="48" rx="10" fill="#2A3540"/>
+ <circle cx="127" cy="503" r="24" fill="#3A4652"/><circle cx="127" cy="503" r="9" fill="#17212B"/>
+ <circle cx="403" cy="503" r="26" fill="#3A4652"/><circle cx="403" cy="503" r="10" fill="#17212B"/>
+ <g fill="#51606E"><circle cx="175" cy="528" r="8"/><circle cx="215" cy="528" r="8"/><circle cx="255" cy="528" r="8"/><circle cx="295" cy="528" r="8"/><circle cx="335" cy="528" r="8"/></g>
+ <rect x="225" y="446" width="100" height="18" fill="#17212B"/>
+ <!-- بدنه بالا -->
+ <path d="M158 368 H496 Q516 368 516 388 V432 Q516 450 496 450 H158 Z" fill="#F2C318"/>
+ <path d="M158 438 H516 V432 Q516 450 496 450 H158 Z" fill="#CFA010"/>
+ <rect x="442" y="368" width="4" height="82" fill="#CFA010"/>
+ <rect x="345" y="346" width="96" height="24" rx="4" fill="#2A3540"/>
+ <g stroke="#51606E" stroke-width="2"><path d="M352 352h82M352 358h82M352 364h82"/></g>
+ <rect x="404" y="318" width="12" height="32" rx="4" fill="#2A3540"/>
+ <path d="M292 368 V350 H340" fill="none" stroke="#2A3540" stroke-width="4" stroke-linecap="round"/>
+ <!-- کابین -->
+ <path d="M168 316 H278 V430 H160 V330 Q160 316 168 316 Z" fill="#F2C318"/>
+ <path d="M170 328 H228 V378 H170 Z" fill="#0B5C7A"/>
+ <path d="M234 328 H270 V378 H234 Z" fill="#0B5C7A"/>
+ <path d="M172 384 H228 V422 H172 Z" fill="#2A3540"/>
+ <path d="M178 334 L190 334 L178 362 Z" fill="#fff" opacity=".3"/>
+ <!-- بوم -->
+ <path d="M288 332 L246 334 L206 212 L108 108 L134 80 L234 176 Z" fill="#F2C318"/>
+ <path d="M288 332 L270 333 L222 196 L124 95 L134 80 L234 176 Z" fill="#CFA010" opacity=".6"/>
+ <path d="M234 316 L186 186" stroke="#8A97A3" stroke-width="9" stroke-linecap="round"/>
+ <path d="M234 316 L210 250" stroke="#51606E" stroke-width="11" stroke-linecap="round"/>
+ <!-- دسته -->
+ <path d="M20 48 L46 30 L134 90 L118 112 L82 140 L70 264 L48 264 L38 136 Z" fill="#F2C318"/>
+ <path d="M82 140 L70 264 L60 264 L68 140 L118 112 Z" fill="#CFA010" opacity=".6"/>
+ <path d="M178 150 L52 44" stroke="#8A97A3" stroke-width="8" stroke-linecap="round"/>
+ <path d="M178 150 L120 101" stroke="#51606E" stroke-width="10" stroke-linecap="round"/>
+ <path d="M30 64 L40 220" stroke="#8A97A3" stroke-width="6" stroke-linecap="round"/>
+ <path d="M30 64 L34 140" stroke="#51606E" stroke-width="8" stroke-linecap="round"/>
+ <circle cx="124" cy="96" r="7" fill="#2A3540"/>
+ <circle cx="58" cy="262" r="7" fill="#2A3540"/>
+ <!-- جام -->
+ <path d="M48 252 Q36 302 92 302 L132 288 L160 222 L96 212 Q60 214 48 252 Z" fill="#F2C318"/>
+ <path d="M98 220 L150 228 L126 280 L94 290 Q72 284 80 250 Z" fill="#CFA010"/>
+ <g fill="#2A3540"><path d="M160 222 l8 -10 l-1 13z M150 220 l7 -11 l0 13z M140 219 l6 -11 l1 13z"/></g>
+ </svg>

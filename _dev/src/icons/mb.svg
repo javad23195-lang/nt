@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="5 40 545 205">
+ <ellipse cx="280" cy="236" rx="262" ry="6" fill="#17212B" opacity=".14"/>
+ <!-- بدنه -->
+ <path d="M44 204 V96 Q46 64 80 58 L120 54 H508 Q526 54 526 72 V204 Z" fill="#F4F6F8" stroke="#B5C0CA" stroke-width="3" stroke-linejoin="round"/>
+ <path d="M44 190 H526 V204 H44 Z" fill="#DDE3E9"/>
+ <!-- نوار شیشه‌ها -->
+ <path d="M52 132 V98 Q54 72 82 68 L112 66 V132 Z" fill="#17212B"/>
+ <rect x="150" y="66" width="368" height="56" rx="6" fill="#17212B"/>
+ <g stroke="#3A4652" stroke-width="3"><path d="M232 68v52M314 68v52M396 68v52M478 68v52"/></g>
+ <path d="M60 100 L74 80 L84 80 L68 104 Z" fill="#fff" opacity=".25"/>
+ <!-- در جلو -->
+ <rect x="114" y="66" width="34" height="132" rx="3" fill="#2A3540"/>
+ <path d="M131 70 V194" stroke="#51606E" stroke-width="2"/>
+ <!-- آینه -->
+ <path d="M60 64 Q34 58 28 74 V92" fill="none" stroke="#C3CDD5" stroke-width="5" stroke-linecap="round"/>
+ <rect x="22" y="88" width="12" height="20" rx="4" fill="#2A3540"/>
+ <!-- نوار رنگی عقب -->
+ <path d="M436 140 L452 140 L500 182 L484 182 Z" fill="#E05A3A"/>
+ <path d="M452 140 L466 140 L514 182 L500 182 Z" fill="#F2B21B"/>
+ <path d="M466 140 L480 140 L526 180 V182 H514 Z" fill="#2F6FC0"/>
+ <!-- چراغ و سپر -->
+ <rect x="44" y="160" width="14" height="10" rx="3" fill="#C3CDD5"/>
+ <rect x="38" y="190" width="30" height="14" rx="4" fill="#8A97A3"/>
+ <!-- گلگیرها -->
+ <path d="M164 206 Q166 166 204 166 Q242 166 244 206 Z" fill="#2A3540"/>
+ <path d="M404 206 Q406 166 444 166 Q482 166 484 206 Z" fill="#2A3540"/>
+ <!-- چرخ‌ها -->
+ <circle cx="204" cy="208" r="29" fill="#17212B"/><circle cx="204" cy="208" r="16" fill="#C3CDD5"/><circle cx="204" cy="208" r="5" fill="#51606E"/>
+ <circle cx="444" cy="208" r="29" fill="#17212B"/><circle cx="444" cy="208" r="16" fill="#C3CDD5"/><circle cx="444" cy="208" r="5" fill="#51606E"/>
+</svg>
