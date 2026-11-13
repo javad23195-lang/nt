@@ -81,5 +81,6 @@ python3 add_design.py "$T/b49r.html" "$T/b49.html"
 python3 build.py "$T/b49.html" ../out.html
 python3 fix_hover.py ../out.html
 python3 no_dot.py ../out.html
+python3 warm.py ../out.html
 python3 stamp.py ../out.html
 echo "ساخته شد: _dev/out.html — بعد از آزمایش، به جای ../سامانه-نت.html بگذارید"
