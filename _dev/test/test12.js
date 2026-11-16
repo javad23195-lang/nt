@@ -64,7 +64,10 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   console.log('4) نسخه تازه سامانه با اینترنت');
   { const h=String(HTML), i=h.lastIndexOf('</body>'); HTML=Buffer.from(h.slice(0,i)+'<div id="newVer"></div>'+h.slice(i)); }
   const n1=hits.length; await p.goto(URL1); await booted();
-  ok(await p.evaluate(()=>!!document.getElementById('newVer')),'با اینترنت، نسخه تازه سامانه باز شد (نه نسخه ذخیره‌شده)');
+  ok(await p.evaluate(()=>!document.getElementById('newVer')),'باز کردن فوری از نسخه ذخیره‌شده (بدون صبر برای اینترنت)');
+  ok(await waitFor(()=>hits.length>n1,10000),'نسخه تازه پشت صحنه از سرور گرفته شد');
+  await sleep(800); await p.goto(URL1); await booted();
+  ok(await p.evaluate(()=>!!document.getElementById('newVer')),'باز کردن بعدی: نسخه تازه سامانه');
   await c.setOffline(true); await p.goto(URL1); await booted();
   ok(await p.evaluate(()=>!!document.getElementById('newVer')),'نسخه تازه برای بدون اینترنت هم ذخیره شد');
   await c.setOffline(false);

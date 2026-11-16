@@ -1,6 +1,6 @@
 /* سامانه نت — کار بدون اینترنت (Service Worker)
-   - صفحه سامانه: اول از اینترنت (برای نسخه تازه)؛ اگر اینترنت نبود یا رسیدن کل صفحه بیش از ۳ ثانیه طول کشید، از نسخه ذخیره‌شده
-     (نسخه تازه پشت صحنه ذخیره می‌شود و pwa.js checkNew آن را نشان می‌دهد).
+   - صفحه سامانه: باز کردن همیشه فوری از نسخه ذخیره‌شده (اگر هست)؛ نسخه تازه پشت صحنه ذخیره می‌شود
+     و pwa.js checkNew (درخواست غیر navigate، از اینترنت) آن را پیدا می‌کند و صفحه را تازه می‌کند یا نوار «نسخه تازه» می‌گذارد.
    - کتابخانه‌ها و آیکن‌ها: از نسخه ذخیره‌شده، و پشت صحنه تازه می‌شوند.
    - درخواست‌های GitHub (اطلاعات مشترک) و سایت‌های دیگر دست نمی‌خورند.
    منبع: همین فایل در ریشه مخزن (_dev/NOTES.md را ببینید). */
@@ -29,9 +29,10 @@ self.addEventListener('fetch',e=>{
         await c.put(pageKey(),full.clone()); return full; });
       const old=await c.match(pageKey());
       if(!old) return net;
-      const late=new Promise(res=>setTimeout(()=>res(null),3000));
-      try{ const r=await Promise.race([net,late]); if(r && r.ok) return r; }catch(err){}
-      net.catch(()=>{});
+      /* باز کردن سامانه (navigate): همان لحظه نسخه ذخیره‌شده؛ نسخه تازه پشت صحنه ذخیره می‌شود.
+         بررسی نسخه تازه (checkNew در pwa.js، درخواست غیر navigate): از اینترنت، و اگر نشد نسخه ذخیره‌شده. */
+      if(req.mode==='navigate'){ e.waitUntil(net.catch(()=>{})); return old; }
+      try{ const r=await net; if(r && r.ok) return r; }catch(err){}
       return old;
     })());
     return;
