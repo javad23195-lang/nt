@@ -55,5 +55,16 @@ async function checkNew(force){
 if(location.protocol==='https:'){ window.addEventListener('load',()=>setTimeout(checkNew,1500));
   document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') checkNew(); });
   setInterval(checkNew,30*60000); }
-window.ntPwa={standalone,checkNew,build:BUILD,get canInstall(){ return !!prompt; },install:()=>{ if(prompt){ const p=prompt; prompt=null; try{ p.prompt(); }catch(e){} } }};
+/** دکمه «بررسی نسخه تازه» (پنجره اطلاعات مشترک): همان لحظه از اینترنت؛ اگر تازه بود، صفحه دوباره باز می‌شود (sw.js نسخه تازه را ذخیره کرده است) */
+async function forceUpdate(btn){
+  const say=t=>{ if(btn) btn.textContent=t; };
+  if(btn) btn.disabled=true; say('در حال بررسی…');
+  try{ const r=await fetch(location.href.split('#')[0],{cache:'no-store',credentials:'same-origin'}); if(!r.ok) throw 0;
+    const m=/<meta name="nt-build" content="([0-9a-f]+)"/.exec(await r.text()); if(!m) throw 0;
+    if(m[1]===BUILD){ say('سامانه به‌روز است'); setTimeout(()=>{ say('بررسی نسخه تازه'); if(btn) btn.disabled=false; },4000); return 'same'; }
+    say('نسخه تازه گرفته شد…'); setTimeout(()=>location.reload(),300); return 'new';
+  }catch(e){ say('اینترنت نیست؛ بعداً دوباره بزنید'); setTimeout(()=>{ say('بررسی نسخه تازه'); if(btn) btn.disabled=false; },4000); return 'err'; }
+}
+document.addEventListener('click',e=>{ const b=e.target&&e.target.closest&&e.target.closest('#syUpd'); if(b && !b.disabled) forceUpdate(b); });
+window.ntPwa={standalone,checkNew,forceUpdate,build:BUILD,get canInstall(){ return !!prompt; },install:()=>{ if(prompt){ const p=prompt; prompt=null; try{ p.prompt(); }catch(e){} } }};
 })();

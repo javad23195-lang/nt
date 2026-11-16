@@ -519,6 +519,10 @@ function memHTML(){ const u=memUse(), c=u.pct>=85?'bad':u.pct>=70?'warn':'';
   return `<div class="symem ${c}" id="syMem"><div class="symembar"><i style="width:${u.pct}%"></i></div><b>حافظه این سیستم: ${fa(u.pct)}٪</b> (${mb(u.t)} از حدود ${mb(MEMCAP)} مگابایت)
     ${u.pct>=70?'<br>حافظه نزدیک پر شدن است. عکس قطعه‌های خریده‌شده و پیوست پیش‌فاکتورهای بسته را پاک کنید.':''}
     <details><summary>بیشترین حجم</summary>${(u.top.filter(([k,n])=>n>20000).map(([k,n])=>`<div>${esc(LABEL[k]||LABEL[k.replace(/_th_v1$/,'_v1')]||k)}: ${mb(n)} مگابایت</div>`).join(''))||'<div>همه بخش‌ها کوچک هستند.</div>'}</details></div>`; }
+/** نسخه سامانه روی همین دستگاه + «بررسی نسخه تازه» (کارش در pwa.js: ntPwa.forceUpdate) */
+function verHTML(){ const g=n=>{ try{ return (document.querySelector('meta[name="'+n+'"]')||{}).content||''; }catch(e){ return ''; } };
+  const v=g('nt-ver'), b=g('nt-build').slice(0,6);
+  return `<div class="syver" id="syVer"><span>نسخه این دستگاه: <b>${esc(fa(v.replace(/\./g,'/')))}</b> <span dir="ltr">${esc(b)}</span></span><button type="button" id="syUpd">بررسی نسخه تازه</button></div>`; }
 /** هشدار روزی یک بار، اگر حافظه از ۸۵٪ بیشتر شد */
 function memWarn(){ try{ const u=memUse(), d=new Date().toDateString(); if(u.pct<85 || localStorage.getItem('ntk_memw')===d) return; localStorage.setItem('ntk_memw',d);
   toast('حافظه این سیستم '+fa(u.pct)+'٪ پر است. در «تنظیم» ببینید چه چیزی جا گرفته است.',true); }catch(e){} }
@@ -1070,7 +1074,7 @@ function viewMain(){
     <div class="sykv"><b>${esc(who)}</b>${cfg.uid?'دسترسی: '+esc(accText(acl()))+'<br>':''}آخرین همگام‌سازی: ${esc(fmtAt(s.at))}${admin?'<br>این سیستم: '+esc(countText(collect())):''}</div>
     ${m==='w'?`<div class="sykv"><b>وضعیت</b>آخرین بررسی اطلاعات مشترک: ${esc(lastChk?hms(lastChk):'—')}<br>آخرین ارسال از این سیستم: ${esc(s.sent?fmtAt(s.sent):'—')}<br>نوشته ارسال‌نشده در این سیستم: <b style="display:inline">${unsent()?'دارد':'ندارد'}</b>${lastErr?'<br>آخرین خطا ('+esc(hms(lastErr.at))+'): '+esc(lastErr.t):''}</div>`:''}
     ${m==='v'?'<small>هر تغییری که در این سیستم بدهید، با اطلاعات جدید جایگزین می‌شود.</small>':''}
-    ${memHTML()}
+    ${memHTML()}${verHTML()}
     <div class="symsg" id="syMsg"></div>
     <button type="button" class="go" id="syNow">همگام‌سازی الان</button>
     ${admin?`<button type="button" class="go" id="syUsers">کاربران${nU?' ('+fa(nU)+')':''}</button>

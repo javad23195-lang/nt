@@ -398,7 +398,16 @@ body.ntnav .topbar .sybar{margin:8px 0 0;border:1px solid;border-radius:12px;pad
 @media (min-width:1000px){
   body .topbar .sybar{position:fixed;top:12px;left:16px;right:auto;z-index:60;width:auto;max-width:460px;margin:0;border:1px solid;border-radius:12px;
     padding:8px 10px 8px 12px;box-shadow:0 6px 20px rgba(27,36,48,.16);font-size:.82rem;line-height:1.6}
+  /* نوار «نسخه تازه» زیر نوار همگام‌سازی، نه روی آن */
+  body .topbar #ntUpBar{z-index:61}
+  body .topbar #ntSyBar:not([hidden])~#ntUpBar{top:76px}
 }
+
+/* نسخه سامانه و «بررسی نسخه تازه» */
+.syver{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:10px 0;padding:10px 12px;border:1px solid #E6E3DD;border-radius:12px;background:#fff;font-size:.86rem;color:#5E6670}
+.syver b{color:#15212C}
+.syver button{min-height:44px;padding:0 14px;border:1px solid #D6D1C8;border-radius:10px;background:#fff;font:inherit;font-size:.86rem;font-weight:800;color:#15212C;cursor:pointer}
+.syver button:disabled{opacity:.6;cursor:default}
 </style>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://api.github.com https://raw.githubusercontent.com https://cdn.jsdelivr.net http://localhost:* http://127.0.0.1:*; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self' blob: mediastream:; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <script>window.addEventListener("message",function(e){ if(e.origin!==location.origin && location.origin!=="null"){ e.stopImmediatePropagation(); } },true);</script>
@@ -406,7 +415,7 @@ body.ntnav .topbar .sybar{margin:8px 0 0;border:1px solid;border-radius:12px;pad
 <meta name="theme-color" content="#15212C">
 <link rel="apple-touch-icon" href="lib/icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="nt-build" content="a2439e8bd7dce477">
+<meta name="nt-build" content="3e34321d288a4ef7">
 <meta name="nt-ver" content="1405.08.25">
 </head>
 <body>
@@ -1194,6 +1203,10 @@ function memHTML(){ const u=memUse(), c=u.pct>=85?'bad':u.pct>=70?'warn':'';
   return `<div class="symem ${c}" id="syMem"><div class="symembar"><i style="width:${u.pct}%"></i></div><b>حافظه این سیستم: ${fa(u.pct)}٪</b> (${mb(u.t)} از حدود ${mb(MEMCAP)} مگابایت)
     ${u.pct>=70?'<br>حافظه نزدیک پر شدن است. عکس قطعه‌های خریده‌شده و پیوست پیش‌فاکتورهای بسته را پاک کنید.':''}
     <details><summary>بیشترین حجم</summary>${(u.top.filter(([k,n])=>n>20000).map(([k,n])=>`<div>${esc(LABEL[k]||LABEL[k.replace(/_th_v1$/,'_v1')]||k)}: ${mb(n)} مگابایت</div>`).join(''))||'<div>همه بخش‌ها کوچک هستند.</div>'}</details></div>`; }
+/** نسخه سامانه روی همین دستگاه + «بررسی نسخه تازه» (کارش در pwa.js: ntPwa.forceUpdate) */
+function verHTML(){ const g=n=>{ try{ return (document.querySelector('meta[name="'+n+'"]')||{}).content||''; }catch(e){ return ''; } };
+  const v=g('nt-ver'), b=g('nt-build').slice(0,6);
+  return `<div class="syver" id="syVer"><span>نسخه این دستگاه: <b>${esc(fa(v.replace(/\./g,'/')))}</b> <span dir="ltr">${esc(b)}</span></span><button type="button" id="syUpd">بررسی نسخه تازه</button></div>`; }
 /** هشدار روزی یک بار، اگر حافظه از ۸۵٪ بیشتر شد */
 function memWarn(){ try{ const u=memUse(), d=new Date().toDateString(); if(u.pct<85 || localStorage.getItem('ntk_memw')===d) return; localStorage.setItem('ntk_memw',d);
   toast('حافظه این سیستم '+fa(u.pct)+'٪ پر است. در «تنظیم» ببینید چه چیزی جا گرفته است.',true); }catch(e){} }
@@ -1745,7 +1758,7 @@ function viewMain(){
     <div class="sykv"><b>${esc(who)}</b>${cfg.uid?'دسترسی: '+esc(accText(acl()))+'<br>':''}آخرین همگام‌سازی: ${esc(fmtAt(s.at))}${admin?'<br>این سیستم: '+esc(countText(collect())):''}</div>
     ${m==='w'?`<div class="sykv"><b>وضعیت</b>آخرین بررسی اطلاعات مشترک: ${esc(lastChk?hms(lastChk):'—')}<br>آخرین ارسال از این سیستم: ${esc(s.sent?fmtAt(s.sent):'—')}<br>نوشته ارسال‌نشده در این سیستم: <b style="display:inline">${unsent()?'دارد':'ندارد'}</b>${lastErr?'<br>آخرین خطا ('+esc(hms(lastErr.at))+'): '+esc(lastErr.t):''}</div>`:''}
     ${m==='v'?'<small>هر تغییری که در این سیستم بدهید، با اطلاعات جدید جایگزین می‌شود.</small>':''}
-    ${memHTML()}
+    ${memHTML()}${verHTML()}
     <div class="symsg" id="syMsg"></div>
     <button type="button" class="go" id="syNow">همگام‌سازی الان</button>
     ${admin?`<button type="button" class="go" id="syUsers">کاربران${nU?' ('+fa(nU)+')':''}</button>
@@ -3557,7 +3570,18 @@ async function checkNew(force){
 if(location.protocol==='https:'){ window.addEventListener('load',()=>setTimeout(checkNew,1500));
   document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') checkNew(); });
   setInterval(checkNew,30*60000); }
-window.ntPwa={standalone,checkNew,build:BUILD,get canInstall(){ return !!prompt; },install:()=>{ if(prompt){ const p=prompt; prompt=null; try{ p.prompt(); }catch(e){} } }};
+/** دکمه «بررسی نسخه تازه» (پنجره اطلاعات مشترک): همان لحظه از اینترنت؛ اگر تازه بود، صفحه دوباره باز می‌شود (sw.js نسخه تازه را ذخیره کرده است) */
+async function forceUpdate(btn){
+  const say=t=>{ if(btn) btn.textContent=t; };
+  if(btn) btn.disabled=true; say('در حال بررسی…');
+  try{ const r=await fetch(location.href.split('#')[0],{cache:'no-store',credentials:'same-origin'}); if(!r.ok) throw 0;
+    const m=/<meta name="nt-build" content="([0-9a-f]+)"/.exec(await r.text()); if(!m) throw 0;
+    if(m[1]===BUILD){ say('سامانه به‌روز است'); setTimeout(()=>{ say('بررسی نسخه تازه'); if(btn) btn.disabled=false; },4000); return 'same'; }
+    say('نسخه تازه گرفته شد…'); setTimeout(()=>location.reload(),300); return 'new';
+  }catch(e){ say('اینترنت نیست؛ بعداً دوباره بزنید'); setTimeout(()=>{ say('بررسی نسخه تازه'); if(btn) btn.disabled=false; },4000); return 'err'; }
+}
+document.addEventListener('click',e=>{ const b=e.target&&e.target.closest&&e.target.closest('#syUpd'); if(b && !b.disabled) forceUpdate(b); });
+window.ntPwa={standalone,checkNew,forceUpdate,build:BUILD,get canInstall(){ return !!prompt; },install:()=>{ if(prompt){ const p=prompt; prompt=null; try{ p.prompt(); }catch(e){} } }};
 })();
 </script>
 <script>
