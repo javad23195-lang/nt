@@ -136,8 +136,7 @@ function st0(){ const [x,c]=stTxt(Q('fType').value), e=Q('ac0st'); if(e){ e.text
 Q('fType').addEventListener('input',()=>{ st0(); forUpd(); note(); }); Q('fType').addEventListener('change',()=>{ st0(); forUpd(); note(); });
 function acSync(){ AL.querySelectorAll('.acx').forEach(c=>{ const k=+c.dataset.k; if(!acts[k]) return; c.querySelectorAll('input[data-f]').forEach(e=>{ acts[k][e.dataset.f]=e.value; }); }); }
 function acRender(){
-  const ed=(typeof editIdx!=='undefined' && editIdx!==null);
-  AB.hidden=ed; if(ed) acts=[];
+  AB.hidden=false;
   AL.innerHTML=acts.map((x,k)=>{ const n=fa(k+2); return `<div class="acx" data-k="${k}">
     <div class="ach"><span class="tag">کار ${n}</span><span class="acst" id="ac${k}st"></span><button type="button" class="acdel" data-k="${k}" aria-label="حذف کار ${n}">✕</button></div>
     <div class="g2"><div class="field"><label for="ac${k}a">دسته <span class="req">*</span></label><div class="combo"><input id="ac${k}a" data-f="act" value="${esc(x.act||'')}" autocomplete="off"><div class="combo-list" id="acl${k}a"></div></div><div class="err" id="ac${k}ae">دسته را وارد کنید.</div></div>
@@ -167,8 +166,7 @@ function note(){ AN.textContent=acts.length?'با «افزودن»، '+fa(acts.l
 /* ---------- فاکتور «برای» کدام کار ---------- */
 function forUpd(){ document.querySelectorAll('#xInv select[data-f="for"]').forEach(s=>{ [...s.options].forEach((o,k)=>{ o.textContent=aName(k); }); }); }
 { const _xr=xRender; xRender=function(){ _xr.apply(this,arguments); try{
-    const ed=(typeof editIdx!=='undefined' && editIdx!==null);
-    if(!acts.length||ed){ xinv.forEach(x=>{ x.for=0; }); return; }
+    if(!acts.length){ xinv.forEach(x=>{ x.for=0; }); return; }
     document.querySelectorAll('#xInv .xinv').forEach(c=>{ const k=+c.dataset.k, x=xinv[k]; if(!x) return; let f=+x.for||0; if(f>acts.length) f=x.for=0;
       const hd=c.querySelector('.invhd'), del=hd&&hd.querySelector('.xdel'); if(!hd) return;
       const l=document.createElement('label'); l.className='forl'; l.innerHTML='برای <select data-f="for" aria-label="این فاکتور برای کدام کار است">'+[...Array(acts.length+1).keys()].map(j=>'<option value="'+j+'"'+(j===f?' selected':'')+'>'+esc(aName(j))+'</option>').join('')+'</select>';
@@ -184,16 +182,17 @@ function acValid(){ acSync(); let ok=true, first=null;
   return ok; }
 Q('bAdd').addEventListener('click',e=>{
   try{ if(!normDate(Q('fReg').value)){ rf.hidden=false; RT.setAttribute('aria-expanded','true'); } }catch(x){}
-  if((typeof editIdx==='undefined'||editIdx===null) && acts.length && !acValid()) e.stopImmediatePropagation(); },true);
+  if(acts.length && !acValid()) e.stopImmediatePropagation(); },true);
 /** ردیف اصلی و فاکتورهایش مثل قبل؛ بعد برای هر کار دیگر یک ردیف (با اولین اجرت و خرید خودش) و فاکتورهای دیگرش */
 { const _xp=xPush; xPush=function(rec,at){
     try{ xSync(); }catch(e){}
-    const ed=(typeof editIdx!=='undefined' && editIdx!==null);
     const all=xinv.slice(), mine=all.filter(x=>!(+x.for>0)), others=all.filter(x=>+x.for>0);
     const L=acts.slice(); acSync();
     const box=Q('xInv'); if(box) box.innerHTML='';
     xinv=mine; let n=_xp(rec,at);
-    if(ed||!L.length) return n;
+    if(!L.length) return n;
+    /* ویرایش (at داده شده): ردیف‌های کارهای تازه درست بعد از همین تعمیر می‌آیند؛ ثبت تازه: آخر لیست */
+    let pos=(at===undefined)?null:at+n;
     const filled=x=>String(x.desc||'').trim()||String(x.who||'').trim()||String(x.cost||'').trim()||String(x.doc||'').trim();
     acts.forEach((a,k)=>{ const inv=others.filter(x=>+x.for===k+1&&filled(x)); inv.forEach(x=>{ delete x.__main; });
       const A=inv.find(x=>x.t==='A'), K=inv.find(x=>x.t==='K');
@@ -206,9 +205,9 @@ Q('bAdd').addEventListener('click',e=>{
         hasK:!!K, sup:K?String(K.who||'').trim():'', costK:K?String(K.cost||'').trim():'', payK:K?(K.pay||''):'', docK:K?String(K.doc||'').trim():'',
         byK:(K&&K.pay==='نقدی')?String(K.by||'').trim():'',
         desc:(A&&String(A.desc||'').trim())?String(A.desc).trim():rec.desc, part:(K&&String(K.desc||'').trim())?String(K.desc).trim():'**'});
-      delete r.__i; delete r.xof; rows.push(r); n++;
+      delete r.__i; delete r.xof; if(pos===null) rows.push(r); else rows.splice(pos++,0,r); n++;
       try{ if(r.hasA) remember(r.rep,myReps,cRep); if(r.hasK) remember(r.sup,mySups,cSup); rememberIn(r.desc,myDesc2,cDesc); rememberIn(r.part,myPart2,cPart); payRemember(r.byA); payRemember(r.byK); }catch(e){}
-      xinv=inv.filter(x=>x!==A&&x!==K); n+=_xp(r);
+      xinv=inv.filter(x=>x!==A&&x!==K); const m=_xp(r,pos===null?undefined:pos); if(pos!==null) pos+=m; n+=m;
     });
     acts=[]; acRender(); rows.forEach((r,q)=>{ r.__i=q; });
     return n; }; }
