@@ -1,5 +1,6 @@
 /* سامانه نت — کار بدون اینترنت (Service Worker)
-   - صفحه سامانه: اول از اینترنت (برای نسخه تازه)؛ اگر اینترنت نبود یا بیش از ۴ ثانیه طول کشید، از نسخه ذخیره‌شده.
+   - صفحه سامانه: اول از اینترنت (برای نسخه تازه)؛ اگر اینترنت نبود یا رسیدن کل صفحه بیش از ۳ ثانیه طول کشید، از نسخه ذخیره‌شده
+     (نسخه تازه پشت صحنه ذخیره می‌شود و pwa.js checkNew آن را نشان می‌دهد).
    - کتابخانه‌ها و آیکن‌ها: از نسخه ذخیره‌شده، و پشت صحنه تازه می‌شوند.
    - درخواست‌های GitHub (اطلاعات مشترک) و سایت‌های دیگر دست نمی‌خورند.
    منبع: همین فایل در ریشه مخزن (_dev/NOTES.md را ببینید). */
@@ -21,10 +22,14 @@ self.addEventListener('fetch',e=>{
   if(isPage(req,url)){
     e.respondWith((async()=>{
       const c=await caches.open(V);
-      const net=fetch(req.url,{cache:'no-store',credentials:'same-origin'}).then(r=>{ if(r && r.ok) c.put(pageKey(),r.clone()); return r; });
+      /* کل صفحه (نه فقط شروع پاسخ) باید برسد؛ وگرنه با اینترنت کند صفحه ۳ مگابایتی آهسته می‌آمد و «در حال آماده‌سازی» می‌ماند */
+      const net=fetch(req.url,{cache:'no-store',credentials:'same-origin'}).then(async r=>{
+        if(!r || !r.ok) return r;
+        const full=new Response(await r.blob(),{status:r.status,statusText:r.statusText,headers:r.headers});
+        await c.put(pageKey(),full.clone()); return full; });
       const old=await c.match(pageKey());
       if(!old) return net;
-      const late=new Promise(res=>setTimeout(()=>res(null),4000));
+      const late=new Promise(res=>setTimeout(()=>res(null),3000));
       try{ const r=await Promise.race([net,late]); if(r && r.ok) return r; }catch(err){}
       net.catch(()=>{});
       return old;
